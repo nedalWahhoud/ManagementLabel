@@ -11,5 +11,5 @@ Die App ermöglicht die Verwaltung von Produkten mit unterschiedlichen Benutzerr
 - Barcode für Product enthält: Id,Name,Preis
 - Etiketten für Produkte erstellen</br>
 
-Beide Benutzerrollen können also Barcodes speichern oder ausdrucken
+Beide Benutzerrollen können also Barcode/Etikett speichern oder ausdrucken
 
