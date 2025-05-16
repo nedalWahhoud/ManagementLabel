@@ -23,3 +23,13 @@ Beide Benutzerrollen können also Barcode/Etikett speichern oder ausdrucken
   - PHP API zur Login-Authentifizierung und Token-Erzeugung
 - Databank:
   - MySQL
+# 👥 Benutzerverwaltung
+Neue Benutzerkonten werden ausschließlich vom Datenbankadministrator in der Datenbank angelegt.</br>
+Eine Registrierung über die Web-App ist nicht vorgesehen.
+# Testzugang
+- Admin-Konto </br>
+  Benutzername: admin </br>
+  Passwort: !123456
+- User-Konto </br>
+  Benutzername: muster </br>
+  Passwort: muster 
