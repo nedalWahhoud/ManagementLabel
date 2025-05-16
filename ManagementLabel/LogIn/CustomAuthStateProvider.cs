@@ -1,10 +1,8 @@
 ﻿using ManagementLabel.LogIn;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Text.Json;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider

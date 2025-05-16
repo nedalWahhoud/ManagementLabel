@@ -29,8 +29,6 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<AuthService>();
 
 
-
-
 // Database connection
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseMySql(

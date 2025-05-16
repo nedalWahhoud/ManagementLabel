@@ -1,6 +1,4 @@
-﻿@inject ILocalStorageService localStorage
-@inject NavigationManager NavigationManager
-@implements IDisposable
+﻿@implements IDisposable
 @rendermode InteractiveServer
 
 
@@ -58,13 +56,11 @@
         // loginState.OnChange += StateHasChanged;
         NavigationManager.LocationChanged += (sender, args) => OnLocationChanged();
     }
-
     public void Dispose()
     {
         //  loginState.OnChange -= StateHasChanged;
         NavigationManager.LocationChanged -= (sender, args) => OnLocationChanged();
     }
-
     private void OnLocationChanged()
     {
         string currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
@@ -73,7 +69,6 @@
 
         StateHasChanged();
     }
-
     private async Task HandleLogout(MouseEventArgs e)
     {
         if (AuthProvider is CustomAuthStateProvider customProvider)

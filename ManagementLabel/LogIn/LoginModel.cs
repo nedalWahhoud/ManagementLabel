@@ -1,13 +1,4 @@
-﻿using ManagementLabel.Data;
-using System.Text;
-using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Newtonsoft.Json;
-using Blazored.LocalStorage;
-
-
-namespace ManagementLabel.LogIn
+﻿namespace ManagementLabel.LogIn
 {
     public class LoginModel
     {
