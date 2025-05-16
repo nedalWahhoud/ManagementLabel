@@ -44,7 +44,6 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         }
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
     }
-
     public  void NotifyUserAuthentication(string token)
     {
         // Save token to localStorage
@@ -53,14 +52,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity))));
     }
-
     public async Task NotifyUserLogout()
     {
         await _js.InvokeVoidAsync("localStorage.removeItem", "authToken");
 
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))));
     }
-
     private void LocalstorageSet(string key, string value)
     {
         _ = _js.InvokeVoidAsync("localStorage.setItem", key, value);
@@ -113,7 +110,6 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         return data!;
     }
-  
     public class MainRenderState
     {
         public bool IsRendered { get; set; } = false;
