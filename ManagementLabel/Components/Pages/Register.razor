@@ -1,0 +1,18 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.Authorization;
+@rendermode InteractiveServer
+
+<div class="container">
+	<p>A login account can only be assigned by the database Administrator. Please contact your database Administrator.</p>
+	<button @onclick="OnBack" class="btn backB">Back to logIn Page</button>
+</div>
+
+@code {
+	// back to login page
+	[Parameter] public EventCallback OnBackToLogin { get; set; }
+	private async void OnBack()
+	{
+		if (OnBackToLogin.HasDelegate)
+	   	await OnBackToLogin.InvokeAsync();
+	}
+}

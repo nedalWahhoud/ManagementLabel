@@ -1,0 +1,90 @@
+﻿@inject ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@implements IDisposable
+@rendermode InteractiveServer
+
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">ManagementLabel</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="@(IsLoaded ? "":"hidden")">
+    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav>
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="#">
+                            <span class="bi bi-upc-scan" aria-hidden="true"></span> Etikett/Barcode
+                        </NavLink>
+                    </div>
+                    <!-- Spacer to push logout to bottom -->
+                    <div style="flex-grow: 1;"></div>
+
+                    <!-- LogOut at bottom -->
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" @onclick="HandleLogout">
+                            <span class="bi bi-box-arrow-right" aria-hidden="true"></span> LogOut
+                        </NavLink>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                            <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> LogIn
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </nav>
+    </div>
+</div>
+
+@code {
+
+    private bool IsRegisterPage = false;
+    private bool IsLoggedIn = false;
+    private bool IsLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        IsLoggedIn = authState.User.Identity?.IsAuthenticated ?? false;
+
+        // loginState.OnChange += StateHasChanged;
+        NavigationManager.LocationChanged += (sender, args) => OnLocationChanged();
+    }
+
+    public void Dispose()
+    {
+        //  loginState.OnChange -= StateHasChanged;
+        NavigationManager.LocationChanged -= (sender, args) => OnLocationChanged();
+    }
+
+    private void OnLocationChanged()
+    {
+        string currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+        IsRegisterPage = currentUrl == "register" ? true : false;
+
+        StateHasChanged();
+    }
+
+    private async Task HandleLogout(MouseEventArgs e)
+    {
+        if (AuthProvider is CustomAuthStateProvider customProvider)
+            await customProvider.NotifyUserLogout();
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            IsLoaded = true;
+            StateHasChanged();
+        }
+    }
+}

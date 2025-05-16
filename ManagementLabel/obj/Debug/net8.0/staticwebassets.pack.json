@@ -1,0 +1,61 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
+      "PackagePath": "staticwebassets\\ManagementLabel.bbknnve0aw.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\pngPdfDownload.js",
+      "PackagePath": "staticwebassets\\js\\pngPdfDownload.js"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\print.js",
+      "PackagePath": "staticwebassets\\js\\print.js"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\script.js",
+      "PackagePath": "staticwebassets\\js\\script.js"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\scrollHelper.js",
+      "PackagePath": "staticwebassets\\js\\scrollHelper.js"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ManagementLabel.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.ManagementLabel.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.ManagementLabel.props",
+      "PackagePath": "build\\ManagementLabel.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.ManagementLabel.props",
+      "PackagePath": "buildMultiTargeting\\ManagementLabel.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.ManagementLabel.props",
+      "PackagePath": "buildTransitive\\ManagementLabel.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

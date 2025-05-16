@@ -1,0 +1,90 @@
+html[b-n4jqytcewr], body[b-n4jqytcewr] {
+    height: 100%;
+    margin: 0;
+    
+}
+.logInContainer[b-n4jqytcewr] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+}
+.logInCard[b-n4jqytcewr] {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+    .logInCard h2[b-n4jqytcewr] {
+        margin-bottom: 20px;
+        font-size: 24px;
+        color: #333;
+    }
+    .logInCard p[b-n4jqytcewr] {
+        margin-bottom: 20px;
+        color: #777;
+    }
+
+.formGroup[b-n4jqytcewr] {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+    .formGroup label[b-n4jqytcewr] {
+        display: block;
+        color: #333;
+        margin-bottom: 5px;
+    }
+.rememberMe[b-n4jqytcewr] {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+    .rememberMe label[b-n4jqytcewr] {
+        margin: 0;
+        font-size: 14px;
+        color: #555;
+    }
+.btn[b-n4jqytcewr] {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.btn:hover[b-n4jqytcewr] {
+    background-color: #0056b3;
+}
+
+.signupLink[b-n4jqytcewr] {
+    margin-top: 20px;
+}
+
+    .signupLink a[b-n4jqytcewr] {
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        .signupLink a:hover[b-n4jqytcewr] {
+            text-decoration: underline;
+        }
+.errorMessage[b-n4jqytcewr] {
+    display: block;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 10px 15px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+.hidden[b-n4jqytcewr] {
+    display: none;
+}

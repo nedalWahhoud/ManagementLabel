@@ -1,0 +1,8 @@
+wwwroot\app.css
+wwwroot\bootstrap\bootstrap.min.css
+wwwroot\bootstrap\bootstrap.min.css.map
+wwwroot\favicon.png
+wwwroot\js\pngPdfDownload.js
+wwwroot\js\print.js
+wwwroot\js\script.js
+wwwroot\js\scrollHelper.js

@@ -1,0 +1,344 @@
+/* user info*/
+.userInfo[b-4on8en2iqt] {
+    font-size: 18px;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 10px 0;
+}
+.userName[b-4on8en2iqt] {
+    font-weight: bold;
+    color: #585858;
+}
+/* top continer */
+.TopContiner[b-4on8en2iqt] {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    width: 100%;
+    justify-content: center;
+   
+}
+    .TopContiner button[b-4on8en2iqt], .TopContiner input[b-4on8en2iqt] {
+        margin: 0;
+        margin: 10px 14px; 
+    }
+
+/* table */
+.tableContiner[b-4on8en2iqt] {
+    max-height: 500px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.input[b-4on8en2iqt] {
+    display: flex;
+    justify-content: center;
+    padding: 10px 14px;
+    margin-top: 20px;
+    font-size: 16px;
+    width: 200%;
+    max-width: 400px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+    .input:focus[b-4on8en2iqt] {
+        border-color: #0056b3;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+    }
+
+.table[b-4on8en2iqt] {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2rem;
+    height: auto;
+}
+    .table tbody td[b-4on8en2iqt] {
+        font-size: 16px;
+        justify-content: center;
+        text-align: center;
+    }
+    .table tbody tr:nth-child(2n+1)[b-4on8en2iqt] {
+        background-color: #f0f0f0;
+
+    }
+
+    .table tbody tr.selected[b-4on8en2iqt] {
+        background-color: #cceeff;
+    }
+
+    .table tbody tr:hover:not(selected)[b-4on8en2iqt] {
+        background-color: #e0f3ff;
+        cursor: pointer;
+    }
+
+    .table tbody tr .deleteForm button[b-4on8en2iqt] {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+        .table tbody tr .deleteForm button:hover[b-4on8en2iqt] {
+            background-color: #c82333;
+            transform: scale(1.05);
+        }
+     .table tbody tr .editForm[b-4on8en2iqt]{
+         gap:10px;
+         display:flex;
+        }
+    .table tbody tr  .editForm button:first-child[b-4on8en2iqt] {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+        .table tbody tr  .editForm button:first-child:hover[b-4on8en2iqt] {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+    .table tbody tr .editForm button:last-child[b-4on8en2iqt] {
+        background-color: #757e84;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+        .table tbody tr .editForm button:last-child:hover[b-4on8en2iqt] {
+            background-color: #5a6268;
+            transform: scale(1.05);
+        }
+ .productImg[b-4on8en2iqt] {
+            width: 75px;
+            height: 75px;
+            border-radius: 12px;
+        }
+/* add product */
+.productForm[b-4on8en2iqt] {
+    display: flex;
+    flex-direction: column;
+    align-items: inherit;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border: 1px solid #ccc;
+    padding: 10px 16px;
+    gap: 10px;
+}
+.formGroupAdd[b-4on8en2iqt]{
+    margin:10px;
+}
+.addProductB[b-4on8en2iqt] {
+    margin: 10px;
+    background-color: #007bff;
+    color:white;
+}
+    .addProductB:hover[b-4on8en2iqt] {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+.addProductCancelB[b-4on8en2iqt] {
+    background-color: #757e84;
+    margin: 10px;
+    color:white;
+}
+.addProductCancelB:hover[b-4on8en2iqt] {
+    background-color: #5a6268;
+    transform: scale(1.05);
+}
+    /* etikettBarcode erlement */
+.container[b-4on8en2iqt] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+.addProductTopB[b-4on8en2iqt] {
+    margin-top: 20px;
+    background-color: #007bff;
+    color: white;
+}
+
+    .addProductTopB:hover[b-4on8en2iqt] {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+.addProductCancelB[b-4on8en2iqt] {
+    color: white;
+    background-color: #757e84;
+}
+
+    .addProductCancelB:hover[b-4on8en2iqt] {
+        background-color: #5a6268;
+        transform: scale(1.05);
+    }
+/* delete product */
+.deleteB[b-4on8en2iqt] {
+    background-color: #dc3545;
+    color: white;
+}
+
+    .deleteB:hover[b-4on8en2iqt] {
+        background-color: #c82333;
+        transform: scale(1.05);
+    }
+
+.deleteCancelB[b-4on8en2iqt] {
+    color: white;
+    background-color: #757e84;
+}
+    .deleteCancelB:hover[b-4on8en2iqt] {
+        background-color: #5a6268;
+        transform: scale(1.05);
+    }
+    /* Label-Style*/
+    .labelPId[b-4on8en2iqt] {
+        display: block;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #333;
+        margin-bottom: 0.4rem;
+        transition: color 0.3s ease;
+        text-align: left;
+        width: auto;
+        border-radius: 5px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .labelPId:hover[b-4on8en2iqt] {
+        color: #007acc;
+        text-decoration: underline;
+        transform: scale(1.03);
+    }
+/* Bild-Styling */
+.imgBarcode[b-4on8en2iqt] {
+    width: 50%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease;
+    display: block;
+    cursor: pointer;
+}
+
+    .imgBarcode:hover[b-4on8en2iqt] {
+        transform: scale(1.03);
+    }
+/* Button-Styling */
+.btn[b-4on8en2iqt] {
+    padding: 10px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.printB[b-4on8en2iqt] {
+    background-color: #fd7e14;
+    color: #ffffff;
+}
+
+    .printB:hover[b-4on8en2iqt] {
+        background-color: #e56700;
+        transform: scale(1.05);
+    }
+
+.saveB[b-4on8en2iqt] {
+    background-color: #28a745; 
+    color: white;
+}
+
+    .saveB:hover[b-4on8en2iqt] {
+        background-color: #218838;
+        transform: scale(1.05);
+    }
+
+.generatorB[b-4on8en2iqt] {
+    background-color: #007bff; 
+    color: white;
+}
+
+    .generatorB:hover[b-4on8en2iqt] {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+.generatorCancelB[b-4on8en2iqt] {
+    color: white;
+    background-color: #757e84;
+}
+    .generatorCancelB:hover[b-4on8en2iqt] {
+        background-color: #5a6268;
+        transform: scale(1.05);
+    }
+    /* select */
+    .saveType[b-4on8en2iqt] {
+    }
+
+.generatorType[b-4on8en2iqt] {
+}
+/* loadingMessage-Styling */
+.loadingMessage[b-4on8en2iqt] {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.etikett[b-4on8en2iqt] {
+    width: 600px;
+    padding: 15px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    border:none;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    text-align: center;
+    margin: 20px auto;
+}
+
+    .etikett:hover[b-4on8en2iqt] {
+        transform: scale(1.03);
+        cursor: pointer;
+    }
+
+    .etikett img[b-4on8en2iqt] {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+    }
+
+productInfo[b-4on8en2iqt] {
+    width: auto;
+    height: auto;
+}
+
+.productInfo p[b-4on8en2iqt] {
+    margin: 4px 0;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.hidden[b-4on8en2iqt] {
+    display: none;
+}
+
+.show[b-4on8en2iqt] {
+    display: table-row;
+}

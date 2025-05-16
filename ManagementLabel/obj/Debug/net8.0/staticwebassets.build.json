@@ -1,0 +1,1052 @@
+{
+  "Version": 1,
+  "Hash": "N4G6LLPK1DUQU36qj+tl3lrK+fqkYdOqUuMbGSbvF7w=",
+  "Source": "ManagementLabel",
+  "BasePath": "_content/ManagementLabel",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "ManagementLabel\\wwwroot",
+      "Source": "ManagementLabel",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Computed",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "ManagementLabel#[.{fingerprint}]?.styles.css",
+      "AssetKind": "All",
+      "AssetMode": "CurrentProject",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "ScopedCss",
+      "AssetTraitValue": "ApplicationBundle",
+      "Fingerprint": "bbknnve0aw",
+      "Integrity": "l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Computed",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "ManagementLabel#[.{fingerprint}]!.bundle.scp.css",
+      "AssetKind": "All",
+      "AssetMode": "Reference",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "ScopedCss",
+      "AssetTraitValue": "ProjectBundle",
+      "Fingerprint": "bbknnve0aw",
+      "Integrity": "l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\app.css",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "app#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "da95v2qkru",
+      "Integrity": "u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\app.css"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "bootstrap/bootstrap.min#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "bpk8xqwxhs",
+      "Integrity": "z8OR40MowJ8GgK6P89Y+hiJK5+cclzFHzLhFQLL92bg=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "bootstrap/bootstrap.min.css#[.{fingerprint}]?.map",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "8inm30yfxf",
+      "Integrity": "gBwg2tmA0Ci2u54gMF1jNCVku6vznarkLS6D76htNNQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\favicon.png",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "favicon#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "ifv42okdf2",
+      "Integrity": "4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\favicon.png"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\pngPdfDownload.js",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "js/pngPdfDownload#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "8tjayrglq9",
+      "Integrity": "zHD4ao1mZBgtpmZ6nhP1RE4invsP5dGtsIOZuwgRMXM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\pngPdfDownload.js"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\print.js",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "js/print#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "7pod793b69",
+      "Integrity": "tSaffiLFmuaZJF4xNBKFJHmvHiVcJ03TiWzWWCt4l7E=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\print.js"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\script.js",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "js/script#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "hjgxkom1mc",
+      "Integrity": "/WVX1/4cC/FU4e5h6I/XQzk1AaRKQpPCfZ+ivAAhAQQ=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\script.js"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\scrollHelper.js",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "js/scrollHelper#[.{fingerprint}]?.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "6b86wox59p",
+      "Integrity": "bsAyqab7+52t+wEMUUT9lnFAbSKKzcSEYT6zfzaJTUM=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\js\\scrollHelper.js"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "app.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\app.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2591"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE="
+        }
+      ]
+    },
+    {
+      "Route": "app.da95v2qkru.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\app.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2591"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "da95v2qkru"
+        },
+        {
+          "Name": "label",
+          "Value": "app.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE="
+        }
+      ]
+    },
+    {
+      "Route": "bootstrap/bootstrap.min.bpk8xqwxhs.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "162720"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"z8OR40MowJ8GgK6P89Y+hiJK5+cclzFHzLhFQLL92bg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "bpk8xqwxhs"
+        },
+        {
+          "Name": "label",
+          "Value": "bootstrap/bootstrap.min.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-z8OR40MowJ8GgK6P89Y+hiJK5+cclzFHzLhFQLL92bg="
+        }
+      ]
+    },
+    {
+      "Route": "bootstrap/bootstrap.min.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "162720"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"z8OR40MowJ8GgK6P89Y+hiJK5+cclzFHzLhFQLL92bg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-z8OR40MowJ8GgK6P89Y+hiJK5+cclzFHzLhFQLL92bg="
+        }
+      ]
+    },
+    {
+      "Route": "bootstrap/bootstrap.min.css.8inm30yfxf.map",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "449111"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/plain"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gBwg2tmA0Ci2u54gMF1jNCVku6vznarkLS6D76htNNQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8inm30yfxf"
+        },
+        {
+          "Name": "label",
+          "Value": "bootstrap/bootstrap.min.css.map"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-gBwg2tmA0Ci2u54gMF1jNCVku6vznarkLS6D76htNNQ="
+        }
+      ]
+    },
+    {
+      "Route": "bootstrap/bootstrap.min.css.map",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "449111"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/plain"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"gBwg2tmA0Ci2u54gMF1jNCVku6vznarkLS6D76htNNQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-gBwg2tmA0Ci2u54gMF1jNCVku6vznarkLS6D76htNNQ="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.ifv42okdf2.png",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\favicon.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1148"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "ifv42okdf2"
+        },
+        {
+          "Name": "label",
+          "Value": "favicon.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg="
+        }
+      ]
+    },
+    {
+      "Route": "favicon.png",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\favicon.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "1148"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 06 May 2025 18:08:54 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg="
+        }
+      ]
+    },
+    {
+      "Route": "js/pngPdfDownload.8tjayrglq9.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\pngPdfDownload.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2381"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"zHD4ao1mZBgtpmZ6nhP1RE4invsP5dGtsIOZuwgRMXM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 09 May 2025 19:40:13 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "8tjayrglq9"
+        },
+        {
+          "Name": "label",
+          "Value": "js/pngPdfDownload.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-zHD4ao1mZBgtpmZ6nhP1RE4invsP5dGtsIOZuwgRMXM="
+        }
+      ]
+    },
+    {
+      "Route": "js/pngPdfDownload.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\pngPdfDownload.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2381"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"zHD4ao1mZBgtpmZ6nhP1RE4invsP5dGtsIOZuwgRMXM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 09 May 2025 19:40:13 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-zHD4ao1mZBgtpmZ6nhP1RE4invsP5dGtsIOZuwgRMXM="
+        }
+      ]
+    },
+    {
+      "Route": "js/print.7pod793b69.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\print.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2092"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"tSaffiLFmuaZJF4xNBKFJHmvHiVcJ03TiWzWWCt4l7E=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 15:50:43 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "7pod793b69"
+        },
+        {
+          "Name": "label",
+          "Value": "js/print.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-tSaffiLFmuaZJF4xNBKFJHmvHiVcJ03TiWzWWCt4l7E="
+        }
+      ]
+    },
+    {
+      "Route": "js/print.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\print.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "2092"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"tSaffiLFmuaZJF4xNBKFJHmvHiVcJ03TiWzWWCt4l7E=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 15:50:43 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-tSaffiLFmuaZJF4xNBKFJHmvHiVcJ03TiWzWWCt4l7E="
+        }
+      ]
+    },
+    {
+      "Route": "js/script.hjgxkom1mc.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\script.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "471"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/WVX1/4cC/FU4e5h6I/XQzk1AaRKQpPCfZ+ivAAhAQQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 15 May 2025 19:32:32 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "hjgxkom1mc"
+        },
+        {
+          "Name": "label",
+          "Value": "js/script.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-/WVX1/4cC/FU4e5h6I/XQzk1AaRKQpPCfZ+ivAAhAQQ="
+        }
+      ]
+    },
+    {
+      "Route": "js/script.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\script.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "471"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"/WVX1/4cC/FU4e5h6I/XQzk1AaRKQpPCfZ+ivAAhAQQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 15 May 2025 19:32:32 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-/WVX1/4cC/FU4e5h6I/XQzk1AaRKQpPCfZ+ivAAhAQQ="
+        }
+      ]
+    },
+    {
+      "Route": "js/scrollHelper.6b86wox59p.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\scrollHelper.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "363"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bsAyqab7+52t+wEMUUT9lnFAbSKKzcSEYT6zfzaJTUM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 16:23:59 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "6b86wox59p"
+        },
+        {
+          "Name": "label",
+          "Value": "js/scrollHelper.js"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-bsAyqab7+52t+wEMUUT9lnFAbSKKzcSEYT6zfzaJTUM="
+        }
+      ]
+    },
+    {
+      "Route": "js/scrollHelper.js",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\scrollHelper.js",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "363"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/javascript"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"bsAyqab7+52t+wEMUUT9lnFAbSKKzcSEYT6zfzaJTUM=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Tue, 13 May 2025 16:23:59 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-bsAyqab7+52t+wEMUUT9lnFAbSKKzcSEYT6zfzaJTUM="
+        }
+      ]
+    },
+    {
+      "Route": "ManagementLabel.bbknnve0aw.bundle.scp.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "20072"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 17:03:19 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "bbknnve0aw"
+        },
+        {
+          "Name": "label",
+          "Value": "ManagementLabel.bundle.scp.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
+        }
+      ]
+    },
+    {
+      "Route": "ManagementLabel.bbknnve0aw.styles.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "20072"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 17:03:19 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "bbknnve0aw"
+        },
+        {
+          "Name": "label",
+          "Value": "ManagementLabel.styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
+        }
+      ]
+    },
+    {
+      "Route": "ManagementLabel.bundle.scp.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "20072"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 17:03:19 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
+        }
+      ]
+    },
+    {
+      "Route": "ManagementLabel.styles.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "20072"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 16 May 2025 17:03:19 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
+        }
+      ]
+    }
+  ]
+}
