@@ -15,7 +15,7 @@ Beide Benutzerrollen können also Barcode/Etikett speichern oder ausdrucken
 
 ## 🛠️ Verwendete Technologien
 - Frontend:   
-  - Blazor C#
+  - Blazor WebAssembly-App (C#)
   - HTML
   - CSS
   - Javascript
