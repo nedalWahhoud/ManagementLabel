@@ -13,3 +13,13 @@ Die App ermöglicht die Verwaltung von Produkten mit unterschiedlichen Benutzerr
 
 Beide Benutzerrollen können also Barcode/Etikett speichern oder ausdrucken
 
+## 🛠️ Verwendete Technologien
+- Frontend:
+  - HTML
+  - CSS
+  - Javascript
+- Backend / Logik:
+  - C#
+  - PHP (Für Authentifizierung und Token-Erzeugung via API)
+- Databank:
+  - MySQL
