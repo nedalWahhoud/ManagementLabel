@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 17. Mai 2025 um 21:44
+-- Erstellungszeit: 18. Mai 2025 um 09:00
 -- Server-Version: 10.4.32-MariaDB
 -- PHP-Version: 8.2.12
 
@@ -164,7 +164,9 @@ ALTER TABLE `products`
 -- Indizes für die Tabelle `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`usersId`);
+  ADD PRIMARY KEY (`usersId`),
+  ADD UNIQUE KEY `unique_usersName` (`userName`),
+  ADD UNIQUE KEY `unique_email` (`email`);
 
 --
 -- AUTO_INCREMENT für exportierte Tabellen
