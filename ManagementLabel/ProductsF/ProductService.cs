@@ -1,207 +1,191 @@
-﻿using ManagementLabel.Data;
-using ManagementLabel.ManufacturerF;
-using Microsoft.EntityFrameworkCore;
+﻿using ManagementLabel.Model;
+using System.Net.Http;
 
 namespace ManagementLabel.ProductsF
 {
-    public class ProductService
+    public class ProductService(HttpClient http)
     {
-        private readonly MyDbContext _context;
-        private readonly ILogger<ProductService> _logger;
-        public ProductService(MyDbContext context, ILogger<ProductService> logger)
+        private readonly HttpClient _http = http;
+        private readonly GetItems<Products> _getItems = new();
+        public GetItems<Products> GetItems => _getItems;
+        public async Task<GetItems<Products>> LoadMoreProducts()
         {
-            _context = context;
-            _logger = logger;
-        }
-
-        public async Task<List<Products>> LoadMoreProducts()
-        {
-            if (Flags.allProductsLoaded) return new List<Products>();
-
+            if (_getItems.AllItemsLoaded)
+                return new() { AllItemsLoaded = _getItems.AllItemsLoaded };
             try
             {
+                var response = await _http.GetAsync($"api/Products/getProducts?CurrentPage={_getItems.CurrentPage}&PageSize={_getItems.PageSize}&AllItemsLoaded={_getItems.AllItemsLoaded}");
 
-                var products = await _context.products
-                    .OrderByDescending(p => p.productsId)
-                    .Skip(ConstantsP.currentPage * ConstantsP.pageSize)
-                    .Take(ConstantsP.pageSize)
-                    .Include(p => p.Category)
-                    .Include(p => p.manufacturer)
-                    .ToListAsync();
+                if (!response.IsSuccessStatusCode)
+                    return new();
 
-                if (products.Count == 0)
-                {
-                    Flags.allProductsLoaded = true;
-                }
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>();
 
-                ConstantsP.currentPage++;
-                return products;
+                _getItems.AllItemsLoaded = getItems!.AllItemsLoaded;
+                _getItems.CurrentPage = getItems!.CurrentPage;
+                return getItems ?? new();
             }
-            catch (Exception ex)
+            catch
             {
-                // استخدام ILogger لتسجيل الأخطاء
-                _logger.LogError($"Error loading products: {ex.Message}", ex);
-                return new List<Products>();
+                return new();
             }
         }
         public async Task<List<Categories>> LoadCategories()
         {
             try
             {
-                return await _context.categories.ToListAsync();
+                var response = await _http.GetAsync($"api/Products/getCategories");
+                if (!response.IsSuccessStatusCode)
+                    return [];
+
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Categories>>();
+
+                return getItems?.Items ?? [];
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"Error loading categories: {ex.Message}", ex);
-                return new List<Categories>();
+                return [];
             }
         }
         public async Task<List<Manufacturer>> LoadManufacturers()
         {
             try
             {
-                return await _context.manufacturer.ToListAsync();
+                var response = await _http.GetAsync($"api/Products/getManufacturers");
+                if (!response.IsSuccessStatusCode)
+                    return [];
+
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Manufacturer>>();
+
+                return getItems?.Items ?? [];
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"Error loading manufacturer: {ex.Message}", ex);
-                return new List<Manufacturer>();
+                return [];
             }
         }
-
-        public async Task<bool> AddProductAsync(Products newProduct)
+        public async Task<List<TaxRate>> LoadTaxRates()
         {
             try
             {
-                _context.products.Add(newProduct);
-                int result = await _context.SaveChangesAsync();
-                return result > 0;
+                var response = await _http.GetAsync($"api/Products/getTaxRates");
+                if (!response.IsSuccessStatusCode)
+                    return [];
+
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<TaxRate>>();
+
+                return getItems?.Items ?? [];
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError($"Error adding product: {ex.Message}", ex);
-                return false;
-
-
+                return [];
             }
         }
-        public async Task<bool> DeleteProductAsync(int productId)
+        public async Task<ValidationResult> AddProductAsync(Products newProduct)
         {
             try
             {
-                int result = 0;
-
-                var existingProduct = await _context.products.FindAsync(productId);
-                if (existingProduct != null)
+                var response = await _http.PostAsJsonAsync("api/Products/addProduct", newProduct);
+                if (!response.IsSuccessStatusCode)
                 {
-                    _context.products.Remove(existingProduct);
-                    result = await _context.SaveChangesAsync();
-                    return result > 0;
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
                 }
-                else
-                    return false;
+
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                return result!;
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                _logger.LogError($"Error deleting product: {ex.Message}", ex);
-                return false;
+                return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-        public async Task<bool> UpdateProductAsync(Products editProduct)
+        public async Task<ValidationResult> DeleteProductAsync(int productId)
         {
             try
             {
-                var existingProduct = await _context.products.FindAsync(editProduct.productsId);
-                if (existingProduct != null)
+                var response = await _http.DeleteAsync($"api/Products/deleteProduct/{productId}");
+                if (!response.IsSuccessStatusCode)
                 {
-                    _context.Entry(existingProduct).CurrentValues.SetValues(editProduct);
-                    int result = await _context.SaveChangesAsync();
-                    return result > 0;
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
                 }
-                else
-                    return false;
                 
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                return result!;
             }
-            catch (Exception e)
+            catch(Exception ex)
             {
-                _logger.LogError($"Error updating product: {e.Message}", e);
-                return false;
+                return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-
-        public bool IsValidProduct(Products newProduct, out string errorMessage)
+        public async Task<ValidationResult> UpdateProductAsync(Products editProduct)
         {
-            if (string.IsNullOrWhiteSpace(newProduct.productName))
+            try
             {
-                errorMessage = "Product name is required.";
-                return false;
-            }
+                var response = await _http.PostAsJsonAsync("api/Products/updateProduct", editProduct);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
+                }
 
-            if (string.IsNullOrWhiteSpace(newProduct.description))
-            {
-                errorMessage = "Description is required.";
-                return false;
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                return result!;
             }
-
-            if (newProduct!.categoriesId <= 0)
+            catch(Exception ex)
             {
-                errorMessage = "Category is required.";
-                return false;
+                return new ValidationResult { Result = false, Message = ex.Message };
             }
-            if (newProduct.quantity < 0)
-            {
-                errorMessage = "Quantity must be greater than -1.";
-                return false;
-            }
-            if (newProduct.sellingPrice <= 0)
-            {
-                errorMessage = "Selling price must be greater than 0.";
-                return false;
-            }
-            if (newProduct.minimumStock < 0)
-            {
-                errorMessage = "Minimum Stock must be greater than -1.";
-                return false;
-            }
-            if (newProduct.manufacturerId <= 0)
-            {
-                errorMessage = "manufacturer is required.";
-                return false;
-            }
-
-            if (newProduct.img == null || (newProduct.img != null && newProduct.img.Length <= 0))
-            {
-                errorMessage = "img is required.";
-                return false;
-            }
-
-            errorMessage = string.Empty;
-            return true;
         }
 
+        public void Reset()
+        {
+            _getItems.Items.Clear();
+            _getItems.AllItemsLoaded = false;
+            _getItems.CurrentPage = 0;
+            _getItems.PageSize = 11;
+        }
         public bool IsEditedProduct(Products currentProduct, Products editProduct)
         {
             if (editProduct == null || currentProduct == null) return false;
-            if (currentProduct.productName != editProduct.productName)
+            if (currentProduct.Name_de != editProduct.Name_de)
                 return true;
-            if (currentProduct.description != editProduct.description)
+            if (currentProduct.Description_de != editProduct.Description_de)
                 return true;
-            if (currentProduct.categoriesId != editProduct.categoriesId)
+            if (currentProduct.CategoryId != editProduct.CategoryId)
                 return true;
-            if (currentProduct.quantity != editProduct.quantity)
+            if (currentProduct.Quantity != editProduct.Quantity)
                 return true;
-            if (currentProduct.sellingPrice != editProduct.sellingPrice)
+            if (currentProduct.PurchasePrice != editProduct.PurchasePrice)
                 return true;
-            if (currentProduct.minimumStock != editProduct.minimumStock)
+            if (currentProduct.SalePrice != editProduct.SalePrice)
                 return true;
-            if (currentProduct.expirationDate != editProduct.expirationDate)
+            if (currentProduct.MinimumStock != editProduct.MinimumStock)
                 return true;
-            if (currentProduct.manufacturerId != editProduct.manufacturerId)
+            if (currentProduct.EXPDate != editProduct.EXPDate)
                 return true;
-            if (currentProduct.img!.Length != editProduct.img!.Length)
+            if (currentProduct.ManufacturerId != editProduct.ManufacturerId)
+                return true;
+            if (currentProduct.Image!.Length != editProduct.Image!.Length)
                 return true;
 
             return false;
+        }
+        //
+        public async Task<List<PaymentMethod>> GetPaymentMethodsAsync()
+        {
+            try
+            {
+                var response = await _http.GetAsync("api/Orders/getPaymentMethods");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return [];
+                }
+               return  await response.Content.ReadFromJsonAsync<List<PaymentMethod>>() ?? [];
+                 
+            }
+            catch
+            {
+                return [];
+            }
         }
     }
 }

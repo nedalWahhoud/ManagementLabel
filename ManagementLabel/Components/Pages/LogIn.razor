@@ -1,28 +1,22 @@
-﻿@page "/"
+﻿@page "/login"
 @using ManagementLabel.LogIn
-@using ManagementLabel.Data
-
-@rendermode InteractiveServer
+@using ManagementLabel.Model
 
 @*LogIn*@
 <div class="logInContainer">
     <div class="logInCard">
         <h2>Welcome</h2>
-        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" >
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="formGroup">
                 <label for="username">Username/E-mail</label>
-                <InputText @onkeydown="KeyDown" id="username" class="form-control" @bind-Value="loginModel.Username" @onfocus="() => IsUsernameFocused = true" @onblur="() => IsUsernameFocused = false" />
+                <InputText @onkeydown="KeyDown" id="username" class="form-control" @bind-Value="loginModel.UserName" @onfocus="() => IsUsernameFocused = true" @onblur="() => IsUsernameFocused = false" />
             </div>
             <div class="formGroup">
                 <label for="password">Password</label>
                 <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
             </div>
-            <!-- <div class="formGroup rememberMe">
-            <InputCheckbox id="rememberMe" @bind-Value="loginModel.RememberMe" />
-            <label for="rememberMe">Remember me</label>
-            </div>-->
             <div class="formGroup">
                 <button type="submit" class="btn btn-primary">Login</button>
             </div>
@@ -30,64 +24,24 @@
         <div class="signupLink">
             <p>Don't have an account? <a href="#" @onclick="OnRegisterClicked1" >Sign up</a></p>
         </div>
-        @if (!string.IsNullOrEmpty(errorMessage)){
-            <div class="@(string.IsNullOrEmpty(errorMessage) ? "hidden": "errorMessage")">@errorMessage</div>
-        }
     </div>
 </div>
 
 
 @code {
-    private string? errorMessage;
+
     private LoginModel loginModel = new LoginModel();
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // if you have already logged in
-            if (AuthProvider is CustomAuthStateProvider customProvider)
-            {
-                string userdataJson = await customProvider.LocalstorageGet("userdata");
-                if (!string.IsNullOrEmpty(userdataJson))
-                {
-                    // Deserialize the JSON string to LoginModel
-                    loginModel = System.Text.Json.JsonSerializer.Deserialize<LoginModel>(userdataJson)!;
-                    StateHasChanged();
-                    // focus on password input
-                    _ = JS.InvokeVoidAsync("focusElement", "password");
-                }
-                else
-                    //focus on username input 
-                    _ = JS.InvokeVoidAsync("focusElement", "username");
-            }
-        }
-    }
     // login
     private async Task HandleLogin()
     {
-
-        if (string.IsNullOrEmpty(loginModel.Username) || string.IsNullOrEmpty(loginModel.Password))
+        ValidationResult result = await AuthService.LoginAsync(loginModel);
+        if (result.Result)
         {
-            errorMessage = "Username and password are required.";
-            StateHasChanged();
-            return;
-        }
 
-        bool isLogged = await AuthService.LoginAsync(loginModel);
-        if (isLogged)
-        {
-            errorMessage = string.Empty;
-
-            StateHasChanged();
-
-            // Redirect to the dashboard or another page after successful login
-            // NavigationManager!.NavigateTo("/etikettBarcode");
+            NavigationManager!.NavigateTo("/", true);
         }
         else
-        {
-            errorMessage = "Invalid username or password.";
-            StateHasChanged();
-        }
+            _ = JS.InvokeVoidAsync("showAlert", result.Message);
     }
     // keydown
     private bool IsUsernameFocused = false;
@@ -100,10 +54,9 @@
         }
     }
     // register
-    [Parameter] public EventCallback OnRegisterClicked { get; set; }
-    private async void OnRegisterClicked1()
+    private void OnRegisterClicked1()
     {
-        if (OnRegisterClicked.HasDelegate)
-            await OnRegisterClicked.InvokeAsync();
+        NavigationManager!.NavigateTo("/register", true);
+       
     }
 }

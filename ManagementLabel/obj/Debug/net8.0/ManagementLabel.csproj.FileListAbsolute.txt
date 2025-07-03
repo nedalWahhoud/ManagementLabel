@@ -118,7 +118,6 @@ C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\Man
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\ManagementLabel.sourcelink.json
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Layout\MainLayout.razor.rz.scp.css
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Layout\NavMenu.razor.rz.scp.css
-C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Pages\EtikettBarcode.razor.rz.scp.css
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Pages\LogIn.razor.rz.scp.css
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Pages\Register.razor.rz.scp.css
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\bundle\ManagementLabel.styles.css
@@ -139,3 +138,5 @@ C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\ref
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\ManagementLabel.pdb
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\ManagementLabel.genruntimeconfig.cache
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\ref\ManagementLabel.dll
+C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Pages\EitkettBarcode.razor.rz.scp.css
+C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Pages\Orders.razor.rz.scp.css

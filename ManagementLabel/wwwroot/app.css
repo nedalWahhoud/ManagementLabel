@@ -1,7 +1,39 @@
+﻿:root {
+    --mainBackgroundColoe: #F0F0F0;
+    --btnBackgroundColor: #007bff;
+    --btnBackgroundColorHover: #0056b3;
+    --btnBackgroundColorProductAdded: #4CAF50;
+    --btnBackgroundColorProductAddedHover: #45a049;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+/* user info*/
+.userInfo {
+    font-size: 18px;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 10px 0;
+}
 
+.userName {
+    font-weight: bold;
+    color: #585858;
+}
+/* loding */
+.lodingContainer {
+    display: flex;
+    font-size: 1.5rem;
+    font-weight: bold;
+    width: 100vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/*  */
 a, .btn-link {
     color: #006bb7;
 }

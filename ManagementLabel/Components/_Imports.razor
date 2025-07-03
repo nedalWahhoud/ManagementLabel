@@ -9,18 +9,28 @@
 @using ManagementLabel
 @using ManagementLabel.Components
 @using ManagementLabel.LogIn
-@using ManagementLabel.Data
 @using Newtonsoft.Json;
-@using Blazored.LocalStorage
 @using Microsoft.AspNetCore.Components.Authorization;
 @using System.Security.Claims
 @using ManagementLabel.ProductsF;
+@using ManagementLabel.Components.OrderF
 @using ManagementLabel.EitkettBarcode
+@using ManagementLabel.Model
+@using ManagementLabel.Components.CartF
+@using ManagementLabel.Components.ReceiptF
+@using ManagementLabel.Components.ProductGroupF
 @using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
+@using Microsoft.Extensions.Localization
 
+@**@
 @inject IJSRuntime JS
+@inject IOptions<ProjectInfo> projectInfo
 @inject NavigationManager NavigationManager
-@inject ILocalStorageService localStorage
 @inject AuthService AuthService
 @inject ProductService productService
+@inject OrderService orderService
 @inject AuthenticationStateProvider AuthProvider
+@inject CartService cartService
+@inject ReceiptService receiptService
+@inject ProductGroupService productGroupService

@@ -1,45 +1,24 @@
-﻿@page "/main"
-@inherits LayoutComponentBase
-@inject CustomAuthStateProvider.MainRenderState _IsRendered
-<div class="page">
+﻿@inherits LayoutComponentBase
 
-    @if (_IsRendered.IsRendered)
-    {
-        <AuthorizeView>
-            <Authorized>
-                <div class="sidebar">
-                    <NavMenu />
-                </div>
-            </Authorized>
-        </AuthorizeView>
-    }
+@if (!isRended)
+{
+    <div class="lodingContainer">
+        <p>wird geladen... </p>
+    </div>
+}
+else
+{
+<div class="page">
+    <AuthorizeView>
+      <Authorized>
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+      </Authorized>
+    </AuthorizeView>
     <main>
         <article class="content px-4">
-            @if (!_IsRendered.IsRendered)
-            {
-                <div class="container">
-                    <p>Loading... Please wait.</p>
-                </div>
-            }
-            else
-            {
-                <AuthorizeView>
-                    <Authorized>
-                        <ManagementLabel.Components.Pages.EtikettBarcode />
-                    </Authorized>
-                    <NotAuthorized>
-                        @if(!IsRegisterPage)
-                        {
-                            <ManagementLabel.Components.Pages.LogIn OnRegisterClicked="RegisterClicked" />
-                        }
-                        else
-                        {
-                            <ManagementLabel.Components.Pages.Register OnBackToLogin="BackToLoginClicked" />
-                        }
-                    </NotAuthorized>
-                </AuthorizeView>
-                @* @Body*@
-            }
+          @Body
         </article>
     </main>
 </div>
@@ -49,25 +28,19 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
-
+}
 @code {
-    private bool IsRegisterPage = false;
 
-    private void RegisterClicked() => IsRegisterPage = true;
-    private void BackToLoginClicked() => IsRegisterPage = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private bool isRended = false;
+    protected override void OnAfterRender(bool firstRender)
     {
-        IsRegisterPage = false;
         if (firstRender)
         {
-            _IsRendered.IsRendered = true;
+			// Initialize the orderService to start count funktion of openOrders 
+            orderService.InitializeAsync();
 
-           /* if (AuthProvider is CustomAuthStateProvider customProvider1)
-                await customProvider1.NotifyUserLogout();*/
-
-            await AuthProvider.GetAuthenticationStateAsync();
-			StateHasChanged();
+            isRended = true;
+            StateHasChanged();
         }
     }
 }

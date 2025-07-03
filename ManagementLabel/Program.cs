@@ -1,9 +1,11 @@
 ﻿using ManagementLabel.Components;
+using ManagementLabel.Components.CartF;
+using ManagementLabel.Components.OrderF;
+using ManagementLabel.Components.ReceiptF;
 using ManagementLabel.LogIn;
-using Blazored.LocalStorage;
-using ManagementLabel.Data;
+using ManagementLabel.Model;
 using ManagementLabel.ProductsF;
-using Microsoft.EntityFrameworkCore;
+using ManagementLabel.Components.ProductGroupF;
 using Microsoft.AspNetCore.Components.Authorization;
 
 
@@ -12,32 +14,26 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+// ProjectInfo 
+builder.Services.Configure<ProjectInfo>(builder.Configuration.GetSection("ProjectInfo"));
 
-// Authorization
-builder.Services.AddScoped(sp => new HttpClient
-{
-    BaseAddress = new Uri("http://localhost/APIs/")
-});
+// API
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7250") });
+// auth
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-builder.Services.AddSingleton<CustomAuthStateProvider.MainRenderState>();
-
-// storage
-builder.Services.AddBlazoredLocalStorage();
-
 // auth AuthService
 builder.Services.AddScoped<AuthService>();
-
-
-// Database connection
-builder.Services.AddDbContext<MyDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
-    ));
-
 // products
 builder.Services.AddScoped<ProductService>();
+// order
+builder.Services.AddScoped<OrderService>();
+// cart
+builder.Services.AddScoped<CartService>();
+// Receipt
+builder.Services.AddScoped<ReceiptService>();
+// Group Products
+builder.Services.AddScoped<ProductGroupService>();
 
 var app = builder.Build();
 

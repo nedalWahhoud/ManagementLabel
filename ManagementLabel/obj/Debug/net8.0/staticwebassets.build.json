@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "O40SKXD5F0cgOJsqqO2Jxkjnq+coHqVDRxWZmIhqy/A=",
+  "Hash": "Z8g1c3MvGd2oV3fMwew2kOOzKHBDwsak7wDpdoHbRz8=",
   "Source": "ManagementLabel",
   "BasePath": "_content/ManagementLabel",
   "Mode": "Default",
@@ -31,8 +31,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ApplicationBundle",
-      "Fingerprint": "bbknnve0aw",
-      "Integrity": "l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=",
+      "Fingerprint": "t796tnkmzr",
+      "Integrity": "19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css"
@@ -52,8 +52,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "ScopedCss",
       "AssetTraitValue": "ProjectBundle",
-      "Fingerprint": "bbknnve0aw",
-      "Integrity": "l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=",
+      "Fingerprint": "t796tnkmzr",
+      "Integrity": "19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css"
@@ -73,8 +73,8 @@
       "RelatedAsset": "",
       "AssetTraitName": "",
       "AssetTraitValue": "",
-      "Fingerprint": "da95v2qkru",
-      "Integrity": "u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE=",
+      "Fingerprint": "d2m74dchxd",
+      "Integrity": "dUMShIKgT2Fo5mAiGK4R/xXK5L7vjAxEOmjyWmdGaJU=",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\app.css"
@@ -141,6 +141,27 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.png"
+    },
+    {
+      "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\Images\\DPImage.png",
+      "SourceId": "ManagementLabel",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\",
+      "BasePath": "_content/ManagementLabel",
+      "RelativePath": "Images/DPImage#[.{fingerprint}]?.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "9uapgljo6k",
+      "Integrity": "Ibc14bD+GcJ+EXpKLOZTuLASBshByqonysYeqtZTo8s=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Images\\DPImage.png"
     },
     {
       "Identity": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\js\\pngPdfDownload.js",
@@ -239,7 +260,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "2591"
+          "Value": "3279"
         },
         {
           "Name": "Content-Type",
@@ -247,11 +268,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE=\""
+          "Value": "\"dUMShIKgT2Fo5mAiGK4R/xXK5L7vjAxEOmjyWmdGaJU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 16 May 2025 17:34:26 GMT"
+          "Value": "Mon, 30 Jun 2025 14:32:17 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -261,12 +282,12 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE="
+          "Value": "sha256-dUMShIKgT2Fo5mAiGK4R/xXK5L7vjAxEOmjyWmdGaJU="
         }
       ]
     },
     {
-      "Route": "app.da95v2qkru.css",
+      "Route": "app.d2m74dchxd.css",
       "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\app.css",
       "Selectors": [],
       "ResponseHeaders": [
@@ -276,7 +297,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "2591"
+          "Value": "3279"
         },
         {
           "Name": "Content-Type",
@@ -284,11 +305,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE=\""
+          "Value": "\"dUMShIKgT2Fo5mAiGK4R/xXK5L7vjAxEOmjyWmdGaJU=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 16 May 2025 17:34:26 GMT"
+          "Value": "Mon, 30 Jun 2025 14:32:17 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -298,7 +319,7 @@
       "EndpointProperties": [
         {
           "Name": "fingerprint",
-          "Value": "da95v2qkru"
+          "Value": "d2m74dchxd"
         },
         {
           "Name": "label",
@@ -306,7 +327,7 @@
         },
         {
           "Name": "integrity",
-          "Value": "sha256-u9qEka1auR7E3rd3/8/j8hkQdSOYj9bRJ4nYiFDR1sE="
+          "Value": "sha256-dUMShIKgT2Fo5mAiGK4R/xXK5L7vjAxEOmjyWmdGaJU="
         }
       ]
     },
@@ -553,6 +574,88 @@
         {
           "Name": "integrity",
           "Value": "sha256-4mWsDy3aHl36ZbGt8zByK7Pvd4kRUoNgTYzRnwmPHwg="
+        }
+      ]
+    },
+    {
+      "Route": "Images/DPImage.9uapgljo6k.png",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\Images\\DPImage.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3640"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Ibc14bD+GcJ+EXpKLOZTuLASBshByqonysYeqtZTo8s=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 30 May 2025 19:21:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "9uapgljo6k"
+        },
+        {
+          "Name": "label",
+          "Value": "Images/DPImage.png"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-Ibc14bD+GcJ+EXpKLOZTuLASBshByqonysYeqtZTo8s="
+        }
+      ]
+    },
+    {
+      "Route": "Images/DPImage.png",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\Images\\DPImage.png",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "3640"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/png"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"Ibc14bD+GcJ+EXpKLOZTuLASBshByqonysYeqtZTo8s=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 30 May 2025 19:21:31 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-Ibc14bD+GcJ+EXpKLOZTuLASBshByqonysYeqtZTo8s="
         }
       ]
     },
@@ -885,96 +988,6 @@
       ]
     },
     {
-      "Route": "ManagementLabel.bbknnve0aw.bundle.scp.css",
-      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "20072"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Fri, 16 May 2025 17:34:26 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "bbknnve0aw"
-        },
-        {
-          "Name": "label",
-          "Value": "ManagementLabel.bundle.scp.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
-        }
-      ]
-    },
-    {
-      "Route": "ManagementLabel.bbknnve0aw.styles.css",
-      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css",
-      "Selectors": [],
-      "ResponseHeaders": [
-        {
-          "Name": "Accept-Ranges",
-          "Value": "bytes"
-        },
-        {
-          "Name": "Content-Length",
-          "Value": "20072"
-        },
-        {
-          "Name": "Content-Type",
-          "Value": "text/css"
-        },
-        {
-          "Name": "ETag",
-          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
-        },
-        {
-          "Name": "Last-Modified",
-          "Value": "Fri, 16 May 2025 17:34:26 GMT"
-        },
-        {
-          "Name": "Cache-Control",
-          "Value": "max-age=31536000, immutable"
-        }
-      ],
-      "EndpointProperties": [
-        {
-          "Name": "fingerprint",
-          "Value": "bbknnve0aw"
-        },
-        {
-          "Name": "label",
-          "Value": "ManagementLabel.styles.css"
-        },
-        {
-          "Name": "integrity",
-          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
-        }
-      ]
-    },
-    {
       "Route": "ManagementLabel.bundle.scp.css",
       "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
       "Selectors": [],
@@ -985,7 +998,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "20072"
+          "Value": "33912"
         },
         {
           "Name": "Content-Type",
@@ -993,11 +1006,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
+          "Value": "\"19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 16 May 2025 17:34:26 GMT"
+          "Value": "Mon, 30 Jun 2025 18:29:39 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1007,7 +1020,7 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
+          "Value": "sha256-19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA="
         }
       ]
     },
@@ -1022,7 +1035,7 @@
         },
         {
           "Name": "Content-Length",
-          "Value": "20072"
+          "Value": "33912"
         },
         {
           "Name": "Content-Type",
@@ -1030,11 +1043,11 @@
         },
         {
           "Name": "ETag",
-          "Value": "\"l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ=\""
+          "Value": "\"19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA=\""
         },
         {
           "Name": "Last-Modified",
-          "Value": "Fri, 16 May 2025 17:34:26 GMT"
+          "Value": "Mon, 30 Jun 2025 18:29:39 GMT"
         },
         {
           "Name": "Cache-Control",
@@ -1044,7 +1057,97 @@
       "EndpointProperties": [
         {
           "Name": "integrity",
-          "Value": "sha256-l/m0da+IaN4/nvIRscHIqzNsrW1dyUop+P0ksENSKPQ="
+          "Value": "sha256-19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA="
+        }
+      ]
+    },
+    {
+      "Route": "ManagementLabel.t796tnkmzr.bundle.scp.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "33912"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 30 Jun 2025 18:29:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "t796tnkmzr"
+        },
+        {
+          "Name": "label",
+          "Value": "ManagementLabel.bundle.scp.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA="
+        }
+      ]
+    },
+    {
+      "Route": "ManagementLabel.t796tnkmzr.styles.css",
+      "AssetFile": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\bundle\\ManagementLabel.styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "33912"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 30 Jun 2025 18:29:39 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "t796tnkmzr"
+        },
+        {
+          "Name": "label",
+          "Value": "ManagementLabel.styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-19L59pRa+LKhR/qcuvwxjxnzHQvhBUfZjxHucTFqwcA="
         }
       ]
     }

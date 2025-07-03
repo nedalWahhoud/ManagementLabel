@@ -1,6 +1,5 @@
-﻿@implements IDisposable
-@rendermode InteractiveServer
-
+﻿@rendermode InteractiveServer
+@implements IDisposable
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -10,29 +9,44 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="@(IsLoaded ? "":"hidden")">
     <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
         <nav>
             <AuthorizeView>
                 <Authorized>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="#">
-                            <span class="bi bi-upc-scan" aria-hidden="true"></span> Etikett/Barcode
-                        </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" href="/" Match="NavLinkMatch.All">
+                        <span class="bi bi-box-seam fs-3 me-2 d-inline-block" style="line-height: 1;"></span>
+                        <span class="ms-2">Produkte</span>
+                    </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnOrder" >
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <span class="bi bi-bag-check fs-3"></span>
+                            @if (orderService.OpenOrderCount > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    @orderService.OpenOrderCount
+                                </span>
+                            }
+                        </span>
+                        <span class="ms-2">Bestellungen</span>
+                    </NavLink>
                     </div>
                     <!-- Spacer to push logout to bottom -->
                     <div style="flex-grow: 1;"></div>
 
                     <!-- LogOut at bottom -->
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" @onclick="HandleLogout">
-                            <span class="bi bi-box-arrow-right" aria-hidden="true"></span> LogOut
+                    <NavLink class="nav-link d-flex align-items-center" @onclick="HandleLogout">
+                        <span class="bi bi-box-arrow-left fs-3 me-2 d-inline-block" style="line-height: 1;"></span>
+                        <span class="ms-2">Logout</span>
                         </NavLink>
                     </div>
                 </Authorized>
                 <NotAuthorized>
                     <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <NavLink class="nav-link" href="/login">
                             <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> LogIn
                         </NavLink>
                     </div>
@@ -40,46 +54,33 @@
             </AuthorizeView>
         </nav>
     </div>
-</div>
 
 @code {
 
-    private bool IsRegisterPage = false;
-    private bool IsLoggedIn = false;
-    private bool IsLoaded = false;
-
-    protected override async Task OnInitializedAsync()
+    private int OpenOrderCount { get; set; } = 0;
+    protected override void OnInitialized()
     {
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
-        IsLoggedIn = authState.User.Identity?.IsAuthenticated ?? false;
-
-        // loginState.OnChange += StateHasChanged;
-        NavigationManager.LocationChanged += (sender, args) => OnLocationChanged();
+        // event handler for cart changes
+        orderService.OnChange += HandleOpenOrderCountChange;
     }
-    public void Dispose()
+    private void HandleOpenOrderCountChange()
     {
-        //  loginState.OnChange -= StateHasChanged;
-        NavigationManager.LocationChanged -= (sender, args) => OnLocationChanged();
+        InvokeAsync(StateHasChanged);
     }
-    private void OnLocationChanged()
-    {
-        string currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
 
-        IsRegisterPage = currentUrl == "register" ? true : false;
-
-        StateHasChanged();
-    }
     private async Task HandleLogout(MouseEventArgs e)
     {
-        if (AuthProvider is CustomAuthStateProvider customProvider)
-            await customProvider.NotifyUserLogout();
+	 await AuthService.Logout();
     }
-    protected override void OnAfterRender(bool firstRender)
+    // order 
+	private void OnOrder()
+	{
+		NavigationManager.NavigateTo("/order",false);
+	}
+
+    public void Dispose()
     {
-        if (firstRender)
-        {
-            IsLoaded = true;
-            StateHasChanged();
-        }
+        
+        orderService.OnChange -= HandleOpenOrderCountChange;
     }
 }

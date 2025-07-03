@@ -1,63 +1,58 @@
-﻿using ManagementLabel.Data;
-using Microsoft.AspNetCore.Components.Authorization;
-using System.Security.Cryptography;
-using System.Text;
-
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using ManagementLabel.Model;
+using Newtonsoft.Json.Linq;
+using System.Security.Claims;
 
 namespace ManagementLabel.LogIn
 {
     public class AuthService
     {
-        private readonly ILogger<AuthService> _logger;
         private readonly HttpClient _http;
         private readonly AuthenticationStateProvider _authStateProvider;
 
-        public AuthService(MyDbContext context, ILogger<AuthService> logger, HttpClient http, AuthenticationStateProvider authStateProvider)
+        public AuthService(HttpClient http, AuthenticationStateProvider authStateProvider)
         {
-            _logger = logger;
+           
             _http = http;
             _authStateProvider = authStateProvider;
         }
 
-        private class LoginResponse
-        {
-            public bool success { get; set; }
-            public string? token { get; set; }
-        }
-
-        public async Task<bool> LoginAsync(LoginModel loginModel)
+        public async Task<ValidationResult> LoginAsync(LoginModel loginModel)
         {
             try
             {
-                loginModel.Password = string.Concat(SHA256.HashData(Encoding.UTF8.GetBytes(loginModel.Password!)).Select(b => b.ToString("x2")));
+                HttpResponseMessage response = await _http!.PostAsJsonAsync("api/Users/login", loginModel);
 
-               var response = await _http.PostAsJsonAsync("http://localhost/APIs/logIn.php", new
-                {
-                    username = loginModel.Username,
-                    password = loginModel.Password
-                });
-
-                loginModel.Password = string.Empty;
                 if (!response.IsSuccessStatusCode)
-                    return false;
-                
+                    return new ValidationResult { Result = false, Message = "Login failed. Please check your credentials." };
+                // get result
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-                if (result == null || !result.success || string.IsNullOrEmpty(result.token))
-                    return false;
-               
+                if (result == null || string.IsNullOrEmpty(result.Token))
+                    return new ValidationResult { Result = false, Message = "Login failed. No token received." };
 
-                // Notify authentication state
-                if (_authStateProvider is CustomAuthStateProvider customProvider)
-                    customProvider?.NotifyUserAuthentication(result.token!);
+                // check admin role 
+                var claimsIdentity = (_authStateProvider as CustomAuthStateProvider)?.GetIdentity(result.Token);
+                if(!claimsIdentity!.HasClaim(ClaimTypes.Role,"admin"))
+                    return new ValidationResult { Result = false, Message = "Sie haben keine Admin Rechte" };
 
-                return true;
+                // set the authorization header
+                (_authStateProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(result.Token);
+
+                return new ValidationResult { Result = true, Message = "Login successful." };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Logout failed");
-                return false;
+                return new ValidationResult{ Result = false, Message = $"An error occurred during login: {ex.Message}"};
             }
+        }
+        public async Task Logout()
+        {
+            if (_authStateProvider is CustomAuthStateProvider customAuthStateProvider)
+            {
+                await customAuthStateProvider.NotifyUserLogout();
+            }
+            _http!.DefaultRequestHeaders.Authorization = null;
         }
     }
 }

@@ -1,0 +1,301 @@
+﻿/* top  */
+.topContiner {
+    display: flex;
+    flex-direction: row;
+    gap: 1px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+    .topContiner button, .topContiner .inputSearch {
+        margin: 0;
+        margin: 10px 14px;
+    }
+
+.statusDropdown {
+    padding: 10px 14px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #333333;
+    font-size: 16px;
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+    /* مهم لضبط الحجم حسب المحتوى */
+    min-width: 200px;
+    height: 40px;
+}
+    .statusDropdown:hover {
+        border-color: #007bff;
+        outline: none;
+    }
+
+    .statusDropdown:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+.inputSearch {
+    display: flex;
+    justify-content: center;
+    padding: 10px 14px;
+    font-size: 16px;
+    width: 200%;
+    max-width: 400px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+   .inputSearch:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+    }
+/* loadingMessage-Styling */
+.loadingMessage {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #007bff;
+}
+        /* table */
+        .tableContiner {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: #fff;
+        }
+
+.table {
+    width: 100%;
+    border-collapse: collapse; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+    .table thead th {
+        background-color: #f5f5f5; 
+        color: #555;
+        padding: 15px 20px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #e0e0e0; 
+        white-space: nowrap; 
+    }
+
+    .table tbody tr {
+        background-color: #dce7f3;
+        border-bottom: 1px solid #eee;
+        transition: background-color 0.2s ease;
+    }
+        .table tbody tr:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .table tbody tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+
+    .table tbody td {
+        padding: 12px 20px;
+        vertical-align: middle;
+        line-height: 1.5;
+    }
+.emailCell:hover {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+.addressCell:hover {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.table tbody td .productImg {
+    width: 50px;
+    height: 50px;
+    object-fit: cover; 
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+     
+        .table tbody td select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+            .table tbody td select:focus {
+                border-color: #007bff;
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            }
+
+    
+    .table .tableSm {
+        width: 98%; /
+        margin: 10px auto; 
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+        .table .tableSm tbody tr:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .table .tableSm thead th {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .table .tableSm tbody td {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+
+        .table .tableSm tbody tr:nth-child(even) {
+            background-color: #e6e9ed;
+        }
+        .table .tableSm tbody tr:hover {
+            background-color: #007bff;
+            color: white;
+        }
+/* Mehr laden button */
+button.btn-primary {
+    width: 150px;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease;
+    /* button center */
+    display: block;
+    margin: 0 auto;
+    margin-bottom:30px;
+}
+/* ======== ADDRESS FORM OVERLAY ======== */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.addressForm {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+    /* عنوان النافذة */
+    .addressPopup h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: #007bff; /* لون أزرق Bootstrap */
+    }
+
+    /* نص العنوان */
+    .addressPopup p {
+        margin: 5px 0;
+        font-size: 1rem;
+    }
+
+    /* زر الإغلاق */
+    .addressPopup button {
+        margin-top: 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+        .addressPopup button:hover {
+            background-color: #0056b3;
+        }
+
+/* hidden show */
+.hidden {
+    display: none;
+}
+
+.show {
+    display: table-row;
+}
+
+@media (max-width: 768px) {
+    .table thead {
+        display: none; /* إخفاء الرؤوس على الشاشات الصغيرة لجعل الجدول مكدسًا */
+    }
+
+    .table, .table tbody, .table tr, .table td {
+        display: block; /* جعل العناصر تظهر ككتل */
+        width: 100%;
+    }
+
+        .table tr {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .table td {
+            text-align: right;
+            padding-left: 50%; /* مساحة لاسم العمود الزائف */
+            position: relative;
+        }
+
+            .table td::before {
+                content: attr(data-label); /* عرض اسم العمود الزائف */
+                position: absolute;
+                left: 10px;
+                width: calc(50% - 20px);
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: bold;
+                color: #666;
+            }
+
+        /* يمكنك إضافة `data-label` لكل خلية `<td>` في HTML الخاص بك لتعمل هذه الخاصية */
+        /* مثال: <td data-label="Bestellnummer">@order.Id</td> */
+
+        .table .tableSm {
+            width: 100%; /* الجدول الداخلي يملأ العرض بالكامل */
+            margin: 10px 0;
+        }
+}

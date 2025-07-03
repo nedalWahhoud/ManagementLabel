@@ -1,0 +1,384 @@
+﻿@page "/order"
+@using ManagementLabel.Model
+
+<AuthorizeView>
+    <Authorized Context="authContext">
+        <!-- user info -->
+        <p class="userInfo">
+            <span class="userName">User Name: @authContext.User.Identity!.Name</span>
+        </p>
+        @* top continer *@
+        <div class="@(Isloading ? "hidden":"topContiner")">
+            <!-- Dropdown -->
+            <select class="statusDropdown" @onchange="OnStatusChanged">
+                <option value="0">Alle Bestellungen</option>
+                @foreach (var status in orderService.OrderStatusList)
+                {
+                    <option value="@status.Id">@status.Status_de</option>
+                }
+            </select>
+        </div>
+        @* table *@
+        <div class="tableContiner">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>B-Nr.</th>
+                        <th>U-Nr</th>
+                        <th>Benutzer</th>
+                        <th>E-mail</th>
+                        <th>Datum</th>
+                        <th>Lieferadresse</th>
+                        <th>Zahlungsmethode</th>
+                        <th>Ge-preis</th>
+                        <th>Status</th>
+                        <th>Notiz</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @* Loading message *@
+                    @if (Isloading || IsOrdersLoading)
+                    {
+                        <tr>
+                            <td colspan="12" class="loadingMessage">
+                                Lädt...
+                            </td>
+                        </tr>
+                    }
+                    @for (int i = 0; i < orders.Count; i++)
+                    {
+                        var order = orders[i];
+                        <tr>
+                            <td>@order.Id</td>
+                            <td>@order.UserId</td>
+                            <td>@(order.User?.UserName ?? "Kein Unsername")</td>
+                            <td title="@order.User?.Email" @onclick="() => OnEmail(order.User?.Email)" class="emailCell">
+                                @(order.User?.Email != null ? order.User.Email.Substring(0, Math.Min(5, order.User.Email.Length)) + "..." : "Keine Email")
+                            </td>
+                            <td>@order.OrderDate.ToShortDateString()</td>
+                            <td title="@GetFullAddress(order.Address!)" @onclick="() => OnAddress(order.Address!)" class="addressCell">@order.Address?.FirstName @order.Address?.LastName</td>
+                            <td>@order.PaymentMethod?.Description_de</td>
+                            <td>@order.TotalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                            <td>
+                                <InputSelect Value="@order.StatusId"
+                                ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
+                                ValueExpression="() => order.StatusId"
+                                class="form-select"
+                                disabled="@isUpdatingStatus">
+                                    @foreach (var status in orderService.OrderStatusList)
+                                    {
+                                        <option value="@status.Id">@status.Status_de</option>
+                                    }
+                                </InputSelect>
+
+                                @if (isUpdatingStatus)
+                                {
+                                    <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
+                                        <span class="visually-hidden">Laden...</span>
+                                    </div>
+                                }
+                            </td>
+                            <td>@order.Notes</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5">
+                                <table class="table tableSm">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Produkt</th>
+                                            <th>Menge</th>
+                                            <th>Einzelpreis</th>
+                                            <th>Gesamt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in order.OrderItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @{
+                                                        var imageBytes = item.Product?.Image ?? Array.Empty<byte>();
+                                                        string src;
+                                                        if (imageBytes.Length > 0)
+                                                        {
+                                                            src = Convert.ToBase64String(imageBytes);
+                                                        }
+                                                        else
+                                                        {
+                                                            src = "images/sample.jpg";
+                                                        }
+                                                    }
+                                                    <img  src="data:image/png;base64,@(src)" class="productImg" />
+                                                </td>
+                                                <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.UnitPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                                                <td>@((item.UnitPrice * item.Quantity).ToString("C", new System.Globalization.CultureInfo("de-DE")))</td>
+
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    }
+                    @* No orders found *@
+                    @if (orders.Count == 0 && !Isloading && !IsOrdersLoading)
+                    {
+                        <tr>
+                            <td colspan="12" class="loadingMessage">
+                                Keine Bestellungen gefunden.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @* Mehr laden *@
+            @if (orders.Count > 0)
+            {
+                <button type="submit" class="btn btn-primary" @onclick="() => OnMoreLoad()" disabled="@(IsOrdersLoading || AllItemsLoaded)">
+                    @if (IsOrdersLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="ms-2">Lädt...</span>
+                    }
+                    else if (!AllItemsLoaded)
+                    {
+                        <span>Mehr laden</span>
+                    }
+                    @if (AllItemsLoaded)
+                    {
+                        <span>Alle geladen</span>
+                    }
+                </button>
+            }
+            @* show address *@
+            @if (IsOverlayVisible &&  overlayItems != null)
+            {
+                <div class="overlay" @onclick="CloseAddress">
+                    <div class="addressForm">
+                        @if (string.IsNullOrEmpty(overlayItems.NoData))
+                        {
+                            <h4>@overlayItems.Title</h4>
+                            @((MarkupString)overlayItems.P1)
+                            @((MarkupString)overlayItems.P2)
+                            @((MarkupString)overlayItems.P3)
+                            @((MarkupString)overlayItems.P4)
+                            @((MarkupString)overlayItems.P5)
+                        }
+                        else
+                        {
+                            @((MarkupString)overlayItems.NoData)
+                        }
+                        <button class="btn btn-primary" @onclick="CloseAddress">Schließen</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <ManagementLabel.Components.Pages.LogIn />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool Isloading = true;
+    private List<Order> orders = new List<Order>();
+    protected override async Task OnInitializedAsync()
+    {
+        Isloading = true;
+        // get orderstatus list
+        await orderService.GetOrderStatusListAsync();
+        // get first orders
+        await OnMoreLoad();
+
+        Isloading = false;
+    }
+    // more load
+    private bool AllItemsLoaded { get; set; } = false;
+    private bool IsOrdersLoading { get; set; } = false;
+    private string statusId = "0";
+    private List<int> excludeOrderIds = new List<int>();
+    private async Task OnMoreLoad()
+    {
+        if (IsOrdersLoading) return;
+
+        IsOrdersLoading = true;
+        // load from downloaded local list 
+        LoadLocal();
+        // load from server
+        await LoandFromServer();
+        // sort orders by OrderDate descending
+        orders = orders.OrderByDescending(o => o.OrderDate).ToList();
+
+        IsOrdersLoading = false;
+        StateHasChanged();
+    }
+    private void LoadLocal()
+    {
+        // get orders by status local
+        var orderLocal = orderService.GetOrdersByStatusLocal(statusId, excludeOrderIds);
+        // add the ids of the loaded orders to the exclude list
+        excludeOrderIds.AddRange(orderService.getIdsFromOrdersLocal(orderLocal));
+        // add local orders to the main list
+        orders.AddRange(orderLocal);
+    }
+    private async Task LoandFromServer()
+    {
+        var result = await orderService.GetAllOrdersbyStatusAsync(statusId, excludeOrderIds);
+        if (result.Result)
+        {
+            // get downloaded orders
+            var ordersDownloaded = orderService.GetOrdersByStatusLocal(statusId, excludeOrderIds);
+            // add the ids of the downloaded orders to the exclude list
+            excludeOrderIds.AddRange(orderService.getIdsFromOrdersLocal(ordersDownloaded));
+            // add dowloaded orders to the main list
+            orders.AddRange(ordersDownloaded);
+
+            if (result.Message == "AllItemsLoaded")
+                AllItemsLoaded = true;
+        }
+        else
+        {
+            // _ = ShowAlert($"Fehler beim Laden der Bestellungen: {result.Message}");
+        }
+    }
+    // change status table
+    private bool isUpdatingStatus = false;
+    private async void OnStatusChangedItem(Order order, string value)
+    {
+        if (order == null || string.IsNullOrEmpty(value)) return;
+
+        isUpdatingStatus = true;
+
+        if (int.TryParse(value, out int statusId))
+        {
+            // The data included does not necessarily need to be sent, For example, the orderitems, address
+            Order orderUpdate = new Order
+                {
+                    Id = order.Id,
+                    OrderDate = order.OrderDate,
+                    DeliveryAddressId = order.DeliveryAddressId,
+                    PaymentMethodId = order.PaymentMethodId,
+                    TotalPrice = order.TotalPrice,
+                    StatusId = statusId,
+                    Notes = order.Notes,
+                    UserId = order.UserId,
+                };
+
+            if (orderService.IsEditedOrder(order, orderUpdate))
+            {
+                var result = await orderService.UpdateOrder(orderUpdate);
+                if (result.Result)
+                {
+                    _ = ShowAlert("Status erfolgreich geändert");
+                    // update exist order status
+                    order.StatusId = statusId;
+                    isUpdatingStatus = false;
+
+					// update openOrder count if status is about Open
+                    OrdersCount count = await orderService.GetOrderCountByStatusId(1);
+					orderService.OpenOrderCount = count.Count;
+					// event to notify state change
+					orderService.NotifyStateChanged();
+
+                    StateHasChanged();
+                    return;
+                }
+                else
+                    _ = ShowAlert($"Fehler bei Statusänderung: {result.Message}");
+            }
+            else
+                _ = ShowAlert("Keine Änderungen an der Bestellung vorgenommen.");
+        }
+        else
+            _ = ShowAlert("Fehler bei Statusänderung: Ungültige Status-ID");
+        isUpdatingStatus = false;
+        StateHasChanged();
+    }
+    // Overlay  click table
+    private bool IsOverlayVisible { get; set; } = false;
+    private OverlayItems overlayItems  = null!;
+    private void OnAddress(Address address)
+    {
+        if (address != null)
+        {
+            overlayItems = new OverlayItems
+				{
+                    Title = "Lieferadresse",
+                    P1 = $"<p><strong>Vor-Nachname: </strong>{address.FirstName} {address.LastName}</p>",
+                    P2 = $"<p><strong>Straße: </strong>{address.Street}</p>",
+                    P3 = $"<p><strong>PLZ: </strong>{address.ZipCode} {address.City}</p>",
+                    P4 = $"<p><strong>Land: </strong>{address.Country}</p>",
+                    P5 = $"<p><strong>Telefonnummer: </strong>{address.Phone}</p>",
+				};
+        }
+        else
+        {
+            overlayItems = new OverlayItems
+				{
+					Title = "Lieferadresse",
+                    NoData = "<p>Keine Adresse vorhanden</p>"
+				};
+        }
+
+        IsOverlayVisible = true;
+
+    }
+    private void OnEmail(string? email)
+    {
+        if (!string.IsNullOrEmpty(email))
+        {
+            overlayItems = new OverlayItems
+                {
+                    Title = "E-mail",
+                    P1 = $"<p><strong>E-mail: </strong>{email}</p>",
+                };
+        }
+        else
+        {
+            overlayItems = new OverlayItems
+                {
+                    Title = "E-mail",
+                    NoData = "<p>Keine E-mail vorhanden</p>"
+                };
+        }
+
+        IsOverlayVisible = true;
+    }
+    private void CloseAddress()
+    {
+        IsOverlayVisible = false;
+        overlayItems = null!;
+    }
+    private string GetFullAddress(Address address)
+    {
+        if (address == null) return "Keine Adresse";
+        return $"{address.FirstName} {address.LastName}, {address.Street}, {address.ZipCode} {address.City}, {address.Country}, 📞 {address.Phone}";
+    }
+    // show alert
+    private async Task ShowAlert(string message)
+    {
+        await JS.InvokeVoidAsync("showAlert", message);
+    }
+    // search 
+    public async void OnStatusChanged(ChangeEventArgs e)
+    {
+        string statusId = e.Value?.ToString() ?? string.Empty;
+        if (string.IsNullOrEmpty(statusId))
+            return;
+
+        // clear orders list to new statusId and excludeOrderIds list
+        orders.Clear();
+        excludeOrderIds.Clear();
+        // reset AllItemsLoaded
+        AllItemsLoaded = false;
+        orderService.Rest();
+
+        // get orders by new statusId
+        this.statusId = statusId;
+        await OnMoreLoad();
+    }
+    
+}

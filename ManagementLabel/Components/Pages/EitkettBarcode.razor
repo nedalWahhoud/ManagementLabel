@@ -1,0 +1,1031 @@
+﻿@page "/"
+@using ManagementLabel.ProductsF;
+@using ManagementLabel.EitkettBarcode
+@using ManagementLabel.Model
+
+@rendermode InteractiveServer
+
+<AuthorizeView>
+	<Authorized Context="authContext">
+		<!-- user info -->
+		<p class="userInfo">
+			<span class="userName">User Name: @authContext.User.Identity!.Name</span>
+		</p>
+		@* top continer *@
+		<div class="TopContiner">
+			<button class="@((authContext.User.IsInRole("admin") == true && !IsLoadingMessage) ? (!IsShowAddProductForm ? "btn addProductTopB" : "btn addProductCancelB") : "hidden")"
+			@onclick="ShowAddProductFormAsync">
+				@(!IsShowAddProductForm ? "Produkt hinzufügen" : "Hinzufügen Abbrechen")
+			</button>
+			<button class="@((authContext.User.IsInRole("admin") == true && !IsLoadingMessage && products.Count > 0) ? (!IsShowAddDeleteForm ? "btn deleteB" : "btn deleteCancelB") : "hidden" )"
+			@onclick="ShowAddDeleteForm" >
+				@(!IsShowAddDeleteForm ? "Produkt löschen" : "Löschen Abbrechen")
+			</button>
+			<button class="@((authContext.User.IsInRole("admin") == true && !IsLoadingMessage && products.Count > 0) ? (!IsShowReceiptForm ? "btn receiptB" : "btn receiptCancelB") : "hidden" )"
+			@onclick="ShowReceiptForm">
+				@(!IsShowReceiptForm ? "Kassenbon erstellen" : "Kassenbon Abbrechen")
+			</button>
+			<input type="text" placeholder="Searching..." class="@(!IsLoadingMessage ? "input" : "hidden")" @oninput="OnTextChanged" />
+		</div>
+		@* table *@
+		<div tabindex="0" @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
+
+			<table class="table">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Name</th> 
+						<th>Beschreibung</th>
+						<th>Kategorie</th>
+						<th>Menge</th>
+						<th>Kaufpreis</th>
+						<th>V-Preis</th>
+						<th>MB</th>
+						<th>Haltbarkeit</th>
+						<th>Hersteller</th>
+						<th>Img</th>
+						<th class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "" : "hidden")">Löschen</th>
+						<th class="@(authContext.User.IsInRole("admin") && _editProduct!=null ? "" : "hidden")">Bearbeiten</th>
+						<th class="@(authContext.User.IsInRole("admin") && IsShowReceiptForm ? "" : "hidden" )">Kassenbon</th> 
+					</tr>
+				</thead>
+				<tbody>
+
+					@* Loading message *@
+					<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "show")">
+						<td colspan="11" class="loadingMessage">
+							Lädt...
+						</td>
+					</tr>
+					@* table *@
+					@{
+						List<Products> htmlProducts = null!;
+						if (filterP == null)
+							htmlProducts = products;
+						else
+							htmlProducts = filterP;
+						if (htmlProducts.Count > 0)
+						{
+							for (int i = 0; i < htmlProducts.Count; i++)
+							{
+								string src = Convert.ToBase64String(htmlProducts[i].Image!);
+								Products thisProducts = htmlProducts[i];
+								<tr 
+								@ondblclick="@(authContext.User.IsInRole("admin") ? (() => DoubleClick(thisProducts)) : null!)"
+								@onclick="()=> SelectRow(thisProducts)" 
+								class="@(selectedRow != null && selectedRow.Id == thisProducts.Id ? "selected" : "")">
+									@*<td>@(startIndex+i+1)</td>*@
+									<td>@htmlProducts[i].Id</td>
+									@if (_editProduct != null && _editProduct.Id == htmlProducts[i].Id)
+									{
+										<td><InputText @bind-Value="_editProduct!.Name_de" /></td>
+										<td><InputText @bind-Value="_editProduct!.Description_de" /></td>
+										<td>
+											<InputSelect class="form-control" @bind-Value="_editProduct.CategoryId">
+												<option value="0">Select Category</option>
+												@foreach (var category in categories!)
+												{
+													<option value="@category.Id">@category.Name_de</option>
+												}
+											</InputSelect>
+										</td>
+										<td><InputNumber @bind-Value="_editProduct!.Quantity" /></td>
+										<td><InputNumber @bind-Value="_editProduct!.PurchasePrice" /></td>
+										<td><InputNumber @bind-Value="_editProduct!.SalePrice" /></td>
+										<td><InputNumber @bind-Value="_editProduct!.MinimumStock" /></td>
+										<td><InputDate @bind-Value="_editProduct.EXPDate" /></td>
+										<td>
+											<InputSelect class="form-control" @bind-Value="_editProduct.ManufacturerId">
+												<option value="0">Select Category</option>
+												@foreach (var Manufacturer in Manufacturers!)
+												{
+													<option value="@Manufacturer.Id">@Manufacturer.Name</option>
+												}
+											</InputSelect>
+										</td>
+										<td><InputFile id="Image" class="form-control" OnChange="EditProductImageUpload" /></td>
+										<td class="@(authContext.User.IsInRole("admin")  && _editProduct!=null ? "editForm" : "hidden")">
+											<button id="editProductB_@htmlProducts[i].Id.ToString()" class="editB" @onclick:stopPropagation="true" @onclick="() => EditProduct()">
+												Edit
+											</button>
+											<button class="editCancelB" @onclick:stopPropagation="true" @onclick="() => EditProductCancel()">
+												Cancel
+											</button>
+										</td>
+									}
+									else
+									{
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_de</td>
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_de</td>
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Category!.Name_de</td>
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;" class="@(htmlProducts[i].MinimumStock >= htmlProducts[i].Quantity ? "IsMinimumStock" : "")">@htmlProducts[i].Quantity</td>
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].MinimumStock</td>
+										@* check exp date *@
+										var expDate = htmlProducts[i].EXPDate;
+										string backgroundcolor = ""; // الافتراضي
+										string color = "";
+
+										if (expDate < DateTime.Today)
+										{
+											backgroundcolor = "red"; // منتهي
+											color = "white";
+										}
+										else if (expDate <= DateTime.Today.AddMonths(1))
+										{
+											backgroundcolor = "orange"; // بقي أقل من شهر
+											color = "white";
+										}
+										<td style="max-width: 200px; word-wrap: break-word; white-space: normal; background-color:@backgroundcolor; color:@color;">
+										@expDate.ToString("dd.MM.yyyy")
+										</td>
+										<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Manufacturer!.Name</td>
+										<td>
+											<img src="data:image/png;base64,@(!string.IsNullOrEmpty(src) ? src : "images/sample.jpg")" class="productImg" />
+										</td>
+									}
+
+									<td class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "deleteForm" : "hidden")">
+										<button @onclick:stopPropagation="true" @onclick="() => DeleteProduct(thisProducts.Id)">
+											Delete
+										</button>
+									</td>
+									<td class="@(authContext.User.IsInRole("admin") && IsShowReceiptForm ? "productsCart" : "hidden")">
+
+										<button class="btn @(cartService.IsProductAdded(thisProducts.CartItem.ProductId)  ? "btnProductAdded" : "btnProduct") "
+										@onclick="() => CartChanged(thisProducts)">
+											@(cartService.IsProductAdded(thisProducts.CartItem.ProductId) ? $"➕({cartService.GetQuantityOfProduct(thisProducts.CartItem.ProductId)})" : "🛒")
+										</button>
+										<InputNumber @bind-Value="thisProducts.CartItem.Quantity" Min="0" class="form-control" />
+									</td>
+								</tr>
+							}
+						}
+						else if(!IsLoadingMessage&&startIndex==0)
+						{
+							<tr>
+								<td colspan="11" class="loadingMessage">
+									Keine Bestellungen gefunden.
+								</td>
+							</tr>
+						}
+						htmlProducts = null!;
+					}
+				</tbody>
+			</table>
+		</div>
+
+		@* Add Product form *@
+		@if (authContext.User.IsInRole("admin") == true && IsShowAddProductForm)
+		{
+			<div class="productForm">
+				<h3>Add New Product</h3>
+				<EditForm Model="@newProduct" OnValidSubmit="AddProduct">
+					<DataAnnotationsValidator />
+					<div class="formGroupAdd">
+						<label for="Name">Product Name DE</label>
+						<InputText id="Name" class="form-control" @bind-Value="newProduct!.Name_de" />
+						<ValidationMessage For="@(() => newProduct.Name_de)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Description">Description DE</label>
+						<InputText id="Description" class="form-control" @bind-Value="newProduct.Description_de" />
+						<ValidationMessage For="@(() => newProduct.Description_de)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Name">اسم المنتج بل عربية</label>
+						<InputText id="Name" class="form-control" @bind-Value="newProduct!.Name_ar" />
+						<ValidationMessage For="@(() => newProduct.Name_ar)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Description">وصف المنتج بل عربية</label>
+						<InputText id="Description" class="form-control" @bind-Value="newProduct.Description_ar" />
+						<ValidationMessage For="@(() => newProduct.Description_ar)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="category">Category</label>
+						<InputSelect id="category" class="form-control" @bind-Value="newProduct.CategoryId">
+							<option value="0">Select Category</option>
+							@foreach (var category in categories!)
+							{
+								<option value="@category.Id">@category.Name_de</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => newProduct.CategoryId)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Quantity">Quantity</label>
+						<InputNumber id="Quantity" class="form-control" @bind-Value="newProduct.Quantity" />
+						<ValidationMessage For="@(() => newProduct.Quantity)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="PurchasePrice">Purchase Price</label>
+						<InputNumber id="PurchasePrice" class="form-control" @bind-Value="newProduct.PurchasePrice" />
+						<ValidationMessage For="@(() => newProduct.PurchasePrice)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="SalePrice">Selling Price</label>
+						<InputNumber id="SalePrice" class="form-control" @bind-Value="newProduct.SalePrice" />
+						<ValidationMessage For="@(() => newProduct.SalePrice)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="MinimumStock">Minimum Stock</label>
+						<InputNumber id="MinimumStock" class="form-control" @bind-Value="newProduct.MinimumStock" />
+						<ValidationMessage For="@(() => newProduct.MinimumStock)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="EXPDate">Expiration Date</label>
+						<InputDate id="EXPDate" class="form-control" @bind-Value="newProduct.EXPDate" />
+						<ValidationMessage For="@(() => newProduct.EXPDate)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="manufacturer">Manufacturer</label>
+						<InputSelect id="category" class="form-control" @bind-Value="newProduct.ManufacturerId">
+							<option value="0">Select Manufacturer</option>
+							@foreach (var Manufacturer in Manufacturers!)
+							{
+								<option value="@Manufacturer.Id">@Manufacturer.Name</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => newProduct.ManufacturerId)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="TaxRate">Steuersatz</label>
+						<InputSelect  class="form-control" @bind-Value="newProduct.TaxRateId">
+							<option value="0">Select Rate</option>
+							@foreach (var rate in TaxRates)
+							{
+								<option value="@rate.Id">@rate.Rate</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => newProduct.TaxRateId)" />
+					</div>
+						<div class="formGroupAdd">
+						<label for="ProductGroup">Product Gruppe</label>
+						<InputSelect  class="form-control" @bind-Value="newProduct.ProductGroupID">
+							<option value="0">wählen Product Gruppe aus</option>
+							@foreach (var groupProduct in groupedProducts)
+							{
+								<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => newProduct.ProductGroupID)" />
+					</div>
+
+					<div class="formGroupAdd">
+						<label for="Image">Image</label>
+						<InputFile id="Image" class="form-control" OnChange="AddProductImageUpload" />
+						<ValidationMessage For="@(() => newProduct.Image)" />
+					</div>
+					<button type="submit" class="btn addProductB">Add Product</button>
+					<button type="button" class="btn addProductCancelB" @onclick="HideAddProductForm">Cancel</button>
+				</EditForm>
+			</div>
+		}
+		@* Add PaymentMethod *@
+		@if (IsOverlayPaymentMethod && PaymentMethods != null)
+		{
+			<div class="overlay" @onclick="ClosePaymentMethod">
+				<div class="PaymentMethodForm">
+
+					<h4>Zahlung Methnode</h4>
+					<div class="buttonMethods">
+						@{
+							PaymentMethod Casch = PaymentMethods.FirstOrDefault(s => s.Id == 3) ?? null!;
+							PaymentMethod Card = PaymentMethods.FirstOrDefault(s => s.Id == 4) ?? null!;
+							<button class="CaschButton" value="@Casch.Id" @onclick="()=> OnPaymentMethod(Casch)">@Casch.Description_de</button>
+							<button class="EcButton" value="@Card.Id" @onclick="()=> OnPaymentMethod(Card)">@Card.Description_de</button>
+						}
+					</div>
+					<button class="btn btn-primary" @onclick="ClosePaymentMethod">Schließen</button>
+				</div>
+			</div>
+		}
+		@*Container for Printing and Saving *@
+		<div class="container">
+			<label class="@(!LabelIdVisible ? "hidden" : "labelPId")">ProductId: @labelPId</label>
+			@* Barcode  *@
+			<img id="imgBarcode" src="data:image/png;base64,@barCodeBase64String" alt="Barcode image" class="@(!barCodeVisible? "hidden":"imgBarcode")" @onclick="OnBarcodeImage" />
+			@* Etikett *@
+			@if(etikettP != null)
+			{
+				<div id="divEtikett" class="@(!etikettVisible ? "hidden" :"etikett")" @onclick="OnEtikkt">
+					<div id="productInfo" class="productInfo">
+						<p>@etikettP?.Name</p>
+						<p>Category: @etikettP!.Name</p>
+						<p>Price: @etikettP!.SalePrice.ToString("C")</p>
+						<p>@etikettP?.manufacturerName</p>
+						<p>EXP: @etikettP?.EXPDate</p>
+						<img src="data:image/png;base64,@etikettP!.barcodeBase64" alt="Barcode image"  />
+						<p>@etikettP?.manufacturerWebsite</p>
+					</div>
+				</div>
+			}
+			@* Receipt *@
+			@if (receipt != null)
+			{
+				<div class="receipt">
+					<h2>@receipt.StoreName</h2>
+					<p>@receipt.StoreAddress</p>
+					<p>Datum: @receipt.ReceiptDate.ToString("dd.MM.yyyy HH:mm")</p>
+
+					<table>
+						<thead>
+							<tr>
+								<th>Produkt</th>
+								<th>Menge</th>
+								<th>Einzelpreis</th>
+								<th>Gesamtpreis</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var product in receipt.Products)
+							{
+								<tr>
+									<td>@product.Name_de</td>
+									<td>@product.Quantity</td>
+									<td>@product.SalePrice.ToString("C")</td>
+									<td>@((product.SalePrice * product.Quantity).ToString("C"))</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+
+					<div class="summary">
+						<p>Netto: @receipt.Summe.NettoPrice.ToString("C")</p>
+						<p>MwSt.: @receipt.Summe.TotalTax.ToString("C")</p>
+						<p><strong>Gesamt: @receipt.Summe.TotalPrice.ToString("C")</strong></p>
+					</div>
+
+					<p>Zahlungsmethode: @receipt.PaymentMethod?.Description_de</p>
+
+					<div class="taxRates">
+						<table class="taxRatesTable">
+							<thead>
+								<tr>
+									<th>Steuersatz (%)</th>
+									<th>Steuerbetrag</th>
+									<th>Netto Preis</th>
+									<th>Gesamt Preis</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var tax in receipt.TaxRates)
+								{
+									<tr>
+										<td>@tax.TaxRate%</td>
+										<td>@tax.TaxAmount.ToString("C")</td>
+										<td>@tax.NettoPrice.ToString("C")</td>
+										<td>@tax.TotalPrice.ToString("C")</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+
+					</div>
+				</div>
+
+			}
+			@* Geberator *@
+			<div class="containerB">
+				<button class="@(!string.IsNullOrEmpty(barCodeBase64String) ? "btn printB" : "hidden")" @onclick="OnPrint">Print</button>
+				<button class="@(!string.IsNullOrEmpty(barCodeBase64String) ? "btn saveB":"hidden")" @onclick="OnSave">Save</button>
+				<select @bind="saveType" class="@(!string.IsNullOrEmpty(barCodeBase64String) ? "btn saveType" : "hidden")">
+					<option value="pdf">PDF</option>
+					<option value="png">PNG</option>
+				</select>
+				<button class="btn generatorB" @onclick="OnGenerate">Generate</button>
+				<select class="btn generatorType" @bind="generatorType">
+					<option value="0">Kassenbon</option>
+					<option value="1">BarCode</option>
+					<option value="2">Etikett</option>
+				</select>
+				<button class="@(GeneratorCancelBVisible == true ? "btn generatorCancelB" : "hidden")" @onclick="OnGenerateCancel">Generation Cancel</button>
+			</div>
+		</div>
+	</Authorized>
+	<NotAuthorized>
+		<ManagementLabel.Components.Pages.LogIn />
+	</NotAuthorized>
+</AuthorizeView>
+@code{
+
+	private DataProcessP dpP = new DataProcessP();
+
+	// load products
+	private List<Products> products => productService.GetItems.Items;
+	private string barCodeBase64String = string.Empty;
+	
+	private async Task<bool> loadInBackground()
+	{
+		if (isLoading) return false;
+		isLoading = true;
+		var moreProducts = await productService.LoadMoreProducts();
+		if (moreProducts.Items.Any())
+			products.AddRange(moreProducts.Items);
+
+		// initialize CartItem for each product
+		foreach (var product in moreProducts.Items)
+		{
+			product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
+		}
+		// hide the loading message
+		IsLoadingMessage = false;
+		StateHasChanged();
+		isLoading = false;
+		return moreProducts.AllItemsLoaded;
+	}
+	
+	// Add Product
+	private bool IsShowAddProductForm = false; 
+	private Products? newProduct = new Products(); 
+	private async void ShowAddProductFormAsync()
+	{
+		// get the categories and manufacturers and taxrates
+		await loadCategories();
+		await loadManufacturers();
+		await loadTaxrates();
+		await loadGroupProducts();
+
+		IsShowAddProductForm = !IsShowAddProductForm;
+		// cancel all other processes
+		IsShowAddDeleteForm = false;
+		_editProduct = null;
+		IsShowReceiptForm = false;
+
+		StateHasChanged();
+	}
+	private void HideAddProductForm()
+	{
+		IsShowAddProductForm = false;
+	}
+	private async void AddProductImageUpload(InputFileChangeEventArgs e)
+	{
+		newProduct = await UploadImage(e, newProduct!);
+	}
+	private async Task AddProduct()
+	{
+		// add user, the new Product added 
+		newProduct!.UserId = int.Parse(userId!);
+
+		// Perform your logic to add the product to the database
+		var result = await productService.AddProductAsync(newProduct!);
+		var idStr = result.Message?.Split(':').LastOrDefault();
+		// Check if the result is successful and Get the ID returned by the database
+		if (result.Result && int.TryParse(idStr, out int id))
+		{
+			// set the ID of the new product
+			newProduct!.Id = id;
+			// set Category in newProduct
+			newProduct!.Category = categories!.FirstOrDefault(c => c.Id == newProduct.CategoryId);
+			// set Manufacturer in newProduct
+			newProduct!.Manufacturer = Manufacturers!.FirstOrDefault(m => m.Id == newProduct.ManufacturerId);
+			// set rate in newProduct
+			newProduct!.TaxRate = TaxRates!.FirstOrDefault(t => t.Id == newProduct.TaxRateId);
+			// set ProductGroup in newProduct
+			newProduct!.ProductGroup = groupedProducts!.FirstOrDefault(g => g.Id == newProduct.ProductGroupID);
+			// initaialize the caritem for this new product
+			newProduct.InitializeCartItem(0);
+
+			// Add the new product to the products list
+			products.Insert(0, newProduct!); // Add the new product to the products list
+			HideAddProductForm(); // Hide the form
+			newProduct = new Products(); // Reset the new product model
+		}
+		else
+		{
+			_ = ShowAlert(result.Message!);
+		}
+	}
+	// Delete Product
+	private bool IsShowAddDeleteForm = false;
+	private void ShowAddDeleteForm()
+	{
+		IsShowAddDeleteForm = !IsShowAddDeleteForm;
+		// cancel all other processes
+		IsShowReceiptForm = false;
+		IsShowAddProductForm = false;
+		_editProduct = null;
+	}
+	private async Task DeleteProduct(int productId)
+	{
+		if (productId <= 0)
+		{
+			await ShowAlert("Please select a product");
+			return;
+		}
+
+		var result = await productService.DeleteProductAsync(productId);
+		if (result.Result)
+		{
+			products.RemoveAll(p => p.Id == productId);
+			selectedRow = null;
+			_ = ShowAlert(result.Message!);
+		}
+		else
+		{
+			await ShowAlert(result.Message!);
+		}
+	}
+	// Edit Product
+	private Products? _editProduct = null;
+	private async Task DoubleClick(Products doubleSelectProduct)
+	{
+		if (!IsShowReceiptForm)
+		{
+			// cancel all other processes
+			IsShowAddDeleteForm = false;
+			IsShowAddProductForm = false;
+			IsShowReceiptForm = false;
+
+			// get the categories, manufacturers and taxrates
+			await loadCategories();
+			await loadManufacturers();
+			await loadTaxrates();
+			await loadGroupProducts();
+
+			// new products create to so that both (products and editproduct) do not reference the same instance.
+			_editProduct = new Products
+				{
+					Id = doubleSelectProduct.Id,
+					Name_de = doubleSelectProduct.Name_de,
+					Description_de = doubleSelectProduct.Description_de,
+					Name_ar = doubleSelectProduct.Name_ar,
+					Description_ar = doubleSelectProduct.Description_ar,
+					CategoryId = doubleSelectProduct.CategoryId,
+					//	Category = doubleSelectProduct.Category,
+					Quantity = doubleSelectProduct.Quantity,
+					PurchasePrice = doubleSelectProduct.PurchasePrice,
+					SalePrice = doubleSelectProduct.SalePrice,
+					MinimumStock = doubleSelectProduct.MinimumStock,
+					EXPDate = doubleSelectProduct.EXPDate,
+					ManufacturerId = doubleSelectProduct.ManufacturerId,
+					//Manufacturer = doubleSelectProduct.Manufacturer,
+					TaxRateId = doubleSelectProduct.TaxRateId,
+					ProductGroupID = doubleSelectProduct.ProductGroupID ,
+					Image = doubleSelectProduct.Image,
+					UserId = int.Parse(userId!),
+					CartItem = doubleSelectProduct.CartItem
+				};
+		}
+	}
+	private async Task EditProductImageUpload(InputFileChangeEventArgs e)
+	{
+		_editProduct = await UploadImage(e, _editProduct!);
+	}
+	private async Task EditProduct()
+	{
+		// if null
+		if (_editProduct == null)
+		{
+			await ShowAlert("Nothing has changed");
+			return;
+		}
+		// if no edited
+		Products? currentProduct = products?.Find(p => p.Id == _editProduct.Id);
+		bool isEdited = productService.IsEditedProduct(currentProduct!, _editProduct);
+		if (!isEdited)
+		{
+			await ShowAlert("Nothing has changed");
+			return;
+		}
+
+		var result = await productService.UpdateProductAsync(_editProduct);
+		if (result.Result)
+		{
+			// set Catgory in editproduct
+			_editProduct!.Category = categories!.FirstOrDefault(c => c.Id == _editProduct.CategoryId);
+			// set Manufacturer in editproduct
+			_editProduct!.Manufacturer = Manufacturers!.FirstOrDefault(m => m.Id == _editProduct.ManufacturerId);
+			// Update the product in the list
+			int index = products!.FindIndex(p => p.Id == _editProduct.Id);
+			products[index] = _editProduct!; // Update the product in the list
+												// if in search mode
+			if(filterP != null && filterP.Count>0)
+			{
+				int filterIndex = filterP.FindIndex(p => p.Id == _editProduct.Id);
+				if (filterIndex >= 0)
+				{
+					filterP[filterIndex] = _editProduct; // Update the product in the filtered list
+				}
+			}
+			selectedRow = null;
+			_editProduct = null;
+			_ = ShowAlert(result.Message!);
+			StateHasChanged();
+		}
+		else
+		{
+			await ShowAlert(result.Message!);
+		}
+	}
+	private void EditProductCancel()
+	{
+		// Reset the selected row
+		selectedRow = null;
+		// Hide the edit form
+		_editProduct = null;
+	}
+	// Search
+	private List<Products> filterP = null!;
+	public async void OnTextChanged(ChangeEventArgs e)
+	{
+		string searchText = e.Value?.ToString()?.Trim() ?? string.Empty;
+		if (products.Count == 0 || string.IsNullOrEmpty(searchText))
+		{
+			filterP = null!;
+			return;
+		}
+		else if (products.Count > 0)
+		{
+			int counter = 0;
+			while (true)
+			{
+				if (counter > 10) 
+				{
+					break;
+				}
+
+				filterP = SearchInProductsLocal(searchText);
+				if (filterP.Count > 0)
+					break;
+				Task.Delay(100).Wait(); // wait for a short time before searching again
+										// if no products found, load more products
+				bool AllItemsLoaded = await loadInBackground();
+				if (AllItemsLoaded) break;
+				counter++;
+			}
+			StateHasChanged();
+		}
+
+	}
+	private List<Products> SearchInProductsLocal(string searchText)
+	{
+		var searchedProducts = products
+					.Where(p =>
+					p.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.Category!.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.Quantity.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.Manufacturer!.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.PurchasePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.SalePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					p.MinimumStock.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase))
+					.ToList();
+		return searchedProducts;
+	}
+	// category
+	private List<Categories>? categories = null;
+	private async Task loadCategories()
+	{
+		categories ??= await productService.LoadCategories();
+	}
+	// manufacturer
+	private List<Manufacturer>? Manufacturers = null;
+	private async Task loadManufacturers()
+	{
+		Manufacturers ??= await productService.LoadManufacturers();
+	}
+	// taxrates
+	private List<TaxRate> TaxRates = null!;
+	private async Task loadTaxrates()
+	{
+		TaxRates ??= await productService.LoadTaxRates();
+	}
+	// Receipt
+	private bool IsShowReceiptForm = false;
+	private void ShowReceiptForm()
+	{
+		// Clean the shopping cart to from the start
+		cartService.ClearCart(products);
+		IsShowReceiptForm = !IsShowReceiptForm;
+		// close other form
+		IsShowAddDeleteForm = false;
+		_editProduct = null;
+		IsShowAddProductForm = false;
+	}
+	private void CartChanged(Products products)
+	{
+		// add cart
+		if (!cartService.IsQuantityZero(products.CartItem))
+			cartService.AddToCart(products.CartItem);
+	}
+	private Receipt receipt = null!;
+	// group products
+	private List<GroupProducts> groupedProducts = null!;
+	private async Task loadGroupProducts()
+	{
+		if (groupedProducts == null || groupedProducts.Count <= 0)
+		{ 
+			await productGroupService.GetAllGroupProductsAsync();
+			groupedProducts = productGroupService.DownloadedproductGroups;
+		}
+	}
+	// paymethods
+	private List<PaymentMethod> PaymentMethods = null!;
+	private async Task loadPaymentMehtods()
+	{
+		PaymentMethods ??= await productService.GetPaymentMethodsAsync();
+	}
+	private bool IsOverlayPaymentMethod = false;
+	private void OnPaymentMethod(PaymentMethod paymentMethod)
+	{
+		double totalPrice = cartService.GetTotalPrice();
+		double totalTax = cartService.GetTotalTax();
+		List<TaxRates> taxRatesGroups = cartService.GetTaxRateGroups();
+		var receipt1 = new Receipt
+			{
+				StoreName = projectInfo.Value.Name!,
+				StoreAddress = projectInfo.Value.Address!,
+				ReceiptDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second),
+				Products = cartService.CartItems.Select(x => x.Product).ToList(),
+				Summe = new Summe() { TotalPrice = totalPrice, TotalTax = totalTax, NettoPrice = totalPrice - totalTax },
+				PaymentMethod = paymentMethod, 
+				PaymentMethodId = paymentMethod.Id, 
+				TaxRates = taxRatesGroups
+			};
+
+		if (!receiptService.IsValidProduct(receipt1, out string errorMessage))
+		{
+			_ = ShowAlert(errorMessage);
+			IsOverlayPaymentMethod = false;
+			return;
+		}
+
+		receipt = receipt1;
+		GeneratorCancelBVisible = true;
+	}
+	private void ClosePaymentMethod()
+	{
+		IsOverlayPaymentMethod = false;
+	}
+
+
+	private bool IsLoadingMessage = true;
+	private bool isLoading = false;
+	private int startIndex = 0;
+
+	// Generate
+	private Etikett? etikettP = null!; 
+	private string generatorType = "0";
+	private bool LabelIdVisible = false;
+	private bool barCodeVisible = false;
+	private bool etikettVisible = false;
+	private string labelPId = string.Empty;
+	private string currentGeneratorType = string.Empty;
+	private async Task OnGenerate()
+	{
+		if (generatorType == "0")
+		{
+			await GenerateReceipt();
+		}
+		else
+		{
+			// wenn die receipt from aktiv ist, dann deaktivieren
+			IsShowReceiptForm = false;
+
+			if (selectedRow == null)
+			{
+				await ShowAlert("Please select a product");
+				return;
+			}
+
+			// Check if a new barcode or etikett needs to be generated
+			if (labelPId != selectedRow!.Id.ToString() || currentGeneratorType != generatorType)
+			{
+				//
+				GenerateBarcodeOrEtikett();
+			}
+		}
+	}
+	private async Task GenerateReceipt()
+	{
+		if (cartService.CartItems.Count == 0 || !IsShowReceiptForm)
+		{
+			_ = ShowAlert("Please add products to the cart before generating a receipt.");
+			return;
+		}
+
+
+		// alle bevor Generation cancel
+		OnGenerateCancel();
+		// get first paymentmethod
+		await SetPaymentMoethodVisibility();
+	}
+
+	private async void GenerateBarcodeOrEtikett()
+	{
+		byte[] barCodeBytes = dpP.BarcodeGenerator(selectedRow!);
+		if (barCodeBytes == null)
+		{
+			await ShowAlert("Error generating the barcode");
+			return;
+		}
+
+		// Update the barcode or etikett based on the generator type
+		barCodeBase64String = Convert.ToBase64String(barCodeBytes);
+		if (generatorType == "1")
+		{
+			SetBarcodeVisibility();
+		}
+		else
+		{
+			SetEtikettVisibility();
+		}
+		labelPId = selectedRow!.Id.ToString()!;
+		currentGeneratorType = generatorType;
+		GeneratorCancelBVisible = true;
+	}
+	private void SetBarcodeVisibility()
+	{
+		receipt = null!;
+		etikettVisible = false;
+		LabelIdVisible = barCodeVisible = true;
+
+	}
+	private void SetEtikettVisibility()
+	{
+		receipt = null!;
+		barCodeVisible = false;
+		LabelIdVisible = etikettVisible = true;
+		etikettP = new Etikett
+			{
+				productsId = selectedRow!.Id,
+				Name = selectedRow.Name_de,
+				categoryName = selectedRow.Category!.Name_de,
+				SalePrice = selectedRow.SalePrice,
+				manufacturerName = selectedRow.Manufacturer!.Name,
+				EXPDate = selectedRow.EXPDate.ToString("dd.MM.yyyy"),
+				barcodeBase64 = barCodeBase64String,
+				manufacturerWebsite = selectedRow.Manufacturer.Website
+			};
+
+	}
+	private async Task SetPaymentMoethodVisibility()
+	{
+		await loadPaymentMehtods();
+		IsOverlayPaymentMethod = true;
+	}
+	private bool GeneratorCancelBVisible = false;
+	private void OnGenerateCancel()
+	{
+		labelPId = string.Empty;
+		etikettVisible = false;
+		barCodeVisible = false;
+		LabelIdVisible = false;
+		barCodeBase64String = string.Empty;
+		etikettP = null!;
+		GeneratorCancelBVisible = false;
+		// receipt
+		receipt = null!;
+	}
+	// Save
+	private string saveType = "pdf";
+	private void OnSave()
+	{
+		if (generatorType == "1")
+		{
+			_ = barCodeSave();
+		}
+		else
+		{
+			_ = ExportEtikett();
+		}
+	}
+	private void OnEtikkt()
+	{
+		_ = ExportEtikett();
+	}
+	private async Task ExportEtikett()
+	{
+		string fileName = $"Etikett_{labelPId}";
+		await JS.InvokeVoidAsync("exportEtikett", "productInfo", fileName, saveType);
+	}
+	private void OnBarcodeImage()
+	{
+		_ = barCodeSave();
+	}
+	private async Task barCodeSave()
+	{
+		if (string.IsNullOrEmpty(barCodeBase64String))
+		{
+			await ShowAlert("No Base64String");
+			return;
+		}
+
+		string fileName = $"BarCode_{labelPId}";
+
+
+		string base64Str = saveType == "pdf" ? Convert.ToBase64String(dpP.ConvertByteToPdf(Convert.FromBase64String(barCodeBase64String))) : barCodeBase64String;
+		_ = JS.InvokeVoidAsync("downloadBase64Image", base64Str, fileName, saveType);
+	}
+	// Print
+	private void OnPrint()
+	{
+		if (generatorType == "barcode")
+		{
+			_ = JS.InvokeVoidAsync("printBarcode", "imgBarcode");
+		}
+		else
+		{
+			_ = JS.InvokeVoidAsync("printEtikett", "divEtikett");
+		}
+	}
+	//  Select 
+	private Products? selectedRow;
+	private void SelectRow(Products product)
+	{
+		selectedRow = product;
+	}
+	// image upload
+	private async Task<Products> UploadImage(InputFileChangeEventArgs e, Products products)
+	{
+		if (e.File == null) return products;
+		using var stream = new MemoryStream();
+
+		Microsoft.AspNetCore.Components.Forms.IBrowserFile imageFile = e.File;
+		try
+		{
+			// Check if the file size exceeds the limit
+			if (imageFile.Size > 512000)
+			{
+				var array = await dpP.CompressImage(imageFile);
+				products!.Image = array;
+			}
+			else
+			{
+				await imageFile.OpenReadStream().CopyToAsync(stream);
+				products!.Image = stream.ToArray();
+			}
+		}
+		catch (Exception ex)
+		{
+			_ = ShowAlert($"Error uploading image: {ex.Message}");
+		}
+
+		stream.Dispose();
+		return products;
+	}
+	// Key Down
+	private void KeyDown(KeyboardEventArgs e)
+	{
+		if (e.Key == "Enter")
+		{
+			if (_editProduct != null)
+				_ = JS.InvokeVoidAsync("elementClick", $"editProductB_{_editProduct!.Id.ToString()}");
+
+		}
+		else if (e.Key == "Escape")
+		{
+			// Reset the selected row
+			selectedRow = null;
+			// Hide the edit form
+			_editProduct = null;
+		}
+	}
+	// reset
+	private void ResetOfPage()
+	{
+		// Reset when the page reloads
+		ConstantsP.currentPage = 0;
+		startIndex = ConstantsP.currentPage * ConstantsP.pageSize;
+		Flags.allProductsLoaded = false;
+	}
+	// show alert
+	private async Task ShowAlert(string message)
+	{
+		await JS.InvokeVoidAsync("showAlert", message);
+	}
+	private string? userId;
+	private DotNetObjectReference<EitkettBarcode>? objRef;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var authState = await AuthProvider.GetAuthenticationStateAsync();
+			var user = authState.User;
+			if (user.Identity?.IsAuthenticated == true)
+			{
+				userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
+
+
+				//// Reset when the page reloads
+				ResetOfPage();
+				//
+				_ = loadInBackground();
+				// get the donnetObject to use in javascript
+				objRef = DotNetObjectReference.Create(this);
+				// set the Oject of donNet in javascript and the id:checkScrollEnd, and get checkScrollEnd funktion from javascript
+				_ = JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
+			}
+		}
+	}
+	// Scroll
+	[JSInvokable]
+	public void OnScrollEnd()
+	{
+		_ = loadInBackground();
+	}
+}
+

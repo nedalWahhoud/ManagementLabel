@@ -9,9 +9,14 @@
 @code {
 	// back to login page
 	[Parameter] public EventCallback OnBackToLogin { get; set; }
-	private async void OnBack()
+	private  void OnBack()
 	{
-		if (OnBackToLogin.HasDelegate)
-	   	await OnBackToLogin.InvokeAsync();
+		NavigationManager!.NavigateTo("/login", false);
+	/*	if (OnBackToLogin.HasDelegate)
+			await OnBackToLogin.InvokeAsync();*/
+	}
+	protected override void OnAfterRender(bool firstRender)
+	{
+
 	}
 }

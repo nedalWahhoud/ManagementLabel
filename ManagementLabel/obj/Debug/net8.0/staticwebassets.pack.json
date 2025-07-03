@@ -2,7 +2,11 @@
   "Files": [
     {
       "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ManagementLabel.bundle.scp.css",
-      "PackagePath": "staticwebassets\\ManagementLabel.bbknnve0aw.bundle.scp.css"
+      "PackagePath": "staticwebassets\\ManagementLabel.t796tnkmzr.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\Images\\DPImage.png",
+      "PackagePath": "staticwebassets\\Images\\DPImage.png"
     },
     {
       "Id": "C:\\Users\\nedal\\source\\repos\\ManagementLabel\\ManagementLabel\\wwwroot\\app.css",
