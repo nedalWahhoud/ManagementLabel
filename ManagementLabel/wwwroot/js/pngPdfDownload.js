@@ -12,7 +12,7 @@ window.exportEtikett = async function (elementId, fileName, format) {
     const mmPerPx = 0.264583;
     const pdfWidth = widthPx * mmPerPx;
     const pdfHeight = heightPx * mmPerPx;
-    //  pdfHeight = pdfHeight + (pdfWidth - pdfHeight);
+    // pdfHeight = pdfHeight + (pdfWidth - pdfHeight);
             if (format === "png") {
                 const link = document.createElement('a');
                 link.href = dataURL;
@@ -62,3 +62,5 @@ window.downloadBase64Image = async function (base64Data, fileName, type) {
     link.download = `${fileName}.${type}`;
     link.click();
 };
+
+

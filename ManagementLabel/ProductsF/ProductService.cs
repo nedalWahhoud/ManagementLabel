@@ -30,7 +30,7 @@ namespace ManagementLabel.ProductsF
                 return new();
             }
         }
-        public async Task<List<Categories>> LoadCategories()
+       /* public async Task<List<Categories>> LoadCategories()
         {
             try
             {
@@ -46,7 +46,7 @@ namespace ManagementLabel.ProductsF
             {
                 return [];
             }
-        }
+        }*/
         public async Task<List<Manufacturer>> LoadManufacturers()
         {
             try
@@ -150,7 +150,13 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.Description_de != editProduct.Description_de)
                 return true;
+            if (currentProduct.Name_ar != editProduct.Name_ar)
+                return true;
+            if (currentProduct.Description_ar != editProduct.Description_ar)
+                return true;
             if (currentProduct.CategoryId != editProduct.CategoryId)
+                return true;
+            if (currentProduct.Barcode != editProduct.Barcode)
                 return true;
             if (currentProduct.Quantity != editProduct.Quantity)
                 return true;
@@ -163,6 +169,10 @@ namespace ManagementLabel.ProductsF
             if (currentProduct.EXPDate != editProduct.EXPDate)
                 return true;
             if (currentProduct.ManufacturerId != editProduct.ManufacturerId)
+                return true;
+            if (currentProduct.TaxRateId != editProduct.TaxRateId)
+                return true;
+            if (currentProduct.ProductGroupID != editProduct.ProductGroupID)
                 return true;
             if (currentProduct.Image!.Length != editProduct.Image!.Length)
                 return true;

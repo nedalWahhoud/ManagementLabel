@@ -92,3 +92,43 @@ window.printBarcode = function (elementId) {
     printWindow.print();
     printWindow.close();
 };
+
+window.printInvoice = function (elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    const css = `
+        @page {
+            size: A4 portrait;
+            margin: 20mm;
+        }
+        width: 100mm;
+            height: auto;
+            display: block;
+        }
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>Print Barcode</title>
+                <style>
+                    ${css}
+                </style>
+            </head>
+            <body>
+                ${element.outerHTML}
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+
+    printWindow.focus();
+
+    // Delay to ensure rendering is complete before printing
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+};

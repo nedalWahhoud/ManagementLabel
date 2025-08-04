@@ -28,7 +28,7 @@ namespace ManagementLabel.ProductsF
 
                 var barcode = new Barcode();
 
-                SKImage barcodeImg = barcode.Encode(BarcodeStandard.Type.Code128, jsonString, 1000, 200);
+                SKImage barcodeImg = barcode.Encode(BarcodeStandard.Type.Code128, jsonString, 2000, 400);
 
                 using (MemoryStream ms = new ())
                 {
@@ -41,9 +41,8 @@ namespace ManagementLabel.ProductsF
 
                 return byteArray;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Error: {ex.Message}");
                 return null!;
             }
         }

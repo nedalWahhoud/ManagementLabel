@@ -27,23 +27,41 @@
 			</button>
 			<input type="text" placeholder="Searching..." class="@(!IsLoadingMessage ? "input" : "hidden")" @oninput="OnTextChanged" />
 		</div>
+		@* choose the Columns *@
+		<div class="mb-3">
+			<strong>Wähle Spalten:</strong>
+			@foreach (var col in columnOptions)
+			{
+				<label class="me-3">
+					<input type="checkbox" @bind="col.IsVisible" />
+					@col.Label
+				</label>
+			}
+		</div>
 		@* table *@
 		<div tabindex="0" @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
 
 			<table class="table">
 				<thead>
 					<tr>
-						<th>ID</th>
-						<th>Name</th> 
-						<th>Beschreibung</th>
-						<th>Kategorie</th>
-						<th>Menge</th>
-						<th>Kaufpreis</th>
-						<th>V-Preis</th>
-						<th>MB</th>
-						<th>Haltbarkeit</th>
-						<th>Hersteller</th>
-						<th>Img</th>
+						@if (ShowColumn("Index")) {<th>Index</th>}
+						@if (ShowColumn("Id"))	{<th>Id</th>}
+						@if (ShowColumn("Name_de")){<th>Name de</th>}
+						@if (ShowColumn("Description_de")){<th>Beschreibung de</th>}
+						@if (ShowColumn("Name_ar")){<th>Name ar</th>}
+						@if (ShowColumn("Description_ar")){<th>Beschreibung ar</th>}
+						@if (ShowColumn("Category")){<th>Kategorie</th>}
+						@if (ShowColumn("Barcode")){<th>Barcode</th>}
+						@if (ShowColumn("Quantity")){<th>Menge</th>}
+						@if (ShowColumn("PurchasePrice")){<th>Kaufpreis</th>}
+						@if (ShowColumn("SellePrice")){<th>Verkaufspreis</th>}
+						@if (ShowColumn("MinimumStock")){<th>Mindestbestand</th>}
+						@if (ShowColumn("ExpDate")){<th>Ablaufdatum</th>}
+						@if (ShowColumn("Manufacturer")){<th>Hersteller</th>}
+						@if (ShowColumn("TaxRate")){<th>Steuersatz</th>}
+						@if (ShowColumn("Group")){<th>Gruppe</th>}
+						@if (ShowColumn("Username")){<th>Benutzername</th>}
+						@if (ShowColumn("Img")){<th>Img</th>}
 						<th class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "" : "hidden")">Löschen</th>
 						<th class="@(authContext.User.IsInRole("admin") && _editProduct!=null ? "" : "hidden")">Bearbeiten</th>
 						<th class="@(authContext.User.IsInRole("admin") && IsShowReceiptForm ? "" : "hidden" )">Kassenbon</th> 
@@ -74,36 +92,70 @@
 								@ondblclick="@(authContext.User.IsInRole("admin") ? (() => DoubleClick(thisProducts)) : null!)"
 								@onclick="()=> SelectRow(thisProducts)" 
 								class="@(selectedRow != null && selectedRow.Id == thisProducts.Id ? "selected" : "")">
-									@*<td>@(startIndex+i+1)</td>*@
-									<td>@htmlProducts[i].Id</td>
+									@if (ShowColumn("Index")){<td>@(startIndex + i + 1)</td>}
+									@if (ShowColumn("Id")){<td>@htmlProducts[i].Id</td>}
 									@if (_editProduct != null && _editProduct.Id == htmlProducts[i].Id)
 									{
-										<td><InputText @bind-Value="_editProduct!.Name_de" /></td>
-										<td><InputText @bind-Value="_editProduct!.Description_de" /></td>
-										<td>
-											<InputSelect class="form-control" @bind-Value="_editProduct.CategoryId">
-												<option value="0">Select Category</option>
-												@foreach (var category in categories!)
-												{
-													<option value="@category.Id">@category.Name_de</option>
-												}
-											</InputSelect>
-										</td>
-										<td><InputNumber @bind-Value="_editProduct!.Quantity" /></td>
-										<td><InputNumber @bind-Value="_editProduct!.PurchasePrice" /></td>
-										<td><InputNumber @bind-Value="_editProduct!.SalePrice" /></td>
-										<td><InputNumber @bind-Value="_editProduct!.MinimumStock" /></td>
-										<td><InputDate @bind-Value="_editProduct.EXPDate" /></td>
-										<td>
-											<InputSelect class="form-control" @bind-Value="_editProduct.ManufacturerId">
-												<option value="0">Select Category</option>
-												@foreach (var Manufacturer in Manufacturers!)
-												{
-													<option value="@Manufacturer.Id">@Manufacturer.Name</option>
-												}
-											</InputSelect>
-										</td>
-										<td><InputFile id="Image" class="form-control" OnChange="EditProductImageUpload" /></td>
+										@if (ShowColumn("Name_de")) {<td><InputText @bind-Value="_editProduct!.Name_de" /></td>}
+										@if (ShowColumn("Description_de")) {<td><InputText @bind-Value="_editProduct!.Description_de" /></td>}
+										@if (ShowColumn("Name_ar")) {<td><InputText @bind-Value="_editProduct!.Name_ar" /></td>}
+										@if (ShowColumn("Description_ar")) {<td><InputText @bind-Value="_editProduct!.Description_ar" /></td>}
+										@if (ShowColumn("Category"))
+										{
+											<td>
+												<InputSelect class="form-control" @bind-Value="_editProduct.CategoryId">
+													<option value="0">Select Category</option>
+													@foreach (var category in categories!)
+													{
+														<option value="@category.Id">@category.Name_de</option>
+													}
+												</InputSelect>
+											</td>
+										}
+										@if (ShowColumn("Barcode")) {<td><InputText @bind-Value="_editProduct!.Barcode" /></td>}
+										@if (ShowColumn("Quantity")) {<td><InputNumber @bind-Value="_editProduct!.Quantity" /></td>}
+										@if (ShowColumn("PurchasePrice")) {<td><InputNumber @bind-Value="_editProduct!.PurchasePrice" /></td>}
+										@if (ShowColumn("SellePrice")) {<td><InputNumber @bind-Value="_editProduct!.SalePrice" /></td>}
+										@if (ShowColumn("MinimumStock")) {<td><InputNumber @bind-Value="_editProduct!.MinimumStock" /></td>}
+										@if (ShowColumn("ExpDate")) {<td><InputDate @bind-Value="_editProduct.EXPDate" /></td>}
+										@if (ShowColumn("Manufacturer"))
+										{
+											<td>
+												<InputSelect class="form-control" @bind-Value="_editProduct.ManufacturerId">
+													<option value="0">Select Category</option>
+													@foreach (var Manufacturer in Manufacturers!)
+													{
+														<option value="@Manufacturer.Id">@Manufacturer.Name</option>
+													}
+												</InputSelect>
+											</td>
+										}
+										@if (ShowColumn("TaxRate"))
+										{
+											<td>
+												<InputSelect class="form-control" @bind-Value="_editProduct.TaxRateId">
+													<option value="0">Select Rate</option>
+													@foreach (var rate in TaxRates)
+													{
+														<option value="@rate.Id">@rate.Rate</option>
+													}
+												</InputSelect>
+											</td>
+										}
+										@if (ShowColumn("Group"))
+										{
+											<td>
+												<InputSelect class="form-control" @bind-Value="_editProduct.ProductGroupID">
+													<option value="0">wählen Product Gruppe aus</option>
+													@foreach (var groupProduct in groupedProducts!)
+													{
+														<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
+													}
+												</InputSelect>
+											</td>
+										}
+										@if (ShowColumn("Username")) {<td>@(_editProduct.User?.UserName ?? "")</td>}
+										@if (ShowColumn("Img")) {<td><InputFile id="Image" class="form-control" OnChange="EditProductImageUpload" /></td>}
 										<td class="@(authContext.User.IsInRole("admin")  && _editProduct!=null ? "editForm" : "hidden")">
 											<button id="editProductB_@htmlProducts[i].Id.ToString()" class="editB" @onclick:stopPropagation="true" @onclick="() => EditProduct()">
 												Edit
@@ -115,35 +167,41 @@
 									}
 									else
 									{
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_de</td>
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_de</td>
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Category!.Name_de</td>
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;" class="@(htmlProducts[i].MinimumStock >= htmlProducts[i].Quantity ? "IsMinimumStock" : "")">@htmlProducts[i].Quantity</td>
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].MinimumStock</td>
-										@* check exp date *@
-										var expDate = htmlProducts[i].EXPDate;
-										string backgroundcolor = ""; // الافتراضي
-										string color = "";
+										@if (ShowColumn("Name_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_de</td>}
+										@if (ShowColumn("Description_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_de</td>}
+										@if (ShowColumn("Name_ar")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_ar</td> }
+										@if (ShowColumn("Description_ar")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_ar</td>}
+										@if (ShowColumn("Category")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Category!.Name_de</td>}
+										@if (ShowColumn("Barcode")) { <td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Barcode</td> }
+										@if (ShowColumn("Quantity")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;" class="@(htmlProducts[i].MinimumStock >= htmlProducts[i].Quantity ? "IsMinimumStock" : "")">@htmlProducts[i].Quantity</td>}
+										@if (ShowColumn("PurchasePrice")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
+										@if (ShowColumn("SellePrice")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
+										@if (ShowColumn("MinimumStock")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].MinimumStock</td>}
+										@if (ShowColumn("ExpDate"))
+										{
+											@* check exp date *@
+											var expDate = htmlProducts[i].EXPDate;
+											string backgroundcolor = ""; // الافتراضي
+											string color = "";
 
-										if (expDate < DateTime.Today)
-										{
-											backgroundcolor = "red"; // منتهي
-											color = "white";
+											if (expDate < DateTime.Today)
+											{
+												backgroundcolor = "red"; // منتهي
+												color = "white";
+											}
+											else if (expDate <= DateTime.Today.AddMonths(1))
+											{
+												backgroundcolor = "orange"; // بقي أقل من شهر
+												color = "white";
+											}
+
+											<td style="max-width: 200px; word-wrap: break-word; white-space: normal; background-color:@backgroundcolor; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
 										}
-										else if (expDate <= DateTime.Today.AddMonths(1))
-										{
-											backgroundcolor = "orange"; // بقي أقل من شهر
-											color = "white";
-										}
-										<td style="max-width: 200px; word-wrap: break-word; white-space: normal; background-color:@backgroundcolor; color:@color;">
-										@expDate.ToString("dd.MM.yyyy")
-										</td>
-										<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Manufacturer!.Name</td>
-										<td>
-											<img src="data:image/png;base64,@(!string.IsNullOrEmpty(src) ? src : "images/sample.jpg")" class="productImg" />
-										</td>
+										@if (ShowColumn("Manufacturer")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Manufacturer!.Name</td>}
+										@if (ShowColumn("TaxRate")) {<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@((htmlProducts[i].TaxRate?.Rate.ToString("0") + "%") ?? "")</td>}
+										@if (ShowColumn("Group")) {<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].ProductGroup?.GroupName_de ?? "")</td>}
+										@if (ShowColumn("Username")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].User?.UserName ?? "")</td>}
+										@if (ShowColumn("Img")){<td><img src="data:image/png;base64,@(!string.IsNullOrEmpty(src) ? src : "images/sample.jpg")" class="productImg" /> </td>}
 									}
 
 									<td class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "deleteForm" : "hidden")">
@@ -288,7 +346,6 @@
 		{
 			<div class="overlay" @onclick="ClosePaymentMethod">
 				<div class="PaymentMethodForm">
-
 					<h4>Zahlung Methnode</h4>
 					<div class="buttonMethods">
 						@{
@@ -410,13 +467,32 @@
 	</NotAuthorized>
 </AuthorizeView>
 @code{
-
-	private DataProcessP dpP = new DataProcessP();
-
+	// show Colmuns
+	private List<ColumnOption> columnOptions = new()
+    {
+	  new("Index", "Index", true),
+	  new("Id", "Id", true),
+	  new("Name de", "Name_de", true),
+	  new("Beschreibung de", "Description_de", true),
+	  new("Name ar", "Name_ar", false),
+	  new("Beschreibung ar", "Description_ar", false),
+	  new("Kategorie", "Category", true),
+	  new("Barcode", "Barcode", false),
+	  new("Menge", "Quantity", true),
+	  new("Kaufpreis", "PurchasePrice", true),
+	  new("Verkaufspreis", "SellePrice", true),
+	  new("Mindestbestand", "MinimumStock", true),
+	  new("Ablaufdatum", "ExpDate", true),
+	  new("Hersteller", "Manufacturer", true),
+	  new("Steuersatz", "TaxRate", false),
+	  new("Gruppe", "Group", false),
+	  new("Benutzername", "Username", false),
+	  new("Img", "Img", true),
+    };
+	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	// load products
+	private DataProcessP dpP = new DataProcessP();
 	private List<Products> products => productService.GetItems.Items;
-	private string barCodeBase64String = string.Empty;
-	
 	private async Task<bool> loadInBackground()
 	{
 		if (isLoading) return false;
@@ -436,7 +512,6 @@
 		isLoading = false;
 		return moreProducts.AllItemsLoaded;
 	}
-	
 	// Add Product
 	private bool IsShowAddProductForm = false; 
 	private Products? newProduct = new Products(); 
@@ -598,10 +673,16 @@
 			_editProduct!.Category = categories!.FirstOrDefault(c => c.Id == _editProduct.CategoryId);
 			// set Manufacturer in editproduct
 			_editProduct!.Manufacturer = Manufacturers!.FirstOrDefault(m => m.Id == _editProduct.ManufacturerId);
+			// set TaxRate in editproduct
+			_editProduct!.TaxRate = TaxRates!.FirstOrDefault(m => m.Id == _editProduct.TaxRateId);
+			// set Group in editproduct
+			_editProduct!.ProductGroup = groupedProducts!.FirstOrDefault(m => m.Id == _editProduct.ProductGroupID);
+
 			// Update the product in the list
 			int index = products!.FindIndex(p => p.Id == _editProduct.Id);
 			products[index] = _editProduct!; // Update the product in the list
-												// if in search mode
+
+			// if in search mode
 			if(filterP != null && filterP.Count>0)
 			{
 				int filterIndex = filterP.FindIndex(p => p.Id == _editProduct.Id);
@@ -679,7 +760,7 @@
 	private List<Categories>? categories = null;
 	private async Task loadCategories()
 	{
-		categories ??= await productService.LoadCategories();
+		categories ??= await categoryService.LoadCategories();
 	}
 	// manufacturer
 	private List<Manufacturer>? Manufacturers = null;
@@ -767,6 +848,7 @@
 	private int startIndex = 0;
 
 	// Generate
+	private string barCodeBase64String = string.Empty;
 	private Etikett? etikettP = null!; 
 	private string generatorType = "0";
 	private bool LabelIdVisible = false;

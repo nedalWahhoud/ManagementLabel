@@ -1,0 +1,208 @@
+﻿@page "/discountcode"
+
+<AuthorizeView>
+    <Authorized Context="authContext">
+        <!-- user info -->
+        <p class="userInfo">
+            <span class="userName">User Name: @authContext.User.Identity!.Name</span>
+        </p>
+        <div>
+            <button class="btn btn-primary" @onclick="() => IsOverlayAddCode = true" disabled="@IsOverlayAddCode">Neuen Rabattcode hinzufügen</button>
+        </div>
+        <div>
+            <button class="btn btn-primary" @onclick="OpenAddCategoryForm" disabled="@IsOverlayAddCategory">Neuen Category Rabattcode hinzufügen</button>
+        </div>
+        @* Rabatt kategorie *@
+        @if(IsOverlayAddCategory)
+        {
+            <div class="overlay">
+                <div class="AddCodeForm">
+                    <EditForm Model="@newDiscountCategory" OnValidSubmit="OnSaveCategory">
+                        <DataAnnotationsValidator />
+                        <div class="mb-3">
+                            <label class="form-label">Code</label>
+                            <InputText class="form-control" @bind-Value="newDiscountCategory.Code" />
+                            <ValidationMessage For="@(() => newDiscountCategory.Code)" />
+                        </div>
+                        <div class="mb-3">
+                            <InputSelect class="form-control" @bind-Value="newDiscountCategory.CategoriesId">
+                                <option value="0">Select Category</option>
+                                @foreach (var category in categories!)
+                                {
+                                    <option value="@category.Id">@category.Name_de</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => newDiscountCategory.CategoriesId)" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rabattprozentsatz in %</label>
+                            <InputNumber class="form-control" @bind-Value="newDiscountCategory.DiscountPercentage" />
+                            <ValidationMessage For="@(() => newDiscountCategory.DiscountPercentage)" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nutzungslimit</label>
+                            <InputNumber class="form-control" @bind-Value="newDiscountCategory.UsageLimit" />
+                            <ValidationMessage For="@(() => newDiscountCategory.UsageLimit)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Startdatum</label>
+                            <InputDate class="form-control" @bind-Value="newDiscountCategory.StartDate" />
+                            <ValidationMessage For="@(() => newDiscountCategory.StartDate)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Enddatum</label>
+                            <InputDate class="form-control" @bind-Value="newDiscountCategory.EndDate" />
+                            <ValidationMessage For="@(() => newDiscountCategory.EndDate)" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="newDiscountCategory.IsActive" />
+                            <label class="form-check-label">Ist aktiv</label>
+                        </div>
+                        <button type="button" class="btn btn-success" @onclick="OnGenerateCategory">Code generieren</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="submit" class="btn btn-secondary" @onclick="() => IsOverlayAddCategory = false">Abbrechen</button>
+                    </EditForm>
+                </div>
+            </div>
+
+        }
+        @* Rabattcode *@
+        @if (IsOverlayAddCode)
+        {
+            <div class="overlay">
+                <div class="AddCodeForm">
+                    <EditForm Model="@newDiscountCode" OnValidSubmit="OnSave">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">Code</label>
+                            <InputText class="form-control" @bind-Value="newDiscountCode.Code" />
+                            <ValidationMessage For="@(() => newDiscountCode.Code)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Rabattprozentsatz in %</label>
+                            <InputNumber class="form-control" @bind-Value="newDiscountCode.DiscountPercentage" />
+                            <ValidationMessage For="@(() => newDiscountCode.DiscountPercentage)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nutzungslimit</label>
+                            <InputNumber class="form-control" @bind-Value="newDiscountCode.UsageLimit" />
+                            <ValidationMessage For="@(() => newDiscountCode.UsageLimit)" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Startdatum</label>
+                            <InputDate class="form-control" @bind-Value="newDiscountCode.StartDate" />
+                            <ValidationMessage For="@(() => newDiscountCode.StartDate)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Enddatum</label>
+                            <InputDate class="form-control" @bind-Value="newDiscountCode.EndDate" />
+                            <ValidationMessage For="@(() => newDiscountCode.EndDate)" />
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <InputCheckbox class="form-check-input" @bind-Value="newDiscountCode.IsActive" />
+                            <label class="form-check-label">Ist aktiv</label>
+                        </div>
+                        <button type="button" class="btn btn-success" @onclick="OnGenerate">Code generieren</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="submit" class="btn btn-secondary" @onclick="() => IsOverlayAddCode = false">Abbrechen</button>
+                    </EditForm>
+                </div>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <ManagementLabel.Components.Pages.LogIn />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    // Discount code
+    private DiscountCodes newDiscountCode = new DiscountCodes();
+    private async void OnSave()
+    {
+        var result = await discountService.AddDiscountCode(newDiscountCode);
+        if (result.Result)
+        {
+            _ = ShowAlert("Rabattcode erfolgreich hinzugefügt!");
+            CloseAddCodeForm();
+            StateHasChanged();
+        }
+        else
+        {
+            _ = ShowAlert(result.Message!);
+        }
+    }
+    private bool IsOverlayAddCode = false;
+    public void OnGenerate()
+    {
+        // Generate a random code
+        var randomCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+        newDiscountCode.Code = randomCode;
+    }
+    public void CloseAddCodeForm()
+    {
+        IsOverlayAddCode = false;
+        newDiscountCode = new DiscountCodes(); // Reset the form
+
+    }
+    // Discount category 
+    private DiscountCategory newDiscountCategory = new DiscountCategory();
+    private bool IsOverlayAddCategory = false;
+
+    private async Task OpenAddCategoryForm()
+    {
+        await loadCategories();
+        IsOverlayAddCategory = true;
+    }
+    private async Task OnSaveCategory()
+    {
+        var result = await discountService.AddDiscountCategory(newDiscountCategory);
+        if (result.Result)
+        {
+            _ = ShowAlert("Rabattkategorie erfolgreich hinzugefügt!");
+            CloseAddCategoryForm();
+            StateHasChanged();
+        }
+        else
+        {
+            _ = ShowAlert(result.Message!);
+        }
+
+    }
+    public void OnGenerateCategory()
+    {
+        // Generate a random code
+        var randomCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+        newDiscountCategory.Code = randomCode;
+    }
+    public void CloseAddCategoryForm()
+    {
+        IsOverlayAddCategory = false;
+        newDiscountCategory = new DiscountCategory(); // Reset the form
+    }
+    // category
+    private List<Categories>? categories = null;
+    private async Task loadCategories()
+    {
+        try
+        {
+            categories ??= await categoryService.LoadCategories();
+        }
+    catch
+    {
+
+    }
+    }
+    private async Task ShowAlert(string message)
+    {
+        await JS.InvokeVoidAsync("showAlert", message);
+    }
+}

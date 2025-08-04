@@ -8,15 +8,12 @@ namespace ManagementLabel.Components.OrderF
         private readonly HttpClient _http = http;
         public List<Order> DownloadedOrders { get; private set; } = [];
         public List<OrderStatus> OrderStatusList { get; private set; } = [];
-
         public event Action? OnChange;
         public void NotifyStateChanged() => OnChange?.Invoke();
-
         public void InitializeAsync()
         {
             _ = RefreshCountOpenOrders();
         }
-
         private GetItems<Order> getItems = new GetItems<Order>() { PageSize = 5 };
         public async Task<ValidationResult> GetAllOrdersbyStatusAsync(string statusId, List<int>? excludeIds = null)
         {
@@ -72,7 +69,7 @@ namespace ManagementLabel.Components.OrderF
                 {
                     return new ValidationResult { Result = false, Message = "Failed to retrieve Order Statuses." };
                 }
-                var orderStatuses = await response.Content.ReadFromJsonAsync<List<OrderStatus>>() ?? new List<OrderStatus>();
+                var orderStatuses = await response.Content.ReadFromJsonAsync<List<OrderStatus>>() ?? new ();
                 if (orderStatuses.Count == 0)
                 {
                     return new ValidationResult { Result = false, Message = "No Order Statuses found." };
@@ -85,16 +82,32 @@ namespace ManagementLabel.Components.OrderF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-        public async Task<ValidationResult> UpdateOrder(Order order)
+        public async Task<ValidationResult> UpdateStatusOrder(int orderId,int newStatusId)
         {
             try
             {
-                var response = await _http.PutAsJsonAsync($"api/Orders/updateOrder", order);
+                var response = await _http.PutAsJsonAsync($"api/Orders/updateStatusOrder/{orderId}", newStatusId);
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new ValidationResult { Result = false, Message = "Failed to update Order Status." };
+                    return new ValidationResult { Result = false, Message = "Failed to update Order Status." } ?? new ValidationResult { Result = false, Message = "Unknown error." };
                 }
-                return new ValidationResult { Result = true, Message = "Order Status updated successfully." };
+                return new ValidationResult { Result = true, Message = "Order Status updated successfully." } ?? new ValidationResult { Result = false, Message = "Unknown error." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task <ValidationResult> AddOrUpdateTrackingNumber(int orderId,string newTrackingNumber)
+        {
+            try
+            {
+                var response = await _http.PutAsJsonAsync($"api/Orders/addOrUpdateTrackingNumber/{orderId}", newTrackingNumber);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler." };
+                }
+                return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler" };
             }
             catch (Exception ex)
             {
@@ -102,11 +115,14 @@ namespace ManagementLabel.Components.OrderF
             }
         }
         public int OpenOrderCount = 0;
-        public async Task<OrdersCount> GetOrderCountByStatusId(int statusId)
+        public int CanceledReturnedOrderCount = 0;
+        public async Task<OrdersCount> GetOrderCountByStatusId(List<int> statusIds)
         {
             try
             {
-                var response = await _http.GetAsync($"api/Orders/getOrderCountByStatusId{statusId}");
+                var queryString = string.Join("&", statusIds.Select(id => $"statusIds={id}"));
+                var response = await _http.GetAsync($"api/Orders/getOrderCountByStatusId?{queryString}");
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return new OrdersCount { Count = 0 };
@@ -123,12 +139,22 @@ namespace ManagementLabel.Components.OrderF
         {
             while (true)
             {
+                // prüf die Count von open orders 
                 int previousCount = 0;
-                var countOrdersOpen = await GetOrderCountByStatusId(1);
+                var countOrdersOpen = await GetOrderCountByStatusId(new List<int>() { 1 });
                 int currentCount = countOrdersOpen.Count;
                 if (currentCount != previousCount)
                 {
                     OpenOrderCount = currentCount;
+                    NotifyStateChanged();
+                }
+                // prüf die Count von storniert orders 
+                previousCount = 0;
+                var countOrdersCanceled = await GetOrderCountByStatusId(new List<int>() { 8, 9 });
+                currentCount = countOrdersCanceled.Count;
+                if (currentCount != previousCount)
+                {
+                    CanceledReturnedOrderCount = currentCount;
                     NotifyStateChanged();
                 }
                 await Task.Delay(20000); // Wait for 20 seconds before checking again
@@ -173,20 +199,6 @@ namespace ManagementLabel.Components.OrderF
         public List<int> getIdsFromOrdersLocal(List<Order> orders)
         {
             return orders.Select(o => o.Id).ToList();
-        }
-        public bool IsEditedOrder(Order currentOrder, Order editedOrder)
-        {
-            if (currentOrder == null || editedOrder == null)
-            {
-                return false;
-            }
-            // Compare properties of currentOrder and editedOrder
-            return currentOrder.OrderDate != editedOrder.OrderDate ||
-                   currentOrder.DeliveryAddressId != editedOrder.DeliveryAddressId ||
-                   currentOrder.PaymentMethodId != editedOrder.PaymentMethodId ||
-                   currentOrder.TotalPrice != editedOrder.TotalPrice ||
-                   currentOrder.StatusId != editedOrder.StatusId ||
-                   currentOrder.Notes != editedOrder.Notes;
         }
         public void Rest()
         {

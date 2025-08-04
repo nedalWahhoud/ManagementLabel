@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ManagementLabel.Model
 {
@@ -18,5 +19,15 @@ namespace ManagementLabel.Model
         public int? UserId { get; set; }
         public Users? User { get; set; }
         public List<OrderItems> OrderItems { get; set; } = [];
+        public int? DiscountCodeId { get; set; }
+        public DiscountCodes? DiscountCode { get; set; }
+        public int? DiscountCategoryId { get; set; }
+        public DiscountCategory? DiscountCategory { get; set; }
+        public int? ShippingProviderId { get; set; }
+        public ShippingProvider? ShippingProviders { get; set; }
+        public double ShippingCost { get; set; }
+        [Required(ErrorMessage = "Bitte geben Sie die Trackingnummer ein.")]
+        [MinLength(8, ErrorMessage = "Die Trackingnummer muss mindestens 8 Zeichen lang sein.")]
+        public string? TrackingNumber { get; set; } 
     }
 }

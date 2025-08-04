@@ -106,16 +106,6 @@
         vertical-align: middle;
         line-height: 1.5;
     }
-.emailCell:hover {
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
-.addressCell:hover {
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
 
 .table tbody td .productImg {
     width: 50px;
@@ -145,7 +135,7 @@
 
     
     .table .tableSm {
-        width: 98%; /
+        width: 98%; 
         margin: 10px auto; 
         border-radius: 5px;
         overflow: hidden;
@@ -204,9 +194,10 @@ button.btn-primary {
     z-index: 1000;
     padding: 1rem;
     box-sizing: border-box;
+    overflow-y: auto;
 }
 
-.addressForm {
+.overlayForm {
     background-color: white;
     padding: 2rem;
     border-radius: 8px;
@@ -246,6 +237,192 @@ button.btn-primary {
         .addressPopup button:hover {
             background-color: #0056b3;
         }
+/* Invoice */
+.overlayFormInvoice {
+    background-color: white;
+    border-radius: 8px;
+    max-width: 1300px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-height: 90vh; 
+    overflow-y: auto;
+}
+.overlayFormInvoice-inner {
+    padding: 2rem;
+    box-sizing: border-box; /* مهم ليشمل البادينج في الحساب */
+}
+    .overlayFormInvoice .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-shrink: 0; /* يمنع تقلص الهيدر */
+        background: #f5f5f5; /* لون خلفية مميز لتلاحظ الهيدر */
+        padding: 10px;
+    }
+/* نسخة CSS الأصلية مع تعديلات PDF-friendly */
+
+.overlayFormInvoice {
+    background-color: white;
+    border-radius: 8px;
+    max-width: 1300px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.overlayFormInvoice-inner {
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.overlayFormInvoice .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    padding: 10px;
+}
+
+.InvoiceBox {
+    width: 210mm;
+    min-height: 296mm;
+    padding: 8mm;
+    margin: auto;
+    background: white;
+    font-size: 12pt;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* مهم جداً: مساحة أسفل الفاتورة للفوتر */
+    padding-bottom: 3.5cm;
+    box-shadow: none; /* إزالة الظل في PDF */
+    /* اجعل الصفحة لا تنكسر داخل الصندوق */
+    page-break-inside: avoid;
+}
+
+.InvoiceContent {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* اجعل المحتوى لا ينكسر داخل */
+    page-break-inside: avoid;
+}
+
+.InvoiceBox h2 {
+    padding-bottom: 80px;
+}
+
+.InvoiceFirstPart {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 120px;
+    width: 100%;
+}
+
+.InvoiceAddress {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    text-align: left;
+}
+
+.SenderAddress {
+    font-size: 12px;
+    text-decoration: underline;
+}
+
+.InvoiceContact {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    text-align: right;
+}
+
+.InvoiceSecondPart {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.InvoiceDetails {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    font-size: 14px;
+}
+
+    .InvoiceDetails span {
+        display: flex;
+        flex-direction: column;
+    }
+
+.OrderDetails {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    /* تجنب قطع الطباعة داخل التفاصيل */
+    page-break-inside: avoid;
+}
+
+.tableOrderDetails {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+    .tableOrderDetails tbody tr {
+        font-size: 14px;
+    }
+
+    .tableOrderDetails th,
+    .tableOrderDetails td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .tableOrderDetails th {
+        background-color: #f2f2f2;
+    }
+
+.text-end {
+    text-align: right;
+}
+
+.OrderFooter {
+    font-size: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-top: 4px solid #eee;
+    padding: 10px 20px;
+    background: white;
+    /* إزالة position fixed لتجنب مشاكل الطباعة */
+    position: static;
+    /* اجعل الفوتر لا ينكسر على صفحات متعددة */
+    page-break-inside: avoid;
+    flex-shrink: 0;
+}
+
+.RightPart {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 50%;
+}
+
+.LeftPart {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 50%;
+}
 
 /* hidden show */
 .hidden {

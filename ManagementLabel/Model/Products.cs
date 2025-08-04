@@ -22,11 +22,14 @@ namespace ManagementLabel.Model
         public double SalePrice { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Minimum Stock muss größer als 0 sein.")]
         public int MinimumStock { get; set; }
+        [Required(ErrorMessage = "Startdatum ist erforderlich.")]
+        [DateInFuture(ErrorMessage = "Startdatum muss in der Zukunft liegen.")]
         public DateTime EXPDate { get; set; }
         [Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
         public int? ManufacturerId { get; set; }
         public Manufacturer? Manufacturer { get; set; }
         public int UserId { get; set; }
+        public Users? User { get; set; }
         public byte[]? Image { get; set; }
         [Required(ErrorMessage = "يجب ادخال اسم المنتج ايضا بل عربية")]
         public string? Name_ar { get; set; }
@@ -52,6 +55,19 @@ namespace ManagementLabel.Model
                 Quantity = quantity,
                 Product = this! 
             };
+        }
+
+        // time validation attribute for future dates
+        public class DateInFutureAttribute : ValidationAttribute
+        {
+            public override bool IsValid(object? value)
+            {
+                if (value is DateTime date)
+                {
+                    return date.Date >= DateTime.Today;
+                }
+                return false;
+            }
         }
     }
 }

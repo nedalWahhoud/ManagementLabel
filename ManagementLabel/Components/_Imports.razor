@@ -19,7 +19,9 @@
 @using ManagementLabel.Components.CartF
 @using ManagementLabel.Components.ReceiptF
 @using ManagementLabel.Components.ProductGroupF
-@using Microsoft.EntityFrameworkCore
+@using ManagementLabel.Components.DiscountF
+@using ManagementLabel.Components.CategoriesF
+@using ManagementLabel.Components.InvoiceF
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
 
@@ -34,3 +36,6 @@
 @inject CartService cartService
 @inject ReceiptService receiptService
 @inject ProductGroupService productGroupService
+@inject DiscountService discountService
+@inject CategoryService categoryService
+@inject InvoiceService invoiceService

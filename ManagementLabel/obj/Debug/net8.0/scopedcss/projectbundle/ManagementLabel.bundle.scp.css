@@ -238,6 +238,34 @@ main[b-rlt59cofuu] {
         overflow-y: auto;
     }
 }
+/* _content/ManagementLabel/Components/Pages/Discountcode.razor.rz.scp.css */
+/* ======== PaymentMethods FORM OVERLAY ======== */
+.overlay[b-8m33hj5uf4] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    box-sizing: border-box;
+}
+
+.AddCodeForm[b-8m33hj5uf4] {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
 /* _content/ManagementLabel/Components/Pages/EitkettBarcode.razor.rz.scp.css */
 /* top continer */
 .TopContiner[b-clabj5iz3j] {
@@ -1009,16 +1037,6 @@ html[b-n4jqytcewr], body[b-n4jqytcewr] {
         vertical-align: middle;
         line-height: 1.5;
     }
-.emailCell:hover[b-aiff3xry1b] {
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
-.addressCell:hover[b-aiff3xry1b] {
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
-}
 
 .table tbody td .productImg[b-aiff3xry1b] {
     width: 50px;
@@ -1048,7 +1066,7 @@ html[b-n4jqytcewr], body[b-n4jqytcewr] {
 
     
     .table .tableSm[b-aiff3xry1b] {
-        width: 98%; /
+        width: 98%; 
         margin: 10px auto; 
         border-radius: 5px;
         overflow: hidden;
@@ -1107,9 +1125,10 @@ button.btn-primary[b-aiff3xry1b] {
     z-index: 1000;
     padding: 1rem;
     box-sizing: border-box;
+    overflow-y: auto;
 }
 
-.addressForm[b-aiff3xry1b] {
+.overlayForm[b-aiff3xry1b] {
     background-color: white;
     padding: 2rem;
     border-radius: 8px;
@@ -1149,6 +1168,192 @@ button.btn-primary[b-aiff3xry1b] {
         .addressPopup button:hover[b-aiff3xry1b] {
             background-color: #0056b3;
         }
+/* Invoice */
+.overlayFormInvoice[b-aiff3xry1b] {
+    background-color: white;
+    border-radius: 8px;
+    max-width: 1300px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-height: 90vh; 
+    overflow-y: auto;
+}
+.overlayFormInvoice-inner[b-aiff3xry1b] {
+    padding: 2rem;
+    box-sizing: border-box; /* مهم ليشمل البادينج في الحساب */
+}
+    .overlayFormInvoice .header[b-aiff3xry1b] {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-shrink: 0; /* يمنع تقلص الهيدر */
+        background: #f5f5f5; /* لون خلفية مميز لتلاحظ الهيدر */
+        padding: 10px;
+    }
+/* نسخة CSS الأصلية مع تعديلات PDF-friendly */
+
+.overlayFormInvoice[b-aiff3xry1b] {
+    background-color: white;
+    border-radius: 8px;
+    max-width: 1300px;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.overlayFormInvoice-inner[b-aiff3xry1b] {
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.overlayFormInvoice .header[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    padding: 10px;
+}
+
+.InvoiceBox[b-aiff3xry1b] {
+    width: 210mm;
+    min-height: 296mm;
+    padding: 8mm;
+    margin: auto;
+    background: white;
+    font-size: 12pt;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* مهم جداً: مساحة أسفل الفاتورة للفوتر */
+    padding-bottom: 3.5cm;
+    box-shadow: none; /* إزالة الظل في PDF */
+    /* اجعل الصفحة لا تنكسر داخل الصندوق */
+    page-break-inside: avoid;
+}
+
+.InvoiceContent[b-aiff3xry1b] {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    /* اجعل المحتوى لا ينكسر داخل */
+    page-break-inside: avoid;
+}
+
+.InvoiceBox h2[b-aiff3xry1b] {
+    padding-bottom: 80px;
+}
+
+.InvoiceFirstPart[b-aiff3xry1b] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 120px;
+    width: 100%;
+}
+
+.InvoiceAddress[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    text-align: left;
+}
+
+.SenderAddress[b-aiff3xry1b] {
+    font-size: 12px;
+    text-decoration: underline;
+}
+
+.InvoiceContact[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    text-align: right;
+}
+
+.InvoiceSecondPart[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.InvoiceDetails[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    font-size: 14px;
+}
+
+    .InvoiceDetails span[b-aiff3xry1b] {
+        display: flex;
+        flex-direction: column;
+    }
+
+.OrderDetails[b-aiff3xry1b] {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    /* تجنب قطع الطباعة داخل التفاصيل */
+    page-break-inside: avoid;
+}
+
+.tableOrderDetails[b-aiff3xry1b] {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+    .tableOrderDetails tbody tr[b-aiff3xry1b] {
+        font-size: 14px;
+    }
+
+    .tableOrderDetails th[b-aiff3xry1b],
+    .tableOrderDetails td[b-aiff3xry1b] {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    .tableOrderDetails th[b-aiff3xry1b] {
+        background-color: #f2f2f2;
+    }
+
+.text-end[b-aiff3xry1b] {
+    text-align: right;
+}
+
+.OrderFooter[b-aiff3xry1b] {
+    font-size: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    border-top: 4px solid #eee;
+    padding: 10px 20px;
+    background: white;
+    /* إزالة position fixed لتجنب مشاكل الطباعة */
+    position: static;
+    /* اجعل الفوتر لا ينكسر على صفحات متعددة */
+    page-break-inside: avoid;
+    flex-shrink: 0;
+}
+
+.RightPart[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 50%;
+}
+
+.LeftPart[b-aiff3xry1b] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 50%;
+}
 
 /* hidden show */
 .hidden[b-aiff3xry1b] {

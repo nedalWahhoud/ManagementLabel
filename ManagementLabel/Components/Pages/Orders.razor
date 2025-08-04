@@ -23,16 +23,20 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>B-Nr.</th>
-                        <th>U-Nr</th>
-                        <th>Benutzer</th>
-                        <th>E-mail</th>
-                        <th>Datum</th>
-                        <th>Lieferadresse</th>
-                        <th>Zahlungsmethode</th>
-                        <th>Ge-preis</th>
-                        <th>Status</th>
-                        <th>Notiz</th>
+                        <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">B-Nr.</th>
+                        <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">U-Nr.</th>
+                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Benutzer</th>
+                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Datum</th>
+                        <th style="min-width:140px; max-width: 150px; word-break: break-word; white-space: normal;">Z-Methode</th>
+                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Rabatt</th>
+                        <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">G-preis</th>
+                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Status</th>
+                        <th style="min-width:150px; max-width: 50px; word-break: break-word; white-space: normal;">V-kosten</th>
+                        <th style="min-width:120px; max-width: 50px; word-break: break-word; white-space: normal;">V-anbieter</th>
+                        <th style="min-width:120px; max-width: 50px; word-break: break-word; white-space: normal;">V-nummer</th>
+                        <th style="min-width:80px; max-width: 250px; word-break: break-word; white-space: normal;">Notiz</th>
+                        <th style="min-width:40px;">⋮</th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -52,12 +56,27 @@
                             <td>@order.Id</td>
                             <td>@order.UserId</td>
                             <td>@(order.User?.UserName ?? "Kein Unsername")</td>
-                            <td title="@order.User?.Email" @onclick="() => OnEmail(order.User?.Email)" class="emailCell">
-                                @(order.User?.Email != null ? order.User.Email.Substring(0, Math.Min(5, order.User.Email.Length)) + "..." : "Keine Email")
-                            </td>
                             <td>@order.OrderDate.ToShortDateString()</td>
-                            <td title="@GetFullAddress(order.Address!)" @onclick="() => OnAddress(order.Address!)" class="addressCell">@order.Address?.FirstName @order.Address?.LastName</td>
                             <td>@order.PaymentMethod?.Description_de</td>
+                            <td>
+                                @* Discount *@
+                                @if (order.DiscountCode != null)
+                                {
+                                    var discountDetails = invoiceService.GetDetailsDiscountCode(order);
+
+                                    @($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue:C})")
+                                }
+                                else if (order.DiscountCategory != null)
+                                {
+                                    var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
+
+                                    @($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue:C})")
+                                }
+                                else
+                                {
+                                    <span>Kein Rabatt</span>
+                                }
+                            </td>
                             <td>@order.TotalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
                             <td>
                                 <InputSelect Value="@order.StatusId"
@@ -78,10 +97,45 @@
                                     </div>
                                 }
                             </td>
+                            <td>
+                                @order.ShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))
+                            </td>
+                            <td>
+                                @if(order.ShippingProviderId != null && order.ShippingProviders != null)
+                                {
+                                    @order.ShippingProviders.Name_de
+                                }
+                            </td>
+                            <td>
+                                @if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber == null)
+                                {
+                                    <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(order)">Add Sendungsnummer</button>
+                                }
+                                else if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber != null)
+                                {
+                                    <span style="cursor:pointer;" @ondblclick=" ()=> OnAddOrUpdateTrackingNumberShowOverlay(order)">@order.TrackingNumber</span>
+                                }
+                                else
+                                {
+                                    <span>Nicht Möglich</span>
+                                }
+                            </td>
                             <td>@order.Notes</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        ⋮
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnAddress(order.Address!)">Adresse anzeigen</a></li>
+                                        <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnEmail(order.User?.Email)">E-mail anzeigen</a></li>
+                                        <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">Rechnung erstellen</a></li>
+                                    </ul>
+                                </div>
+                            </td>
                         </tr>
                         <tr>
-                            <td colspan="5">
+                            <td colspan="8">
                                 <table class="table tableSm">
                                     <thead>
                                         <tr>
@@ -157,7 +211,7 @@
             @if (IsOverlayVisible &&  overlayItems != null)
             {
                 <div class="overlay" @onclick="CloseAddress">
-                    <div class="addressForm">
+                    <div class="overlayForm">
                         @if (string.IsNullOrEmpty(overlayItems.NoData))
                         {
                             <h4>@overlayItems.Title</h4>
@@ -175,7 +229,225 @@
                     </div>
                 </div>
             }
+            @* show Add Tracking Number *@
+            @if(IsAddTrackingNumberVisible)
+            {
+                <div class="overlay">
+                    <div class="overlayForm">
+                        <EditForm Model="orderAddTrackingNumber" OnValidSubmit="OnAddOrUpdateTrackingNumber">
+                            <DataAnnotationsValidator />
+                            <p>Bitte geben Sie die Trackingnummer ein:</p>
+                            <div class="formGroupAdd">
+                                <InputText class="form-control" @bind-value="orderAddTrackingNumber.TrackingNumber" placeholder="Trackingnummer" />
+                                <ValidationMessage For="@(() => orderAddTrackingNumber.TrackingNumber)" />
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-2" disabled="@IsAddTrackingNumberLoading">
+                                @if (IsAddTrackingNumberLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="ms-2">Ladt...</span>
+                                }
+                                else
+                                {
+                                    <span>Hinzufügen</span>
+                                }
+                            </button>
+                            <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">Abbrechen</button>
+                        </EditForm>
+                    </div>
+                </div>
+            }
+
+
         </div>
+        @* Rechnung *@
+        @if (IsInvoiceVisible && invoice != null)
+        {
+            <div class="overlay">
+                <div class="overlayFormInvoice">
+                    <div class="header">
+                        <button class="btn btn-close" @onclick="CloseInvoice"></button>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                ⋮
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnSaveInvoice(invoice)">Speichern</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="InvoiceBox" class="InvoiceBox">
+                        <div class="InvoiceContent">
+                            <h2>@invoice.projectInfo.Value.Name</h2>
+                            <div class="InvoiceFirstPart">
+                                <div class="InvoiceAddress">
+                                    <span class="SenderAddress">@invoice.projectInfo.Value.Name @invoice.projectInfo.Value.Address</span>
+                                    <span>@invoice.order.Address?.FirstName @invoice.order.Address?.LastName</span>
+                                    <span>@invoice.order.Address?.Street</span>
+                                    <span>@invoice.order.Address?.ZipCode @invoice.order.Address?.City</span>
+                                </div>
+                                <div class="InvoiceContact">
+                                    <span>E-mail: @projectInfo.Value.Email</span>
+                                    <span>Tel.: @projectInfo.Value.Phone</span>
+                                </div>
+                            </div>
+                            <div class="InvoiceSecondPart">
+                                <span>Rechnung</span>
+                                <p class="InvoiceDetails">
+                                    <span><label>Rechnungsnummer</label>@invoice.InvoceeNumber</span>
+                                    <span><label>Rechnungsdatum</label>@DateTime.Today.ToString("dd.MM.yyyy")</span>
+                                    <span><label>Order Id</label>@invoice.order.Id</span>
+                                    <span><label>Ordersdatum</label>@invoice.order.OrderDate.ToString("dd.MM.yyyy HH:mm")</span>
+                                </p>
+                            </div>
+                            <div class="OrderDetails">
+                                <table class="tableOrderDetails">
+                                    <thead>
+                                        <tr>
+                                            <th>Pos.</th>
+                                            <th>Produkt</th>
+                                            <th>Menge</th>
+                                            <th>Einzelpreis</th>
+                                            <th>Steuer</th>
+                                            <th>Preis</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @{
+                                            double TotalGross = 0;
+                                            double GetTaxAmountRate19 = 0;
+                                            double TotalPriceOfTaxRate19 = 0;
+                                            double GetTaxAmountRate7 = 0;
+                                            double TotalPriceOfTaxRate7 = 0;
+                                            for (int i = 0; i < invoice.order.OrderItems.Count; i++)
+                                            {
+                                                var item = invoice.order.OrderItems[i];
+                                                var itemPreis = item.UnitPrice * item.Quantity;
+                                                TotalGross += itemPreis;
+                                                if (item.Product?.TaxRate != null && item.Product?.TaxRate?.Rate == 19)
+                                                {
+                                                    if (invoice.order.DiscountCode != null)
+                                                    {
+                                                        TotalPriceOfTaxRate19 += itemPreis - ((itemPreis / 100) * invoice.order.DiscountCode.DiscountPercentage);
+                                                    }
+                                                    else if (invoice.order.DiscountCategory != null)
+                                                    {
+                                                        TotalPriceOfTaxRate19 += itemPreis - ((itemPreis / 100) * invoice.order.DiscountCategory.DiscountPercentage);
+                                                    }
+                                                    else
+                                                        TotalPriceOfTaxRate19 += itemPreis;
+                                                }
+                                                else if (item.Product?.TaxRate != null && item.Product?.TaxRate?.Rate == 7)
+                                                {
+                                                    if (invoice.order.DiscountCode != null)
+                                                    {
+                                                        TotalPriceOfTaxRate7 += itemPreis - ((itemPreis / 100) * invoice.order.DiscountCode.DiscountPercentage);
+                                                    }
+                                                    else if (invoice.order.DiscountCategory != null)
+                                                    {
+                                                        TotalPriceOfTaxRate7 += itemPreis - ((itemPreis / 100) * invoice.order.DiscountCategory.DiscountPercentage);
+                                                    }
+                                                    else
+                                                        TotalPriceOfTaxRate7 += itemPreis;
+                                                }
+                                                <tr>
+                                                    <td>@(i + 1)</td>
+                                                    <td>@(item.Product?.Name_de ?? "Fehler")</td>
+                                                    <td>@item.Quantity</td>
+                                                    <td>@item.UnitPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                                                    <td>@(item.Product?.TaxRate?.Rate != null ? item.Product.TaxRate.Rate : "")</td>
+                                                    <td>@(itemPreis.ToString("C", new System.Globalization.CultureInfo("de-DE")))</td>
+                                                </tr>
+                                            }
+                                            @* Rabbat *@
+                                            @if (invoice.order.DiscountCode != null)
+                                            {
+                                                var discountDetails = invoiceService.GetDetailsDiscountCode(invoice.order);
+
+                                                <tr style="border-top: 1px solid #cccccc;">
+                                                    <td colspan="5" style="padding-top:20px;" class="text-end"><strong>Rabatt:</strong></td>
+                                                    <td colspan="1" style="padding-top:20px;">@($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue:C})")</td>
+                                                </tr>
+                                                @* Den Rabatt vom Betrag abziehen *@
+                                                TotalGross -= discountDetails.DiscountValue;
+                                            }
+                                            else if (invoice.order.DiscountCategory != null)
+                                            {
+                                                var discountDetails = invoiceService.GetDetailsDiscountCategory(invoice.order);
+
+                                                <tr style="border-top: 1px solid #cccccc;">
+                                                    <td colspan="5" style="padding-top:20px; padding-bottom:10px;" class="text-end"><strong>Rabatt:</strong></td>
+                                                    <td colspan="1" style="padding-top:20px; padding-bottom:10px;">@($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue:C})")</td>
+                                                </tr>
+                                                @* Den Rabatt vom Betrag abziehen *@
+                                                TotalGross -= discountDetails.DiscountValue;
+                                            }
+                                            else
+                                            {
+                                                <tr style="border-top: 1px solid #cccccc;">
+                                                    <td colspan="5" style="padding-top:20px; padding-bottom:10px;" class="text-end"><strong>Rabatt:</strong></td>
+                                                    <td colspan="1" style="padding-top:20px; padding-bottom:10px;">0 €</td>
+                                                </tr>
+                                            }
+                                            @* Versandkosten *@
+                                            <tr>
+                                                <td colspan="5" class="text-end"><strong>Versandskosten:</strong></td>
+                                                <td colspan="1">@invoice.order?.ShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                                            </tr>
+                                            @* Preis *@
+                                            <tr>
+                                                <td colspan="5" class="text-end"><strong>Preis:</strong></td>
+                                                <td colspan="1">@(TotalGross.ToString("C", new System.Globalization.CultureInfo("de-DE")))</td>
+                                            </tr>
+                                            @* Gesamtbrutto *@
+                                            <tr>
+                                                <td colspan="5" class="text-end"><strong>Gesamtbrutto:</strong></td>
+                                                <td colspan="1">@((TotalGross + invoice.order?.ShippingCost ?? 0).ToString("C", new System.Globalization.CultureInfo("de-DE")))</td>
+                                            </tr>
+                                            @* Steuer *@
+                                            GetTaxAmountRate19 = (TotalPriceOfTaxRate19 / 100) * 19;
+                                            GetTaxAmountRate7 = (TotalPriceOfTaxRate7 / 100) * 7;
+
+                                            <tr>
+                                                <td colspan="5" class="text-end"><strong>MwSt. 19% von @TotalPriceOfTaxRate19.ToString("C", new System.Globalization.CultureInfo("de-DE")) :</strong></td>
+                                                <td colspan="1">@GetTaxAmountRate19.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="5" class="text-end"><strong>MwSt. 7% von @TotalPriceOfTaxRate7.ToString("C", new System.Globalization.CultureInfo("de-DE")) :</strong></td>
+                                                <td colspan="1">@GetTaxAmountRate7.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                                            </tr>
+                                            @* Netto *@
+                                            <tr>
+                                                <td colspan="5" style="padding-top:10px;" class="text-end"><strong>Gesamtnetto:</strong></td>
+                                                <td colspan="1" style="padding-top:10px;">@((TotalGross - (GetTaxAmountRate19 + GetTaxAmountRate7)).ToString("C", new System.Globalization.CultureInfo("de-DE")))</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="OrderFooter">
+                            <p class="RightPart">
+                                <span>@invoice.projectInfo.Value.Name</span>
+                                <span>@invoice.projectInfo.Value.Address</span>
+                                <span>@($"Steuernummer: {invoice.projectInfo.Value.Steuernummer}")</span>
+                                <span>@($"USt-IdNr.: {invoice.projectInfo.Value.UStIdNr}")</span>
+                            </p>
+                            @for (int i = 0; i < @invoiceService.DownloadedBankTransferDetails.Count; i++)
+                            {
+                                <p class="LeftPart">
+                                    <span>@invoiceService.DownloadedBankTransferDetails[i].AccountHolderName</span>
+                                    <span>@invoiceService.DownloadedBankTransferDetails[i].BankName</span>
+                                    <span>@invoiceService.DownloadedBankTransferDetails[i].IBAN</span>
+                                    <span>@invoiceService.DownloadedBankTransferDetails[i].BIC</span>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </Authorized>
     <NotAuthorized>
         <ManagementLabel.Components.Pages.LogIn />
@@ -188,6 +460,9 @@
     protected override async Task OnInitializedAsync()
     {
         Isloading = true;
+        // get BankTransferDetails
+        _ = invoiceService.GetBankTransferDetailsAsync();
+
         // get orderstatus list
         await orderService.GetOrderStatusListAsync();
         // get first orders
@@ -246,7 +521,7 @@
     }
     // change status table
     private bool isUpdatingStatus = false;
-    private async void OnStatusChangedItem(Order order, string value)
+    private async Task OnStatusChangedItem(Order order, string value)
     {
         if (order == null || string.IsNullOrEmpty(value)) return;
 
@@ -254,50 +529,56 @@
 
         if (int.TryParse(value, out int statusId))
         {
-            // The data included does not necessarily need to be sent, For example, the orderitems, address
-            Order orderUpdate = new Order
-                {
-                    Id = order.Id,
-                    OrderDate = order.OrderDate,
-                    DeliveryAddressId = order.DeliveryAddressId,
-                    PaymentMethodId = order.PaymentMethodId,
-                    TotalPrice = order.TotalPrice,
-                    StatusId = statusId,
-                    Notes = order.Notes,
-                    UserId = order.UserId,
-                };
-
-            if (orderService.IsEditedOrder(order, orderUpdate))
+            // wenn wird die status jeweilig Sendung muss erstmal die Verfolgungsnummer eingeben wenn nicht schon eingegeben wurde
+            if (statusId >= 4 && statusId <= 6)
             {
-                var result = await orderService.UpdateOrder(orderUpdate);
-                if (result.Result)
+                if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber == null)
                 {
-                    _ = ShowAlert("Status erfolgreich geändert");
-                    // update exist order status
-                    order.StatusId = statusId;
-                    isUpdatingStatus = false;
-
-					// update openOrder count if status is about Open
-                    OrdersCount count = await orderService.GetOrderCountByStatusId(1);
-					orderService.OpenOrderCount = count.Count;
-					// event to notify state change
-					orderService.NotifyStateChanged();
-
-                    StateHasChanged();
-                    return;
+                    OnAddOrUpdateTrackingNumberShowOverlay(order);
                 }
                 else
-                    _ = ShowAlert($"Fehler bei Statusänderung: {result.Message}");
+                    await UpdateStatusInDatabase(order, statusId);
             }
             else
-                _ = ShowAlert("Keine Änderungen an der Bestellung vorgenommen.");
+            {
+                await UpdateStatusInDatabase(order, statusId);
+            }
         }
         else
             _ = ShowAlert("Fehler bei Statusänderung: Ungültige Status-ID");
         isUpdatingStatus = false;
         StateHasChanged();
     }
-    // Overlay  click table
+    private async Task UpdateStatusInDatabase(Order order,int statusId)
+    {
+        var result = await orderService.UpdateStatusOrder(order.Id, statusId);
+        if (result.Result)
+        {
+            _ = ShowAlert("Status erfolgreich geändert");
+
+            // update exist order status
+            order.StatusId = statusId;
+            isUpdatingStatus = false;
+
+            // update openOrder count if status is about Open
+            OrdersCount count = await orderService.GetOrderCountByStatusId(new List<int>() { 1 });
+            orderService.OpenOrderCount = count.Count;
+            // event to notify state change
+            orderService.NotifyStateChanged();
+
+            // update openOrder count if status is about Canceled or Returned
+            count = await orderService.GetOrderCountByStatusId(new List<int>() { 8, 9 });
+            orderService.CanceledReturnedOrderCount = count.Count;
+            // event to notify state change
+            orderService.NotifyStateChanged();
+
+            StateHasChanged();
+            return;
+        }
+        else
+            _ = ShowAlert($"Fehler bei Statusänderung: {result.Message}");
+    }
+    // Overlay click table
     private bool IsOverlayVisible { get; set; } = false;
     private OverlayItems overlayItems  = null!;
     private void OnAddress(Address address)
@@ -380,5 +661,125 @@
         this.statusId = statusId;
         await OnMoreLoad();
     }
-    
+    // Sendungsnummer
+    private bool IsAddTrackingNumberVisible = false;
+    private Order orderAddTrackingNumber = null!;
+    public void OnAddOrUpdateTrackingNumberShowOverlay(Order order)
+    { 
+        // check if order is not null
+        if (order == null)
+        {
+            _ = ShowAlert("Keine Bestellung ausgewählt.");
+            return;
+        }
+        // Vorbereitung die orderAddTrackingNumber von anfang damit die änderung bei orderAddTrackingNumber nicht an ursprüngliche order geändert wird
+        orderAddTrackingNumber = new Order
+			{
+				Id = order.Id,
+				TrackingNumber = order.TrackingNumber ?? string.Empty // set existing tracking number or empty
+			};
+        IsAddTrackingNumberVisible = true;
+    }
+    private bool IsAddTrackingNumberLoading = false;
+    private async Task OnAddOrUpdateTrackingNumber()
+    {
+        if (IsAddTrackingNumberLoading) return;
+        IsAddTrackingNumberLoading = true;
+
+        if (string.IsNullOrEmpty(orderAddTrackingNumber.TrackingNumber))
+        {
+            _ = ShowAlert("Bitte geben Sie eine Trackingnummer ein.");
+            return;
+        }
+        var result = await orderService.AddOrUpdateTrackingNumber(orderAddTrackingNumber.Id, orderAddTrackingNumber.TrackingNumber);
+        if (result.Result)
+        {
+            _ = ShowAlert(result.Message!);
+            // update die trackingnummer in ursprüngliche order
+            var orderToUpdate = orders.FirstOrDefault(o => o.Id == orderAddTrackingNumber.Id);
+            if (orderToUpdate != null)
+            {
+                orderToUpdate.TrackingNumber = orderAddTrackingNumber.TrackingNumber;
+            }
+
+            // reset tracking number and visibility
+            orderAddTrackingNumber = null!;
+            IsAddTrackingNumberVisible = false;
+        }
+        else
+        {
+            orderAddTrackingNumber.TrackingNumber = null!;
+            _ = ShowAlert($"Fehler beim Hinzufügen der Sendungsnummer: {result.Message}");
+        }
+
+        IsAddTrackingNumberLoading = false;
+    }
+    public void OnAddTrackingNumberClose()
+    {
+        // reset tracking number and visibility
+        orderAddTrackingNumber = null!;
+        IsAddTrackingNumberVisible = false;
+    }
+    // Rechnung
+    private bool IsInvoiceVisible = false;
+    private Invoice invoice = null!;
+    private async void OnInvoice(Order order)
+    {
+        IsInvoiceVisible = true;
+
+        // get bacnk transfer details if not already loaded
+        var result = await invoiceService.GetBankTransferDetailsAsync();
+        if (result.Result == true)
+        {
+            invoice = new Invoice
+                {
+                    projectInfo = projectInfo,
+                    InvoceeNumber = order.OrderDate.Year.ToString() +
+                                        order.OrderDate.Month.ToString("D2") +
+                                        order.OrderDate.Day.ToString("D2") +
+                                        order.Id.ToString("D6"),
+                    order = order,
+
+                };
+        }
+        else
+        {
+            _ = ShowAlert($"{result.Message}");
+            IsInvoiceVisible = false;
+            return;
+        }
+    }
+    private void CloseInvoice()
+    {
+        IsInvoiceVisible = false;
+    }
+    private async Task OnSaveInvoice(Invoice invoice)
+    {
+        try
+        {
+
+            var bytes = await invoiceService.InvoicePdfGeneration(invoice);
+
+            var base64 = Convert.ToBase64String(bytes);
+            var url = $"data:application/pdf;base64,{base64}";
+
+            await JS.InvokeVoidAsync("eval", $@"
+                 const byteCharacters = atob('{base64}');
+                 const byteNumbers = new Array(byteCharacters.length);
+                 for (let i = 0; i < byteCharacters.length; i++) {{
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                 }}
+                 const byteArray = new Uint8Array(byteNumbers);
+                 const blob = new Blob([byteArray], {{ type: 'application/pdf' }});
+                 const blobUrl = URL.createObjectURL(blob);
+                 window.open(blobUrl, '_blank');");
+
+            /* string FileName = $"Rechnung_{invoice.InvoceeNumber}_{invoice.order.Address?.LastName}";
+              _ = JS.InvokeVoidAsync("downloadInvoice", "InvoiceBox", FileName);*/
+        }
+        catch (Exception ex)
+        {
+            _ = ShowAlert($"Fehler beim Speichern der Rechnung: {ex.Message}");
+        }
+    }
 }
