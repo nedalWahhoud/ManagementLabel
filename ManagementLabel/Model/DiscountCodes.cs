@@ -20,6 +20,8 @@ namespace ManagementLabel.Model
         [DateInFuture(ErrorMessage = "Enddatum muss in der Zukunft liegen.")]
         public DateTime EndDate { get; set; } = DateTime.Today.AddDays(30);
         public bool IsActive { get; set; } = true;
+
+        public string Message { get; set; } = string.Empty;
     }
     public class DateInFutureAttribute : ValidationAttribute
     {

@@ -27,7 +27,19 @@
     <script src="js/script.js"></script>
     <script src="js/print.js"></script>
     <!---->
+
+    <script>
+        window.clearSearchBox = (id) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+
+            }
+        };
+     </script>
     <script src="_framework/blazor.web.js"></script>
+
 </body>
 
 </html>

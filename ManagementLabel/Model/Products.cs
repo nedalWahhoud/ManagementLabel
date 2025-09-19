@@ -11,7 +11,7 @@ namespace ManagementLabel.Model
         [Required(ErrorMessage = "Description ist erforderlich.")]
         public string? Description_de { get; set; }
         [Required(ErrorMessage = "Bitte wählen Sie eine Kategorie aus.")]
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public Categories? Category { get; set; }
         public string? Barcode { get; set; } = "BarcodeNull";
         [Range(1, int.MaxValue, ErrorMessage = "Quantity muss größer als 0 sein.")]
@@ -40,6 +40,8 @@ namespace ManagementLabel.Model
         public TaxRate? TaxRate { get; set; }
         public int? ProductGroupID { get; set; }
         public GroupProducts? ProductGroup { get; set; }
+        public bool IsShippable { get; set; } = true;
+        //
         public CartItem CartItem { get; set; } = null!;
         public Products()
         {

@@ -22,6 +22,7 @@
 @using ManagementLabel.Components.DiscountF
 @using ManagementLabel.Components.CategoriesF
 @using ManagementLabel.Components.InvoiceF
+@using ManagementLabel.Components.AddressesF
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
 
@@ -34,6 +35,7 @@
 @inject OrderService orderService
 @inject AuthenticationStateProvider AuthProvider
 @inject CartService cartService
+@inject AddressService addressService
 @inject ReceiptService receiptService
 @inject ProductGroupService productGroupService
 @inject DiscountService discountService

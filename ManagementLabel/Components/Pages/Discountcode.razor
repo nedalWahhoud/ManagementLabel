@@ -6,11 +6,9 @@
         <p class="userInfo">
             <span class="userName">User Name: @authContext.User.Identity!.Name</span>
         </p>
-        <div>
-            <button class="btn btn-primary" @onclick="() => IsOverlayAddCode = true" disabled="@IsOverlayAddCode">Neuen Rabattcode hinzufügen</button>
-        </div>
-        <div>
-            <button class="btn btn-primary" @onclick="OpenAddCategoryForm" disabled="@IsOverlayAddCategory">Neuen Category Rabattcode hinzufügen</button>
+        <div class="addFormBtn">
+            <button class="btn btn-primary" @onclick="OpenAddForm" disabled="@IsOverlayAddCode">Neuen Rabattcode hinzufügen</button>
+            <button class="btn btn-success" @onclick="OpenAddCategoryForm" disabled="@IsOverlayAddCategory">Neuen Category Rabattcode hinzufügen</button>
         </div>
         @* Rabatt kategorie *@
         @if(IsOverlayAddCategory)
@@ -141,6 +139,10 @@
         }
     }
     private bool IsOverlayAddCode = false;
+    private void OpenAddForm()
+    {
+        IsOverlayAddCode = true;
+    }
     public void OnGenerate()
     {
         // Generate a random code
@@ -156,7 +158,6 @@
     // Discount category 
     private DiscountCategory newDiscountCategory = new DiscountCategory();
     private bool IsOverlayAddCategory = false;
-
     private async Task OpenAddCategoryForm()
     {
         await loadCategories();
@@ -196,10 +197,10 @@
         {
             categories ??= await categoryService.LoadCategories();
         }
-    catch
-    {
+        catch
+        {
 
-    }
+        }
     }
     private async Task ShowAlert(string message)
     {

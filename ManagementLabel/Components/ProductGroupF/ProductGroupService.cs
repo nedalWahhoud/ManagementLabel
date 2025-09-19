@@ -8,6 +8,9 @@ namespace ManagementLabel.Components.ProductGroupF
         public List<GroupProducts> DownloadedproductGroups { get; private set; } = [];
         public async Task<ValidationResult> GetAllGroupProductsAsync()
         {
+            if(DownloadedproductGroups.Count != 0)
+                return new ValidationResult() { Result = true, Message = "Product groups already loaded" };
+
             try
             {
                 var response = await _http.GetAsync("api/GroupProducts/getAllGroupProducts");

@@ -8,11 +8,43 @@ namespace ManagementLabel.Components.OrderF
         private readonly HttpClient _http = http;
         public List<Order> DownloadedOrders { get; private set; } = [];
         public List<OrderStatus> OrderStatusList { get; private set; } = [];
+        public List<PaymentMethod> DownloadedPaymentMethods { get; private set; } = [];
+        public List<ShippingProvider> DownloadedShippingProviders { get; private set; } = [];
+        
         public event Action? OnChange;
         public void NotifyStateChanged() => OnChange?.Invoke();
         public void InitializeAsync()
         {
             _ = RefreshCountOpenOrders();
+        }
+        public async Task<ValidationResult> AddOrderAsync(Order order)
+        {
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/Orders/addOrder", order);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                if(result != null && result.Result)
+                {
+                    var getId = result.Message?.Split(':').LastOrDefault();
+                    if (int.TryParse(getId, out int id))
+                    {
+                        order.Id = id; // Set the ID of the new order	
+                        AddProductToLocal(order); // Add the new order to the list
+                    }
+                    return result;
+                }
+                else
+                  return new ValidationResult { Result = false, Message = "Unknown error." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
         }
         private GetItems<Order> getItems = new GetItems<Order>() { PageSize = 5 };
         public async Task<ValidationResult> GetAllOrdersbyStatusAsync(string statusId, List<int>? excludeIds = null)
@@ -158,6 +190,54 @@ namespace ManagementLabel.Components.OrderF
                     NotifyStateChanged();
                 }
                 await Task.Delay(20000); // Wait for 20 seconds before checking again
+            }
+        }
+        public async Task<ValidationResult> GetPaymentMethodsAsync()
+        {
+            if (DownloadedPaymentMethods.Count > 0)
+            {
+                return new ValidationResult { Result = true, Message = "Payment methods already loaded." };
+            }
+            try
+            {
+                var response = await _http.GetAsync("api/Orders/getPaymentMethods");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false, Message = "Failed to retrieve payment methods." };
+                }
+                DownloadedPaymentMethods = await response.Content.ReadFromJsonAsync<List<PaymentMethod>>() ?? [];
+                return new ValidationResult { Result = true, Message = "Payment methods retrieved successfully." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task<ValidationResult> GetShippingProvidersAsync()
+        {
+            if (DownloadedShippingProviders.Count > 0)
+            {
+                return new ValidationResult { Result = true, Message = "Shipping providers already loaded." };
+            }
+            try
+            {
+                var response = await _http.GetAsync("api/Orders/getShippingProvider");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error" };
+                }
+                var shippingProvider = await response.Content.ReadFromJsonAsync<List<ShippingProvider>>();
+
+                if (shippingProvider == null)
+                {
+                    return new ValidationResult { Result = false, Message = "Unknown error" };
+                }
+                DownloadedShippingProviders = shippingProvider;
+                return new ValidationResult { Result = true, Message = "Shipping providers retrieved successfully." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
         // local

@@ -9,7 +9,8 @@ using ManagementLabel.Components.DiscountF;
 using ManagementLabel.Components.ProductGroupF;
 using Microsoft.AspNetCore.Components.Authorization;
 using ManagementLabel.Components.CategoriesF;
-using ManagementLabel.Components.InvoiceF;  
+using ManagementLabel.Components.InvoiceF;
+using ManagementLabel.Components.AddressesF;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,8 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<OrderService>();
 // cart
 builder.Services.AddScoped<CartService>();
+// addresses
+builder.Services.AddScoped<AddressService>();
 // Receipt
 builder.Services.AddScoped<ReceiptService>();
 // Group Products

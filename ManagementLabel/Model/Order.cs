@@ -28,6 +28,7 @@ namespace ManagementLabel.Model
         public double ShippingCost { get; set; }
         [Required(ErrorMessage = "Bitte geben Sie die Trackingnummer ein.")]
         [MinLength(8, ErrorMessage = "Die Trackingnummer muss mindestens 8 Zeichen lang sein.")]
-        public string? TrackingNumber { get; set; } 
+        public string? TrackingNumber { get; set; }
+        public bool IsUserCreated { get; set; }
     }
 }

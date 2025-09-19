@@ -4,9 +4,10 @@
     flex-direction: row;
     gap: 50px;
     width: 100%;
+    height:50px;
     justify-content: center;
 }
-    .TopContiner button, .TopContiner input {
+    .TopContiner  {
         margin: 0;
         margin: 10px 14px;
     }
@@ -22,34 +23,19 @@
     flex-direction: column;
     align-items: center;
 }
-
-.input {
-    display: flex;
-    justify-content: center;
-    padding: 10px 14px;
-    margin-top: 20px;
-    font-size: 16px;
-    width: 200%;
-    max-width: 400px;
-    border: 2px solid #007bff;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-    .input:focus {
-        border-color: #0056b3;
-        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
-    }
-
 .table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 2rem;
+    margin-top: 1rem;
     height: auto;
 }
-
+    .table thead th {
+        position: sticky;
+        top: 0;
+        background-color:#ffffff;
+        z-index: 2; /* يخلي العناوين فوق بقية الخلايا */
+        border-bottom: 2px solid #ccc;
+    }
     .table tbody tr td {
         font-size: 15px;
         vertical-align: middle;
@@ -119,6 +105,74 @@
                 background-color: #5a6268;
                 transform: scale(1.05);
             }
+.AddDecresaseCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content:center;
+    gap: 1px;
+}
+/* search */
+.searchWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+}
+
+.searchInput {
+    width: 100%;
+    padding: 10px 40px 10px 14px; /* تعطي مساحة كافية لزر المسح (يمين) */
+    font-size: 16px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+    .searchInput:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+    }
+
+.clearButton {
+    position: absolute;
+    right: 2%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 25px;
+    line-height: 1;
+    color: #888888;
+    padding: 0;
+    user-select: none;
+}
+    .clearButton:hover {
+        background-color: #e0e0e0;
+        color: #888888; 
+        border-radius: 50%;
+        
+    }
+.filterContainer {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 10px 14px;
+}
+.categoryDropdown {
+    padding: 0px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+}
+    .categoryDropdown:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+    }
 /* cart */
 .productsCart {
     display: flex;
@@ -167,6 +221,20 @@
     border-radius: 12px;
 }
 /* add product */
+
+.overlayAddForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh; /* يمنع الطلوع خارج الشاشة */
+    overflow-y: auto; /* يسمح بالتمرير */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
 .productForm {
     display: flex;
     flex-direction: column;
@@ -196,7 +264,6 @@
 
 .addProductCancelB {
     background-color: #757e84;
-    margin: 10px;
     color: white;
 }
 
@@ -215,7 +282,6 @@
 }
 
 .addProductTopB {
-    margin-top: 20px;
     background-color: #007bff;
     color: white;
 }
@@ -272,19 +338,42 @@
         background-color: #5a6268;
         transform: scale(1.05);
     }
-/* Label-Style*/
-.labelPId {
-    display: block;
-    font-weight: 600;
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 0.4rem;
-    transition: color 0.3s ease;
-    text-align: left;
-    width: auto;
-    border-radius: 5px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+.InvoiceB {
+    color: white;
+    background-color: #16A34A;
 }
+    .InvoiceB:hover {
+        background-color: #15803D;
+    }
+.InvoiceCancelB {
+    color: white;
+    background-color: #757e84;
+}
+    .InvoiceCancelB:hover {
+        background-color: #5a6268;
+        transform: scale(1.05);
+    }
+.InvoiceGeB {
+    color: white;
+    background-color: #7C3AED;
+}
+    .InvoiceGeB:hover {
+        background-color: #6D28D9;
+        transform: scale(1.05);
+    }
+    /* Label-Style*/
+    .labelPId {
+        display: block;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #333;
+        margin-bottom: 0.4rem;
+        transition: color 0.3s ease;
+        text-align: left;
+        width: auto;
+        border-radius: 5px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
 
     .labelPId:hover {
         color: #007acc;
@@ -569,3 +658,208 @@ productInfo {
     background-color: #f44336;
     color: white;
 }
+/* Invoice */
+/* order */
+.addAddressClassB {
+    display: flex;
+    gap: 10px;
+    flex-direction: row;
+    margin-top: 10px;
+}
+.addAddressB {
+    background-color: #007bff;
+    color: white;
+}
+
+    .addAddressB:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+.addressRadio {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.addressOption {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+    /* حتى لا يتمدد label */
+    .addressOption label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-grow: 1;
+        margin: 0;
+    }
+.paymentMethodOption {
+    display: flex;
+    flex-direction: column;
+}
+    .paymentMethodOption label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95rem;
+    }
+.discountClass{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+.placeOrder {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-top: 15px;
+    border-top: 2px solid #cccccc;
+}
+.OrderClassB {
+    display: flex;
+    flex-direction: row;
+    gap:5px;
+}
+.InvoiceGenerateB {
+    background-color: #007bff;
+    color: white;
+}
+
+    .InvoiceGenerateB:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+.InvoiceGeneratCancelB {
+    background-color: #757e84;
+    color: white;
+}
+
+    .InvoiceGeneratCancelB:hover {
+        background-color: #5a6268;
+        transform: scale(1.05);
+    }
+/* موبايل: عرض أقل من 768px */
+@media (max-width: 768px) {
+    /* العنوان العلوي */
+    .TopContiner {
+                flex-direction: column; /* بدل صف إلى عمود */
+                gap: 15px;
+                height: auto;
+                align-items: center;
+            }
+
+            /* الجدول */
+            .tableContiner {
+                max-height: none;
+                overflow-x: auto; /* تمكين التمرير الأفقي */
+                padding: 0 5px;
+            }
+
+            .table {
+                font-size: 13px;
+                margin-top: 1rem;
+            }
+
+                .table tbody tr td {
+                    font-size: 13px;
+                    height: auto;
+                    padding: 8px;
+                }
+
+            /* البحث */
+            .searchWrapper,
+            .filterContainer {
+                max-width: 100%;
+                margin: 8px 0;
+            }
+
+            .searchInput {
+                font-size: 14px;
+                padding: 8px 35px 8px 10px;
+            }
+
+            .clearButton {
+                font-size: 20px;
+            }
+
+            /* عربة المنتجات */
+            .productsCart {
+                flex-direction: column;
+                gap: 6px;
+                max-width: 100%;
+            }
+
+                .productsCart input {
+                    width: 50px;
+                }
+
+            /* صورة المنتج */
+            .productImg {
+                width: 60px;
+                height: 60px;
+            }
+
+
+            .overlayAddForm,
+            .PaymentMethodForm,
+            .overlayOrderForm {
+                max-width: 95%;
+                padding: 1rem;
+            }
+
+            /* زرار الدفع */
+            .buttonMethods {
+                flex-direction: column;
+                padding: 10px;
+                gap: 12px;
+            }
+
+            .CaschButton,
+            .EcButton {
+                width: 100%;
+                padding: 16px;
+                font-size: 14px;
+            }
+
+            /* الفاتورة */
+            .receipt {
+                width: 95%;
+                padding: 1rem;
+            }
+
+                .receipt h2 {
+                    font-size: 1.5rem;
+                    padding-bottom: 1rem;
+                }
+
+                .receipt table thead th,
+                .receipt table tbody td {
+                    font-size: 12px;
+                    padding: 6px;
+                }
+
+            /* الملصق (etikett) */
+            .etikett {
+                width: 95%;
+                margin: 10px auto;
+                padding: 10px;
+            }
+
+            .productInfo p {
+                font-size: 14px;
+            }
+
+            .productForm {
+                margin-top: 1rem;
+                margin-bottom: 1rem;
+                padding: 8px;
+            }
+        }

@@ -135,3 +135,4 @@ C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\sco
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Pages\Discountcode.razor.rz.scp.css
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\bin\Debug\net8.0\itextsharp.dll
+C:\Users\nedal\source\repos\ManagementLabel\ManagementLabel\obj\Debug\net8.0\scopedcss\Components\Layout\AddDecresaseCard.razor.rz.scp.css
