@@ -15,7 +15,7 @@ namespace ManagementLabel.Components.OrderF
         public void NotifyStateChanged() => OnChange?.Invoke();
         public void InitializeAsync()
         {
-            _ = RefreshCountOpenOrders();
+            _ = RefreshCountOpenOrders(true);
         }
         public async Task<ValidationResult> AddOrderAsync(Order order)
         {
@@ -146,8 +146,7 @@ namespace ManagementLabel.Components.OrderF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-        public int OpenOrderCount = 0;
-        public int CanceledReturnedOrderCount = 0;
+        public int NotFinishedOrderCount = 0;
         public async Task<OrdersCount> GetOrderCountByStatusId(List<int> statusIds)
         {
             try
@@ -167,28 +166,21 @@ namespace ManagementLabel.Components.OrderF
                 return new OrdersCount { Count = 0 };
             }
         }
-        public async Task RefreshCountOpenOrders()
+        public async Task RefreshCountOpenOrders(bool IfLoop)
         {
             while (true)
             {
-                // prüf die Count von open orders 
-                int previousCount = 0;
-                var countOrdersOpen = await GetOrderCountByStatusId(new List<int>() { 1 });
-                int currentCount = countOrdersOpen.Count;
-                if (currentCount != previousCount)
+                // prüf die Count von nicht fertige Bestellungen 
+                // die Zahlen sind von id der Status Orders
+                var currentCount = (await GetOrderCountByStatusId(new List<int>() { 1, 2, 3, 4, 5, 9 })).Count;
+                if (currentCount != 0)
                 {
-                    OpenOrderCount = currentCount;
+                    NotFinishedOrderCount = currentCount;
                     NotifyStateChanged();
                 }
-                // prüf die Count von storniert orders 
-                previousCount = 0;
-                var countOrdersCanceled = await GetOrderCountByStatusId(new List<int>() { 8, 9 });
-                currentCount = countOrdersCanceled.Count;
-                if (currentCount != previousCount)
-                {
-                    CanceledReturnedOrderCount = currentCount;
-                    NotifyStateChanged();
-                }
+                if(IfLoop == false)
+                    break;
+
                 await Task.Delay(20000); // Wait for 20 seconds before checking again
             }
         }
@@ -255,6 +247,7 @@ namespace ManagementLabel.Components.OrderF
         {
             if (!DownloadedOrders.Any(p => p.Id == order.Id))
             {
+                
                 DownloadedOrders.Add(order);
             }
         }
@@ -269,16 +262,25 @@ namespace ManagementLabel.Components.OrderF
                .ToList();
             }
             else
+            {
                 searchedOrders = DownloadedOrders
                     .Where(o => (excludeIds == null || !excludeIds.Contains(o.Id)))
                     .ToList();
-
+            }
 
             return searchedOrders;
         }
         public List<int> getIdsFromOrdersLocal(List<Order> orders)
         {
             return orders.Select(o => o.Id).ToList();
+        }
+        public ShippingProvider GetShippingProviderByIdLocal(int id)
+        {
+            return DownloadedShippingProviders.FirstOrDefault(sp => sp.Id == id) ?? null!;
+        }
+        public PaymentMethod GetPaymentMethodByIdLocal(int id)
+        {
+            return DownloadedPaymentMethods.FirstOrDefault(pm => pm.Id == id) ?? null!;
         }
         public void Rest()
         {

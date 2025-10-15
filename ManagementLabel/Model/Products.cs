@@ -41,6 +41,7 @@ namespace ManagementLabel.Model
         public int? ProductGroupID { get; set; }
         public GroupProducts? ProductGroup { get; set; }
         public bool IsShippable { get; set; } = true;
+        public double DiscountedPrice { get; set; } = 0;
         //
         public CartItem CartItem { get; set; } = null!;
         public Products()

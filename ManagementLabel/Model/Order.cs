@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ManagementLabel.Model
 {
@@ -25,10 +26,11 @@ namespace ManagementLabel.Model
         public DiscountCategory? DiscountCategory { get; set; }
         public int? ShippingProviderId { get; set; }
         public ShippingProvider? ShippingProviders { get; set; }
-        public double ShippingCost { get; set; }
         [Required(ErrorMessage = "Bitte geben Sie die Trackingnummer ein.")]
         [MinLength(8, ErrorMessage = "Die Trackingnummer muss mindestens 8 Zeichen lang sein.")]
         public string? TrackingNumber { get; set; }
         public bool IsUserCreated { get; set; }
+        [JsonIgnore]
+        public bool IsUpdatingStatus { get; set; } = false;
     }
 }

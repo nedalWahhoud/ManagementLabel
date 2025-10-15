@@ -83,14 +83,14 @@
                                 ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
                                 ValueExpression="() => order.StatusId"
                                 class="form-select"
-                                disabled="@isUpdatingStatus">
+                                             disabled="@order.IsUpdatingStatus">
                                     @foreach (var status in orderService.OrderStatusList)
                                     {
                                         <option value="@status.Id">@status.Status_de</option>
                                     }
                                 </InputSelect>
 
-                                @if (isUpdatingStatus)
+                                @if (order.IsUpdatingStatus)
                                 {
                                     <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
                                         <span class="visually-hidden">Laden...</span>
@@ -98,7 +98,7 @@
                                 }
                             </td>
                             <td>
-                                @order.ShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))
+                                @order.ShippingProviders?.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))
                             </td>
                             <td>
                                 @if(order.ShippingProviderId != null && order.ShippingProviders != null)
@@ -330,16 +330,15 @@
         }
         else
         {
-            // _ = ShowAlert($"Fehler beim Laden der Bestellungen: {result.Message}");
+            _ = ShowAlert($"Fehler beim Laden der Bestellungen: {result.Message}");
         }
     }
     // change status table
-    private bool isUpdatingStatus = false;
     private async Task OnStatusChangedItem(Order order, string value)
     {
         if (order == null || string.IsNullOrEmpty(value)) return;
 
-        isUpdatingStatus = true;
+        order.IsUpdatingStatus = true;
 
         if (int.TryParse(value, out int statusId))
         {
@@ -360,7 +359,7 @@
         }
         else
             _ = ShowAlert("Fehler bei Statusänderung: Ungültige Status-ID");
-        isUpdatingStatus = false;
+        order.IsUpdatingStatus = false;
         StateHasChanged();
     }
     private async Task UpdateStatusInDatabase(Order order,int statusId)
@@ -372,21 +371,10 @@
 
             // update exist order status
             order.StatusId = statusId;
-            isUpdatingStatus = false;
-
             // update openOrder count if status is about Open
-            OrdersCount count = await orderService.GetOrderCountByStatusId(new List<int>() { 1 });
-            orderService.OpenOrderCount = count.Count;
-            // event to notify state change
-            orderService.NotifyStateChanged();
-
-            // update openOrder count if status is about Canceled or Returned
-            count = await orderService.GetOrderCountByStatusId(new List<int>() { 8, 9 });
-            orderService.CanceledReturnedOrderCount = count.Count;
-            // event to notify state change
-            orderService.NotifyStateChanged();
-
+            await orderService.RefreshCountOpenOrders(false);
             StateHasChanged();
+
             return;
         }
         else

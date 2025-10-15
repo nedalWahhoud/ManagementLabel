@@ -189,6 +189,8 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.IsShippable != editProduct.IsShippable)
                 return true;
+            if (currentProduct.DiscountedPrice != editProduct.DiscountedPrice)
+                return true;
             if (currentProduct.Image!.Length != editProduct.Image!.Length)
                 return true;
 

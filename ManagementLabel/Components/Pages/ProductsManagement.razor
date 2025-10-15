@@ -2,6 +2,9 @@
 @using ManagementLabel.ProductsF;
 @using ManagementLabel.EitkettBarcode
 @using ManagementLabel.Model
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
+
 
 @rendermode InteractiveServer
 
@@ -42,19 +45,34 @@
 		</div>
 		@* choose the Columns *@
 		<div class="mb-3">
-			<strong>Wähle Spalten:</strong>
-			@foreach (var col in columnOptions)
-			{
-				<label class="me-3">
-					<input type="checkbox" @bind="col.IsVisible" />
-					@col.Label
-				</label>
-			}
+			<div class="dropdown">
+				<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+					Wähle Spalten
+				</button>
+				<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+					@foreach (var col in columnOptions)
+					{
+						<li>
+							<div class="form-check form-switch">
+								<input class="form-check-input"
+								type="checkbox"
+								id="@col.Key"
+								@bind="col.IsVisible"
+								@bind:after="OnColumnChanged" />
+								<label class="form-check-label" for="@col.Key">
+									@col.Label
+								</label>
+							</div>
+						</li>
+					}
+				</ul>
+			</div>
 		</div>
+
 		@* table *@
 		<div tabindex="0" @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
 
-			<table class="table">
+			<table class="table text-center align-middle">
 				<thead>
 					<tr>
 						@if (ShowColumn("Index")) {<th>Index</th>}
@@ -74,6 +92,7 @@
 						@if (ShowColumn("TaxRate")){<th>Steuersatz</th>}
 						@if (ShowColumn("Group")){<th>Gruppe</th>}
 						@if (ShowColumn("IsShippable")){<th>Versandfähig</th>}
+						@if (ShowColumn("DiscountedPrice")){<th>Im Angebot</th>}
 						@if (ShowColumn("Username")){<th>Benutzername</th>}
 						@if (ShowColumn("Img")){<th>Img</th>}
 						<th class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "" : "hidden")">Löschen</th>
@@ -169,6 +188,7 @@
 											</td>
 										}
 										@if (ShowColumn("IsShippable")){<td><InputCheckbox @bind-Value="_editProduct.IsShippable" /></td>}
+										@if (ShowColumn("DiscountedPrice")){<td><InputNumber @bind-Value="_editProduct.DiscountedPrice" /></td>}
 										@if (ShowColumn("Username")) {<td>@(_editProduct.User?.UserName ?? "")</td>}
 										@if (ShowColumn("Img")) {<td><InputFile id="Image" class="form-control" OnChange="EditProductImageUpload" /></td>}
 										<td class="@(authContext.User.IsInRole("admin")  && _editProduct!=null ? "editForm" : "hidden")">
@@ -215,10 +235,8 @@
 										@if (ShowColumn("Manufacturer")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Manufacturer!.Name</td>}
 										@if (ShowColumn("TaxRate")) {<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@((htmlProducts[i].TaxRate?.Rate.ToString("0") + "%") ?? "")</td>}
 										@if (ShowColumn("Group")) {<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].ProductGroup?.GroupName_de ?? "")</td>}
-										@if (ShowColumn("IsShippable"))
-										{
-											<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].IsShippable</td>
-										}
+										@if (ShowColumn("IsShippable")){<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].IsShippable</td>}
+										@if (ShowColumn("DiscountedPrice")){<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].DiscountedPrice</td>}
 										@if (ShowColumn("Username")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].User?.UserName ?? "")</td>}
 										@if (ShowColumn("Img")){<td><img src="data:image/png;base64,@(!string.IsNullOrEmpty(src) ? src : "images/sample.jpg")" class="productImg" /> </td>}
 									}
@@ -228,14 +246,6 @@
 											Delete
 										</button>
 									</td>
-									@*<td class="@(authContext.User.IsInRole("admin") && IsShowReceiptForm ? "productsCart" : "hidden")">
-
-										<button class="btn @(cartService.IsProductAdded(thisProducts.CartItem.ProductId)  ? "btnProductAdded" : "btnProduct") "
-										@onclick="() => CartChanged(thisProducts)">
-											@(cartService.IsProductAdded(thisProducts.CartItem.ProductId) ? $"➕({cartService.GetQuantityOfProduct(thisProducts.CartItem.ProductId)})" : "🛒")
-										</button>
-										<InputNumber @bind-Value="thisProducts.CartItem.Quantity" Min="0" class="form-control" />
-									</td>*@
 									@* Rechnung *@
 									<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
 										<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@thisProducts.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
@@ -361,6 +371,11 @@
 								<ValidationMessage For="@(() => newProduct.IsShippable)" />
 							</div>
 							<div class="formGroupAdd">
+								<label for="ImAngebot">Im Angebot</label>
+								<InputNumber id="ImAngebot" min="0" class="form-control" @bind-Value="newProduct.DiscountedPrice" />
+								<ValidationMessage For="@(() => newProduct.DiscountedPrice)" />
+							</div>
+							<div class="formGroupAdd">
 								<label for="Image">Image</label>
 								<InputFile id="Image" class="form-control" OnChange="AddProductImageUpload" />
 								<ValidationMessage For="@(() => newProduct.Image)" />
@@ -439,7 +454,7 @@
 							@for (int i = 0; i < orderService.DownloadedPaymentMethods.Count; i++)
 							{
 								if (orderService.DownloadedPaymentMethods[i].Id == 1 || orderService.DownloadedPaymentMethods[i].Id == 2 ||
-						orderService.DownloadedPaymentMethods[i].Id == 5)
+							orderService.DownloadedPaymentMethods[i].Id == 5)
 								{
 									var paymentMethod = orderService.DownloadedPaymentMethods[i];
 									<label>
@@ -449,7 +464,7 @@
 								}
 							}
 						</InputRadioGroup>
-					
+
 					</div>
 					@* Discount Code *@
 					<div class="discountClass">
@@ -533,10 +548,8 @@
 							double totalPrice = 0;
 							if (order.ShippingProviders != null && order.ShippingProviderId > 0)
 							{
-								GetShippingCost();
-
-								<span>Versandkosten: @order.ShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
-								totalPrice = order.TotalPrice + order.ShippingCost;
+								<span>Versandkosten: @order.ShippingProviders.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
+								totalPrice = order.TotalPrice + order.ShippingProviders.PublicShippingCost;
 							}
 							else
 								totalPrice = order.TotalPrice;
@@ -700,13 +713,25 @@
 	  new("Steuersatz", "TaxRate", false),
 	  new("Gruppe", "Group", false),
 	  new("Versandfähig", "IsShippable", false),
+	  new("Im Angebot", "DiscountedPrice", false),
 	  new("Benutzername", "Username", false),
 	  new("Img", "Img", true),
     };
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
-	protected override  void OnInitialized()
+	protected override async Task OnInitializedAsync()
 	{
 		_ = loadCategories();
+
+		//await LocalStorage.RemoveItemAsync("columnOptions");
+
+		var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
+		if (saved is not null)
+			columnOptions = saved;
+	}
+	private async Task OnColumnChanged()
+	{
+		// كل ما يتغير أي Checkbox، نحفظ القائمة
+		await LocalStorage.SetItemAsync("columnOptions", columnOptions);
 	}
 	// load products
 	private DataProcessP dpP = new DataProcessP();
@@ -858,6 +883,7 @@
 					TaxRateId = doubleSelectProduct.TaxRateId,
 					ProductGroupID = doubleSelectProduct.ProductGroupID,
 					IsShippable = doubleSelectProduct.IsShippable,
+					DiscountedPrice = doubleSelectProduct.DiscountedPrice,
 					Image = doubleSelectProduct.Image,
 					UserId = user?.Id ?? 0,
 					CartItem = doubleSelectProduct.CartItem
@@ -1243,20 +1269,6 @@
 	{
 		order.TotalPrice = cartService.GetTotalPrice();
 	}
-	private void GetShippingCost()
-	{
-		if (order.ShippingProviders != null && order.ShippingProviderId > 0)
-		{
-			if (order.TotalPrice > order.ShippingProviders.FreeShippingThreshold)
-			{
-				order.ShippingCost = 0;
-			}
-			else
-			{
-				order.ShippingCost = order.ShippingProviders.PublicShippingCost;
-			}
-		}
-	}
 	private async Task OnPaymentChanged(int newPaymentId)
 	{
 		// 5 ist die payment überweisung dass bedeuetet die versandkosten soll verlangt werden
@@ -1328,14 +1340,11 @@
 				DiscountCodeId = order.DiscountCodeId ?? null,
 				DiscountCategoryId = order.DiscountCategoryId ?? null,
 				ShippingProviderId = order.ShippingProviderId ?? null,
-				ShippingCost = order.ShippingCost,
 				IsUserCreated = false
 			};
 		var result1 = await orderService.AddOrderAsync(createOrder);
 		if (result1.Result)
 		{
-			// clear cart
-			cartService.ClearCart();
 			// get added order
 			order = orderService.DownloadedOrders[orderService.DownloadedOrders.Count - 1];
 			// get the products for the order items
@@ -1354,25 +1363,36 @@
 			{
 				order.DiscountCategory = discountCategory;
 			}
+
+			// Rechnung
+			order.ShippingProviders = orderService.GetShippingProviderByIdLocal(order.ShippingProviderId ?? 0);
+			order.PaymentMethod = orderService.GetPaymentMethodByIdLocal(order.PaymentMethodId);
+			invoice = new Invoice
+				{
+					projectInfo = projectInfo,
+					InvoceeNumber = order.OrderDate.Year.ToString() +
+												   order.OrderDate.Month.ToString("D2") +
+												   order.OrderDate.Day.ToString("D2") +
+												   order.Id.ToString("D6"),
+					order = order,
+				};
+
+			IsInvoiceVisible = true;
+			IsShowOrder = false;
+			// clear cart
+			cartService.ClearCart();
+			// clear the newaddress
+			newAddress = new()!;
+			selectedAddress = false;;
+			order = new();
+			// default payment id
+			selectedPaymentId = 0;
 		}
 		else
 		{
 			_ = JS.InvokeVoidAsync("alert", result1.Message);
 			return ;
 		}
-		// Rechnung
-		invoice = new Invoice
-			{
-				projectInfo = projectInfo,
-				InvoceeNumber = order.OrderDate.Year.ToString() +
-										   order.OrderDate.Month.ToString("D2") +
-										   order.OrderDate.Day.ToString("D2") +
-										   order.Id.ToString("D6"),
-				order = order,
-			};
-
-		IsInvoiceVisible = true;
-		IsShowOrder = false;
 	}
 	private async Task HandleInvoiceClose()
 	{
@@ -1662,7 +1682,7 @@
 		await JS.InvokeVoidAsync("showAlert", message);
 	}
 	private Users? user;
-	private DotNetObjectReference<EitkettBarcode>? objRef;
+	private DotNetObjectReference<ProductsManagement>? objRef;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)

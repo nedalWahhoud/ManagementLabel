@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using ManagementLabel.Components.CategoriesF;
 using ManagementLabel.Components.InvoiceF;
 using ManagementLabel.Components.AddressesF;
+using Blazored.LocalStorage;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,7 +47,8 @@ builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<CategoryService>();
 // Invoice
 builder.Services.AddScoped<InvoiceService>();
-
+//
+builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

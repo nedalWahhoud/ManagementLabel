@@ -1,15 +1,18 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
+using ManagementLabel.Components.OrderF;
 using ManagementLabel.Model;
 using Microsoft.Extensions.Options;
+using static iTextSharp.text.pdf.AcroFields;
 
 
 namespace ManagementLabel.Components.InvoiceF
 {
-    public class InvoiceService(HttpClient http)
+    public class InvoiceService(HttpClient http, OrderService orderService)
     {
         private readonly HttpClient _http = http;
-     
+        private readonly OrderService _orderService = orderService;
+
         public List<BankTransferDetails> DownloadedBankTransferDetails = [];
         public async Task<ValidationResult> GetBankTransferDetailsAsync()
         {
@@ -47,7 +50,7 @@ namespace ManagementLabel.Components.InvoiceF
         {
             if (DownloadedBankTransferDetails.Count == 0)
             {
-               await GetBankTransferDetailsAsync();
+                await GetBankTransferDetailsAsync();
             }
             // get projectinfo
             _projectInfo = invoice.projectInfo;
@@ -63,7 +66,7 @@ namespace ManagementLabel.Components.InvoiceF
                 document.Open();
 
                 // space table
-                PdfPTable spaceTable = new (1)
+                PdfPTable spaceTable = new(1)
                 {
                     TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin,
                     LockedWidth = true,
@@ -81,7 +84,7 @@ namespace ManagementLabel.Components.InvoiceF
                 document.Add(spaceTable);
 
                 // address 
-                PdfPTable addressTable = new (2)
+                PdfPTable addressTable = new(2)
                 {
                     TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin,
                     LockedWidth = true,
@@ -95,7 +98,7 @@ namespace ManagementLabel.Components.InvoiceF
                 // absender
                 string senderAddress = $"{invoice.projectInfo.Value.Name} {invoice.projectInfo.Value.Address.Replace("\n", "")}";
                 Font font = FontFactory.GetFont(FontFactory.HELVETICA, 6, BaseColor.BLACK);
-                Chunk underlinedSender = new (senderAddress, font);
+                Chunk underlinedSender = new(senderAddress, font);
                 underlinedSender.SetUnderline(0.1f, -1f);
                 Paragraph absenderP = new()
                 {
@@ -107,20 +110,20 @@ namespace ManagementLabel.Components.InvoiceF
                 if (invoice.order.Address != null)
                 {
                     string recipientAddressName = $"{invoice.order.Address.FirstName} {invoice.order.Address.LastName}";
-                    Paragraph p1 = new (recipientAddressName, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
+                    Paragraph p1 = new(recipientAddressName, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
                     {
                         SpacingAfter = 1f // مسافة بعد الفقرة
                     };
                     addressCell.AddElement(p1);
                     string recipientAddress = $"{invoice.order.Address.Street}";
-                    Paragraph p2 = new (recipientAddress, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
+                    Paragraph p2 = new(recipientAddress, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
                     {
                         SpacingAfter = 1f,
 
                     };
                     addressCell.AddElement(p2);
                     string zipCodeCity = $"{invoice.order.Address.ZipCode} {invoice.order.Address.City}";
-                    Paragraph p3 = new (zipCodeCity, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
+                    Paragraph p3 = new(zipCodeCity, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
                     addressCell.AddElement(p3);
                 }
 
@@ -135,13 +138,13 @@ namespace ManagementLabel.Components.InvoiceF
                     VerticalAlignment = Element.ALIGN_MIDDLE
                 };
                 string Email = $"E-Mail: {invoice.projectInfo.Value.Email}";
-                Paragraph ContactP1 = new (Email, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
+                Paragraph ContactP1 = new(Email, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
                 {
                     SpacingAfter = 1f // مسافة بعد الفقرة
                 };
                 contectCell.AddElement(ContactP1);
                 string Tel = $"Tel.: {invoice.projectInfo.Value.Phone}";
-                Paragraph ContactP2 = new (Tel, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
+                Paragraph ContactP2 = new(Tel, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
                 contectCell.AddElement(ContactP2);
 
 
@@ -153,14 +156,14 @@ namespace ManagementLabel.Components.InvoiceF
 
 
                 // Invoice Info
-                PdfPTable InvoiceInfoTable = new (4)
+                PdfPTable InvoiceInfoTable = new(4)
                 {
                     TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin,
                     LockedWidth = true,
                 };
                 // rechnung text
                 string Invoice = "Rechnung";
-                Paragraph InvoiceP = new (Invoice, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
+                Paragraph InvoiceP = new(Invoice, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
                 {
                     Alignment = Element.ALIGN_LEFT,
                     SpacingAfter = 10f
@@ -183,25 +186,25 @@ namespace ManagementLabel.Components.InvoiceF
                 Font font1 = FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);
 
                 // إنشاء الخلايا الأربعة في صف واحد
-                PdfPCell cell1 = new (new Phrase($"Rechnungsnummer\n{invoice.InvoceeNumber}", font1))
+                PdfPCell cell1 = new(new Phrase($"Rechnungsnummer\n{invoice.InvoceeNumber}", font1))
                 {
                     Border = Rectangle.NO_BORDER,
                     PaddingBottom = 5f
                 };
 
-                PdfPCell cell2 = new (new Phrase($"Rechnungsdatum\n{DateTime.Today:dd.MM.yyyy}", font1))
+                PdfPCell cell2 = new(new Phrase($"Rechnungsdatum\n{DateTime.Today:dd.MM.yyyy}", font1))
                 {
                     Border = Rectangle.NO_BORDER,
                     PaddingBottom = 5f
                 };
 
-                PdfPCell cell3 = new (new Phrase($"Order Id\n{invoice.order.Id}", font1))
+                PdfPCell cell3 = new(new Phrase($"Order Id\n{invoice.order.Id}", font1))
                 {
                     Border = Rectangle.NO_BORDER,
                     PaddingBottom = 5f
                 };
 
-                PdfPCell cell4 = new (new Phrase($"Ordersdatum\n{invoice.order.OrderDate:dd.MM.yyyy HH:mm}", font1))
+                PdfPCell cell4 = new(new Phrase($"Ordersdatum\n{invoice.order.OrderDate:dd.MM.yyyy HH:mm}", font1))
                 {
                     Border = Rectangle.NO_BORDER,
                     PaddingBottom = 5f
@@ -231,7 +234,7 @@ namespace ManagementLabel.Components.InvoiceF
                 string[] headers = ["Pos.", "Produkt", "Menge", "Einzelpreis", "Steuer", "Preis"];
                 foreach (string header in headers)
                 {
-                    PdfPCell headerCell = new (new Phrase(header, headerFont))
+                    PdfPCell headerCell = new(new Phrase(header, headerFont))
                     {
                         BackgroundColor = new BaseColor(230, 230, 230),
                         HorizontalAlignment = Element.ALIGN_CENTER,
@@ -309,11 +312,16 @@ namespace ManagementLabel.Components.InvoiceF
                 orderItemsTable.AddCell(new PdfPCell(new Phrase("Preis: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                 orderItemsTable.AddCell(new PdfPCell(new Phrase(TotalGross.ToString("C", new System.Globalization.CultureInfo("de-DE")), cellFont)) { Colspan = 4, Padding = 5 });
                 // Versandkosten
+                if (invoice.order != null && invoice.order.ShippingProviderId != null && invoice.order.ShippingProviders == null)
+                {
+                    await _orderService.GetShippingProvidersAsync();
+                    invoice.order.ShippingProviders = _orderService.GetShippingProviderByIdLocal(invoice.order.ShippingProviderId ?? 0);
+                }
                 orderItemsTable.AddCell(new PdfPCell(new Phrase("Versandskosten: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
-                orderItemsTable.AddCell(new PdfPCell(new Phrase(invoice.order?.ShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE")), cellFont)) { Colspan = 4, Padding = 5 });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase(invoice.order?.ShippingProviders?.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE")), cellFont)) { Colspan = 4, Padding = 5 });
                 // Gesamtbrutto
                 orderItemsTable.AddCell(new PdfPCell(new Phrase("Gesamtbrutto: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
-                orderItemsTable.AddCell(new PdfPCell(new Phrase((TotalGross + invoice.order?.ShippingCost ?? 0).ToString("C", new System.Globalization.CultureInfo("de-DE")), cellFont)) { Colspan = 4, Padding = 5 });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase((TotalGross + invoice.order?.ShippingProviders?.PublicShippingCost ?? 0).ToString("C", new System.Globalization.CultureInfo("de-DE")), cellFont)) { Colspan = 4, Padding = 5 });
                 // Steuer 
                 GetTaxAmountRate19 = (TotalPriceOfTaxRate19 / 100) * 19;
                 GetTaxAmountRate7 = (TotalPriceOfTaxRate7 / 100) * 7;
@@ -374,6 +382,101 @@ namespace ManagementLabel.Components.InvoiceF
             discountDetails.categoryName = matchedItem?.Product?.Category?.Name_de ?? "null";
 
             return discountDetails;
+        }
+
+        public double GetTotalPriceBeforeDiscount(Order order)
+        {
+            if (order.DiscountCode != null)
+            {
+                return order.TotalPrice / (1 - ((order.DiscountCode?.DiscountPercentage ?? 0) / 100.0));
+            }
+            else if (order.DiscountCategory != null)
+            {
+                double categoryitemsPrice = 0;
+                foreach (var item in order.OrderItems)
+                {
+                    if ((item.Product?.CategoryId ?? 0) == (order.DiscountCategory?.CategoriesId ?? 0))
+                    {
+                        categoryitemsPrice += item.UnitPrice * item.Quantity;
+                    }
+                }
+                double discountValue = categoryitemsPrice * (order.DiscountCategory?.DiscountPercentage ?? 0) / 100.0;
+                return order.TotalPrice + discountValue;
+
+            }
+            return order.TotalPrice;
+        }
+        public double GetTotalPriceAfterDiscount(Order order)
+        {
+            return order.TotalPrice;
+        }   
+        public double GetShippingCost(Order order)
+        {
+            return order.ShippingProviders?.PublicShippingCost ?? 0;
+        }
+        public double GetTotalPrice(Order order)
+        {
+            return order.TotalPrice + (order.ShippingProviders?.PublicShippingCost ?? 0);
+        }
+        public double GetTotalGross(Order order)
+        {
+            return order.TotalPrice;
+        }
+        public double GetTotalPriceOfTaxRate19(Order order)
+        {
+            double TotalPriceOfTaxRate19 = 0;
+            foreach (var item in order.OrderItems)
+            {
+                double itemPreis = item.UnitPrice * item.Quantity;
+                if (item.Product?.TaxRate != null && item.Product?.TaxRate?.Rate == 19)
+                {
+                    if (order.DiscountCode != null)
+                    {
+                        TotalPriceOfTaxRate19 += itemPreis - ((itemPreis / 100) * order.DiscountCode.DiscountPercentage);
+                    }
+                    else if (order.DiscountCategory != null && order.DiscountCategory.CategoriesId == item.Product?.CategoryId)
+                    {
+                        TotalPriceOfTaxRate19 += itemPreis - ((itemPreis / 100) * order.DiscountCategory.DiscountPercentage);
+                    }
+                    else
+                        TotalPriceOfTaxRate19 += itemPreis;
+                }
+            }
+            return TotalPriceOfTaxRate19;
+        }
+        public double GetTotalPriceOfTaxRate7(Order order)
+        {
+            double TotalPriceOfTaxRate7 = 0;
+            foreach (var item in order.OrderItems)
+            {
+                double itemPreis = item.UnitPrice * item.Quantity;
+                if (item.Product?.TaxRate != null && item.Product?.TaxRate?.Rate == 7)
+                {
+                    if (order.DiscountCode != null)
+                    {
+                        TotalPriceOfTaxRate7 += itemPreis - ((itemPreis / 100) * order.DiscountCode.DiscountPercentage);
+                    }
+                    else if (order.DiscountCategory != null && order.DiscountCategory.CategoriesId == item.Product?.CategoryId)
+                    {
+                        TotalPriceOfTaxRate7 += itemPreis - ((itemPreis / 100) * order.DiscountCategory.DiscountPercentage);
+                    }
+                    else
+                        TotalPriceOfTaxRate7 += itemPreis;
+                }
+            }
+            return TotalPriceOfTaxRate7;
+        }
+        public double GetTaxAmountRate19(Order order)
+        {
+            return (GetTotalPriceOfTaxRate19(order) / 100) * 19;
+        }
+        public double GetTaxAmountRate7(Order order)
+        {
+            return (GetTotalPriceOfTaxRate7(order) / 100) * 7;
+        }
+        public double GetTotalNetPrice(Order order)
+        {
+            return GetTotalGross(order) - (GetTaxAmountRate19(order) + GetTaxAmountRate7(order));
         }
     }
     public class PdfEvent(List<BankTransferDetails> bankDetails, IOptions<ProjectInfo> projectInfo) : PdfPageEventHelper
