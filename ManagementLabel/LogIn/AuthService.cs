@@ -12,7 +12,7 @@ namespace ManagementLabel.LogIn
 
         public AuthService(HttpClient http, AuthenticationStateProvider authStateProvider)
         {
-           
+
             _http = http;
             _authStateProvider = authStateProvider;
         }
@@ -33,17 +33,21 @@ namespace ManagementLabel.LogIn
 
                 // check admin role 
                 var claimsIdentity = (_authStateProvider as CustomAuthStateProvider)?.GetIdentity(result.Token);
-                if(!claimsIdentity!.HasClaim(ClaimTypes.Role,"admin"))
+                if (!claimsIdentity!.HasClaim(ClaimTypes.Role, "admin"))
                     return new ValidationResult { Result = false, Message = "Sie haben keine Admin Rechte" };
 
                 // set the authorization header
                 (_authStateProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(result.Token);
+                if (loginModel.RememberMe)
+                    (_authStateProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", result.Token);
+                else
+                    (_authStateProvider as CustomAuthStateProvider)?.SessionStorageSet("authToken", result.Token);
 
                 return new ValidationResult { Result = true, Message = "Login successful." };
             }
             catch (Exception ex)
             {
-                return new ValidationResult{ Result = false, Message = $"An error occurred during login: {ex.Message}"};
+                return new ValidationResult { Result = false, Message = $"An error occurred during login: {ex.Message}" };
             }
         }
         public async Task Logout()
@@ -53,6 +57,22 @@ namespace ManagementLabel.LogIn
                 await customAuthStateProvider.NotifyUserLogout();
             }
             _http!.DefaultRequestHeaders.Authorization = null;
+        }
+
+        public async Task<ValidationResult> CheckAdminStatus(int id)
+        {
+            try
+            {
+                HttpResponseMessage response = await _http!.GetAsync($"api/Users/checkAdminStatus/{id}");
+                if (!response.IsSuccessStatusCode)
+                    return new ValidationResult { Result = false, Message = "Admin check failed." };
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                return result ?? new ValidationResult { Result = false, Message = "Admin check failed." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = $"An error occurred during admin check: {ex.Message}" };
+            }
         }
     }
 }

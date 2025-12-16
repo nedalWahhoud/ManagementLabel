@@ -12,6 +12,8 @@ using ManagementLabel.Components.CategoriesF;
 using ManagementLabel.Components.InvoiceF;
 using ManagementLabel.Components.AddressesF;
 using Blazored.LocalStorage;
+using Microsoft.Extensions.Options;
+using ManagementLabel.Components.ProductImagesF;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,11 +21,33 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddServerSideBlazor()
+    .AddHubOptions(options =>
+    {
+        options.ClientTimeoutInterval = TimeSpan.FromMinutes(5); // Wartet 5 Minuten, bevor die Verbindung getrennt wird
+        options.KeepAliveInterval = TimeSpan.FromSeconds(15);    // Alle 15 Sekunden ein Ping durchführen, um die Verbindung aufrechtzuerhalten
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);   
+    })
+    .AddCircuitOptions(options =>
+    {
+        // Speichert den Benutzerstatus für 10 Minuten nach Verbindungsverlust
+        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
+        options.JSInteropDefaultCallTimeout = TimeSpan.FromSeconds(30);
+    });
+
 // ProjectInfo 
 builder.Services.Configure<ProjectInfo>(builder.Configuration.GetSection("ProjectInfo"));
 
-// API
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7250") });
+// app config
+builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
+
+// http client with base address from app config
+builder.Services.AddScoped(sp =>
+{
+    var config = sp.GetRequiredService<IOptions<AppConfig>>().Value;
+    return new HttpClient { BaseAddress = config.ApiUri };
+});
+
 // auth
 builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
@@ -47,6 +71,8 @@ builder.Services.AddScoped<DiscountService>();
 builder.Services.AddScoped<CategoryService>();
 // Invoice
 builder.Services.AddScoped<InvoiceService>();
+// ProductImages
+builder.Services.AddScoped<ProductImagesService>();
 //
 builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();

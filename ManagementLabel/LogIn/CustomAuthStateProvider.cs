@@ -20,21 +20,26 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         try
         {
+            string token = null!;
             ClaimsPrincipal user;
-            string token = await LocalstorageGet("authToken");
-            if (string.IsNullOrWhiteSpace(token))
+            string localToken = await LocalstorageGet("authToken");
+            string sessionToken = await SessionStorageGet("authToken");
+
+            if (localToken == null && sessionToken == null)
             {
                 // User is not logged
                 user = new ClaimsPrincipal(new ClaimsIdentity());
+                return new AuthenticationState(user);
             }
             else
             {
-                var identity = GetIdentity(token);
-                NotifyUserAuthentication(token);
-
-                user = new ClaimsPrincipal(identity);
+                token = localToken ?? sessionToken;
             }
 
+            var identity = GetIdentity(token);
+            NotifyUserAuthentication(token);
+
+            user = new ClaimsPrincipal(identity);
             return new AuthenticationState(user);
         }
         catch
@@ -44,27 +49,43 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     }
     public void NotifyUserAuthentication(string token)
     {
-        // Save token to localStorage
-        LocalstorageSet("authToken", token);
         var identity = GetIdentity(token);
 
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity))));
     }
     public async Task NotifyUserLogout()
     {
-        await _js.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        await LocalstorageRemove("authToken");
         // Reset the product service state
         _productService.Reset();
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))));
     }
-    private void LocalstorageSet(string key, string value)
+    public void LocalstorageSet(string key, string value)
     {
         _ = _js.InvokeVoidAsync("localStorage.setItem", key, value);
+    }
+    private async Task LocalstorageRemove(string key)
+    {
+        await _js.InvokeVoidAsync("localStorage.removeItem", key);
     }
     private async Task<string> LocalstorageGet(string key)
     {
         string value = await _js.InvokeAsync<string>("localStorage.getItem", key);
         return value;
+    }
+    public async Task SessionStorageSet(string key, string value)
+    {
+        await _js.InvokeVoidAsync("sessionStorage.setItem", key, value);
+    }
+
+    private async Task<string> SessionStorageGet(string key)
+    {
+        return await _js.InvokeAsync<string>("sessionStorage.getItem", key);
+    }
+
+    private async Task SessionStorageRemove(string key)
+    {
+        await _js.InvokeVoidAsync("sessionStorage.removeItem", key);
     }
     public ClaimsIdentity GetIdentity(string token)
     {

@@ -6,10 +6,10 @@ namespace ManagementLabel.Components.ProductGroupF
     {
         private readonly HttpClient _http = http;
         public List<GroupProducts> DownloadedproductGroups { get; private set; } = [];
-        public async Task<ValidationResult> GetAllGroupProductsAsync()
+        public async Task<List<GroupProducts>> GetAllGroupProductsAsync()
         {
-            if(DownloadedproductGroups.Count != 0)
-                return new ValidationResult() { Result = true, Message = "Product groups already loaded" };
+            if (DownloadedproductGroups.Count != 0)
+                return DownloadedproductGroups;
 
             try
             {
@@ -17,7 +17,7 @@ namespace ManagementLabel.Components.ProductGroupF
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult() { Message = response.RequestMessage?.ToString() ?? "Failed to load product groups", Result = false };
+                    return [];
                 }
 
                 var groupProducts = await response.Content.ReadFromJsonAsync<List<GroupProducts>>() ?? [];
@@ -25,11 +25,11 @@ namespace ManagementLabel.Components.ProductGroupF
                 // add to local list
                 DownloadedproductGroups.AddRange(groupProducts);
 
-                return new ValidationResult() { Result = true, Message = "Product groups loaded successfully" };
+                return DownloadedproductGroups;
             }
-            catch (Exception ex)
+            catch
             {
-                return new ValidationResult() { Message = ex.Message, Result = false };
+                return [];
             }
         }
     }

@@ -1,6 +1,4 @@
-﻿using ManagementLabel.Model;
-
-namespace ManagementLabel.ProductsF
+﻿namespace ManagementLabel.Model
 {
     public class Categories
     {

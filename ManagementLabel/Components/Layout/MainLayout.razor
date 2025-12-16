@@ -8,39 +8,75 @@
 }
 else
 {
-<div class="page">
-    <AuthorizeView>
-      <Authorized>
-        <div class="sidebar">
-            <NavMenu />
-        </div>
-      </Authorized>
-    </AuthorizeView>
-    <main>
-        <article class="content px-4">
-          @Body
-        </article>
-    </main>
-</div>
+    <div class="page">
+        <AuthorizeView>
+            <Authorized>
+                <div class="sidebar">
+                    <NavMenu />
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <main>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
 }
 @code {
+    protected override void OnInitialized()
+    {
+        // Subscribe to location changes
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
 
     private bool isRended = false;
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
-			// Initialize the orderService to start count funktion of openOrders 
+            _ = CheckAdminStatusAsync();
+            // Initialize the orderService to start count funktion of openOrders 
             orderService.InitializeAsync();
 
             isRended = true;
             StateHasChanged();
         }
+    }
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _ = CheckAdminStatusAsync();
+    }
+
+    private async Task CheckAdminStatusAsync()
+    {
+        // check admin status
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
+            if (int.TryParse(userIdStr, out int userIdInt))
+            {
+
+                var result = await AuthService.CheckAdminStatus(userIdInt);
+                if (!result.Result && (result.Message == "kein Admin" || result.Message == "nicht gefunden"))
+                {
+                    await AuthService.Logout();
+                }
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }

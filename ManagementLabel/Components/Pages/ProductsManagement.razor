@@ -1,207 +1,129 @@
 ﻿@page "/"
 @using ManagementLabel.ProductsF;
-@using ManagementLabel.EitkettBarcode
-@using ManagementLabel.Model
+@using ManagementLabel.Model;
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
-
-
-
 @rendermode InteractiveServer
 
-<AuthorizeView>
-	<Authorized Context="authContext">
-		<!-- user info -->
-		<p class="userInfo">
-			<span class="userName">User Name: @authContext.User.Identity!.Name</span>
-		</p>
-		@* top continer *@
-		<div class="TopContiner">
-			<button class="@(!IsShowAddProductForm ? "btn addProductTopB" : "btn addProductCancelB")" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)">
-				@(!IsShowAddProductForm ? "Produkt hinzufügen" : "Hinzufügen Abbrechen")
-			</button>
-			<button class="@(!IsShowAddDeleteForm ? "btn deleteB" : "btn deleteCancelB")" @onclick="ShowAddDeleteForm" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-				@(!IsShowAddDeleteForm ? "Produkt löschen" : "Löschen Abbrechen")
-			</button>
-			@*<button class="@(!IsShowReceiptForm ? "btn receiptB" : "btn receiptCancelB")" @onclick="ShowReceiptForm" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-				@(!IsShowReceiptForm ? "Kassenbon erstellen" : "Kassenbon Abbrechen")
-			</button*@
-			<button class="@(!IsShowInvoice ? "btn InvoiceB" : "btn InvoiceCancelB")" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
-				@(!IsShowInvoice ? "Rechnung erstellen" : "Rechnung Abbrechen")
-			</button>
-			<div class="searchWrapper">
-				<input id="searchBox" type="text" placeholder="Searching..." class="searchInput" @oninput="OnTextChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)" />
-				<button class="clearButton" @onclick="ClearInput" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-					X
+<div @onclick="OnMainDiv">
+	<AuthorizeView>
+		<Authorized Context="authContext">
+			<!-- user info -->
+			<p class="userInfo">
+				<span class="userName">User Name: @authContext.User.Identity!.Name</span>
+			</p>
+			@* top continer *@
+			<div class="TopContiner">
+				<button class="@(!IsShowAddProductForm ? "btn addProductTopB" : "btn addProductCancelB")" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)">
+					@(!IsShowAddProductForm ? "Produkt hinzufügen" : "Hinzufügen Abbrechen")
 				</button>
-			</div>
-			@* category filter *@
-			<select class="categoryDropdown" @onfocus="OnCategoryOpened" @onchange="OnCategoryChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-				<option value="0">Alle</option>
-				@foreach (var category in categories)
-				{
-					<option value="@category.Id">@category.Name_de</option>
-				}
-			</select>
-		</div>
-		@* choose the Columns *@
-		<div class="mb-3">
-			<div class="dropdown">
-				<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
-					Wähle Spalten
+				<button class="@(!IsShowInvoice ? "btn InvoiceB" : "btn InvoiceCancelB")" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
+					@(!IsShowInvoice ? "Rechnung erstellen" : "Rechnung Abbrechen")
 				</button>
-				<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-					@foreach (var col in columnOptions)
+				<div class="searchWrapper">
+					<input id="searchBox" type="text" placeholder="Searching..." class="searchInput" @oninput="OnTextChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)" />
+					<button class="clearButton" @onclick="ClearInput" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+						X
+					</button>
+				</div>
+				@* category filter *@
+				<select class="categoryDropdown" @onfocus="OnCategoryOpened" @onchange="OnCategoryChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+					<option value="0">Alle</option>
+					@foreach (var category in categories)
 					{
-						<li>
-							<div class="form-check form-switch">
-								<input class="form-check-input"
-								type="checkbox"
-								id="@col.Key"
-								@bind="col.IsVisible"
-								@bind:after="OnColumnChanged" />
-								<label class="form-check-label" for="@col.Key">
-									@col.Label
-								</label>
-							</div>
-						</li>
+						<option value="@category.Id">@category.Name_de</option>
 					}
-				</ul>
+				</select>
 			</div>
-		</div>
-
-		@* table *@
-		<div tabindex="0" @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
-
-			<table class="table text-center align-middle">
-				<thead>
-					<tr>
-						@if (ShowColumn("Index")) {<th>Index</th>}
-						@if (ShowColumn("Id"))	{<th>Id</th>}
-						@if (ShowColumn("Name_de")){<th>Name de</th>}
-						@if (ShowColumn("Description_de")){<th>Beschreibung de</th>}
-						@if (ShowColumn("Name_ar")){<th>Name ar</th>}
-						@if (ShowColumn("Description_ar")){<th>Beschreibung ar</th>}
-						@if (ShowColumn("Category")){<th>Kategorie</th>}
-						@if (ShowColumn("Barcode")){<th>Barcode</th>}
-						@if (ShowColumn("Quantity")){<th>Menge</th>}
-						@if (ShowColumn("PurchasePrice")){<th>Kaufpreis</th>}
-						@if (ShowColumn("SellePrice")){<th>Verkaufspreis</th>}
-						@if (ShowColumn("MinimumStock")){<th>Mindestbestand</th>}
-						@if (ShowColumn("ExpDate")){<th>Ablaufdatum</th>}
-						@if (ShowColumn("Manufacturer")){<th>Hersteller</th>}
-						@if (ShowColumn("TaxRate")){<th>Steuersatz</th>}
-						@if (ShowColumn("Group")){<th>Gruppe</th>}
-						@if (ShowColumn("IsShippable")){<th>Versandfähig</th>}
-						@if (ShowColumn("DiscountedPrice")){<th>Im Angebot</th>}
-						@if (ShowColumn("Username")){<th>Benutzername</th>}
-						@if (ShowColumn("Img")){<th>Img</th>}
-						<th class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "" : "hidden")">Löschen</th>
-						<th class="@(authContext.User.IsInRole("admin") && _editProduct!=null ? "" : "hidden")">Bearbeiten</th>
-						<th class="@(authContext.User.IsInRole("admin") && IsShowReceiptForm ? "" : "hidden" )">Kassenbon</th> 
-						<th class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
-					</tr>
-				</thead>
-				<tbody>
-					@* Loading message *@
-					<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "show")">
-						<td colspan="11" class="loadingMessage">
-							Lädt...
-						</td>
-					</tr>
-					@* table *@
-					@{
-						List<Products> htmlProducts = null!;
-						if (filterP == null)
-							htmlProducts = productService.DownloadedProduct;
-						else
-							htmlProducts = filterP;
-						if (htmlProducts.Count > 0)
+			@* choose the Columns *@
+			<div class="mb-3">
+				<div class="dropdown">
+					<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+						Wähle Spalten
+					</button>
+					<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+						@foreach (var col in columnOptions)
 						{
-							for (int i = 0; i < htmlProducts.Count; i++)
+							<li>
+								<div class="form-check form-switch">
+									<input class="form-check-input"
+									type="checkbox"
+									id="@col.Key"
+									@bind="col.IsVisible"
+									@bind:after="OnColumnChanged" />
+									<label class="form-check-label" for="@col.Key">
+										@col.Label
+									</label>
+								</div>
+							</li>
+						}
+					</ul>
+				</div>
+			</div>
+
+			@* table *@
+			<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
+
+				<table class="table text-center align-middle">
+					<thead>
+						<tr>
+							@if (ShowColumn("Index")) {<th>Index</th>}
+							@if (ShowColumn("Id"))	{<th>Id</th>}
+							@if (ShowColumn("Name_de")){<th>Name de</th>}
+							@if (ShowColumn("Description_de")){<th>Beschreibung de</th>}
+							@if (ShowColumn("Name_ar")){<th>Name ar</th>}
+							@if (ShowColumn("Description_ar")){<th>Beschreibung ar</th>}
+							@if (ShowColumn("Category")){<th>Kategorie</th>}
+							@if (ShowColumn("Barcode")){<th>Barcode</th>}
+							@if (ShowColumn("Quantity")){<th>Menge</th>}
+							@if (ShowColumn("PurchasePrice")){<th>Kaufpreis</th>}
+							@if (ShowColumn("SellePrice")){<th>Verkaufspreis</th>}
+							@if (ShowColumn("MinimumStock")){<th>Mindestbestand</th>}
+							@if (ShowColumn("ExpDate")){<th>Ablaufdatum</th>}
+							@if (ShowColumn("Manufacturer")){<th>Hersteller</th>}
+							@if (ShowColumn("TaxRate")){<th>Steuersatz</th>}
+							@if (ShowColumn("Group")){<th>Gruppe</th>}
+							@if (ShowColumn("IsShippable")){<th>Versandfähig</th>}
+							@if (ShowColumn("DiscountedPrice")){<th>Im Angebot</th>}
+							@if (ShowColumn("Username")){<th>Benutzername</th>}
+							@if (ShowColumn("Img")){<th>Img</th>}
+							<th class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
+						</tr>
+					</thead>
+					<tbody>
+						@* Loading message *@
+						<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "show")">
+							<td colspan="11" class="loadingMessage">
+								Lädt...
+							</td>
+						</tr>
+						@* table *@
+						@{
+							List<Products> htmlProducts = null!;
+							if (filterP == null)
+								htmlProducts = productService.DownloadedProduct;
+							else
+								htmlProducts = filterP;
+							if (htmlProducts.Count > 0)
 							{
-								string src = Convert.ToBase64String(htmlProducts[i].Image!);
-								Products thisProducts = htmlProducts[i];
-								<tr 
-								@ondblclick="@(authContext.User.IsInRole("admin") ? (() => DoubleClick(thisProducts)) : null!)"
-								@onclick="()=> SelectRow(thisProducts)" 
-								class="@(selectedRow != null && selectedRow.Id == thisProducts.Id ? "selected" : "")">
-									@if (ShowColumn("Index")){<td>@(startIndex + i + 1)</td>}
-									@if (ShowColumn("Id")){<td>@htmlProducts[i].Id</td>}
-									@if (_editProduct != null && _editProduct.Id == htmlProducts[i].Id)
-									{
-										@if (ShowColumn("Name_de")) {<td><InputText @bind-Value="_editProduct!.Name_de" /></td>}
-										@if (ShowColumn("Description_de")) {<td><InputText @bind-Value="_editProduct!.Description_de" /></td>}
-										@if (ShowColumn("Name_ar")) {<td><InputText @bind-Value="_editProduct!.Name_ar" /></td>}
-										@if (ShowColumn("Description_ar")) {<td><InputText @bind-Value="_editProduct!.Description_ar" /></td>}
-										@if (ShowColumn("Category"))
-										{
-											<td>
-												<InputSelect class="form-control" @bind-Value="_editProduct.CategoryId">
-													<option value="0">Select Category</option>
-													@foreach (var category in categories)
-													{
-														<option value="@category.Id">@category.Name_de</option>
-													}
-												</InputSelect>
-											</td>
-										}
-										@if (ShowColumn("Barcode")) {<td><InputText @bind-Value="_editProduct!.Barcode" /></td>}
-										@if (ShowColumn("Quantity")) {<td><InputNumber @bind-Value="_editProduct!.Quantity" /></td>}
-										@if (ShowColumn("PurchasePrice")) {<td><InputNumber @bind-Value="_editProduct!.PurchasePrice" /></td>}
-										@if (ShowColumn("SellePrice")) {<td><InputNumber @bind-Value="_editProduct!.SalePrice" /></td>}
-										@if (ShowColumn("MinimumStock")) {<td><InputNumber @bind-Value="_editProduct!.MinimumStock" /></td>}
-										@if (ShowColumn("ExpDate")) {<td><InputDate @bind-Value="_editProduct.EXPDate" /></td>}
-										@if (ShowColumn("Manufacturer"))
-										{
-											<td>
-												<InputSelect class="form-control" @bind-Value="_editProduct.ManufacturerId">
-													<option value="0">Select Category</option>
-													@foreach (var Manufacturer in Manufacturers!)
-													{
-														<option value="@Manufacturer.Id">@Manufacturer.Name</option>
-													}
-												</InputSelect>
-											</td>
-										}
-										@if (ShowColumn("TaxRate"))
-										{
-											<td>
-												<InputSelect class="form-control" @bind-Value="_editProduct.TaxRateId">
-													<option value="0">Select Rate</option>
-													@foreach (var rate in TaxRates)
-													{
-														<option value="@rate.Id">@rate.Rate</option>
-													}
-												</InputSelect>
-											</td>
-										}
-										@if (ShowColumn("Group"))
-										{
-											<td>
-												<InputSelect class="form-control" @bind-Value="_editProduct.ProductGroupID">
-													<option value="0">wählen Product Gruppe aus</option>
-													@foreach (var groupProduct in groupedProducts!)
-													{
-														<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
-													}
-												</InputSelect>
-											</td>
-										}
-										@if (ShowColumn("IsShippable")){<td><InputCheckbox @bind-Value="_editProduct.IsShippable" /></td>}
-										@if (ShowColumn("DiscountedPrice")){<td><InputNumber @bind-Value="_editProduct.DiscountedPrice" /></td>}
-										@if (ShowColumn("Username")) {<td>@(_editProduct.User?.UserName ?? "")</td>}
-										@if (ShowColumn("Img")) {<td><InputFile id="Image" class="form-control" OnChange="EditProductImageUpload" /></td>}
-										<td class="@(authContext.User.IsInRole("admin")  && _editProduct!=null ? "editForm" : "hidden")">
-											<button id="editProductB_@htmlProducts[i].Id.ToString()" class="editB" @onclick:stopPropagation="true" @onclick="() => EditProduct()">
-												Edit
-											</button>
-											<button class="editCancelB" @onclick:stopPropagation="true" @onclick="() => EditProductCancel()">
-												Cancel
-											</button>
-										</td>
-									}
-									else
-									{
+								for (int i = 0; i < htmlProducts.Count; i++)
+								{
+									Products thisProducts = htmlProducts[i];
+									<tr
+									@oncontextmenu:preventDefault="true"
+									@oncontextmenu="@(e => OnSelectRow(thisProducts, e))"
+									@onpointerdown="(e) => OnTouchStart(thisProducts, e)"
+									@onpointermove="OnTouchMove"
+									@onpointerup="OnTouchEnd"
+									@onclick="(e)=> OnSelectRow(thisProducts,e)"
+									class="@(selectedRow != null && selectedRow.Id == thisProducts.Id ? "selected" : "")">
+										@if (ShowColumn("Index")){<td>@(startIndex + i + 1)</td>}
+										@if (ShowColumn("Id")){<td>@htmlProducts[i].Id</td>}
+										@*	@if (_editProduct != null && _editProduct.Id == htmlProducts[i].Id)
+									//	{
+									//		<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" Title="Produkt bearbeiten" ButtonName="Produkt Updaten" GetProducts="_editProduct" OnHandel="HandleEditProduct" />
+									//	}
+									//	else
+									//	{*@
 										@if (ShowColumn("Name_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_de</td>}
 										@if (ShowColumn("Description_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_de</td>}
 										@if (ShowColumn("Name_ar")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_ar</td> }
@@ -216,17 +138,17 @@
 										{
 											@* check exp date *@
 											var expDate = htmlProducts[i].EXPDate;
-											string backgroundcolor = ""; // الافتراضي
+											string backgroundcolor = ""; // Default color
 											string color = "";
 
 											if (expDate < DateTime.Today)
 											{
-												backgroundcolor = "red"; // منتهي
+												backgroundcolor = "red"; // Abgelaufen
 												color = "white";
 											}
 											else if (expDate <= DateTime.Today.AddMonths(1))
 											{
-												backgroundcolor = "orange"; // بقي أقل من شهر
+												backgroundcolor = "orange"; // Weniger als ein Monat übrig
 												color = "white";
 											}
 
@@ -238,461 +160,253 @@
 										@if (ShowColumn("IsShippable")){<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].IsShippable</td>}
 										@if (ShowColumn("DiscountedPrice")){<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].DiscountedPrice</td>}
 										@if (ShowColumn("Username")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].User?.UserName ?? "")</td>}
-										@if (ShowColumn("Img")){<td><img src="data:image/png;base64,@(!string.IsNullOrEmpty(src) ? src : "images/sample.jpg")" class="productImg" /> </td>}
-									}
-
-									<td class="@(authContext.User.IsInRole("admin") && IsShowAddDeleteForm ? "deleteForm" : "hidden")">
-										<button @onclick:stopPropagation="true" @onclick="() => DeleteProduct(thisProducts.Id)">
-											Delete
-										</button>
-									</td>
-									@* Rechnung *@
-									<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
-										<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@thisProducts.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
+										@if (ShowColumn("Img"))
+										{
+											<td><img src="@productImagesService.GetProductImageUrl(htmlProducts[i].ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
+										}
+										//	}
+										@* Rechnung *@
+										<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
+											<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@thisProducts.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
+										</td>
+									</tr>
+								}
+							}
+							else if(!IsLoadingMessage&&startIndex==0)
+							{
+								<tr>
+									<td colspan="11" class="loadingMessage">
+										Keine Bestellungen gefunden.
 									</td>
 								</tr>
 							}
-						}
-						else if(!IsLoadingMessage&&startIndex==0)
-						{
-							<tr>
-								<td colspan="11" class="loadingMessage">
-									Keine Bestellungen gefunden.
-								</td>
-							</tr>
-						}
-						htmlProducts = null!;
-					}
-				</tbody>
-			</table>
-		</div>
-
-		@* Add Product form *@
-		@if (authContext.User.IsInRole("admin") == true && IsShowAddProductForm)
-		{
-			<div class="overlay">
-				<div class="overlayAddForm">
-					<div class="productForm">
-						<h3>Neues Produkt hinzufügen</h3>
-						<EditForm Model="@newProduct" OnValidSubmit="AddProduct">
-							<DataAnnotationsValidator />
-							<div class="formGroupAdd">
-								<label for="Name">Product Name DE</label>
-								<InputText id="Name" class="form-control" @bind-Value="newProduct!.Name_de" />
-								<ValidationMessage For="@(() => newProduct.Name_de)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="Description">Description DE</label>
-								<InputText id="Description" class="form-control" @bind-Value="newProduct.Description_de" />
-								<ValidationMessage For="@(() => newProduct.Description_de)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="Name">اسم المنتج بل عربية</label>
-								<InputText id="Name" class="form-control" @bind-Value="newProduct!.Name_ar" />
-								<ValidationMessage For="@(() => newProduct.Name_ar)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="Description">وصف المنتج بل عربية</label>
-								<InputText id="Description" class="form-control" @bind-Value="newProduct.Description_ar" />
-								<ValidationMessage For="@(() => newProduct.Description_ar)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="category">Category</label>
-								<InputSelect id="category" class="form-control" @bind-Value="newProduct.CategoryId">
-									<option value="0">Select Category</option>
-									@foreach (var category in categories)
-									{
-										<option value="@category.Id">@category.Name_de</option>
-									}
-								</InputSelect>
-								<ValidationMessage For="@(() => newProduct.CategoryId)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="Quantity">Quantity</label>
-								<InputNumber id="Quantity" min="0" class="form-control" @bind-Value="newProduct.Quantity" />
-								<ValidationMessage For="@(() => newProduct.Quantity)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="PurchasePrice">Purchase Price</label>
-								<InputNumber id="PurchasePrice" min="0" class="form-control" @bind-Value="newProduct.PurchasePrice" />
-								<ValidationMessage For="@(() => newProduct.PurchasePrice)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="SalePrice">Selling Price</label>
-								<InputNumber id="SalePrice" min="0" class="form-control" @bind-Value="newProduct.SalePrice" />
-								<ValidationMessage For="@(() => newProduct.SalePrice)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="MinimumStock">Minimum Stock</label>
-								<InputNumber id="MinimumStock" min="0" class="form-control" @bind-Value="newProduct.MinimumStock" />
-								<ValidationMessage For="@(() => newProduct.MinimumStock)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="EXPDate">Expiration Date</label>
-								<InputDate id="EXPDate" class="form-control" @bind-Value="newProduct.EXPDate" />
-								<ValidationMessage For="@(() => newProduct.EXPDate)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="manufacturer">Manufacturer</label>
-								<InputSelect id="category" class="form-control" @bind-Value="newProduct.ManufacturerId">
-									<option value="0">Select Manufacturer</option>
-									@foreach (var Manufacturer in Manufacturers!)
-									{
-										<option value="@Manufacturer.Id">@Manufacturer.Name</option>
-									}
-								</InputSelect>
-								<ValidationMessage For="@(() => newProduct.ManufacturerId)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="TaxRate">Steuersatz</label>
-								<InputSelect  class="form-control" @bind-Value="newProduct.TaxRateId">
-									<option value="0">Select Rate</option>
-									@foreach (var rate in TaxRates)
-									{
-										<option value="@rate.Id">@rate.Rate</option>
-									}
-								</InputSelect>
-								<ValidationMessage For="@(() => newProduct.TaxRateId)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="ProductGroup">Product Gruppe</label>
-								<InputSelect  class="form-control" @bind-Value="newProduct.ProductGroupID">
-									<option value="0">wählen Product Gruppe aus</option>
-									@foreach (var groupProduct in groupedProducts)
-									{
-										<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
-									}
-								</InputSelect>
-								<ValidationMessage For="@(() => newProduct.ProductGroupID)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="ProductGroup">Versandfähig</label>
-								<InputCheckbox @bind-Value="newProduct.IsShippable" />
-								<ValidationMessage For="@(() => newProduct.IsShippable)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="ImAngebot">Im Angebot</label>
-								<InputNumber id="ImAngebot" min="0" class="form-control" @bind-Value="newProduct.DiscountedPrice" />
-								<ValidationMessage For="@(() => newProduct.DiscountedPrice)" />
-							</div>
-							<div class="formGroupAdd">
-								<label for="Image">Image</label>
-								<InputFile id="Image" class="form-control" OnChange="AddProductImageUpload" />
-								<ValidationMessage For="@(() => newProduct.Image)" />
-							</div>
-							<button type="submit" class="btn addProductB">Add Product</button>
-							<button type="button" class="btn addProductCancelB" @onclick="HideAddProductForm">Cancel</button>
-						</EditForm>
-					</div>
-				</div>
-			</div>
-		}
-		@* order erstellen *@
-		@if (IsShowOrder)
-		{
-			<div class="overlay">
-				<div class="overlayAddForm">
-					@* address *@
-					<h3>Lieferadresse: </h3>
-					@if (selectedAddress == false)
-					{
-						<EditForm Model="@newAddress" OnValidSubmit="HandleAddressSubmit">
-							<DataAnnotationsValidator />
-							<div class="form-group">
-								<label>Vorname</label>
-								<InputText class="form-control" @bind-Value="newAddress.FirstName" />
-								<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
-							</div>
-							<div class="form-group">
-								<label>Nachname</label>
-								<InputText class="form-control" @bind-Value="newAddress.LastName" />
-								<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
-							</div>
-							<div class="form-group">
-								<label>Tel.</label>
-								<InputText class="form-control" @bind-Value="newAddress.Phone" />
-								<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
-							</div>
-							<div class="form-group">
-								<label>Straße</label>
-								<InputText class="form-control" @bind-Value="newAddress.Street" />
-								<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
-							</div>
-							<div class="form-group">
-								<label>Postleitzahl</label>
-								<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
-								<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
-							</div>
-							<div class="form-group">
-								<label>Stadt</label>
-								<InputText class="form-control" @bind-Value="newAddress.City" />
-								<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
-							</div>
-							<div class="form-group">
-								<label>Land</label>
-								<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
-							</div>
-							<div class="addAddressClassB">
-								<button type="submit" class="btn addAddressB">Adresse Hinzufügen</button>
-							</div>
-						</EditForm>
-					}
-					@if (selectedAddress == true)
-					{
-						<InputRadioGroup @bind-Value="selectedAddressId" class="addressRadio">
-							<div class="addressOption">
-								<label>
-									<InputRadio Value="@newAddress.Id" />
-									@newAddress.FirstName @newAddress.LastName - @newAddress.Street, @newAddress.ZipCode @newAddress.City
-								</label>
-							</div>
-						</InputRadioGroup>
-					}
-					@* Zahlung Methode *@
-					<div class="paymentMethodOption">
-						<InputRadioGroup Value="@selectedPaymentId" ValueChanged="@((int val) => OnPaymentChanged(val))" ValueExpression="() => selectedPaymentId">
-							@for (int i = 0; i < orderService.DownloadedPaymentMethods.Count; i++)
+							@if (showContextMenu && selectedProduct != null)
 							{
-								if (orderService.DownloadedPaymentMethods[i].Id == 1 || orderService.DownloadedPaymentMethods[i].Id == 2 ||
-							orderService.DownloadedPaymentMethods[i].Id == 5)
-								{
-									var paymentMethod = orderService.DownloadedPaymentMethods[i];
-									<label>
-										<InputRadio Value="@paymentMethod.Id" />
-										@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? paymentMethod.Description_ar : paymentMethod.Description_de)
-									</label>
-								}
+								<div class="contextMenu"
+								style="position: fixed; top:@menuYpx; left:@menuXpx;"
+								@onclick:stopPropagation="true">
+									<ul>
+										<li @onclick="() => EditProduct(selectedProduct)">✏️ Bearbeiten</li>
+										<li @onclick="() => DeleteProduct(selectedProduct)">🗑️ Löschen</li>
+									</ul>
+								</div>
 							}
-						</InputRadioGroup>
 
-					</div>
-					@* Discount Code *@
-					<div class="discountClass">
-						<label>Hast du Rabatt Code?</label>
-						<div class="input-group d-flex gap-2 mb-1">
-							<InputText class="form-control" @bind-Value="discountCode.Code" />
-							<button type="button" class="btn btn-primary" @onclick="OnCode">
-								@if (IsDiscountCodeLoading)
+							htmlProducts = null!;
+						}
+					</tbody>
+				</table>
+			</div>
+
+			@* Add Product form *@
+			@if (IsShowAddProductForm)
+			{
+				<ManagementLabel.Components.Layout.OverlayEditForm Action="Add" Title="Ein neues Produkt hinzufügen" ButtonName="Produkt hinzufügen" GetProducts="newProduct" user ="user" OnHandel="HandleEditProduct" />
+			}
+			else if (_editProduct != null)
+			{
+				<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" Title="Produkt bearbeiten" ButtonName="Produkt Updaten" GetProducts="_editProduct" user="user" OnHandel="HandleEditProduct" />
+			}
+			@* order erstellen *@
+			@if (IsShowOrder)
+			{
+				<div class="overlay">
+					<div class="overlayAddForm">
+						@* address *@
+						<h3>Lieferadresse: </h3>
+						@if (selectedAddress == false)
+						{
+							<EditForm Model="@newAddress" OnValidSubmit="HandleAddressSubmit">
+								<DataAnnotationsValidator />
+								<div class="form-group">
+									<label>Vorname</label>
+									<InputText class="form-control" @bind-Value="newAddress.FirstName" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
+								</div>
+								<div class="form-group">
+									<label>Nachname</label>
+									<InputText class="form-control" @bind-Value="newAddress.LastName" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
+								</div>
+								<div class="form-group">
+									<label>Tel.</label>
+									<InputText class="form-control" @bind-Value="newAddress.Phone" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
+								</div>
+								<div class="form-group">
+									<label>Straße</label>
+									<InputText class="form-control" @bind-Value="newAddress.Street" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
+								</div>
+								<div class="form-group">
+									<label>Postleitzahl</label>
+									<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
+								</div>
+								<div class="form-group">
+									<label>Stadt</label>
+									<InputText class="form-control" @bind-Value="newAddress.City" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
+								</div>
+								<div class="form-group">
+									<label>Land</label>
+									<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
+								</div>
+								<div class="addAddressClassB">
+									<button type="submit" class="btn addAddressB">Adresse Hinzufügen</button>
+								</div>
+							</EditForm>
+						}
+						@if (selectedAddress == true)
+						{
+							<InputRadioGroup @bind-Value="selectedAddressId" class="addressRadio">
+								<div class="addressOption">
+									<label>
+										<InputRadio Value="@newAddress.Id" />
+										@newAddress.FirstName @newAddress.LastName - @newAddress.Street, @newAddress.ZipCode @newAddress.City
+									</label>
+								</div>
+							</InputRadioGroup>
+						}
+						@* Zahlung Methode *@
+						<div class="paymentMethodOption">
+							<InputRadioGroup Value="@selectedPaymentId" ValueChanged="@((int val) => OnPaymentChanged(val))" ValueExpression="() => selectedPaymentId">
+								@for (int i = 0; i < orderService.DownloadedPaymentMethods.Count; i++)
 								{
-									<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+									if (orderService.DownloadedPaymentMethods[i].Id == 1 || orderService.DownloadedPaymentMethods[i].Id == 2 ||
+						orderService.DownloadedPaymentMethods[i].Id == 5)
+									{
+										var paymentMethod = orderService.DownloadedPaymentMethods[i];
+										<label>
+											<InputRadio Value="@paymentMethod.Id" />
+											@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? paymentMethod.Description_ar : paymentMethod.Description_de)
+										</label>
+									}
+								}
+							</InputRadioGroup>
+
+						</div>
+						@* Discount Code *@
+						<div class="discountClass">
+							<label>Hast du Rabatt Code?</label>
+							<div class="input-group d-flex gap-2 mb-1">
+								<InputText class="form-control" @bind-Value="discountCode.Code" />
+								<button type="button" class="btn btn-primary" @onclick="OnCode">
+									@if (IsDiscountCodeLoading)
+									{
+										<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+									}
+									else
+									{
+										<span>Code eingeben</span>
+									}
+								</button>
+							</div>
+							@{
+								string message = null!;
+								if (discountCode.Message != null && !string.IsNullOrEmpty(discountCode.Message))
+								{
+									message = discountCode.Message;
+								}
+								else if (discountCategory.Message != null && !string.IsNullOrEmpty(discountCategory.Message))
+								{
+									message = discountCategory.Message;
+								}
+
+								double DiscountPercentageText =
+								discountCode.DiscountPercentage != 0
+								? discountCode.DiscountPercentage
+								: discountCategory.DiscountPercentage != 0
+								? discountCategory.DiscountPercentage
+								: 0;
+
+								<label class="mt-2 text-success">Rabattprozentsatz: @DiscountPercentageText %</label>
+								<label class="mt-2 text-danger">@message</label>
+							}
+						</div>
+						@* shipping *@
+						@if (selectedPaymentId == 5)
+						{
+							<div class="shipping">
+								<h4>Versandmethode:</h4>
+								<div class="shippingProvider">
+									<InputRadioGroup @bind-Value="@order.ShippingProviderId">
+										@foreach (ShippingProvider item in orderService.DownloadedShippingProviders)
+										{
+											if(item.Id == 1)
+											{
+												<label>
+													<InputRadio Value="@item.Id" />
+													@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? item.Name_ar : item.Name_de)
+												</label>
+											}
+										}
+									</InputRadioGroup>
+								</div>
+								<label>Versandkosten:<span style="font-weight:bold;">&nbsp;@((order.ShippingProviders?.PublicShippingCost ?? 0).ToString("C", new System.Globalization.CultureInfo("de-DE")))</span></label>
+							</div>
+						}
+						<div class="placeOrder">
+							Artikel: @cartService.GetTotalQuantity()
+							<span>
+								@if (discountCode != null && discountCode.Id > 0)
+								{
+									var result = GetFinalPriceWithDiscount();
+									<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
+								}
+								else if (discountCategory != null && discountCategory.Id > 0 && discountCategory.CategoriesId > 0)
+								{
+									var result = GetFinalPriceWithDiscountCategory();
+									<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
 								}
 								else
 								{
-									<span>Code eingeben</span>
+									GetFinalPrice();
 								}
-							</button>
-						</div>
-						@{
-							string message = null!;
-							if (discountCode.Message != null && !string.IsNullOrEmpty(discountCode.Message))
-							{
-								message = discountCode.Message;
-							}
-							else if (discountCategory.Message != null && !string.IsNullOrEmpty(discountCategory.Message))
-							{
-								message = discountCategory.Message;
-							}
-
-							double DiscountPercentageText =
-							discountCode.DiscountPercentage != 0
-							? discountCode.DiscountPercentage
-							: discountCategory.DiscountPercentage != 0
-							? discountCategory.DiscountPercentage
-							: 0;
-
-							<label class="mt-2 text-success">Rabattprozentsatz: @DiscountPercentageText %</label>
-							<label class="mt-2 text-danger">@message</label>
-						}
-					</div>
-					@* shipping *@
-					@if (selectedPaymentId == 5)
-					{
-						<div class="shipping">
-							<h4>Versandmethode:</h4>
-							<div class="shippingProvider">
-								<InputRadioGroup @bind-Value="@order.ShippingProviderId">
-									@foreach (ShippingProvider item in orderService.DownloadedShippingProviders)
-									{
-										if(item.Id == 1)
-										{
-											<label>
-												<InputRadio Value="@item.Id" />
-												@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? item.Name_ar : item.Name_de)
-											</label>
-										}
-									}
-								</InputRadioGroup>
-							</div>
-							<label>Versandkosten:<span style="font-weight:bold;">&nbsp;@((order.ShippingProviders?.PublicShippingCost ?? 0).ToString("C", new System.Globalization.CultureInfo("de-DE")))</span></label>
-						</div>
-					}
-					<div class="placeOrder">
-						Artikel: @cartService.GetTotalQuantity()
-						<span>
-							@if (discountCode != null && discountCode.Id > 0)
-							{
-								var result = GetFinalPriceWithDiscount();
-								<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
-							}
-							else if (discountCategory != null && discountCategory.Id > 0 && discountCategory.CategoriesId > 0)
-							{
-								var result = GetFinalPriceWithDiscountCategory();
-								<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
-							}
-							else
-							{
-								GetFinalPrice();
-							}
-						</span>
-						@{
-							double totalPrice = 0;
-							if (order.ShippingProviders != null && order.ShippingProviderId > 0)
-							{
-								<span>Versandkosten: @order.ShippingProviders.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
-								totalPrice = order.TotalPrice + order.ShippingProviders.PublicShippingCost;
-							}
-							else
-								totalPrice = order.TotalPrice;
-						}
-						<span><strong>Gesamtpreis:</strong> @totalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
-						<span>Die Preise beinhalten MwSt.</span>
-					</div>
-					<div class="OrderClassB">
-						<button type="button" class="btn InvoiceGenerateB" @onclick="OnInvoiceGenerate"
-						disabled="@((selectedAddress && selectedPaymentId > 0) ? false : true)">Rechnung erstellen</button>
-						<button type="button" class="btn InvoiceGeneratCancelB" @onclick="OnOrderCancel">Abbrechnen</button>
-					</div>
-				</div>
-			</div>
-		}
-		@* Rechnung *@
-		<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice" IsInvoiceVisible="IsInvoiceVisible" OnClose="HandleInvoiceClose" />
-		@* Add PaymentMethod *@
-		@if (IsOverlayPaymentMethod && PaymentMethods != null)
-		{
-			<div class="overlay" @onclick="ClosePaymentMethod">
-				<div class="PaymentMethodForm">
-					<h4>Zahlung Methnode</h4>
-					<div class="buttonMethods">
-						@{
-							PaymentMethod Casch = PaymentMethods.FirstOrDefault(s => s.Id == 3) ?? null!;
-							PaymentMethod Card = PaymentMethods.FirstOrDefault(s => s.Id == 4) ?? null!;
-							<button class="CaschButton" value="@Casch.Id" @onclick="()=> OnPaymentMethod(Casch)">@Casch.Description_de</button>
-							<button class="EcButton" value="@Card.Id" @onclick="()=> OnPaymentMethod(Card)">@Card.Description_de</button>
-						}
-					</div>
-					<button class="btn btn-primary" @onclick="ClosePaymentMethod">Schließen</button>
-				</div>
-			</div>
-		}
-		@*Container for Printing and Saving *@
-		<div class="container">
-			<label class="@(!LabelIdVisible ? "hidden" : "labelPId")">ProductId: @labelPId</label>
-			@* Barcode  *@
-			<img id="imgBarcode" src="data:image/png;base64,@barCodeBase64String" alt="Barcode image" class="@(!barCodeVisible? "hidden":"imgBarcode")" @onclick="OnBarcodeImage" />
-			@* Etikett *@
-			@if(etikettP != null)
-			{
-				<div id="divEtikett" class="@(!etikettVisible ? "hidden" :"etikett")" @onclick="OnEtikkt">
-					<div id="productInfo" class="productInfo">
-						<p>@etikettP?.Name</p>
-						<p>Category: @etikettP!.Name</p>
-						<p>Price: @etikettP!.SalePrice.ToString("C")</p>
-						<p>@etikettP?.manufacturerName</p>
-						<p>EXP: @etikettP?.EXPDate</p>
-						<img src="data:image/png;base64,@etikettP!.barcodeBase64" alt="Barcode image"  />
-						<p>@etikettP?.manufacturerWebsite</p>
-					</div>
-				</div>
-			}
-			@* Receipt *@
-			@if (receipt != null)
-			{
-				<div class="receipt">
-					<h2>@receipt.StoreName</h2>
-					<p>@receipt.StoreAddress</p>
-					<p>Datum: @receipt.ReceiptDate.ToString("dd.MM.yyyy HH:mm")</p>
-
-					<table>
-						<thead>
-							<tr>
-								<th>Produkt</th>
-								<th>Menge</th>
-								<th>Einzelpreis</th>
-								<th>Gesamtpreis</th>
-							</tr>
-						</thead>
-						<tbody>
-							@foreach (var product in receipt.Products)
-							{
-								<tr>
-									<td>@product.Name_de</td>
-									<td>@product.Quantity</td>
-									<td>@product.SalePrice.ToString("C")</td>
-									<td>@((product.SalePrice * product.Quantity).ToString("C"))</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-
-					<div class="summary">
-						<p>Netto: @receipt.Summe.NettoPrice.ToString("C")</p>
-						<p>MwSt.: @receipt.Summe.TotalTax.ToString("C")</p>
-						<p><strong>Gesamt: @receipt.Summe.TotalPrice.ToString("C")</strong></p>
-					</div>
-
-					<p>Zahlungsmethode: @receipt.PaymentMethod?.Description_de</p>
-
-					<div class="taxRates">
-						<table class="taxRatesTable">
-							<thead>
-								<tr>
-									<th>Steuersatz (%)</th>
-									<th>Steuerbetrag</th>
-									<th>Netto Preis</th>
-									<th>Gesamt Preis</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var tax in receipt.TaxRates)
+							</span>
+							@{
+								double totalPrice = 0;
+								if (order.ShippingProviders != null && order.ShippingProviderId > 0)
 								{
-									<tr>
-										<td>@tax.TaxRate%</td>
-										<td>@tax.TaxAmount.ToString("C")</td>
-										<td>@tax.NettoPrice.ToString("C")</td>
-										<td>@tax.TotalPrice.ToString("C")</td>
-									</tr>
+									<span>Versandkosten: @order.ShippingProviders.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
+									totalPrice = order.TotalPrice + order.ShippingProviders.PublicShippingCost;
 								}
-							</tbody>
-						</table>
-
+								else
+									totalPrice = order.TotalPrice;
+							}
+							<span><strong>Gesamtpreis:</strong> @totalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
+							<span>Die Preise beinhalten MwSt.</span>
+						</div>
+						<div class="OrderClassB">
+							<button type="button" class="btn InvoiceGenerateB" @onclick="OnInvoiceGenerate"
+							disabled="@((selectedAddress && selectedPaymentId > 0) ? false : true)">Rechnung erstellen</button>
+							<button type="button" class="btn InvoiceGeneratCancelB" @onclick="OnOrderCancel">Abbrechnen</button>
+						</div>
 					</div>
 				</div>
-
 			}
-			@* Geberator *@
-			<div class="containerB">
-				<button class="@(!string.IsNullOrEmpty(barCodeBase64String) ? "btn printB" : "hidden")" @onclick="OnPrint">Print</button>
-				<button class="@(!string.IsNullOrEmpty(barCodeBase64String) ? "btn saveB":"hidden")" @onclick="OnSave">Save</button>
-				<select @bind="saveType" class="@(!string.IsNullOrEmpty(barCodeBase64String) ? "btn saveType" : "hidden")">
-					<option value="pdf">PDF</option>
-					<option value="png">PNG</option>
-				</select>
-				<button class="btn generatorB" @onclick="OnGenerate">Generate</button>
-				<select class="btn generatorType" @bind="generatorType">
-					<option value="0">Kassenbon</option>
-					<option value="1">BarCode</option>
-					<option value="2">Etikett</option>
-				</select>
-				<button class="@(GeneratorCancelBVisible == true ? "btn generatorCancelB" : "hidden")" @onclick="OnGenerateCancel">Generation Cancel</button>
-			</div>
-		</div>
-	</Authorized>
-	<NotAuthorized>
-		<ManagementLabel.Components.Pages.LogIn />
-	</NotAuthorized>
-</AuthorizeView>
+			@* Rechnung *@
+			<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice" IsInvoiceVisible="IsInvoiceVisible" OnClose="HandleInvoiceClose" />
+		</Authorized>
+		<NotAuthorized>
+			<ManagementLabel.Components.Pages.LogIn />
+		</NotAuthorized>
+	</AuthorizeView>
+</div>
 @code{
+
+	private string GetScr(Products product)
+	{
+		string scr = productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!);
+
+		if(product.Id == 304)
+		{
+
+		}
+
+		return scr;
+	}
+
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
     {
@@ -733,8 +447,113 @@
 		// كل ما يتغير أي Checkbox، نحفظ القائمة
 		await LocalStorage.SetItemAsync("columnOptions", columnOptions);
 	}
+	// OnAfterRenderAsync
+	private Users? user;
+	private DotNetObjectReference<ProductsManagement>? objRef;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var authState = await AuthProvider.GetAuthenticationStateAsync();
+			var user = authState.User;
+			if (user.Identity?.IsAuthenticated == true)
+			{
+				this.user = new();
+				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
+				if (int.TryParse(userIdStr, out int userIdInt))
+				{
+					this.user.Id = userIdInt;
+				}
+				//// Reset when the page reloads
+				ResetOfPage();
+				//
+				await loadInBackground();
+				// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
+				objRef = DotNetObjectReference.Create(this);
+				await Task.Delay(100);
+				// Setzen Sie das Objekt von donNet in JavaScript und die ID:checkScrollEnd und rufen Sie die Funktion checkScrollEnd aus JavaScript ab.
+				_ = JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
+			}
+		}
+	}
+
+	// Menu recht klicken
+	private bool showContextMenu = false;
+	private double menuX;
+	private double menuY;
+	private string menuXpx => $"{menuX}px";
+	private string menuYpx => $"{menuY}px";
+	private Products? selectedProduct;
+	private System.Timers.Timer? longPressTimer;
+	private double startX, startY;
+	private bool isDragging = false;
+
+	private void HideContextMenu() => showContextMenu = false;
+	// Select
+	private Products? selectedRow;
+	private void OnSelectRow(Products product, MouseEventArgs e)
+	{
+		// wenn in Bearbeitungsmodus, Addsmodus,Deletsmodus, Invoicesmodus oder Ordersmodus, kein Kontextmenü anzeigen
+		if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+			return;
+
+		if (e.Button == 2) // right click
+		{
+			selectedProduct = product;
+			menuX = e.ClientX;
+			menuY = e.ClientY;
+			showContextMenu = true;
+		}
+		selectedRow = product;
+	}
+	private void OnTouchStart(Products product, PointerEventArgs e)
+	{
+		// wenn in Bearbeitungsmodus, Addsmodus,Deletsmodus, Invoicesmodus oder Ordersmodus, kein Kontextmenü anzeigen
+		if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+			return;
+
+		startX = e.ClientX;
+		startY = e.ClientY;
+		isDragging = false;
+
+		//Timer für langes Drücken (eine halbe Sekunde)
+		longPressTimer = new System.Timers.Timer(600);
+		longPressTimer.Elapsed += (_, __) =>
+		{
+			if (!isDragging) // nur wenn nicht gezogen wird
+			{
+				InvokeAsync(() =>
+				{
+					selectedProduct = product;
+					menuX = e.ClientX;
+					menuY = e.ClientY;
+					showContextMenu = true;
+					StateHasChanged();
+				});
+			}
+			longPressTimer?.Stop();
+		};
+		longPressTimer.AutoReset = false;
+		longPressTimer.Start();
+		// select die Row
+		selectedRow = product;
+	}
+	private void OnTouchMove(PointerEventArgs e)
+	{
+		// إذا تحرك الإصبع أكثر من 10px → اعتبره سحب
+		if (Math.Abs(e.ClientX - startX) > 10 || Math.Abs(e.ClientY - startY) > 10)
+		{
+			isDragging = true;
+			longPressTimer?.Stop();
+		}
+	}
+	private void OnTouchEnd(PointerEventArgs e)
+	{
+		// Wenn der Benutzer seinen Finger schnell anhebt → das Menü öffnet sich nicht
+		longPressTimer?.Stop();
+	}
+
 	// load products
-	private DataProcessP dpP = new DataProcessP();
 	private bool IsLoadding = false;
 	private async Task<bool> loadInBackground()
 	{
@@ -756,9 +575,12 @@
 	}
 	// Add Product
 	private bool IsShowAddProductForm = false; 
-	private Products? newProduct = new Products(); 
+
 	private async void ShowAddProductFormAsync()
 	{
+		// cancel all other processes
+		_editProduct = null!;
+
 		// get the categories and manufacturers and taxrates
 		await loadCategories();
 		await loadManufacturers();
@@ -766,192 +588,154 @@
 		await loadGroupProducts();
 
 		IsShowAddProductForm = !IsShowAddProductForm;
-		// cancel all other processes
-		IsShowAddDeleteForm = false;
-		_editProduct = null!;
-		IsShowReceiptForm = false;
-
 		StateHasChanged();
 	}
 	private void HideAddProductForm()
 	{
 		IsShowAddProductForm = false;
 	}
-	private async void AddProductImageUpload(InputFileChangeEventArgs e)
-	{
-		newProduct = await UploadImage(e, newProduct!);
-	}
-	private async Task AddProduct()
-	{
-		// add user, the new Product added 
-		newProduct!.UserId = user?.Id ?? 0;
-
-		// Perform your logic to add the product to the database
-		var result = await productService.AddProductAsync(newProduct!);
-		var idStr = result.Message?.Split(':').LastOrDefault();
-		// Check if the result is successful and Get the ID returned by the database
-		if (result.Result && int.TryParse(idStr, out int id))
-		{
-			// set the ID of the new product
-			newProduct!.Id = id;
-			// set Category in newProduct
-			newProduct!.Category = categories.FirstOrDefault(c => c.Id == newProduct.CategoryId);
-			// set Manufacturer in newProduct
-			newProduct!.Manufacturer = Manufacturers!.FirstOrDefault(m => m.Id == newProduct.ManufacturerId);
-			// set rate in newProduct
-			newProduct!.TaxRate = TaxRates!.FirstOrDefault(t => t.Id == newProduct.TaxRateId);
-			// set ProductGroup in newProduct
-			newProduct!.ProductGroup = groupedProducts!.FirstOrDefault(g => g.Id == newProduct.ProductGroupID);
-			// initaialize the caritem for this new product
-			newProduct.InitializeCartItem(0);
-
-			// Add the new product to the products list
-			productService.DownloadedProduct.Insert(0, newProduct!); // Add the new product to the products list
-			HideAddProductForm(); // Hide the form
-			newProduct = new Products(); // Reset the new product model
-		}
-		else
-		{
-			_ = ShowAlert(result.Message!);
-		}
-	}
 	// Delete Product
-	private bool IsShowAddDeleteForm = false;
-	private void ShowAddDeleteForm()
+	private bool IsDeleting = false;
+	private async Task DeleteProduct(Products SelectedProduct)
 	{
-		IsShowAddDeleteForm = !IsShowAddDeleteForm;
-		// cancel all other processes
-		IsShowReceiptForm = false;
-		IsShowAddProductForm = false;
-		_editProduct = null!;
-	}
-	private async Task DeleteProduct(int productId)
-	{
-		if (productId <= 0)
+		if (SelectedProduct == null || IsDeleting)
 		{
 			await ShowAlert("Please select a product");
 			return;
 		}
-
-		var result = await productService.DeleteProductAsync(productId);
-		if (result.Result)
+		// hide die context menu
+		showContextMenu = false;
+		// set deleting state
+		IsDeleting = true;
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Produkt mit der ID {SelectedProduct.Id} wirklich löschen?");
+		if (resultConfirm)
 		{
-			productService.DownloadedProduct.RemoveAll(p => p.Id == productId);
-			selectedRow = null;
-			_ = ShowAlert(result.Message!);
+
+			var result = await productService.DeleteProductAsync(SelectedProduct.Id);
+			if (result.Result)
+			{
+				productService.DownloadedProduct.RemoveAll(p => p.Id == SelectedProduct.Id);
+				// wenn in filter mode
+				if (filterP != null && filterP.Count > 0)
+				{
+					filterP.RemoveAll(p => p.Id == SelectedProduct.Id);
+				}
+				selectedRow = null;
+				_ = ShowAlert(result.Message!);
+			}
+			else
+			{
+				_ = ShowAlert(result.Message!);
+			}
 		}
 		else
 		{
-			await ShowAlert(result.Message!);
+			// User cancelled the deletion
 		}
+
+		// reset deleting state
+		IsDeleting = false;
 	}
 	// Edit Product
 	private Products _editProduct = null!;
-	private async Task DoubleClick(Products doubleSelectProduct)
+	private Products newProduct = new Products();
+	private async Task EditProduct(Products SelectedProduct)
 	{
+		if (SelectedProduct == null)
+		{
+			await ShowAlert("Please select a product");
+			return;
+		}
+		// hide die context menu
+		showContextMenu = false;
 		// erlaubt keine Änderung von Produkten, wenn Kassenbon oder Rechnung angezeigt wird
-		if (!IsShowReceiptForm && !IsShowInvoice)
+		if (!IsShowInvoice && SelectedProduct != null)
 		{
 			// cancel all other processes
-			IsShowAddDeleteForm = false;
 			IsShowAddProductForm = false;
-			IsShowReceiptForm = false;
-
-			// get the categories, manufacturers and taxrates
-			await loadCategories();
-			await loadManufacturers();
-			await loadTaxrates();
-			await loadGroupProducts();
 
 			// new products create to so that both (products and editproduct) do not reference the same instance.
 			_editProduct = new Products
 				{
-					Id = doubleSelectProduct.Id,
-					Name_de = doubleSelectProduct.Name_de,
-					Description_de = doubleSelectProduct.Description_de,
-					Name_ar = doubleSelectProduct.Name_ar,
-					Description_ar = doubleSelectProduct.Description_ar,
-					CategoryId = doubleSelectProduct.CategoryId,
+					Id = SelectedProduct.Id,
+					Name_de = SelectedProduct.Name_de,
+					Description_de = SelectedProduct.Description_de,
+					Name_ar = SelectedProduct.Name_ar,
+					Description_ar = SelectedProduct.Description_ar,
+					CategoryId = SelectedProduct.CategoryId,
 					//	Category = doubleSelectProduct.Category,
-					Quantity = doubleSelectProduct.Quantity,
-					PurchasePrice = doubleSelectProduct.PurchasePrice,
-					SalePrice = doubleSelectProduct.SalePrice,
-					MinimumStock = doubleSelectProduct.MinimumStock,
-					EXPDate = doubleSelectProduct.EXPDate,
-					ManufacturerId = doubleSelectProduct.ManufacturerId,
+					Quantity = SelectedProduct.Quantity,
+					PurchasePrice = SelectedProduct.PurchasePrice,
+					SalePrice = SelectedProduct.SalePrice,
+					MinimumStock = SelectedProduct.MinimumStock,
+					EXPDate = SelectedProduct.EXPDate,
+					ManufacturerId = SelectedProduct.ManufacturerId,
 					//Manufacturer = doubleSelectProduct.Manufacturer,
-					TaxRateId = doubleSelectProduct.TaxRateId,
-					ProductGroupID = doubleSelectProduct.ProductGroupID,
-					IsShippable = doubleSelectProduct.IsShippable,
-					DiscountedPrice = doubleSelectProduct.DiscountedPrice,
-					Image = doubleSelectProduct.Image,
+					TaxRateId = SelectedProduct.TaxRateId,
+					ProductGroupID = SelectedProduct.ProductGroupID,
+					IsShippable = SelectedProduct.IsShippable,
+					DiscountedPrice = SelectedProduct.DiscountedPrice,
+					//Image = SelectedProduct.Image,
+					ProductImages = SelectedProduct.ProductImages?
+		             .Select(img => new ProductImages
+		             {
+	 		           Id = img.Id,
+			           ProductId = img.ProductId,
+			           ImageUrl = img.ImageUrl,
+			           IsMain = img.IsMain,
+			           ImageBytes = img.ImageBytes,
+			           LastModified = img.LastModified
+		             })
+		             .ToList() ?? new List<ProductImages>(),
 					UserId = user?.Id ?? 0,
-					CartItem = doubleSelectProduct.CartItem
+					CartItem = SelectedProduct.CartItem
 				};
 		}
 	}
-	private async Task EditProductImageUpload(InputFileChangeEventArgs e)
+	// Overlay Form Handel
+	private void HandleEditProduct((Products product, string Action, bool ActionState) data)
 	{
-		_editProduct = await UploadImage(e, _editProduct!);
-	}
-	private async Task EditProduct()
-	{
-		// if null
-		if (_editProduct == null)
+		if (data.Action == "Edit")
 		{
-			await ShowAlert("Nothing has changed");
-			return;
-		}
-		// if no edited
-		Products? currentProduct = productService.DownloadedProduct.Find(p => p.Id == _editProduct.Id);
-		bool isEdited = productService.IsEditedProduct(currentProduct!, _editProduct);
-		if (!isEdited)
-		{
-			await ShowAlert("Nothing has changed");
-			return;
-		}
-
-		var result = await productService.UpdateProductAsync(_editProduct);
-		if (result.Result)
-		{
-			// set Catgory in editproduct
-			_editProduct!.Category = categories.FirstOrDefault(c => c.Id == _editProduct.CategoryId);
-			// set Manufacturer in editproduct
-			_editProduct!.Manufacturer = Manufacturers!.FirstOrDefault(m => m.Id == _editProduct.ManufacturerId);
-			// set TaxRate in editproduct
-			_editProduct!.TaxRate = TaxRates!.FirstOrDefault(m => m.Id == _editProduct.TaxRateId);
-			// set Group in editproduct
-			_editProduct!.ProductGroup = groupedProducts!.FirstOrDefault(m => m.Id == _editProduct.ProductGroupID);
-
-			// Update the product in the list
-			int index = productService.DownloadedProduct!.FindIndex(p => p.Id == _editProduct.Id);
-			productService.DownloadedProduct[index] = _editProduct!; // Update the product in the list
-
-			// if in search mode
-			if (filterP != null && filterP.Count > 0)
+			// edit if in Filter mode
+			if (data.product != null)
 			{
-				int filterIndex = filterP.FindIndex(p => p.Id == _editProduct.Id);
-				if (filterIndex >= 0)
+				if (filterP != null && filterP.Count > 0)
 				{
-					filterP[filterIndex] = _editProduct; // Update the product in the filtered list
+					int filterIndex = filterP.FindIndex(p => p.Id == data.product.Id);
+					if (filterIndex >= 0)
+					{
+						filterP[filterIndex] = data.product; // Update the product in the filtered list
+					}
+				}
+				data.product = null!;
+			}
+
+			if (!data.ActionState)
+			{
+				// Hide the edit form
+				_editProduct = null!;
+			}
+		}
+		else if (data.Action == "Add")
+		{
+			// add if in Filter mode
+			if (data.product != null)
+			{
+				if (filterP != null && filterP.Count > 0)
+				{
+					// Add the new product to the filtered list
+					filterP.Insert(0,data.product); 
 				}
 			}
-			selectedRow = null!;
-			_editProduct = null!;
-			_ = ShowAlert(result.Message!);
-			StateHasChanged();
+
+			if (!data.ActionState)
+			{
+				// Hide the add form
+				IsShowAddProductForm = false;
+				newProduct = new();
+			}
 		}
-		else
-		{
-			await ShowAlert(result.Message!);
-		}
-	}
-	private void EditProductCancel()
-	{
-		// Reset the selected row
-		selectedRow = null!;
-		// Hide the edit form
-		_editProduct = null!;
 	}
 	// Search
 	private List<Products> filterP = null!;
@@ -1115,25 +899,6 @@
 	{
 		TaxRates ??= await productService.LoadTaxRates();
 	}
-	// Receipt
-	private bool IsShowReceiptForm = false;
-	private Receipt receipt = null!;
-	private void ShowReceiptForm()
-	{
-		// Clean the shopping cart to from the start
-		cartService.ClearCart(productService.DownloadedProduct);
-		IsShowReceiptForm = !IsShowReceiptForm;
-		// close other form
-		IsShowAddDeleteForm = false;
-		_editProduct = null!;
-		IsShowAddProductForm = false;
-	}
-	private void CartChanged(Products products)
-	{
-		// add cart
-		if (!cartService.IsQuantityZero(products.CartItem.ProductId))
-			cartService.AddToCart(products.CartItem);
-	}
 	// Invoice
 	private bool IsShowInvoice = false;
 	private bool IsShowOrder = false;
@@ -1152,7 +917,6 @@
 		// then show the invoice form
 		IsShowInvoice = true;
 		// close other form
-		IsShowAddDeleteForm = false;
 		_editProduct = null!;
 		IsShowAddProductForm = false;
 	}
@@ -1350,7 +1114,7 @@
 			// get the products for the order items
 			foreach (var item in order.OrderItems)
 			{
-				item.Product = productService.GetProductByIdLocal(item.ProductId) ??  await productService.GetProductByIdServer(item.ProductId);
+				item.Product = productService.GetProductByIdLocal(item.ProductId) ?? await productService.GetProductByIdAsync(item.ProductId);
 			}
 			// set the address of the order
 			order.Address = newAddress;
@@ -1404,263 +1168,15 @@
 	private List<GroupProducts> groupedProducts = null!;
 	private async Task loadGroupProducts()
 	{
-		await productGroupService.GetAllGroupProductsAsync();
-		groupedProducts = productGroupService.DownloadedproductGroups;
-	}
-	// paymethods
-	private List<PaymentMethod> PaymentMethods = null!;
-	private async Task loadPaymentMehtods()
-	{
-		PaymentMethods ??= await productService.GetPaymentMethodsAsync();
-	}
-	private bool IsOverlayPaymentMethod = false;
-	private void OnPaymentMethod(PaymentMethod paymentMethod)
-	{
-		double totalPrice = cartService.GetTotalPrice();
-		double totalTax = cartService.GetTotalTax();
-		List<TaxRates> taxRatesGroups = cartService.GetTaxRateGroups();
-		var receipt1 = new Receipt
-			{
-				StoreName = projectInfo.Value.Name!,
-				StoreAddress = projectInfo.Value.Address!,
-				ReceiptDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second),
-				Products = cartService.CartItems.Select(x => x.Product).ToList(),
-				Summe = new Summe() { TotalPrice = totalPrice, TotalTax = totalTax, NettoPrice = totalPrice - totalTax },
-				PaymentMethod = paymentMethod, 
-				PaymentMethodId = paymentMethod.Id, 
-				TaxRates = taxRatesGroups
-			};
-
-		if (!receiptService.IsValidProduct(receipt1, out string errorMessage))
-		{
-			_ = ShowAlert(errorMessage);
-			IsOverlayPaymentMethod = false;
-			return;
-		}
-
-		receipt = receipt1;
-		GeneratorCancelBVisible = true;
-	}
-	private void ClosePaymentMethod()
-	{
-		IsOverlayPaymentMethod = false;
+		groupedProducts = await productGroupService.GetAllGroupProductsAsync();
 	}
 
 	private bool IsLoadingMessage = true;
 	private int startIndex = 0;
-
-	// Generate
-	private string barCodeBase64String = string.Empty;
-	private Etikett? etikettP = null!; 
-	private string generatorType = "0";
-	private bool LabelIdVisible = false;
-	private bool barCodeVisible = false;
-	private bool etikettVisible = false;
-	private string labelPId = string.Empty;
-	private string currentGeneratorType = string.Empty;
-	private async Task OnGenerate()
-	{
-		if (generatorType == "0")
-		{
-			await GenerateReceipt();
-		}
-		else
-		{
-			// wenn die receipt from aktiv ist, dann deaktivieren
-			IsShowReceiptForm = false;
-
-			if (selectedRow == null)
-			{
-				await ShowAlert("Please select a product");
-				return;
-			}
-
-			// Check if a new barcode or etikett needs to be generated
-			if (labelPId != selectedRow!.Id.ToString() || currentGeneratorType != generatorType)
-			{
-				//
-				GenerateBarcodeOrEtikett();
-			}
-		}
-	}
-	private async Task GenerateReceipt()
-	{
-		if (cartService.CartItems.Count == 0 || !IsShowReceiptForm)
-		{
-			_ = ShowAlert("Please add products to the cart before generating a receipt.");
-			return;
-		}
-
-
-		// alle bevor Generation cancel
-		OnGenerateCancel();
-		// get first paymentmethod
-		await SetPaymentMoethodVisibility();
-	}
-
-	private async void GenerateBarcodeOrEtikett()
-	{
-		byte[] barCodeBytes = dpP.BarcodeGenerator(selectedRow!);
-		if (barCodeBytes == null)
-		{
-			await ShowAlert("Error generating the barcode");
-			return;
-		}
-
-		// Update the barcode or etikett based on the generator type
-		barCodeBase64String = Convert.ToBase64String(barCodeBytes);
-		if (generatorType == "1")
-		{
-			SetBarcodeVisibility();
-		}
-		else
-		{
-			SetEtikettVisibility();
-		}
-		labelPId = selectedRow!.Id.ToString()!;
-		currentGeneratorType = generatorType;
-		GeneratorCancelBVisible = true;
-	}
-	private void SetBarcodeVisibility()
-	{
-		receipt = null!;
-		etikettVisible = false;
-		LabelIdVisible = barCodeVisible = true;
-
-	}
-	private void SetEtikettVisibility()
-	{
-		receipt = null!;
-		barCodeVisible = false;
-		LabelIdVisible = etikettVisible = true;
-		etikettP = new Etikett
-			{
-				productsId = selectedRow!.Id,
-				Name = selectedRow.Name_de,
-				categoryName = selectedRow.Category!.Name_de,
-				SalePrice = selectedRow.SalePrice,
-				manufacturerName = selectedRow.Manufacturer!.Name,
-				EXPDate = selectedRow.EXPDate.ToString("dd.MM.yyyy"),
-				barcodeBase64 = barCodeBase64String,
-				manufacturerWebsite = selectedRow.Manufacturer.Website
-			};
-
-	}
-	private async Task SetPaymentMoethodVisibility()
-	{
-		await loadPaymentMehtods();
-		IsOverlayPaymentMethod = true;
-	}
-	private bool GeneratorCancelBVisible = false;
-	private void OnGenerateCancel()
-	{
-		labelPId = string.Empty;
-		etikettVisible = false;
-		barCodeVisible = false;
-		LabelIdVisible = false;
-		barCodeBase64String = string.Empty;
-		etikettP = null!;
-		GeneratorCancelBVisible = false;
-		// receipt
-		receipt = null!;
-	}
-	// Save
-	private string saveType = "pdf";
-	private void OnSave()
-	{
-		if (generatorType == "1")
-		{
-			_ = barCodeSave();
-		}
-		else
-		{
-			_ = ExportEtikett();
-		}
-	}
-	private void OnEtikkt()
-	{
-		_ = ExportEtikett();
-	}
-	private async Task ExportEtikett()
-	{
-		string fileName = $"Etikett_{labelPId}";
-		await JS.InvokeVoidAsync("exportEtikett", "productInfo", fileName, saveType);
-	}
-	private void OnBarcodeImage()
-	{
-		_ = barCodeSave();
-	}
-	private async Task barCodeSave()
-	{
-		if (string.IsNullOrEmpty(barCodeBase64String))
-		{
-			await ShowAlert("No Base64String");
-			return;
-		}
-
-		string fileName = $"BarCode_{labelPId}";
-
-
-		string base64Str = saveType == "pdf" ? Convert.ToBase64String(dpP.ConvertByteToPdf(Convert.FromBase64String(barCodeBase64String))) : barCodeBase64String;
-		_ = JS.InvokeVoidAsync("downloadBase64Image", base64Str, fileName, saveType);
-	}
-	// Print
-	private void OnPrint()
-	{
-		if (generatorType == "barcode")
-		{
-			_ = JS.InvokeVoidAsync("printBarcode", "imgBarcode");
-		}
-		else
-		{
-			_ = JS.InvokeVoidAsync("printEtikett", "divEtikett");
-		}
-	}
-	//  Select 
-	private Products? selectedRow;
-	private void SelectRow(Products product)
-	{
-		selectedRow = product;
-	}
-	// image upload
-	private async Task<Products> UploadImage(InputFileChangeEventArgs e, Products products)
-	{
-		if (e.File == null) return products;
-		using var stream = new MemoryStream();
-
-		Microsoft.AspNetCore.Components.Forms.IBrowserFile imageFile = e.File;
-		try
-		{
-			// Check if the file size exceeds the limit
-			if (imageFile.Size > 512000)
-			{
-				var array = await dpP.CompressImage(imageFile);
-				products!.Image = array;
-			}
-			else
-			{
-				await imageFile.OpenReadStream().CopyToAsync(stream);
-				products!.Image = stream.ToArray();
-			}
-		}
-		catch (Exception ex)
-		{
-			_ = ShowAlert($"Error uploading image: {ex.Message}");
-		}
-
-		stream.Dispose();
-		return products;
-	}
 	// Key Down
 	private void KeyDown(KeyboardEventArgs e)
 	{
-		if (e.Key == "Enter")
-		{
-			if (_editProduct != null)
-				_ = JS.InvokeVoidAsync("elementClick", $"editProductB_{_editProduct!.Id.ToString()}");
-
-		}
-		else if (e.Key == "Escape")
+		if (e.Key == "Escape")
 		{
 			// Reset the selected row
 			selectedRow = null!;
@@ -1668,45 +1184,21 @@
 			_editProduct = null!;
 		}
 	}
+	private void OnMainDiv()
+	{
+		// hide die Menu if sichtbar
+		showContextMenu = false;
+	}
 	// reset
 	private void ResetOfPage()
 	{
-		// Reset when the page reloads
-		ConstantsP.currentPage = 0;
-		startIndex = ConstantsP.currentPage * ConstantsP.pageSize;
-		Flags.allProductsLoaded = false;
+
+		startIndex = 0;
 	}
 	// show alert
 	private async Task ShowAlert(string message)
 	{
 		await JS.InvokeVoidAsync("showAlert", message);
-	}
-	private Users? user;
-	private DotNetObjectReference<ProductsManagement>? objRef;
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			var authState = await AuthProvider.GetAuthenticationStateAsync();
-			var user = authState.User;
-			if (user.Identity?.IsAuthenticated == true)
-			{
-				this.user = new();
-				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-				if (int.TryParse(userIdStr, out int userIdInt))
-				{
-					this.user.Id = userIdInt;
-				}
-				//// Reset when the page reloads
-				ResetOfPage();
-				//
-				_ = loadInBackground();
-				// get the donnetObject to use in javascript
-				objRef = DotNetObjectReference.Create(this);
-				// set the Oject of donNet in javascript and the id:checkScrollEnd, and get checkScrollEnd funktion from javascript
-				_ = JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
-			}
-		}
 	}
 	// Scroll
 	[JSInvokable]

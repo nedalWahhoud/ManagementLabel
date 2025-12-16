@@ -1,5 +1,5 @@
-﻿using ManagementLabel.ProductsF;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ManagementLabel.Model
 {
@@ -14,7 +14,6 @@ namespace ManagementLabel.Model
         public int CategoryId { get; set; }
         public Categories? Category { get; set; }
         public string? Barcode { get; set; } = "BarcodeNull";
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity muss größer als 0 sein.")]
         public int Quantity { get; set; }
         [Range(0.01, double.MaxValue, ErrorMessage = "Purchase Price muss größer als 0 sein.")]
         public double PurchasePrice { get; set; }
@@ -24,13 +23,13 @@ namespace ManagementLabel.Model
         public int MinimumStock { get; set; }
         [Required(ErrorMessage = "Startdatum ist erforderlich.")]
         [DateInFuture(ErrorMessage = "Startdatum muss in der Zukunft liegen.")]
-        public DateTime EXPDate { get; set; }
+        public DateTime EXPDate { get; set; } = DateTime.Today;
         [Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
         public int? ManufacturerId { get; set; }
         public Manufacturer? Manufacturer { get; set; }
         public int UserId { get; set; }
         public Users? User { get; set; }
-        public byte[]? Image { get; set; }
+        public ICollection<ProductImages> ProductImages { get; set; } = [];
         [Required(ErrorMessage = "يجب ادخال اسم المنتج ايضا بل عربية")]
         public string? Name_ar { get; set; }
         [Required(ErrorMessage = "يجب ادخال وصف المنتج ايضا بل عربية")]
@@ -44,12 +43,6 @@ namespace ManagementLabel.Model
         public double DiscountedPrice { get; set; } = 0;
         //
         public CartItem CartItem { get; set; } = null!;
-        public Products()
-        {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "DPImage.png");
-            if(File.Exists(path))
-                Image = File.ReadAllBytes(path); 
-        }
         public void InitializeCartItem(int quantity)
         {
             CartItem = new CartItem

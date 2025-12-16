@@ -29,7 +29,6 @@
     }
 
 .formGroup {
-    margin-bottom: 20px;
     text-align: left;
 }
 
@@ -86,4 +85,10 @@
 }
 .hidden {
     display: none;
+}
+.RememberMe {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
 }

@@ -9,11 +9,11 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-        <nav>
-            <AuthorizeView>
-                <Authorized>
-                    <div class="nav-item px-3">
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
                     <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" href="/" Match="NavLinkMatch.All">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <span class="bi bi-box-seam fs-3"></span>
@@ -39,28 +39,28 @@
                         </span>
                         <span class="ms-2">Discount</span>
                     </NavLink>
-                    </div>
-                    <!-- Spacer to push logout to bottom -->
-                    <div style="flex-grow: 1;"></div>
+                </div>
+                <!-- Spacer to push logout to bottom -->
+                <div style="flex-grow: 1;"></div>
 
-                    <!-- LogOut at bottom -->
-                    <div class="nav-item px-3">
+                <!-- LogOut at bottom -->
+                <div class="nav-item px-3">
                     <NavLink class="nav-link d-flex align-items-center" @onclick="HandleLogout">
                         <span class="bi bi-box-arrow-left fs-3 me-2 d-inline-block" style="line-height: 1;"></span>
                         <span class="ms-2">Logout</span>
-                        </NavLink>
-                    </div>
-                </Authorized>
-                <NotAuthorized>
-                    <div class="nav-item px-3">
-                        <NavLink class="nav-link" href="/login">
-                            <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> LogIn
-                        </NavLink>
-                    </div>
-                </NotAuthorized>
-            </AuthorizeView>
-        </nav>
-    </div>
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/login">
+                        <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> LogIn
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
 
 @code {
 
@@ -70,14 +70,15 @@
         // event handler for cart changes
         orderService.OnChange += HandleOpenOrderCountChange;
     }
+
     private void HandleOpenOrderCountChange()
     {
         InvokeAsync(StateHasChanged);
     }
 
-    private async Task HandleLogout(MouseEventArgs e)
+    private async Task HandleLogout()
     {
-	 await AuthService.Logout();
+        await AuthService.Logout();
     }
     // order 
 	private void OnOrder()
@@ -92,7 +93,6 @@
 
     public void Dispose()
     {
-        
         orderService.OnChange -= HandleOpenOrderCountChange;
     }
 }

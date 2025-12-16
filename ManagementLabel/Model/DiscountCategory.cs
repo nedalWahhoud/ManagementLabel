@@ -1,5 +1,4 @@
-﻿using ManagementLabel.ProductsF;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ManagementLabel.Model
 {

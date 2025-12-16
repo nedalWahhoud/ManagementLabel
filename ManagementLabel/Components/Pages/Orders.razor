@@ -53,10 +53,13 @@
                     {
                         var order = orders[i];
                         <tr>
+                            @{
+                                var germanCulture = new System.Globalization.CultureInfo("de-DE");
+                            }
                             <td>@order.Id</td>
                             <td>@order.UserId</td>
                             <td>@(order.User?.UserName ?? "Kein Unsername")</td>
-                            <td>@order.OrderDate.ToShortDateString()</td>
+                            <td>@order.OrderDate.ToString("d", germanCulture)</td>
                             <td>@order.PaymentMethod?.Description_de</td>
                             <td>
                                 @* Discount *@
@@ -64,26 +67,26 @@
                                 {
                                     var discountDetails = invoiceService.GetDetailsDiscountCode(order);
 
-                                    @($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue:C})")
+                                    @($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
                                 }
                                 else if (order.DiscountCategory != null)
                                 {
                                     var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
 
-                                    @($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue:C})")
+                                    @($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
                                 }
                                 else
                                 {
                                     <span>Kein Rabatt</span>
                                 }
                             </td>
-                            <td>@order.TotalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+                            <td>@order.TotalPrice.ToString("C", germanCulture)</td>
                             <td>
                                 <InputSelect Value="@order.StatusId"
                                 ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
                                 ValueExpression="() => order.StatusId"
                                 class="form-select"
-                                             disabled="@order.IsUpdatingStatus">
+                                disabled="@order.IsUpdatingStatus">
                                     @foreach (var status in orderService.OrderStatusList)
                                     {
                                         <option value="@status.Id">@status.Status_de</option>
@@ -98,7 +101,7 @@
                                 }
                             </td>
                             <td>
-                                @order.ShippingProviders?.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))
+                                @order.ShippingProviders?.PublicShippingCost.ToString("C", germanCulture)
                             </td>
                             <td>
                                 @if(order.ShippingProviderId != null && order.ShippingProviders != null)
@@ -151,24 +154,12 @@
                                         {
                                             <tr>
                                                 <td>
-                                                    @{
-                                                        var imageBytes = item.Product?.Image ?? Array.Empty<byte>();
-                                                        string src;
-                                                        if (imageBytes.Length > 0)
-                                                        {
-                                                            src = Convert.ToBase64String(imageBytes);
-                                                        }
-                                                        else
-                                                        {
-                                                            src = "images/sample.jpg";
-                                                        }
-                                                    }
-                                                    <img  src="data:image/png;base64,@(src)" class="productImg" />
+                                                    <img src="@productImagesService.GetProductImageUrl(item.Product?.ProductImages.FirstOrDefault(img => img.IsMain)!)" class="productImg" />
                                                 </td>
                                                 <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
                                                 <td>@item.Quantity</td>
-                                                <td>@item.UnitPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
-                                                <td>@((item.UnitPrice * item.Quantity).ToString("C", new System.Globalization.CultureInfo("de-DE")))</td>
+                                                <td>@item.UnitPrice.ToString("C", germanCulture)</td>
+                                                <td>@((item.UnitPrice * item.Quantity).ToString("C", germanCulture))</td>
 
                                             </tr>
                                         }

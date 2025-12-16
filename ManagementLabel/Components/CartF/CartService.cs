@@ -35,7 +35,7 @@ namespace ManagementLabel.Components.CartF
         }
         public async Task<string> AddToCart(int productId)
         {
-            Products product = _productService.GetProductByIdLocal(productId) ?? await _productService.GetProductByIdServer(productId);
+            Products product = _productService.GetProductByIdLocal(productId) ?? await _productService.GetProductByIdAsync(productId);
             if (product == null)
                 return "Produkt nicht gefunden";
             //
@@ -69,7 +69,7 @@ namespace ManagementLabel.Components.CartF
                 {
                     ProductId = productId,
                     Quantity = 1, // add first item with quantity 1
-                    Product = _productService.GetProductByIdLocal(productId) ?? await _productService.GetProductByIdServer(productId),
+                    Product = _productService.GetProductByIdLocal(productId) ?? await _productService.GetProductByIdAsync(productId),
                 });
             }
             SaveCart(); // Save the updated cart to local storage

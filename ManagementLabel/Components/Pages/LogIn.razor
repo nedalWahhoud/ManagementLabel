@@ -6,16 +6,20 @@
 <div class="logInContainer">
     <div class="logInCard">
         <h2>Welcome</h2>
-        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" >
+        <EditForm style="display:flex; flex-direction:column; gap:5px;" Model="@loginModel" OnValidSubmit="HandleLogin">
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="formGroup">
-                <label for="username">Username/E-mail</label>
-                <InputText @onkeydown="KeyDown" id="username" class="form-control" @bind-Value="loginModel.UserName" @onfocus="() => IsUsernameFocused = true" @onblur="() => IsUsernameFocused = false" />
+                <label for="username">E-mail</label>
+                <InputText @onkeydown="KeyDown" id="username" class="form-control" @bind-Value="loginModel.Email" @onfocus="() => IsUsernameFocused = true" @onblur="() => IsUsernameFocused = false" />
             </div>
             <div class="formGroup">
                 <label for="password">Password</label>
                 <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+            </div>
+            <div class="RememberMe">
+                <InputCheckbox @bind-Value="loginModel.RememberMe" />
+                <span>An mich erinneren</span>
             </div>
             <div class="formGroup">
                 <button type="submit" class="btn btn-primary">Login</button>
@@ -34,10 +38,10 @@
     // login
     private async Task HandleLogin()
     {
+        loginModel.SignupProvider = "Manual";
         ValidationResult result = await AuthService.LoginAsync(loginModel);
         if (result.Result)
         {
-
             NavigationManager!.NavigateTo("/", true);
         }
         else

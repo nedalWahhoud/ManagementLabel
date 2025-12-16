@@ -1,14 +1,18 @@
 ﻿using ManagementLabel.Model;
-using System.Net.Http;
+
 
 namespace ManagementLabel.ProductsF
 {
     public class ProductService(HttpClient http)
     {
         private readonly HttpClient _http = http;
-        private GetItems<Products> _getItems { get; set; } = new();
+
+        private GetItems<Products> GetItems { get; set; } = new();
 
         public List<Products> DownloadedProduct { get; set; } = [];
+
+        public List<Manufacturer> DownloadedManufacturers { get; set; } = [];
+        public List<TaxRate> DownloadedTaxRates { get; set; } = [];
         public async Task<List<Products>> GetProductByIdsServer(List<int> productIds)
         {
             try
@@ -20,8 +24,8 @@ namespace ManagementLabel.ProductsF
                 var products = await response.Content.ReadFromJsonAsync<List<Products>>();
                 if (products != null)
                 {
-                    // add the product to the local list
-                    AddProductToLocal(products);
+                        // add the product to the local list
+                        AddProductToLocal(products);
                     return products;
                 }
                 return null!;
@@ -31,22 +35,21 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-    
         public async Task<GetItems<Products>> LoadMoreProducts()
         {
-            if (_getItems.AllItemsLoaded)
-                return new() { AllItemsLoaded = _getItems.AllItemsLoaded };
+            if (GetItems.AllItemsLoaded)
+                return new() { AllItemsLoaded = GetItems.AllItemsLoaded };
             try
             {
-                var response = await _http.GetAsync($"api/Products/getProducts?CurrentPage={_getItems.CurrentPage}&PageSize={_getItems.PageSize}&AllItemsLoaded={_getItems.AllItemsLoaded}");
+                var response = await _http.GetAsync($"api/Products/getProducts?CurrentPage={GetItems.CurrentPage}&PageSize={GetItems.PageSize}&AllItemsLoaded={GetItems.AllItemsLoaded}");
 
                 if (!response.IsSuccessStatusCode)
                     return new();
 
                 var getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>();
 
-                _getItems.AllItemsLoaded = getItems!.AllItemsLoaded;
-                _getItems.CurrentPage = getItems!.CurrentPage;
+                GetItems.AllItemsLoaded = getItems!.AllItemsLoaded;
+                GetItems.CurrentPage = getItems!.CurrentPage;
 
                 // add to local list
                 AddProductToLocal(getItems.Items);
@@ -58,9 +61,10 @@ namespace ManagementLabel.ProductsF
                 return new();
             }
         }
-       
         public async Task<List<Manufacturer>> LoadManufacturers()
         {
+            if(DownloadedManufacturers.Count > 0)
+                return DownloadedManufacturers;
             try
             {
                 var response = await _http.GetAsync($"api/Products/getManufacturers");
@@ -68,8 +72,10 @@ namespace ManagementLabel.ProductsF
                     return [];
 
                 var getItems = await response.Content.ReadFromJsonAsync<GetItems<Manufacturer>>();
+                // add the manufacturers to the local list
+                DownloadedManufacturers.AddRange(getItems?.Items ?? []); 
 
-                return getItems?.Items ?? [];
+                return DownloadedManufacturers;
             }
             catch
             {
@@ -78,6 +84,8 @@ namespace ManagementLabel.ProductsF
         }
         public async Task<List<TaxRate>> LoadTaxRates()
         {
+            if (DownloadedTaxRates.Count > 0)
+                return DownloadedTaxRates;
             try
             {
                 var response = await _http.GetAsync($"api/Products/getTaxRates");
@@ -85,8 +93,10 @@ namespace ManagementLabel.ProductsF
                     return [];
 
                 var getItems = await response.Content.ReadFromJsonAsync<GetItems<TaxRate>>();
+                // add the tax rates to the local list
+                DownloadedTaxRates.AddRange(getItems?.Items ?? []);
 
-                return getItems?.Items ?? [];
+                return DownloadedTaxRates;
             }
             catch
             {
@@ -151,10 +161,10 @@ namespace ManagementLabel.ProductsF
       
         public void Reset()
         {
-            _getItems.Items.Clear();
-            _getItems.AllItemsLoaded = false;
-            _getItems.CurrentPage = 0;
-            _getItems.PageSize = 11;
+            GetItems.Items.Clear();
+            GetItems.AllItemsLoaded = false;
+            GetItems.CurrentPage = 0;
+            GetItems.PageSize = 11;
         }
         public bool IsEditedProduct(Products currentProduct, Products editProduct)
         {
@@ -191,7 +201,7 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.DiscountedPrice != editProduct.DiscountedPrice)
                 return true;
-            if (currentProduct.Image!.Length != editProduct.Image!.Length)
+            if (currentProduct.ProductImages.FirstOrDefault(i => i.IsMain)?.LastModified != editProduct.ProductImages.FirstOrDefault(i => i.IsMain)?.LastModified)
                 return true;
 
             return false;
@@ -253,7 +263,7 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-        public async Task<Products> GetProductByIdServer(int productId)
+        public async Task<Products> GetProductByIdAsync(int productId)
         {
             try
             {
@@ -275,5 +285,7 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
+        // 
+       
     }
 }

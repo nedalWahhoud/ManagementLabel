@@ -55,56 +55,6 @@
         background-color: #e0f3ff;
         cursor: pointer;
     }
-
-    .table tbody tr .deleteForm button {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        padding: 10px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-        .table tbody tr .deleteForm button:hover {
-            background-color: #c82333;
-            transform: scale(1.05);
-        }
-
-    .table tbody tr .editForm {
-        gap: 10px;
-        display: flex;
-    }
-
-        .table tbody tr .editForm button:first-child {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-            .table tbody tr .editForm button:first-child:hover {
-                background-color: #218838;
-                transform: scale(1.05);
-            }
-
-        .table tbody tr .editForm button:last-child {
-            background-color: #757e84;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-            .table tbody tr .editForm button:last-child:hover {
-                background-color: #5a6268;
-                transform: scale(1.05);
-            }
 .AddDecresaseCard {
     display: flex;
     flex-direction: column;
@@ -155,12 +105,6 @@
         border-radius: 50%;
         
     }
-.filterContainer {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    margin: 10px 14px;
-}
 .categoryDropdown {
     padding: 0px 12px;
     border-radius: 6px;
@@ -173,47 +117,6 @@
         border-color: #007bff;
         box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
     }
-/* cart */
-.productsCart {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    max-width: 200px;
-}
-
-    .productsCart input {
-        width: 60px;
-        text-align: center;
-    }
-    .productsCart .btnProduct,
-    .btnProductAdded {
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        height: 35px;
-        padding: 0 10px;
-        border-radius: 6px;
-        border: none;
-        color: white;
-        font-size: 14px;
-        cursor: pointer;
-    }
-    .productsCart .btnProduct {
-        background-color: var(--btnBackgroundColor);
-    }
-
-        .productsCart .btnProduct:hover {
-            background-color: var(--btnBackgroundColorHover);
-        }
-
-    .productsCart .btnProductAdded {
-        background-color: var(--btnBackgroundColorProductAdded);
-    }
-
-        .productsCart .btnProductAdded:hover {
-            background-color: var(--btnBackgroundColorProductAddedHover);
-        }
 /* product image */
 .productImg {
     width: 75px;
@@ -235,32 +138,9 @@
     overflow-y: auto; /* يسمح بالتمرير */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
-.productForm {
-    display: flex;
-    flex-direction: column;
-    align-items: inherit;
-    margin-top: 3rem;
-    margin-bottom: 3rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    border: 1px solid #ccc;
-    padding: 10px 16px;
-    gap: 10px;
-}
-
 .formGroupAdd {
     margin: 10px;
 }
-
-.addProductB {
-    margin: 10px;
-    background-color: #007bff;
-    color: white;
-}
-
-    .addProductB:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
 
 .addProductCancelB {
     background-color: #757e84;
@@ -272,15 +152,6 @@
         transform: scale(1.05);
     }
 /* etikettBarcode erlement */
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-}
-
 .addProductTopB {
     background-color: #007bff;
     color: white;
@@ -300,44 +171,7 @@
         background-color: #5a6268;
         transform: scale(1.05);
     }
-/* delete product */
-.deleteB {
-    background-color: #dc3545;
-    color: white;
-}
-
-    .deleteB:hover {
-        background-color: #c82333;
-        transform: scale(1.05);
-    }
-
-.deleteCancelB {
-    color: white;
-    background-color: #757e84;
-}
-
-    .deleteCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
-/* Kassenbon erstellen */
-.receiptB {
-    color: white;
-    background-color: #4CAF50;
-}
-    .receiptB:hover {
-        background-color: #4CAF50;
-        transform: scale(1.05);
-    }
-.receiptCancelB {
-    color: white;
-    background-color: #757e84;
-}
-
-    .receiptCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
+/* Invoice */
 .InvoiceB {
     color: white;
     background-color: #16A34A;
@@ -361,39 +195,6 @@
         background-color: #6D28D9;
         transform: scale(1.05);
     }
-    /* Label-Style*/
-    .labelPId {
-        display: block;
-        font-weight: 600;
-        font-size: 1rem;
-        color: #333;
-        margin-bottom: 0.4rem;
-        transition: color 0.3s ease;
-        text-align: left;
-        width: auto;
-        border-radius: 5px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .labelPId:hover {
-        color: #007acc;
-        text-decoration: underline;
-        transform: scale(1.03);
-    }
-/* Bild-Styling */
-.imgBarcode {
-    width: 50%;
-    height: auto;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease;
-    display: block;
-    cursor: pointer;
-}
-
-    .imgBarcode:hover {
-        transform: scale(1.03);
-    }
 /* Button-Styling */
 .btn {
     padding: 10px 16px;
@@ -404,46 +205,6 @@
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.printB {
-    background-color: #fd7e14;
-    color: #ffffff;
-}
-
-    .printB:hover {
-        background-color: #e56700;
-        transform: scale(1.05);
-    }
-
-.saveB {
-    background-color: #28a745;
-    color: white;
-}
-
-    .saveB:hover {
-        background-color: #218838;
-        transform: scale(1.05);
-    }
-
-.generatorB {
-    background-color: #007bff;
-    color: white;
-}
-
-    .generatorB:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
-
-.generatorCancelB {
-    color: white;
-    background-color: #757e84;
-}
-
-    .generatorCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
-/* ======== PaymentMethods FORM OVERLAY ======== */
 .overlay {
     position: fixed;
     top: 0;
@@ -458,192 +219,12 @@
     padding: 1rem;
     box-sizing: border-box;
 }
-
-.PaymentMethodForm {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 100%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.buttonMethods {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 20px 60px;
-}
-.CaschButton {
-    background-color: #4CAF50; /* أخضر */
-    color: white;
-    border: none;
-    padding: 22px 35px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-    .CaschButton:hover {
-        background-color: #45a049; /* أخضر أغمق عند المرور */
-    }
-.EcButton {
-    background-color: #2196F3; /* أزرق */
-    color: white;
-    border: none;
-    padding: 22px 35px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-}
-
-    .EcButton:hover {
-        background-color: #0b7dda; /* أزرق أغمق عند المرور */
-    }
-/* receipt */
-.receipt {
-    max-width: 500px;
-    margin: 2rem auto;
-    padding: 1.5rem 2rem;
-    background: #f9f9f9;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
-    cursor:pointer;
-}
-    .receipt:hover {
-        transform: scale(1.03);
-    }
-    .receipt h2 {
-        width: 100%;
-        display: flex;
-        align-content: center;
-        justify-content: center;
-        border-block-color: #000000;
-        font-size: 2rem;
-        margin-bottom: 0.25rem;
-        padding-bottom: 3rem;
-    }
-
-    .receipt p {
-        margin: 0.2rem 0 1rem 0;
-        font-size: 0.9rem;
-        color: #555;
-    }
-
-    .receipt table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 1.5rem;
-    }
-
-        .receipt table thead th {
-            color: black;
-            padding: 0.6rem;
-            font-weight: 600;
-            text-align: left;
-            border-radius: 6px 6px 0 0;
-        }
-
-        .receipt table tbody td {
-            padding: 0.6rem;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        .receipt table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-.summary {
-    border-top: 2px solid #000000;
-    padding-top: 1rem;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #0b3d91;
-}
-
-    .summary p {
-        margin: 0.3rem 0;
-    }
-
-.taxRates {
-    margin-top: 1rem;
-    font-size: 0.9rem;
-}
-
-    .taxRates h4 {
-        color: #2196F3;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-
-    .taxRates ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
-
-        .taxRates ul li {
-            padding: 0.2rem 0;
-            border-bottom: 1px solid #eee;
-            color: #444;
-        }
-
-            .taxRates ul li:last-child {
-                border-bottom: none;
-            }
-
-
 /* loadingMessage-Styling */
 .loadingMessage {
         text-align: center;
         margin-top: 10px;
         font-weight: bold;
         color: #007bff;
-}
-
-.etikett {
-    width: 600px;
-    padding: 15px;
-    border: 1px solid #000;
-    border-radius: 8px;
-    border: none;
-    background-color: #fff;
-    font-family: Arial, sans-serif;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    text-align: center;
-    margin: 20px auto;
-}
-
-    .etikett:hover {
-        transform: scale(1.03);
-        cursor: pointer;
-    }
-
-    .etikett img {
-        max-width: 100%;
-        height: auto;
-        margin-bottom: 10px;
-    }
-
-productInfo {
-    width: auto;
-    height: auto;
-}
-
-.productInfo p {
-    margin: 4px 0;
-    font-weight: bold;
-    font-size: 18px;
 }
 
 .hidden {
@@ -746,120 +327,106 @@ productInfo {
         background-color: #5a6268;
         transform: scale(1.05);
     }
-/* موبايل: عرض أقل من 768px */
+/* menu */
+.contextMenu {
+    z-index: 9999;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    min-width: 150px;
+}
+
+    .contextMenu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .contextMenu li {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+        .contextMenu li:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
 @media (max-width: 768px) {
-    /* العنوان العلوي */
     .TopContiner {
-                flex-direction: column; /* بدل صف إلى عمود */
+                flex-direction: column; 
                 gap: 15px;
                 height: auto;
                 align-items: center;
             }
+    .tableContiner {
+        max-height: 60vh; /* ارتفاع محدد بالنسبة للشاشة */
+        overflow-y: auto; /* scroll عمودي */
+        overflow-x: hidden; /* scroll أفقي */
+        display: block; /* منع flex من تعطيل scroll */
+        padding: 0 5px;
+    }
 
-            /* الجدول */
-            .tableContiner {
-                max-height: none;
-                overflow-x: auto; /* تمكين التمرير الأفقي */
-                padding: 0 5px;
-            }
-
-            .table {
-                font-size: 13px;
-                margin-top: 1rem;
-            }
-
-                .table tbody tr td {
-                    font-size: 13px;
-                    height: auto;
-                    padding: 8px;
-                }
-
-            /* البحث */
-            .searchWrapper,
-            .filterContainer {
-                max-width: 100%;
-                margin: 8px 0;
-            }
-
-            .searchInput {
-                font-size: 14px;
-                padding: 8px 35px 8px 10px;
-            }
-
-            .clearButton {
-                font-size: 20px;
-            }
-
-            /* عربة المنتجات */
-            .productsCart {
-                flex-direction: column;
-                gap: 6px;
-                max-width: 100%;
-            }
-
-                .productsCart input {
-                    width: 50px;
-                }
-
-            /* صورة المنتج */
-            .productImg {
-                width: 60px;
-                height: 60px;
-            }
-
-
-            .overlayAddForm,
-            .PaymentMethodForm,
-            .overlayOrderForm {
-                max-width: 95%;
-                padding: 1rem;
-            }
-
-            /* زرار الدفع */
-            .buttonMethods {
-                flex-direction: column;
-                padding: 10px;
-                gap: 12px;
-            }
-
-            .CaschButton,
-            .EcButton {
-                width: 100%;
-                padding: 16px;
-                font-size: 14px;
-            }
-
-            /* الفاتورة */
-            .receipt {
-                width: 95%;
-                padding: 1rem;
-            }
-
-                .receipt h2 {
-                    font-size: 1.5rem;
-                    padding-bottom: 1rem;
-                }
-
-                .receipt table thead th,
-                .receipt table tbody td {
-                    font-size: 12px;
-                    padding: 6px;
-                }
-
-            /* الملصق (etikett) */
-            .etikett {
-                width: 95%;
-                margin: 10px auto;
-                padding: 10px;
-            }
-
-            .productInfo p {
-                font-size: 14px;
-            }
-
-            .productForm {
-                margin-top: 1rem;
-                margin-bottom: 1rem;
-                padding: 8px;
-            }
+        .tableContiner tr {
+            user-select: none;
+            -webkit-touch-callout: none;
         }
+    .table {
+        width: 100%; /* يجعل الجدول يملأ عرض الشاشة */
+        font-size: 13px;
+        margin-top: 1rem;
+        table-layout: auto; /* الأعمدة تتوزع حسب المحتوى */
+    }
+        .table tbody tr td {
+            font-size: 13px;
+            height: auto;
+            padding: 8px;
+        }
+    /* Suchen */
+    .searchWrapper,
+    .filterContainer {
+        max-width: 100%;
+        margin: 8px 0;
+    }
+
+    .searchInput {
+        font-size: 14px;
+        padding: 8px 35px 8px 10px;
+    }
+
+    .clearButton {
+        font-size: 20px;
+    }
+
+    /* product Image  */
+    .productImg {
+        width: 60px;
+        height: 60px;
+    }
+
+
+    .overlayAddForm,
+    .PaymentMethodForm,
+    .overlayOrderForm {
+        max-width: 95%;
+        padding: 1rem;
+    }
+
+    .buttonMethods {
+        flex-direction: column;
+        padding: 10px;
+        gap: 12px;
+    }
+
+    .CaschButton,
+    .EcButton {
+        width: 100%;
+        padding: 16px;
+        font-size: 14px;
+    }
+
+    .productInfo p {
+        font-size: 14px;
+    }
+}

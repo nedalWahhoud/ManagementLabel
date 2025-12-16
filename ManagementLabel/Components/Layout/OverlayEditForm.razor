@@ -1,0 +1,326 @@
+﻿@implements IDisposable
+
+@if(GetProducts != null)
+{
+	<div class="overlay">
+		<div class="overlayAddForm">
+			<div class="productForm">
+				<h3>@(Title ?? "Fehler")</h3>
+				<EditForm Model="@GetProducts" OnValidSubmit="HandleSubmit">
+
+					<DataAnnotationsValidator />
+					<div class="formGroupAdd">
+						<label for="Name">Product Name DE</label>
+						<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_de" />
+						<ValidationMessage For="@(() => GetProducts.Name_de)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Description">Description DE</label>
+						<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_de" />
+						<ValidationMessage For="@(() => GetProducts.Description_de)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Name">اسم المنتج بل عربية</label>
+						<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_ar" />
+						<ValidationMessage For="@(() => GetProducts.Name_ar)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Description">وصف المنتج بل عربية</label>
+						<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_ar" />
+						<ValidationMessage For="@(() => GetProducts.Description_ar)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="category">Category</label>
+						<InputSelect id="category" class="form-control" @bind-Value="GetProducts.CategoryId">
+							<option value="0">Select Category</option>
+							@foreach (var category in categories)
+							{
+								<option value="@category.Id">@category.Name_de</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => GetProducts.CategoryId)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Quantity">Quantity</label>
+						<InputNumber id="Quantity" min="0" class="form-control" @bind-Value="GetProducts.Quantity" />
+						<ValidationMessage For="@(() => GetProducts.Quantity)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="PurchasePrice">Purchase Price</label>
+						<InputNumber id="PurchasePrice" min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" />
+						<ValidationMessage For="@(() => GetProducts.PurchasePrice)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="SalePrice">Selling Price</label>
+						<InputNumber id="SalePrice" min="0" class="form-control" @bind-Value="GetProducts.SalePrice" />
+						<ValidationMessage For="@(() => GetProducts.SalePrice)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="MinimumStock">Minimum Stock</label>
+						<InputNumber id="MinimumStock" min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" />
+						<ValidationMessage For="@(() => GetProducts.MinimumStock)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="EXPDate">Expiration Date</label>
+						<InputDate id="EXPDate" class="form-control" @bind-Value="GetProducts.EXPDate" />
+						<ValidationMessage For="@(() => GetProducts.EXPDate)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="manufacturer">Manufacturer</label>
+						<InputSelect id="category" class="form-control" @bind-Value="GetProducts.ManufacturerId">
+							<option value="0">Select Manufacturer</option>
+							@foreach (var Manufacturer in manufacturers!)
+							{
+								<option value="@Manufacturer.Id">@Manufacturer.Name</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => GetProducts.ManufacturerId)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="TaxRate">Steuersatz</label>
+						<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">
+							<option value="0">Select Rate</option>
+							@foreach (var rate in taxRates)
+							{
+								<option value="@rate.Id">@rate.Rate</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => GetProducts.TaxRateId)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="ProductGroup">Product Gruppe</label>
+						<InputSelect class="form-control" @bind-Value="GetProducts.ProductGroupID">
+							<option value="0">wählen Product Gruppe aus</option>
+							@foreach (var groupProduct in groupedProducts)
+							{
+								<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
+							}
+						</InputSelect>
+						<ValidationMessage For="@(() => GetProducts.ProductGroupID)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="ProductGroup">Versandfähig</label>
+						<InputCheckbox @bind-Value="GetProducts.IsShippable" />
+						<ValidationMessage For="@(() => GetProducts.IsShippable)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="ImAngebot">Im Angebot</label>
+						<InputNumber id="ImAngebot" min="0" class="form-control" @bind-Value="GetProducts.DiscountedPrice" />
+						<ValidationMessage For="@(() => GetProducts.DiscountedPrice)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Image">Image</label>
+						<div class="imageUpload">
+							<InputFile id="Image" class="form-control" OnChange="ImageUpload" />
+							@if (GetProducts.ProductImages != null && GetProducts.ProductImages.Count > 0)
+							{
+								ProductImages mainImage = GetProducts.ProductImages.FirstOrDefault(i => i.IsMain)!;
+								string imgScr = string.Empty;
+								if (!string.IsNullOrEmpty(mainImage.ImageUrlLocal))
+								{
+									imgScr = mainImage.ImageUrlLocal;
+								}
+								else
+								{
+									imgScr = productImagesService.GetProductImageUrl(mainImage);
+
+								}
+								<img src="@imgScr"
+								alt="Product Image"
+								class="previewImage" />
+								<ValidationMessage For="@(() => GetProducts!.ProductImages)" />
+							}
+						</div>
+					</div>
+					<button type="submit" class="btn addProductB">@(ButtonName ?? "Fehler")</button>
+					<button type="button" class="btn addProductCancelB" @onclick="CancelSubmit">Cancel</button>
+				</EditForm>
+			</div>
+		</div>
+	</div>
+}
+@code {
+	[Parameter]
+	public string Title { get; set; } = string.Empty;
+	[Parameter]
+	public string ButtonName { get; set; } = null!;
+	[Parameter]
+	public Products GetProducts { get; set; } = null!;
+	[Parameter]
+	public string Action { get; set; } = string.Empty;
+	[Parameter]
+	public Users? user { get; set; }
+	[Parameter]
+	public EventCallback<(Products product, string Action, bool ActionState)> OnHandel { get; set; }
+
+	private List<Categories> categories = new();
+	private List<GroupProducts> groupedProducts = new();
+	private List<TaxRate> taxRates = new();
+	private List<Manufacturer> manufacturers = new();
+	protected override async Task OnInitializedAsync()
+	{
+		categories = await categoryService.LoadCategories();
+		groupedProducts = await productGroupService.GetAllGroupProductsAsync();
+		taxRates = await productService.LoadTaxRates();
+		manufacturers = await productService.LoadManufacturers();
+		// get default image for add action
+		if (Action == "Add")
+		{
+			GetProducts.ProductImages.Add(productImagesService.GetDefaultImage());
+		}
+	}
+
+	private async Task HandleSubmit()
+	{
+		if (Action == "Edit")
+		{
+			// if null
+			if (GetProducts == null)
+			{
+				await ShowAlert("Nothing has changed");
+				return;
+			}
+			// if no edited
+			Products? currentProduct = productService.DownloadedProduct.Find(p => p.Id == GetProducts.Id);
+			bool isEdited = productService.IsEditedProduct(currentProduct!, GetProducts);
+			if (!isEdited)
+			{
+				await ShowAlert("Nothing has changed");
+				return;
+			}
+
+			var result = await productService.UpdateProductAsync(GetProducts);
+			if (result.Result)
+			{
+				// get edited Product
+				var editedProduct = await productService.GetProductByIdAsync(GetProducts.Id);
+				GetProducts = editedProduct;
+
+				// initaialize the caritem for this new product
+				GetProducts.InitializeCartItem(0);
+
+				// Update the product in the list
+				int index = productService.DownloadedProduct!.FindIndex(p => p.Id == GetProducts.Id);
+				productService.DownloadedProduct[index] = GetProducts!; // Update the product in the list
+
+				// Benachrichtigen Sie die Vater Komponente über das Update
+				await OnHandel.InvokeAsync((GetProducts, Action, false));
+			}
+			else
+			{
+				await ShowAlert(result.Message!);
+			}
+		}
+		else if (Action == "Add")
+		{
+			// add user, the new Product added
+			GetProducts!.UserId = user?.Id ?? 0;
+
+			// löschen die ImageUrls bevor das Produkt hinzugefügt wird, weil wir brauchen die imageUrl nicht, da wird in Api in eine Datei gespeichert, und die URL wird generiert
+			GetProducts.ProductImages.ToList().ForEach(i => i.ImageUrl = string.Empty);
+
+			// Perform your logic to add the product to the database
+			var result = await productService.AddProductAsync(GetProducts!);
+			var idStr = result.Message?.Split(':').LastOrDefault();
+			// Check if the result is successful and Get the ID returned by the database
+			if (result.Result && int.TryParse(idStr, out int id))
+			{
+				// get added Product
+				var addedProduct = await productService.GetProductByIdAsync(id);
+				GetProducts = addedProduct;
+				// initaialize the caritem for this new product
+				GetProducts.InitializeCartItem(0);
+
+				// Add the new product to the products list
+				productService.DownloadedProduct.Insert(0, GetProducts!); // Add the new product to the products list
+
+				// Benachrichtigen Sie die Vater Komponente über das Update
+				await OnHandel.InvokeAsync((GetProducts, Action, false));
+			}
+			else
+			{
+				_ = ShowAlert(result.Message!);
+			}
+		}
+	}
+	private void CancelSubmit()
+	{
+		GetProducts = null!;
+		OnHandel.InvokeAsync((GetProducts, Action,false));
+	}
+	// image 
+	private async Task ImageUpload(InputFileChangeEventArgs e)
+	{
+		if (e.File == null) return;
+
+
+		Microsoft.AspNetCore.Components.Forms.IBrowserFile imageFile = e.File;
+		try
+		{
+			if (Action == "Add")
+			{
+				byte[] imageBytes = await productImagesService.GetImageBytesAndCheckSize(imageFile);
+
+				string imageUrl = string.Empty;
+				if (imageBytes != null)
+				{
+					string base64 = Convert.ToBase64String(imageBytes);
+					imageUrl = $"data:image/jpeg;base64,{base64}";
+					var mainImage = GetProducts.ProductImages.FirstOrDefault(i => i.IsMain);
+					if (mainImage == null)
+					{
+						mainImage = new ProductImages
+							{
+								ProductId = 0,
+								ImageUrlLocal = imageUrl,
+								IsMain = true,
+								ImageBytes = imageBytes
+							};
+
+						GetProducts.ProductImages.Add(mainImage);
+					}
+					else
+					{
+						mainImage.ImageUrlLocal = imageUrl;
+						mainImage.ImageBytes = imageBytes;
+					}
+				}
+				else
+				{
+					ProductImages mainProductImages = productImagesService.GetDefaultImage();
+					GetProducts.ProductImages.Add(mainProductImages);
+					return;
+				}
+			}
+			else
+			{
+				byte[] imageBytes = await productImagesService.GetImageBytesAndCheckSize(imageFile);
+
+				var mainImage = GetProducts.ProductImages.FirstOrDefault(i => i.IsMain);
+
+				if (mainImage != null)
+				{
+					string base64 = Convert.ToBase64String(imageBytes);
+					string imageUrl = $"data:image/jpeg;base64,{base64}";
+					mainImage.ProductId = GetProducts.Id;
+					mainImage.ImageUrlLocal = imageUrl;
+					mainImage.ImageBytes = imageBytes;
+					mainImage.LastModified = DateTime.UtcNow;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			_ = ShowAlert($"Error uploading image: {ex.Message}");
+		}
+	}
+
+	private async Task ShowAlert(string message)
+	{
+		await JS.InvokeVoidAsync("showAlert", message);
+	}
+	public void Dispose()
+	{
+		GetProducts = null!;
+	}
+}
