@@ -13,7 +13,7 @@ using ManagementLabel.Components.InvoiceF;
 using ManagementLabel.Components.AddressesF;
 using Blazored.LocalStorage;
 using Microsoft.Extensions.Options;
-using ManagementLabel.Components.ProductImagesF;
+using ManagementLabel.Components.ImagesF;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +73,8 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<InvoiceService>();
 // ProductImages
 builder.Services.AddScoped<ProductImagesService>();
+//  Carousel Image 
+builder.Services.AddScoped<CarouselImageService>();
 //
 builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();

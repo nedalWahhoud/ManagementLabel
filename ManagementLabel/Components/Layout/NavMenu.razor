@@ -39,6 +39,18 @@
                         </span>
                         <span class="ms-2">Discount</span>
                     </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnGroupProduct">
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <i class="bi bi-stack fs-3"></i>
+                        </span>
+                        <span class="ms-2">Produktgruppe</span>
+                    </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnCarousel">
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <i class="bi bi-display fs-3"></i>
+                        </span>
+                        <span class="ms-2">Bildkarussell</span>
+                    </NavLink>
                 </div>
                 <!-- Spacer to push logout to bottom -->
                 <div style="flex-grow: 1;"></div>
@@ -90,7 +102,16 @@
     {
 		NavigationManager.NavigateTo("/discountcode", false);
 	}
-
+    // group product
+	private void OnGroupProduct()
+	{
+		NavigationManager.NavigateTo("/groupproduct", false);
+	}
+    // carousel
+	private void OnCarousel()
+    {
+        NavigationManager.NavigateTo("/carousel", false);
+	}
     public void Dispose()
     {
         orderService.OnChange -= HandleOpenOrderCountChange;

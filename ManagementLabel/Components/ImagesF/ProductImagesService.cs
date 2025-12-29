@@ -5,11 +5,10 @@ using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 
-namespace ManagementLabel.Components.ProductImagesF
+namespace ManagementLabel.Components.ImagesF
 {
-    public class ProductImagesService(HttpClient http, IOptions<AppConfig> appConfig, IWebHostEnvironment env)
+    public class ProductImagesService(IOptions<AppConfig> appConfig, IWebHostEnvironment env)
     {
-        private readonly HttpClient _http = http;
         private readonly IOptions<AppConfig> _appConfig = appConfig;
         private readonly IWebHostEnvironment _env = env;
 
@@ -18,17 +17,11 @@ namespace ManagementLabel.Components.ProductImagesF
             if (productImages == null)
                 return "/images/sample.jpg";
 
-            if(productImages.Id == 182)
-            {
-
-            }
-
             if (productImages.ImageUrl != null)
             {
                 string dbImageUrl = productImages.ImageUrl.TrimStart('/');
                 // ✅ Füge eine Zufallszahl hinzu, um Cash zu vermeiden.
-                string unique = string.Empty;
-                unique = $"?v={productImages.LastModified}";
+                string unique = $"?v={productImages.LastModified}";
                 //
                 if (_env.IsDevelopment())
                 {
@@ -42,11 +35,11 @@ namespace ManagementLabel.Components.ProductImagesF
                 {
                     if (dbImageUrl.StartsWith("ProductsImages/", StringComparison.OrdinalIgnoreCase))
                     {
-                        dbImageUrl = dbImageUrl.Substring("ProductsImages/".Length);
+                        dbImageUrl = dbImageUrl["ProductsImages/".Length..];
                     }
                     string domin = _appConfig.Value.Domin.TrimEnd('/');
 
-                    string completteUrl = $"{domin}/{_appConfig.Value.ImagesProxy}/{dbImageUrl}{unique}";
+                    string completteUrl = $"{domin}/{_appConfig.Value.ProductImagesproxy}/{dbImageUrl}{unique}";
                     return completteUrl;
                 }
             }

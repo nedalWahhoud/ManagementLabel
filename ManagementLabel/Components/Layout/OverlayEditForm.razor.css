@@ -77,7 +77,7 @@
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc;
 }
 
 @media (max-width: 768px) {

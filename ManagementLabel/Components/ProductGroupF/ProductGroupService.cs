@@ -1,4 +1,6 @@
 ﻿using ManagementLabel.Model;
+using ManagementLabel.ProductsF;
+using Org.BouncyCastle.Crypto;
 
 namespace ManagementLabel.Components.ProductGroupF
 {
@@ -30,6 +32,94 @@ namespace ManagementLabel.Components.ProductGroupF
             catch
             {
                 return [];
+            }
+        }
+        public async Task <ValidationResult> CreateGroupProduct(GroupProducts groupProduct)
+        {
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/GroupProducts/CreateGroupProduct", groupProduct);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false, Message = "Die Produktgruppe konnte nicht erstellt werden.." };
+                }
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                if (result == null || !result.Result)
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Produktgruppe konnte nicht erstellt werden." };
+                }
+                // get Id
+                var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(); ;
+                if (result.Result && int.TryParse(idStr, out int id))
+                {
+                    // Add to local list
+                    groupProduct.Id = id;
+                    DownloadedproductGroups.Add(groupProduct);
+                }
+                else
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "keine Id in Message gefunden." };
+                }
+
+                
+                return new ValidationResult { Result = true, Message = "Produktgruppe erfolgreich erstellt." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = $"Es ist ein Fehler aufgetreten: {ex.Message}" };
+            }
+        }
+        public async Task<ValidationResult> UpdateGroupProduct(GroupProducts editedGroupProducts)
+        {
+            try
+            {
+                var response = await _http.PutAsJsonAsync("api/GroupProducts/updateGroupProduct", editedGroupProducts);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false, Message = "Die Produktgruppe konnte nicht aktualisiert werden.." };
+                }
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                if (result == null || !result.Result)
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Produktgruppe konnte nicht aktualisiert werden.." };
+                }
+                // Update local list
+                var index = DownloadedproductGroups.FindIndex(gp => gp.Id == editedGroupProducts.Id);
+                if (index != -1)
+                {
+                    DownloadedproductGroups[index] = editedGroupProducts;
+                }
+                return new ValidationResult { Result = true, Message = "Produktgruppe erfolgreich aktualisiert." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = $"Es ist ein Fehler aufgetreten: {ex.Message}" };
+            }
+        }
+        public async Task<ValidationResult> DeleteGroupProducts(int id)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"api/GroupProducts/deleteGroupProducts/{id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false,Message = "Die Produktgruppe konnte nicht gelöscht werden.." };
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if (result == null || !result.Result)
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Produktgruppe konnte nicht gelöscht werden.." };
+                }
+
+                // Remove from local list
+                DownloadedproductGroups.RemoveAll(gp => gp.Id == id);
+                return new ValidationResult{ Result = true,Message = "Produktgruppe erfolgreich gelöscht." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult {Result = false,  Message = $"Es ist ein Fehler aufgetreten: {ex.Message}"  };
             }
         }
     }

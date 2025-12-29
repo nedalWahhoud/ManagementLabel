@@ -27,7 +27,6 @@
     <script src="js/script.js"></script>
     <script src="js/print.js"></script>
     <!---->
-
     <script>
         window.clearSearchBox = (id) => {
             const el = document.getElementById(id);
@@ -38,6 +37,17 @@
             }
         };
      </script>
+     <!-- select alle inhalt des input -->
+    <script>
+        window.selectInputNumberText = (id) => {
+        const inputNumber = document.getElementById(id);
+              if (inputNumber) {
+                  const input = inputNumber.querySelector("input") || inputNumber;
+                  input.select();
+              }
+        };
+    </script>
+
     <script src="_framework/blazor.web.js"></script>
 
 </body>

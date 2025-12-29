@@ -1,0 +1,119 @@
+﻿@page "/carousel"
+<h3>Carousel Images</h3>
+<button class="btn btn-success mb-3" @onclick="NewCarouselImage">
+	➕ Add neue Carousel Image
+</button>
+
+@if (carouselImageService.DownloadedCarouselImage == null || !carouselImageService.DownloadedCarouselImage.Any())
+{
+	<div class="d-flex justify-content-center align-items-center"
+		 style="min-height: 60vh;">
+		<p class="text-muted fs-5">
+			Keine Carousel Images gefunden.
+		</p>
+	</div>
+}
+else
+{
+<div class="row">
+	@foreach (var carouselImage in carouselImageService.DownloadedCarouselImage)
+	{
+		<div class="col-md-4 mb-4">
+			<div class="card h-100 shadow-sm">
+		        @if (!string.IsNullOrEmpty(carouselImage.ImageUrl))
+				{
+					<img src="@carouselImageService.GetImageUrl(carouselImage)" class="card-img-top" style="object-fit: cover; height: 200px;" />
+						<p>@carouselImageService.GetImageUrl(carouselImage)</p>
+				}
+
+				<div class="card-body d-flex flex-column">
+					<h5 class="card-title">ID: @carouselImage.Id</h5>
+					<p class="card-text mb-1"><strong>Start:</strong> @carouselImage.StartDate.ToShortDateString()</p>
+					<p class="card-text mb-1"><strong>End:</strong> @carouselImage.EndDate.ToShortDateString()</p>
+					<p class="card-text mb-2"><strong>Order:</strong> @carouselImage.DisplayOrder</p>
+
+					<div class="mt-auto d-flex justify-content-between">
+							<button class="btn btn-sm btn-warning" @onclick="() => EditCarouselImage(carouselImage)" disabled="@IsProcessing">
+							<i class="bi bi-pencil"></i> Bearbeiten
+						</button>
+						<button class="btn btn-sm btn-danger" @onclick="() => DeleteCarouselImage(carouselImage.Id)" disabled="@IsProcessing">
+								@if (IsProcessing)
+								{
+									<span class="spinner-border spinner-border-sm"
+										  role="status"
+										  aria-hidden="true"></span>
+								}
+								else
+								{
+									<span><i class="bi bi-trash"></i> Löschen</span>
+								}
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+</div>
+}
+
+
+@if (IsAdding)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddCarouselImage carouselImage="new CarouselImage()" Action="Add" OnHandel="HandleEditAddCarouselImage" />
+}
+else if (IsEditing)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddCarouselImage carouselImage="EditingCarouselImage" Action="Edit" OnHandel="HandleEditAddCarouselImage" />
+}
+@code {
+
+	private CarouselImage EditingCarouselImage = new CarouselImage();
+	private bool IsAdding = false;
+	private bool IsEditing = false;
+	private bool IsProcessing = false;
+	protected override async Task OnInitializedAsync()
+	{
+		await carouselImageService.GetAllCarouselAsync();
+	}
+
+	private void NewCarouselImage()
+	{
+		IsAdding = true;
+	}
+	private void EditCarouselImage(CarouselImage carouselImage)
+	{
+		EditingCarouselImage = new CarouselImage
+			{
+				Id = carouselImage.Id,
+				ImageUrl = carouselImage.ImageUrl,
+				ImageUrlLocal = carouselImage.ImageUrlLocal,
+				StartDate = carouselImage.StartDate,
+				EndDate = carouselImage.EndDate,
+				DisplayOrder = carouselImage.DisplayOrder,
+				LastModified = carouselImage.LastModified
+			};
+		IsEditing = true;
+	}
+	private async Task DeleteCarouselImage(int id)
+    {
+		IsProcessing = true;
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Carousel-Image mit der ID {id} wirklich löschen?");
+		if (resultConfirm)
+		{
+		    var result = await carouselImageService.DeleteCarouselImageAsync(id);
+			await JS.InvokeVoidAsync("showAlert", result.Message);
+		}
+		IsProcessing = false;
+    }
+	private void HandleEditAddCarouselImage(string action)
+	{
+		if (action == "Add")
+		{
+			IsAdding = false;
+		}
+		else
+		{
+			IsEditing = false;
+		}
+	}
+}

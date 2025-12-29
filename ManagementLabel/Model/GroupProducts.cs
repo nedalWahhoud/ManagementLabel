@@ -1,9 +1,13 @@
-﻿namespace ManagementLabel.Model
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ManagementLabel.Model
 {
     public class GroupProducts
     {
         public int Id { get; set; }
-        public string? GroupName_de { get; set; }
-        public string? GroupName_ar { get; set; }
+        [Required(ErrorMessage = "Name de ist erforderlich.")]
+        public string GroupName_de { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Name ar ist erforderlich.")]
+        public string GroupName_ar { get; set; } = string.Empty;
     }
 }

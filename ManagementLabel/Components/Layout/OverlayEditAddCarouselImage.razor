@@ -1,0 +1,212 @@
+﻿@if (carouselImage != null)
+{
+	<div class="overlay">
+		<div class="overlayEditAddForm">
+			<h4>@(action == "Add" ? "Carousel Image hinzufügen" : "Carousel Image bearbeiten")</h4>
+			<EditForm Model="@carouselImage" OnValidSubmit="Save">
+				<DataAnnotationsValidator />
+				<div class="formGroupAdd">
+					<div class="imageUpload">
+						<InputFile id="Image" class="form-control" OnChange="ImageUpload" />
+						@if (carouselImage != null)
+						{
+
+							string imgScr = string.Empty;
+							if (!string.IsNullOrEmpty(carouselImage.ImageUrlLocal))
+							{
+								imgScr = carouselImage.ImageUrlLocal;
+							}
+							else
+							{
+								imgScr = carouselImageService.GetImageUrl(carouselImage);
+
+							}
+							<img src="@imgScr"
+							alt="Product Image"
+							class="previewImage" />
+							<ValidationMessage For="@(() => carouselImage!.ImageUrlLocal)" />
+						}
+					</div>
+					<div class="formGroupAdd">
+						<label for="Start">Expiration Date</label>
+						<InputDate class="form-control" @bind-Value="carouselImage.StartDate" />
+						<ValidationMessage For="@(() => carouselImage.StartDate)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="Ende">Expiration Date</label>
+						<InputDate class="form-control" @bind-Value="carouselImage.EndDate" />
+						<ValidationMessage For="@(() => carouselImage.EndDate)" />
+					</div>
+					<div class="formGroupAdd">
+						<label for="MinimumStock">Minimum Stock</label>
+						<InputNumber id="displayOrderInput" min="0" class="form-control" @bind-Value="carouselImage.DisplayOrder" @onfocus="@(e => SelectAllContent("displayOrderInput"))" />
+						<ValidationMessage For="@(() => carouselImage.DisplayOrder)" />
+					</div>
+				</div>
+				<div class="mt-3">
+					<button class="btn btn-primary me-2" disabled="@IsProcessing">
+						@if (IsProcessing)
+						{
+							<span class="spinner-border spinner-border-sm"
+							role="status"
+							aria-hidden="true"></span>
+						}
+						else
+						{
+							<span>@(action == "Add" ? "Carousel Image hinzufügen" : "Carousel Image updaten")</span>
+						}
+					</button>
+					<button class="btn btn-secondary" @onclick="Cancel" disabled="@IsProcessing">Abbrechen</button>
+				</div>
+			</EditForm>
+		</div>
+	</div>
+}
+@code {
+
+	[Parameter]
+	public CarouselImage carouselImage { get; set; } = new CarouselImage();
+	[Parameter]
+	public string action { get; set; } = string.Empty;
+	[Parameter]
+	public EventCallback<string> OnHandel {get; set;}
+
+	private bool IsProcessing = false;
+	protected override void OnInitialized()
+	{
+		if (action == "Add")
+		{
+			carouselImage = carouselImageService.GetDefaultImage();
+		}
+	}
+	private async Task Save()
+	{
+		IsProcessing = true;
+		try
+		{
+			if (action == "Add")
+			{
+				var result = await carouselImageService.AddCarouselImageAsync(carouselImage);
+				if (result.Result == false)
+				{
+					await JS.InvokeVoidAsync("showAlert", result.Message);
+					return;
+				}
+				var idStr = result.Message?.Split(':').LastOrDefault();
+				if (result.Result && int.TryParse(idStr, out int id))
+				{
+					// get added Product
+					var addedCarousel = await carouselImageService.GetCarouselImageByIdAsync(id);
+					if (addedCarousel == null)
+					{
+						await JS.InvokeVoidAsync("showAlert", "Fehler beim Laden des hinzugefügten Carousel Image");
+						return;
+					}
+					// Add the new product to the products list
+					carouselImageService.AddProductToLocal(addedCarousel);
+
+					// Benachrichtigen Sie die Vater Komponente über das Update
+					await OnHandel.InvokeAsync(action);
+				}
+				else
+				{
+					await JS.InvokeVoidAsync("showAlert", result.Message);
+				}
+			}
+			else
+			{
+				if (carouselImage == null)
+				{
+					await JS.InvokeVoidAsync("showAlert", "Fehler: Kein Carousel Image zum Aktualisieren ausgewählt");
+					return;
+				}
+				var result = await carouselImageService.UpdateCarouselImageAsync(carouselImage);
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+				if (result.Result == false)
+					return;
+
+				var updatedCarousel = await carouselImageService.GetCarouselImageByIdAsync(carouselImage.Id);
+				if (updatedCarousel == null)
+				{
+					await JS.InvokeVoidAsync("showAlert", "Fehler beim Laden des aktualisierten Carousel Image");
+					return;
+				}
+				int index = carouselImageService.DownloadedCarouselImage.FindIndex(p => p.Id == updatedCarousel.Id);
+				carouselImageService.DownloadedCarouselImage[index] = updatedCarousel; // Update local list
+				// Benachrichtigen Sie die Vater Komponente über das Update
+				await OnHandel.InvokeAsync(action);
+			}
+		}
+		finally
+		{
+			IsProcessing = false;
+		}
+	}
+	private void Cancel()
+	{
+		carouselImage = new CarouselImage();
+		OnHandel.InvokeAsync(action);
+
+	}
+	// image
+	private async Task ImageUpload(InputFileChangeEventArgs e)
+	{
+		if (e.File == null) return;
+		Microsoft.AspNetCore.Components.Forms.IBrowserFile imageFile = e.File;
+		try
+		{
+			if (action == "Add")
+			{
+				byte[] imageBytes = await carouselImageService.GetImageBytesAndCheckSize(imageFile);
+
+				string imageUrl = string.Empty;
+				if (imageBytes != null)
+				{
+					string base64 = Convert.ToBase64String(imageBytes);
+					imageUrl = $"data:image/jpeg;base64,{base64}";
+					carouselImage = new()
+						{
+							ImageUrlLocal = imageUrl,
+							ImageBytes = imageBytes
+						};
+				}
+				else
+				{
+					await JS.InvokeVoidAsync("showAlert", "Fehler keine Image Data gefunden");
+					return;
+				}
+			}
+			else
+			{
+				byte[] imageBytes = await carouselImageService.GetImageBytesAndCheckSize(imageFile);
+
+
+				string base64 = Convert.ToBase64String(imageBytes);
+				string imageUrl = $"data:image/jpeg;base64,{base64}";
+				if (imageBytes == null || carouselImage == null)
+				{
+					await JS.InvokeVoidAsync("showAlert", "Fehler keine Image Data gefunden");
+					return;
+				}
+				carouselImage.ImageUrlLocal = imageUrl;
+				carouselImage.ImageBytes = imageBytes;
+				carouselImage.LastModified = DateTime.Now;
+			}
+		}
+		catch (Exception ex)
+		{
+			await JS.InvokeVoidAsync("showAlert", ex.Message);
+		}
+	}
+	private async Task SelectAllContent(string id)
+	{
+		try
+		{
+			await JS.InvokeVoidAsync("selectInputNumberText", id);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error selecting input text: {ex.Message}");
+		}
+	}
+}

@@ -118,12 +118,6 @@
 									class="@(selectedRow != null && selectedRow.Id == thisProducts.Id ? "selected" : "")">
 										@if (ShowColumn("Index")){<td>@(startIndex + i + 1)</td>}
 										@if (ShowColumn("Id")){<td>@htmlProducts[i].Id</td>}
-										@*	@if (_editProduct != null && _editProduct.Id == htmlProducts[i].Id)
-									//	{
-									//		<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" Title="Produkt bearbeiten" ButtonName="Produkt Updaten" GetProducts="_editProduct" OnHandel="HandleEditProduct" />
-									//	}
-									//	else
-									//	{*@
 										@if (ShowColumn("Name_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_de</td>}
 										@if (ShowColumn("Description_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_de</td>}
 										@if (ShowColumn("Name_ar")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_ar</td> }
@@ -164,7 +158,6 @@
 										{
 											<td><img src="@productImagesService.GetProductImageUrl(htmlProducts[i].ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
 										}
-										//	}
 										@* Rechnung *@
 										<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
 											<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@thisProducts.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />

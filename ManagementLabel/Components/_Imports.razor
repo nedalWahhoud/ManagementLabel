@@ -22,10 +22,9 @@
 @using ManagementLabel.Components.CategoriesF
 @using ManagementLabel.Components.InvoiceF
 @using ManagementLabel.Components.AddressesF
-@using ManagementLabel.Components.ProductImagesF
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
-
+@using ManagementLabel.Components.ImagesF
 
 @**@
 @inject IJSRuntime JS
@@ -43,3 +42,4 @@
 @inject CategoryService categoryService
 @inject InvoiceService invoiceService
 @inject ProductImagesService productImagesService
+@inject CarouselImageService carouselImageService

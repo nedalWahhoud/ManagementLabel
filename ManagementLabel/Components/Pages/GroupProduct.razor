@@ -1,0 +1,95 @@
+﻿@page "/groupproduct"
+<h3>Produktgruppen</h3>
+<div class="main">
+	<button class="btn btn-success mb-3" @onclick="NewGroup">
+		➕ Add neue Gruppe
+	</button>
+	<table class="table table-bordered table-hover">
+		<tr>
+			<th>Id</th>
+			<th>Name de</th>
+			<th>Name ar</th>
+		</tr>
+		<tbody>
+			@foreach (var group in productGroupService.DownloadedproductGroups)
+			{
+				<tr>
+					<td>@group.Id</td>
+					<td>@group.GroupName_de</td>
+					<td>@group.GroupName_ar</td>
+					<td>
+						<button class="btn btn-sm btn-warning me-1"
+						@onclick="() => EditGroup(group)">
+							Bearbeiten
+						</button>
+						<button class="btn btn-sm btn-danger"
+						@onclick="() => DeleteGroup(group)">
+							Löschen
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+@if (IsAdding)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="new GroupProducts()" Action="Add" OnHandel="HandleEditAddGroupProduct" />
+}
+@if (IsEditing)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="EditingGroupProduct" Action="Edit" OnHandel="HandleEditAddGroupProduct" />
+}
+
+@code {
+	private GroupProducts EditingGroupProduct = null!;
+	private bool IsEditing = false;
+	private bool IsAdding = false;
+	protected async override Task OnInitializedAsync()
+	{
+		await productGroupService.GetAllGroupProductsAsync();
+	}
+
+	private void NewGroup()
+	{
+		IsAdding = true;
+	}
+	private void EditGroup(GroupProducts group)
+	{
+		IsEditing = true;
+		EditingGroupProduct = new GroupProducts
+			{
+				Id = group.Id,
+				GroupName_de = group.GroupName_de,
+				GroupName_ar = group.GroupName_ar
+			};
+	}
+	private async Task DeleteGroup(GroupProducts group)
+	{
+		if (group == null )
+		{
+			await JS.InvokeVoidAsync("showAlert", "Please select a product");
+			return;
+		}
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Gruppe mit der ID {group.Id} wirklich löschen?");
+		if (resultConfirm)
+		{
+			var result = await productGroupService.DeleteGroupProducts(group.Id);
+			await JS.InvokeVoidAsync("showAlert", result.Message);
+		}
+	}
+
+	private void HandleEditAddGroupProduct(string action)
+	{
+		if (action == "Add")
+		{
+			IsAdding = false;
+		}
+		else
+		{
+			IsEditing = false;
+			EditingGroupProduct = null!;
+		}
+	}
+}
