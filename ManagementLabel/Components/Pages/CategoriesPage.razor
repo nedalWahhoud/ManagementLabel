@@ -1,0 +1,108 @@
+﻿@page "/categories"
+<h3>Categories</h3>
+<div class="main">
+	<button class="btn btn-success mb-3" @onclick="NewCategory">
+		➕ Add neue Category
+	</button>
+	<table class="table table-bordered table-hover">
+		<tr>
+			<th>Id</th>
+			<th>Name de</th>
+			<th>Name ar</th>
+		</tr>
+		<tbody>
+			@foreach (var category in categoryService.DownloadedCategories)
+			{
+				<tr>
+					<td>@category.Id</td>
+					<td>@category.Name_de</td>
+					<td>@category.Name_ar</td>
+					<td>
+						<button class="btn btn-sm btn-warning me-1"
+								@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
+							Bearbeiten
+						</button>
+						<button class="btn btn-sm btn-danger"
+						@onclick="() => DeleteGroup(category.Id)" disabled="@IsDeletingProcessing.Item1">
+						@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == category.Id)
+						{
+								<span class="spinner-border spinner-border-sm"
+									  role="status"
+									  aria-hidden="true"></span>
+						}
+						else
+						{
+								<span>Löschen</span>
+						}
+						</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</div>
+
+@if (IsAdding)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddCategories category="new Categories()" Action="Add" OnHandel="HandleEditCategory" />
+}
+@if (IsEditing)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddCategories category="EditingCategory" Action="Edit" OnHandel="HandleEditCategory" />
+}
+@code {
+	private Categories EditingCategory = null!;
+	private bool IsAdding = false;
+	private bool IsEditing = false;
+	protected async override Task OnInitializedAsync()
+	{
+		// get all categories
+		await categoryService.GetAllCategoriesAsync();
+	}
+	private void NewCategory()
+	{
+		IsAdding = true;
+	}
+	private void EditGroup(Categories category)
+	{
+		IsEditing = true;
+		EditingCategory = new Categories
+			{
+				Id = category.Id,
+				Name_de = category.Name_de,
+				Name_ar = category.Name_ar
+			};
+	}
+	private (bool,int) IsDeletingProcessing = (false,0);
+	private async Task DeleteGroup(int id)
+	{
+		if (id <= 0)
+		{
+			await JS.InvokeVoidAsync("showAlert", "Please select a Category");
+			return;
+		}
+		IsDeletingProcessing = (true,id);
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Category mit der ID {id} wirklich löschen?");
+		if (resultConfirm)
+		{
+			var result = await categoryService.DeleteCategoryAsync(id);
+			if (!result.Result)
+			{
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+			}
+		}
+		IsDeletingProcessing = (false,id);
+	}
+	private void HandleEditCategory(string action)
+	{
+		if (action == "Add")
+		{
+			IsAdding = false;
+		}
+		else
+		{
+			IsEditing = false;
+			EditingCategory = null!;
+		}
+	}
+}

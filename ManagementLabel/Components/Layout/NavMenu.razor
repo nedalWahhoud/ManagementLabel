@@ -39,6 +39,12 @@
                         </span>
                         <span class="ms-2">Discount</span>
                     </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnCategories">
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <i class="bi bi-grid-3x3-gap fs-3"></i>
+                        </span>
+                        <span class="ms-2">Categories</span>
+                    </NavLink>
                     <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnGroupProduct">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-stack fs-3"></i>
@@ -111,6 +117,11 @@
 	private void OnCarousel()
     {
         NavigationManager.NavigateTo("/carousel", false);
+	}
+    // categories
+	private void OnCategories()
+    {
+        NavigationManager.NavigateTo("/categories", false);
 	}
     public void Dispose()
     {

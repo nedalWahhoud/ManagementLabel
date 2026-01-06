@@ -29,7 +29,7 @@
 					</div>
 					<div class="formGroupAdd">
 						<label for="Start">Expiration Date</label>
-						<InputDate class="form-control" @bind-Value="carouselImage.StartDate" />
+						<InputDate TValue="DateTime" class="form-control" @bind-Value="carouselImage.StartDate" />
 						<ValidationMessage For="@(() => carouselImage.StartDate)" />
 					</div>
 					<div class="formGroupAdd">

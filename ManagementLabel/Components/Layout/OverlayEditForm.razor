@@ -132,7 +132,18 @@
 							}
 						</div>
 					</div>
-					<button type="submit" class="btn addProductB">@(ButtonName ?? "Fehler")</button>
+					<button type="submit" class="btn addProductB">
+						@if (IsProcessing)
+						{
+							<span class="spinner-border spinner-border-sm"
+								  role="status"
+								  aria-hidden="true"></span>
+						}
+						else
+						{
+						 @(ButtonName ?? "Fehler")
+						}					
+						</button>
 					<button type="button" class="btn addProductCancelB" @onclick="CancelSubmit">Cancel</button>
 				</EditForm>
 			</div>
@@ -157,9 +168,10 @@
 	private List<GroupProducts> groupedProducts = new();
 	private List<TaxRate> taxRates = new();
 	private List<Manufacturer> manufacturers = new();
+	private bool IsProcessing = false;
 	protected override async Task OnInitializedAsync()
 	{
-		categories = await categoryService.LoadCategories();
+		categories = await categoryService.GetAllCategoriesAsync();
 		groupedProducts = await productGroupService.GetAllGroupProductsAsync();
 		taxRates = await productService.LoadTaxRates();
 		manufacturers = await productService.LoadManufacturers();
@@ -172,12 +184,13 @@
 
 	private async Task HandleSubmit()
 	{
+		IsProcessing = true;
 		if (Action == "Edit")
 		{
 			// if null
 			if (GetProducts == null)
 			{
-				await ShowAlert("Nothing has changed");
+				await ShowAlert("Nichts hat sich geändert");
 				return;
 			}
 			// if no edited
@@ -185,7 +198,7 @@
 			bool isEdited = productService.IsEditedProduct(currentProduct!, GetProducts);
 			if (!isEdited)
 			{
-				await ShowAlert("Nothing has changed");
+				await ShowAlert("Nichts hat sich geändert");
 				return;
 			}
 
@@ -242,6 +255,8 @@
 				_ = ShowAlert(result.Message!);
 			}
 		}
+		IsProcessing = false;
+		StateHasChanged();
 	}
 	private void CancelSubmit()
 	{

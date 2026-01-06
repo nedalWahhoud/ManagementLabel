@@ -1,17 +1,17 @@
 ﻿<div class="overlay">
 	<div class="overlayEditAddForm">
-		<h4>@(action == "Add" ? "Gruppe hinzufügen" : "Gruppe bearbeiten")</h4>
-		<EditForm Model="@groupProduct" OnValidSubmit="SaveGroup">
+		<h4>@(action == "Add" ? "Category hinzufügen" : "Category bearbeiten")</h4>
+		<EditForm Model="@category" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
 				<label>Name de</label>
-				<input class="form-control" @bind="groupProduct.GroupName_de" />
-				<ValidationMessage For="@(() => groupProduct.GroupName_de)" />
+				<input class="form-control" @bind="category.Name_de" />
+				<ValidationMessage For="@(() => category.Name_de)" />
 			</div>
 			<div class="formGroupAdd">
 				<label>Name ar</label>
-				<input class="form-control" @bind="groupProduct.GroupName_ar" />
-				<ValidationMessage For="@(() => groupProduct.GroupName_ar)" />
+				<input class="form-control" @bind="category.Name_ar" />
+				<ValidationMessage For="@(() => category.Name_ar)" />
 			</div>
 			<div class="mt-3">
 				<button class="btn btn-primary me-2">
@@ -23,7 +23,7 @@
 					}
 					else
 					{
-						@(action == "Add" ? "Gruppe hinzufügen" : "Gruppe updaten")
+						@(action == "Add" ? "Category hinzufügen" : "Category updaten")
 					}
 				</button>
 				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
@@ -33,25 +33,22 @@
 </div>
 
 @code {
-
 	[Parameter]
-	public GroupProducts groupProduct { get; set; } = new();
+	public Categories category { get; set; } = new Categories();
 	[Parameter]
 	public string action { get; set; } = string.Empty;
 	[Parameter]
 	public EventCallback<string> OnHandel { get; set; }
-
 	private bool IsProcessing = false;
-	private async void SaveGroup()
+	private async void Save()
 	{
 		IsProcessing = true;
 		if (action == "Add")
 		{
-			var result = await productGroupService.CreateGroupProduct(groupProduct);
-
+			var result = await categoryService.CreateCategory(category);
 			if (result.Result)
 			{
-				groupProduct = null!;
+				category = null!;
 				await OnHandel.InvokeAsync(action);
 			}
 			else
@@ -59,16 +56,17 @@
 		}
 		else
 		{
-			GroupProducts? currentGroup = productGroupService.DownloadedproductGroups.FirstOrDefault(c => c.Id == groupProduct.Id);
-			if (currentGroup != null)
+			// wenn category editiert wurde
+			Categories? currentCategory = categoryService.DownloadedCategories.FirstOrDefault(c => c.Id == category.Id);
+			if (currentCategory != null)
 			{
-				bool isEdited = productGroupService.IsCategoryEdited(currentGroup, groupProduct);
+				bool isEdited = categoryService.IsCategoryEdited(currentCategory, category);
 				if (isEdited)
 				{
-					var result = await productGroupService.UpdateGroupProduct(groupProduct);
+					var result = await categoryService.UpdateCategoryAsync(category);
 					if (result.Result)
 					{
-						groupProduct = new();
+						category = null!;
 						await OnHandel.InvokeAsync(action);
 					}
 					else
@@ -78,15 +76,16 @@
 					await JS.InvokeVoidAsync("showAlert", "Nichts hat sich geändert");
 			}
 			else
-				await JS.InvokeVoidAsync("showAlert", "keine currentGroup gefunden");
-
+				await JS.InvokeVoidAsync("showAlert", "keine currentCategory gefunden");
 		}
+
 		IsProcessing = false;
 		StateHasChanged();
 	}
 	private void Cancel()
 	{
-		groupProduct = new();
+		category = new Categories();
 		OnHandel.InvokeAsync(action);
+
 	}
 }

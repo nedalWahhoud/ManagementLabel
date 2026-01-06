@@ -8,8 +8,8 @@ namespace ManagementLabel.Components.CategoriesF
     {
         private readonly HttpClient _http = http;
         private readonly ProductService _productService = productService;
-        private List<Categories> DownloadedCategories { get; set; } = [];
-        public async Task<List<Categories>> LoadCategories()
+        public List<Categories> DownloadedCategories { get; set; } = [];
+        public async Task<List<Categories>> GetAllCategoriesAsync()
         {
             // if DownloadedCategories already has items, return them
             if (DownloadedCategories.Count > 0)
@@ -31,6 +31,39 @@ namespace ManagementLabel.Components.CategoriesF
             catch
             {
                 return [];
+            }
+        }
+        public async Task<ValidationResult> CreateCategory(Categories category)
+        {
+            try
+            {
+                var response = await _http.PostAsJsonAsync("api/Categories/createCategory", category);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht erstellt werden." };
+                }
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                if (result == null || !result.Result)
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht erstellt werden." };
+                }
+                // get Id
+                var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(); ;
+                if (result.Result && int.TryParse(idStr, out int id))
+                {
+                    // Add to local list
+                    category.Id = id;
+                    AddCategoriesToLocal(category);
+                }
+                else
+                {
+                    return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht erstellt werden." };
+                }
+                return result;
+            }
+            catch
+            {
+                return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht erstellt werden." };
             }
         }
         public async Task<Categories> GetCategoryById(int categoryId)
@@ -61,7 +94,61 @@ namespace ManagementLabel.Components.CategoriesF
                 return null!;
             }
         }
-
+        public async Task<ValidationResult> UpdateCategoryAsync(Categories category)
+        {
+            try
+            {
+                var response = await _http.PutAsJsonAsync("api/Categories/updateCategory", category);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht aktualisiert werden." };
+                }
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                if (result == null || !result.Result)
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht aktualisiert werden." };
+                }
+                // update local list
+                var localCategory = DownloadedCategories.FirstOrDefault(c => c.Id == category.Id);
+                if (localCategory != null)
+                {
+                    localCategory.Name_de = category.Name_de;
+                    localCategory.Name_ar = category.Name_ar;
+                }
+                return result;
+            }
+            catch
+            {
+                return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht aktualisiert werden." };
+            }
+        }
+        public async Task<ValidationResult> DeleteCategoryAsync(int id)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"api/Categories/deleteCategory/{id}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht gelöscht werden." };
+                }
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                if (result == null || !result.Result)
+                {
+                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht gelöscht werden." };
+                }
+                // remove from local list
+                var localCategory = DownloadedCategories.FirstOrDefault(c => c.Id == id);
+                if (localCategory != null)
+                {
+                    DownloadedCategories.Remove(localCategory);
+                }
+                return result;
+            }
+            catch
+            {
+                return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht gelöscht werden." };
+            }
+        }
         public async Task<GetItems<Products>> GetProductsByCategoryIdAsync(int categoryId, int? pageSize = null, List<int>? excludeProductsIds = null)
         {
             GetItems<Products> getItems = new();
@@ -132,6 +219,15 @@ namespace ManagementLabel.Components.CategoriesF
             {
                 DownloadedCategories.Add(category);
             }
+        }
+        public bool IsCategoryEdited(Categories currentCategory, Categories editCategory)
+        {
+            if (currentCategory.Name_de != editCategory.Name_de ||
+                currentCategory.Name_ar != editCategory.Name_ar)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

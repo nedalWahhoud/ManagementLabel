@@ -19,12 +19,21 @@
 					<td>@group.GroupName_ar</td>
 					<td>
 						<button class="btn btn-sm btn-warning me-1"
-						@onclick="() => EditGroup(group)">
+								@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessing.Item1">
 							Bearbeiten
 						</button>
 						<button class="btn btn-sm btn-danger"
-						@onclick="() => DeleteGroup(group)">
-							Löschen
+								@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessing.Item1">
+							@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == group.Id)
+							{
+								<span class="spinner-border spinner-border-sm"
+									  role="status"
+									  aria-hidden="true"></span>
+							}
+							else
+							{
+								<span>Löschen</span>
+							}
 						</button>
 					</td>
 				</tr>
@@ -65,19 +74,26 @@
 				GroupName_ar = group.GroupName_ar
 			};
 	}
-	private async Task DeleteGroup(GroupProducts group)
+	private (bool,int) IsDeletingProcessing = (false,0);
+	private async Task DeleteGroup(int  id)
 	{
-		if (group == null )
+		if (id <= 0 )
 		{
-			await JS.InvokeVoidAsync("showAlert", "Please select a product");
+			await JS.InvokeVoidAsync("showAlert", "Please select a Group");
 			return;
 		}
-		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Gruppe mit der ID {group.Id} wirklich löschen?");
+		IsDeletingProcessing = (true,id);
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Gruppe mit der ID {id} wirklich löschen?");
 		if (resultConfirm)
 		{
-			var result = await productGroupService.DeleteGroupProducts(group.Id);
-			await JS.InvokeVoidAsync("showAlert", result.Message);
+			var result = await productGroupService.DeleteGroupProducts(id);
+			if (!result.Result)
+			{
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+			}
+			
 		}
+		IsDeletingProcessing = (false,id);
 	}
 
 	private void HandleEditAddGroupProduct(string action)

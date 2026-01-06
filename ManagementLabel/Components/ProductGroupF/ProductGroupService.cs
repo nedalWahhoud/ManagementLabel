@@ -1,4 +1,5 @@
-﻿using ManagementLabel.Model;
+﻿using ManagementLabel.Components.Pages;
+using ManagementLabel.Model;
 using ManagementLabel.ProductsF;
 using Org.BouncyCastle.Crypto;
 
@@ -121,6 +122,39 @@ namespace ManagementLabel.Components.ProductGroupF
             {
                 return new ValidationResult {Result = false,  Message = $"Es ist ein Fehler aufgetreten: {ex.Message}"  };
             }
+        }
+        // Local
+        public void AddCategoriesToLocal(List<GroupProducts> groupProducts)
+        {
+            if (groupProducts.Count > 0 && DownloadedproductGroups.Count == 0)
+            {
+                DownloadedproductGroups.AddRange(groupProducts);
+                return;
+            }
+
+            foreach (var group in groupProducts)
+            {
+                if (!DownloadedproductGroups.Any(p => p.Id == group.Id))
+                {
+                    DownloadedproductGroups.Add(group);
+                }
+            }
+        }
+        public void AddCategoriesToLocal(GroupProducts groupProducts)
+        {
+            if (!DownloadedproductGroups.Any(p => p.Id == groupProducts.Id))
+            {
+                DownloadedproductGroups.Add(groupProducts);
+            }
+        }
+        public bool IsCategoryEdited(GroupProducts currentGroup, GroupProducts editGroup)
+        {
+            if (currentGroup.GroupName_de != editGroup.GroupName_de ||
+                currentGroup.GroupName_ar != editGroup.GroupName_ar)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

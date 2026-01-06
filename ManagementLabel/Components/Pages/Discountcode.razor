@@ -156,11 +156,12 @@
 
     }
     // Discount category 
+    private List<Categories>? categories = null;
     private DiscountCategory newDiscountCategory = new DiscountCategory();
     private bool IsOverlayAddCategory = false;
     private async Task OpenAddCategoryForm()
     {
-        await loadCategories();
+        categories ??= await categoryService.GetAllCategoriesAsync();
         IsOverlayAddCategory = true;
     }
     private async Task OnSaveCategory()
@@ -189,19 +190,7 @@
         IsOverlayAddCategory = false;
         newDiscountCategory = new DiscountCategory(); // Reset the form
     }
-    // category
-    private List<Categories>? categories = null;
-    private async Task loadCategories()
-    {
-        try
-        {
-            categories ??= await categoryService.LoadCategories();
-        }
-        catch
-        {
-
-        }
-    }
+ 
     private async Task ShowAlert(string message)
     {
         await JS.InvokeVoidAsync("showAlert", message);

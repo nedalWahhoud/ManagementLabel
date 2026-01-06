@@ -28,7 +28,7 @@
 				@* category filter *@
 				<select class="categoryDropdown" @onfocus="OnCategoryOpened" @onchange="OnCategoryChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 					<option value="0">Alle</option>
-					@foreach (var category in categories)
+					@foreach (var category in categoryService.DownloadedCategories)
 					{
 						<option value="@category.Id">@category.Name_de</option>
 					}
@@ -427,7 +427,7 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	protected override async Task OnInitializedAsync()
 	{
-		_ = loadCategories();
+		_ = categoryService.GetAllCategoriesAsync();
 
 		//await LocalStorage.RemoveItemAsync("columnOptions");
 
@@ -575,7 +575,7 @@
 		_editProduct = null!;
 
 		// get the categories and manufacturers and taxrates
-		await loadCategories();
+		await categoryService.GetAllCategoriesAsync();
 		await loadManufacturers();
 		await loadTaxrates();
 		await loadGroupProducts();
@@ -814,7 +814,7 @@
 	}
 	private async Task OnCategoryOpened()
 	{
-		await loadCategories();
+		await categoryService.GetAllCategoriesAsync();
 	}
 	private int selectedCategoryId = 0;
 	private async Task OnCategoryChanged(ChangeEventArgs e)
@@ -874,12 +874,7 @@
 			selectedCategoryId = 0;
 		IsLoadingMessage = false;
 	}
-	// category
-	private List<Categories> categories = new();
-	private async Task loadCategories()
-	{
-		categories = await categoryService.LoadCategories();
-	}
+	
 	// manufacturer
 	private List<Manufacturer>? Manufacturers = null;
 	private async Task loadManufacturers()
