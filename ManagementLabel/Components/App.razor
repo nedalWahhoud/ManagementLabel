@@ -47,7 +47,26 @@
               }
         };
     </script>
+    @* script wenn Handy dann wird Whatsapp geöffent sonst wird webseite von Whatsapp geöffenet*@
+    <script>
+        window.whatsappRedirect = {
+          openWhatsAppWithoutNumber: function(message) {
+            const text = encodeURIComponent(message);
+            const url = `https://api.whatsapp.com/send?text=${text}`;
 
+            // Gerättype prüfen
+            const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+            if (isMobile) {
+              // auf Handy versuche erst app zu öffnen
+              window.location = url;
+            } else {
+              // auf Computer app nicht möglich, öffne Web
+               window.open(url, '_blank');
+            }
+          }
+        };
+    </script>
     <script src="_framework/blazor.web.js"></script>
 
 </body>

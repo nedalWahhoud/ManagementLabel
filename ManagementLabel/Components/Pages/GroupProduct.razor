@@ -66,13 +66,13 @@
 	}
 	private void EditGroup(GroupProducts group)
 	{
-		IsEditing = true;
 		EditingGroupProduct = new GroupProducts
 			{
 				Id = group.Id,
 				GroupName_de = group.GroupName_de,
 				GroupName_ar = group.GroupName_ar
 			};
+		IsEditing = true;
 	}
 	private (bool,int) IsDeletingProcessing = (false,0);
 	private async Task DeleteGroup(int  id)

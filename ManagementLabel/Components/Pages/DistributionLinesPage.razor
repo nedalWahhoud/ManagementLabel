@@ -1,0 +1,229 @@
+﻿@page "/distributionlines"
+<div class="main" @onclick="OnMainDiv">
+	<h3>Verteilungslinen</h3>
+
+	<button class="btn btn-success mb-3" @onclick="NewDistributionLine">
+		➕ Add neue DistributionLine
+	</button>
+	@if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
+	{
+		<div class="d-flex justify-content-center align-items-center"
+		style="min-height: 60vh;">
+			<p class="text-muted fs-5">
+				Keine Verteilungslinien gefunden.
+			</p>
+		</div>
+	}
+	else
+	{
+		<table class="table table-bordered table-hover">
+			<tr>
+				<th>Id</th>
+				<th>Name Line</th>
+				<th>Beschreibung</th>
+			</tr>
+			<tbody>
+				@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
+				{
+					<tr @oncontextmenu:preventDefault="true"
+					@oncontextmenu="@(e => OnSelectRow(distributionLine, e))"
+					@onpointerdown="(e) => OnTouchStart(distributionLine, e)"
+					@onpointermove="OnTouchMove"
+					@onpointerup="OnTouchEnd"
+					@onclick="(e)=> OnSelectRow(distributionLine,e)"
+					class="@(selectedDistributionLine != null && selectedDistributionLine.Id == selectedDistributionLine.Id ? "selected" : "")">
+						<td>@distributionLine.Id</td>
+						<td>@distributionLine.LineName</td>
+						<td>@distributionLine.Description</td>
+						<td>
+							<button class="btn btn-sm btn-warning me-1"
+							@onclick="() => EditDistributionLine(distributionLine)" disabled="@IsDeletingProcessing.Item1">
+								Bearbeiten
+							</button>
+							<button class="btn btn-sm btn-danger"
+							@onclick="() => DeleteDistributionLine(distributionLine.Id)" disabled="@IsDeletingProcessing.Item1">
+								@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == distributionLine.Id)
+								{
+									<span class="spinner-border spinner-border-sm"
+									role="status"
+									aria-hidden="true"></span>
+								}
+								else
+								{
+									<span>Löschen</span>
+								}
+							</button>
+						</td>
+					</tr>
+				}
+				@if (showContextMenu && selectedDistributionLine != null && IsDeletingProcessing.Item1 == false)
+				{
+					<div class="contextMenu"
+					style="position: fixed; top:@(menuYpx); left:@(menuXpx);"
+					@onclick:stopPropagation="true">
+						<ul>
+							<li @onclick="() => viaWhatasappShre(selectedDistributionLine)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
+						</ul>
+					</div>
+				}
+			</tbody>
+		</table>
+	}
+</div>
+@if (IsAdding)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="new DistributionLines()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
+}
+else if (IsEditing)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="EditingDistributionLine" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
+}
+@code {
+
+	private bool IsAdding = false;
+	private bool IsEditing = false;
+	private DistributionLines EditingDistributionLine = null!;
+
+	protected async override Task OnInitializedAsync()
+	{
+		await distributionLinesService.GetAllDistributionLines();
+	}
+
+	private void NewDistributionLine()
+	{
+		IsAdding = true;
+	}
+	private void EditDistributionLine(DistributionLines distributionLine)
+	{
+		EditingDistributionLine = new DistributionLines
+			{
+				Id = distributionLine.Id,
+				LineName = distributionLine.LineName,
+				Description = distributionLine.Description
+			};
+		IsEditing = true;
+	}
+	private (bool, int) IsDeletingProcessing = (false, 0);
+
+	private async Task DeleteDistributionLine(int id)
+	{
+		if (id <= 0)
+		{
+			await JS.InvokeVoidAsync("showAlert", "Please select a DistributionLine");
+			return;
+		}
+		IsDeletingProcessing = (true, id);
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
+		if (resultConfirm)
+		{
+			var result = await distributionLinesService.DeleteDistributionLineAsync(id);
+			if (!result.Result)
+			{
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+			}
+
+		}
+		IsDeletingProcessing = (false, id);
+	}
+	private void HandleEditAddDistributionLine(string action)
+	{
+		if (action == "Add")
+		{
+			IsAdding = false;
+		}
+		else
+		{
+			IsEditing = false;
+			EditingDistributionLine = null!;
+		}
+	}
+
+	// Menu recht klicken
+	private bool showContextMenu = false;
+	private double menuX;
+	private double menuY;
+	private string menuXpx => $"{menuX}px";
+	private string menuYpx => $"{menuY}px";
+	private System.Timers.Timer? longPressTimer;
+	private double startX, startY;
+	private bool isDragging = false;
+	private DistributionLines? selectedDistributionLine;
+
+	private void OnSelectRow(DistributionLines distributionLine, MouseEventArgs e)
+	{
+		if (e.Button == 2) // right click
+		{
+			selectedDistributionLine = distributionLine;
+			menuX = e.ClientX;
+			menuY = e.ClientY;
+			showContextMenu = true;
+		}
+		selectedDistributionLine = distributionLine;
+	}
+	private void OnTouchStart(DistributionLines distributionLine, PointerEventArgs e)
+	{
+		startX = e.ClientX;
+		startY = e.ClientY;
+		isDragging = false;
+
+		//Timer für langes Drücken (eine halbe Sekunde)
+		longPressTimer = new System.Timers.Timer(600);
+		longPressTimer.Elapsed += (_, __) =>
+		{
+			if (!isDragging) // nur wenn nicht gezogen wird
+			{
+				InvokeAsync(() =>
+				{
+					selectedDistributionLine = distributionLine;
+					menuX = e.ClientX;
+					menuY = e.ClientY;
+					showContextMenu = true;
+					StateHasChanged();
+				});
+			}
+			longPressTimer?.Stop();
+		};
+		longPressTimer.AutoReset = false;
+		longPressTimer.Start();
+		// select die Row
+		selectedDistributionLine = distributionLine;
+	}
+	private void OnTouchMove(PointerEventArgs e)
+	{
+		// إذا تحرك الإصبع أكثر من 10px → اعتبره سحب
+		if (Math.Abs(e.ClientX - startX) > 10 || Math.Abs(e.ClientY - startY) > 10)
+		{
+			isDragging = true;
+			longPressTimer?.Stop();
+		}
+	}
+	private void OnTouchEnd(PointerEventArgs e)
+	{
+		// Wenn der Benutzer seinen Finger schnell anhebt → das Menü öffnet sich nicht
+		longPressTimer?.Stop();
+	}
+	private async Task viaWhatasappShre(DistributionLines selectedDistributionLine)
+	{
+		// get all customers
+		await customersService.GetAllCustomers();
+		// get customers von der distribution line 
+		List<Customers> customers = customersService.GetCustomerByDistributionLineIdLocal(selectedDistributionLine.Id);
+		if (customers == null || !customers.Any())
+		{
+			await JS.InvokeVoidAsync("showAlert", "Keine Kunden in dieser Verteilungslinie gefunden.");
+			showContextMenu = false;
+			return;
+		}
+
+		var result = await whatsAppService.SendCustomerInfo(customers);
+		if (!result.Result)
+		{
+			await JS.InvokeVoidAsync("showAlert", result.Message);
+		}
+		showContextMenu = false;
+	}
+	private void OnMainDiv()
+	{
+		showContextMenu = false;
+	}
+}

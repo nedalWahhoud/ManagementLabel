@@ -5,12 +5,12 @@
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
 				<label>Name de</label>
-				<input class="form-control" @bind="groupProduct.GroupName_de" />
+				<InputText class="form-control" @bind-Value="groupProduct.GroupName_de" />
 				<ValidationMessage For="@(() => groupProduct.GroupName_de)" />
 			</div>
 			<div class="formGroupAdd">
 				<label>Name ar</label>
-				<input class="form-control" @bind="groupProduct.GroupName_ar" />
+				<InputText class="form-control" @bind-Value="groupProduct.GroupName_ar" />
 				<ValidationMessage For="@(() => groupProduct.GroupName_ar)" />
 			</div>
 			<div class="mt-3">

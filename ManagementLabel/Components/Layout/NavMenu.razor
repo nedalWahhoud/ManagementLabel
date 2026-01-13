@@ -57,6 +57,18 @@
                         </span>
                         <span class="ms-2">Bildkarussell</span>
                     </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnDistributionLines">
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <i class="bi bi-truck fs-3"></i>
+                        </span>
+                        <span class="ms-2">Verteilungslinien</span>
+                    </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnCustomers">
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <i class="bi bi-people fs-3"></i>
+                        </span>
+                        <span class="ms-2">Kunden</span>
+                    </NavLink>
                 </div>
                 <!-- Spacer to push logout to bottom -->
                 <div style="flex-grow: 1;"></div>
@@ -122,6 +134,16 @@
 	private void OnCategories()
     {
         NavigationManager.NavigateTo("/categories", false);
+	}
+	// distribution lines
+    private void OnDistributionLines()
+    {
+        NavigationManager.NavigateTo("/distributionlines", false);
+    }
+    // customers
+	private void OnCustomers()
+	{
+		NavigationManager.NavigateTo("/customers", false);
 	}
     public void Dispose()
     {

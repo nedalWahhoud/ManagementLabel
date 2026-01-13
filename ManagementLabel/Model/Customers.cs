@@ -1,0 +1,42 @@
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
+namespace ManagementLabel.Model
+{
+    public class Customers
+    {
+        public int Id { get; set; }
+        [Required(ErrorMessage = "Name de ist erforderlich.")]
+        public string Name_de { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Name ar ist erforderlich.")]
+        public string Name_ar { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Straße ist erforderlich.")]
+        public string Street { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Hausnummer ist erforderlich.")]
+        public string BuildingNumber { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Plz ist erforderlich.")]
+        public string PostalCode { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Stadt ist erforderlich.")]
+        public string City { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Latitude ist erforderlich.")]
+        [Range(-90, 90, ErrorMessage = "Latitude ist ungültig.")]
+        public decimal Latitude { get; set; }
+        [Required(ErrorMessage = "Longitude ist erforderlich.")]
+        [Range(-180, 180, ErrorMessage = "Longitude ist ungültig.")]
+        public decimal Longitude { get; set; }
+        [RegularExpression(@"^\+?[0-9\s\-]{7,20}$",
+         ErrorMessage = "Telefonnummer ist ungültig.")]
+        public string? PhoneNumber { get; set; }
+        [EmailAddress(ErrorMessage = "E-Mail ist ungültig.")]
+        public string? Email { get; set; }
+        [StringLength(200, ErrorMessage = "Note darf maximal 200 Zeichen lang sein.")]
+        public string? Notes_de { get; set; }
+        [StringLength(200, ErrorMessage = "Note darf maximal 200 Zeichen lang sein.")]
+        public string? Notes_ar { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // 🔗 FK
+        public int DistributionLineId { get; set; }
+        public DistributionLines? DistributionLine { get; set; }
+    }
+}

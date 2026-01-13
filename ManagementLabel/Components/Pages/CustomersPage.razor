@@ -1,0 +1,294 @@
+﻿@page "/customers"
+
+<div class="main" @onclick="OnMainDiv">
+	<h3>Kunden</h3>
+	<div class="TopContiner">
+		<button class="btn btn-success" @onclick="NewCustomer">
+			➕ Add neue Customer
+		</button>
+		<select class="DistributionLinesDropdown" @onfocus="OnDistributionLineOpened" @onchange="OnDistributionLineChanged">
+			<option value="0">Alle</option>
+			@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
+			{
+				<option value="@distributionLine.Id">@distributionLine.LineName</option>
+			}
+		</select>
+	</div>
+	@{
+		List<Customers> customersToDisplay = customersService.DownloadedCustomers;
+		if (FilteredCustomers != null && FilteredCustomers.Count > 0)
+		{
+			customersToDisplay = FilteredCustomers;
+		}
+
+		if (customersToDisplay == null || !customersToDisplay.Any())
+		{
+			<div class="d-flex justify-content-center align-items-center"
+			style="min-height: 60vh;">
+				<p class="text-muted fs-5">
+					Keine Customer gefunden.
+				</p>
+			</div>
+		}
+		else
+		{
+			<table class="table table-bordered table-hover">
+				<tr>
+					<th>Id</th>
+					<th>Name de</th>
+					<th>Name ar</th>
+					<th>Anschrift</th>
+					<th>Koordinaten</th>
+					<th>Tel.</th>
+					<th>E-Mail</th>
+					<th>Notizen de</th>
+					<th>Notizen ar</th>
+					<th>Richtung</th>
+				</tr>
+				<tbody>
+					@foreach (var customer in customersToDisplay)
+					{
+						<tr @oncontextmenu:preventDefault="true"
+						@oncontextmenu="@(e => OnSelectRow(customer, e))"
+						@onpointerdown="(e) => OnTouchStart(customer, e)"
+						@onpointermove="OnTouchMove"
+						@onpointerup="OnTouchEnd"
+						@onclick="(e)=> OnSelectRow(customer,e)"
+						class="@(selectedCustomer != null && selectedCustomer.Id == selectedCustomer.Id ? "selected" : "")">
+							<td>@customer.Id</td>
+							<td>@customer.Name_de</td>
+							<td>@customer.Name_ar</td>
+							<td>
+								@customer.Street @customer.BuildingNumber<br />
+								@customer.PostalCode @customer.City 
+							</td>
+							<td>
+								La: @customer.Latitude <br/>
+								Lo: @customer.Longitude
+							</td>
+							<td>@customer.PhoneNumber</td>
+							<td>@customer.Email</td>
+							<td>@customer.Notes_de</td>
+							<td>@customer.Notes_ar</td>
+							<td>
+								@(customer.DistributionLine?.LineName ?? "Null DistributionLine")
+							</td>
+							<td>
+								<button class="btn btn-sm btn-warning me-1"
+										@onclick="() => Edit(customer)" disabled="@IsProcessing.Item1">
+									Bearbeiten
+								</button>
+								<button class="btn btn-sm btn-danger"
+										@onclick="() => Delete(customer.Id)" disabled="@IsProcessing.Item1">
+									@if (IsProcessing.Item1 && IsProcessing.Item2 == customer.Id)
+									{
+										<span class="spinner-border spinner-border-sm"
+										role="status"
+										aria-hidden="true"></span>
+									}
+									else
+									{
+										<span>Löschen</span>
+									}
+								</button>
+							</td>
+						</tr>
+					}
+					@if (showContextMenu && selectedCustomer != null && IsProcessing.Item1 == false)
+					{
+						<div class="contextMenu"
+						style="position: fixed; top:@menuYpx; left:@menuXpx;"
+						@onclick:stopPropagation="true">
+							<ul>
+								<li @onclick="() => viaWhatasappShre(selectedCustomer)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
+							</ul>
+						</div>
+					}
+				</tbody>
+			</table>
+		}
+	}
+</div>
+@if (IsAdding)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
+}
+else if (IsEditing)
+{
+	<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
+}
+@code {
+	private bool IsAdding = false;
+	private bool IsEditing = false;
+	private Customers EditingCustomer = null!;
+	protected async override Task OnInitializedAsync()
+	{
+
+		var customersTask = customersService.GetAllCustomers();
+		var distributionLinesTask = distributionLinesService.GetAllDistributionLines();
+
+		await Task.WhenAll(customersTask, distributionLinesTask);
+
+	}
+	private void NewCustomer()
+	{
+		IsAdding = true;
+	}
+	private void Edit(Customers customers)
+	{
+		EditingCustomer = new Customers
+			{
+				Id = customers.Id,
+				Name_de = customers.Name_de,
+				Name_ar = customers.Name_ar,
+				Street = customers.Street,
+				BuildingNumber = customers.BuildingNumber,
+				PostalCode = customers.PostalCode,
+				City = customers.City,
+				Latitude = customers.Latitude,
+				Longitude = customers.Longitude,
+				PhoneNumber = customers.PhoneNumber,
+				Email = customers.Email,
+				Notes_de = customers.Notes_de,
+				Notes_ar = customers.Notes_ar,
+				DistributionLineId = customers.DistributionLineId,
+				DistributionLine = customers.DistributionLine
+				
+			};
+
+		IsEditing = true;
+	}
+	private (bool, int) IsProcessing = (false, 0);
+	private async Task Delete(int id)
+	{
+		if (id <= 0)
+		{
+			await JS.InvokeVoidAsync("showAlert", "Please select a DistributionLine");
+			return;
+		}
+		IsProcessing = (true, id);
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
+		if (resultConfirm)
+		{
+			var result = await customersService.DeleteCustomer(id);
+			if (!result.Result)
+			{
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+			}
+
+		}
+		IsProcessing = (false, id);
+	}
+	private void HandleEditAddDistributionLine(string action)
+	{
+		if (action == "Add")
+		{
+			IsAdding = false;
+		}
+		else
+		{
+			IsEditing = false;
+			EditingCustomer = null!;
+		}
+	}
+	// filter 
+	private List<Customers> FilteredCustomers = new List<Customers>();
+	private async Task OnDistributionLineOpened()
+	{
+		await distributionLinesService.GetAllDistributionLines();
+	}
+	private void OnDistributionLineChanged(ChangeEventArgs e)
+	{
+		if (int.TryParse(e.Value?.ToString(), out int selectedId))
+		{
+			if (selectedId > 0)
+			{
+				if (customersService.DownloadedCustomers.Count > 0)
+				{
+					FilteredCustomers = customersService.GetCustomerByDistributionLineIdLocal(selectedId);
+				}
+			}
+			else
+			{
+				FilteredCustomers = new List<Customers>();
+			}
+		}
+	}
+	// Menu recht klicken
+	private bool showContextMenu = false;
+	private double menuX;
+	private double menuY;
+	private string menuXpx => $"{menuX}px";
+	private string menuYpx => $"{menuY}px";
+	private System.Timers.Timer? longPressTimer;
+	private double startX, startY;
+	private bool isDragging = false;
+	private Customers? selectedCustomer;
+
+	private void OnSelectRow(Customers customer, MouseEventArgs e)
+	{
+		if (e.Button == 2) // right click
+		{
+			selectedCustomer = customer;
+			menuX = e.ClientX;
+			menuY = e.ClientY;
+			showContextMenu = true;
+		}
+		selectedCustomer = customer;
+	}
+	private void OnTouchStart(Customers customer, PointerEventArgs e)
+	{
+		startX = e.ClientX;
+		startY = e.ClientY;
+		isDragging = false;
+
+		//Timer für langes Drücken (eine halbe Sekunde)
+		longPressTimer = new System.Timers.Timer(600);
+		longPressTimer.Elapsed += (_, __) =>
+		{
+			if (!isDragging) // nur wenn nicht gezogen wird
+			{
+				InvokeAsync(() =>
+				{
+					selectedCustomer = customer;
+					menuX = e.ClientX;
+					menuY = e.ClientY;
+					showContextMenu = true;
+					StateHasChanged();
+				});
+			}
+			longPressTimer?.Stop();
+		};
+		longPressTimer.AutoReset = false;
+		longPressTimer.Start();
+		// select die Row
+		selectedCustomer = customer;
+	}
+	private void OnTouchMove(PointerEventArgs e)
+	{
+		// إذا تحرك الإصبع أكثر من 10px → اعتبره سحب
+		if (Math.Abs(e.ClientX - startX) > 10 || Math.Abs(e.ClientY - startY) > 10)
+		{
+			isDragging = true;
+			longPressTimer?.Stop();
+		}
+	}
+	private void OnTouchEnd(PointerEventArgs e)
+	{
+		// Wenn der Benutzer seinen Finger schnell anhebt → das Menü öffnet sich nicht
+		longPressTimer?.Stop();
+	}
+	private async Task viaWhatasappShre(Customers customer)
+	{
+		var result = await whatsAppService.SendCustomerInfo(customer);
+		if (!result.Result)
+		{
+			await JS.InvokeVoidAsync("showAlert", result.Message);
+		}
+		showContextMenu = false;
+	}
+	private void OnMainDiv()
+	{
+		showContextMenu = false;
+	}
+}

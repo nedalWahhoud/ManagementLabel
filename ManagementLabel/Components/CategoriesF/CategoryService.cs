@@ -109,11 +109,10 @@ namespace ManagementLabel.Components.CategoriesF
                     return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht aktualisiert werden." };
                 }
                 // update local list
-                var localCategory = DownloadedCategories.FirstOrDefault(c => c.Id == category.Id);
-                if (localCategory != null)
+                int index = DownloadedCategories.FindIndex(c => c.Id == category.Id);
+                if (index != -1)
                 {
-                    localCategory.Name_de = category.Name_de;
-                    localCategory.Name_ar = category.Name_ar;
+                    DownloadedCategories[index] = category;
                 }
                 return result;
             }
@@ -223,7 +222,9 @@ namespace ManagementLabel.Components.CategoriesF
         public bool IsCategoryEdited(Categories currentCategory, Categories editCategory)
         {
             if (currentCategory.Name_de != editCategory.Name_de ||
-                currentCategory.Name_ar != editCategory.Name_ar)
+                currentCategory.Name_ar != editCategory.Name_ar ||
+                currentCategory.Requires18Plus != editCategory.Requires18Plus ||
+                currentCategory.IsAktiv != editCategory.IsAktiv)
             {
                 return true;
             }

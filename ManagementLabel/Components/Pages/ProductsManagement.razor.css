@@ -42,7 +42,7 @@
         text-align: center;
         height: 120px;
     }
-
+/* selected */
     .table tbody tr:nth-child(2n+1) {
         background-color: #f0f0f0;
     }

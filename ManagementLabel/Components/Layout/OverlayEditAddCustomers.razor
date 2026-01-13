@@ -1,0 +1,152 @@
+﻿<div class="overlay">
+	<div class="overlayEditAddForm">
+		<h4>@(action == "Add" ? "Customer hinzufügen" : "Customer bearbeiten")</h4>
+		<EditForm Model="@customer" OnValidSubmit="Save">
+			<DataAnnotationsValidator />
+			<div class="formGroupAdd">
+				<label>Richtung</label>
+				<InputSelect class="form-control" @bind-Value="customer.DistributionLineId">
+					<option value="0">Select Verteilungslinie</option>
+					@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
+					{
+						<option value="@distributionLine.Id">@distributionLine.LineName</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => customer.DistributionLineId)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Name de</label>
+				<InputText class="form-control" @bind-Value="customer.Name_de" />
+				<ValidationMessage For="@(() => customer.Name_de)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Name ar</label>
+				<InputText class="form-control" @bind-Value="customer.Name_ar" />
+				<ValidationMessage For="@(() => customer.Name_ar)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Anschrift</label>
+				<InputText class="form-control" @bind-Value="customer.Street" />
+				<ValidationMessage For="@(() => customer.Street)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Hausnummer</label>
+				<InputText class="form-control" @bind-Value="customer.BuildingNumber" />
+				<ValidationMessage For="@(() => customer.BuildingNumber)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>PLZ</label>
+				<InputText class="form-control" @bind-Value="customer.PostalCode" />
+				<ValidationMessage For="@(() => customer.PostalCode)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Stadt</label>
+				<InputText class="form-control" @bind-Value="customer.City" />
+				<ValidationMessage For="@(() => customer.City)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Latitude</label>
+				<InputNumber TValue="decimal" class="form-control" @bind-Value="customer.Latitude" />
+				<ValidationMessage For="@(() => customer.Latitude)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Longitude</label>
+				<InputNumber TValue="decimal" class="form-control" @bind-Value="customer.Longitude" />
+				<ValidationMessage For="@(() => customer.Longitude)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Tel.</label>
+				<InputText class="form-control" @bind-Value="customer.PhoneNumber" />
+				<ValidationMessage For="@(() => customer.PhoneNumber)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Email</label>
+				<InputText class="form-control" @bind-Value="customer.Email" />
+				<ValidationMessage For="@(() => customer.Email)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Notes de</label>
+				<InputText class="form-control" @bind-Value="customer.Notes_de" />
+				<ValidationMessage For="@(() => customer.Notes_de)" />
+			</div>
+            <div class="formGroupAdd">
+				<label>Notes ar</label>
+				<InputText class="form-control" @bind-Value="customer.Notes_ar" />
+				<ValidationMessage For="@(() => customer.Notes_ar)" />
+			</div>
+
+			<div class="mt-3">
+				<button class="btn btn-primary me-2">
+					@if (IsProcessing)
+					{
+						<span class="spinner-border spinner-border-sm"
+							  role="status"
+							  aria-hidden="true"></span>
+					}
+					else
+					{
+						@(action == "Add" ? "Customer hinzufügen" : "Customer updaten")
+					}
+				</button>
+				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public Customers customer { get; set; } = new Customers();
+	[Parameter]
+	public string action { get; set; } = string.Empty;
+	[Parameter]
+	public EventCallback<string> OnHandel { get; set; }
+	private bool IsProcessing = false;
+	private async void Save()
+	{
+		IsProcessing = true;
+		if (action == "Add")
+		{
+			var result = await customersService.AddCustomer(customer);
+			if (result.Result)
+			{
+				customer = null!;
+				await OnHandel.InvokeAsync(action);
+			}
+			else
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+		}
+		else
+		{
+			// wenn category editiert wurde
+			Customers? currentCustomer = customersService.DownloadedCustomers.FirstOrDefault(c => c.Id == customer.Id);
+			if (currentCustomer != null)
+			{
+				bool isEdited = customersService.IsEdited(currentCustomer, customer);
+				if (isEdited)
+				{
+					var result = await customersService.UpdateCustomer(customer);
+					if (result.Result)
+					{
+						customer = null!;
+						await OnHandel.InvokeAsync(action);
+					}
+					else
+						await JS.InvokeVoidAsync("showAlert", result.Message);
+				}
+				else
+					await JS.InvokeVoidAsync("showAlert", "Nichts hat sich geändert");
+			}
+			else
+				await JS.InvokeVoidAsync("showAlert", "keine currentCategory gefunden");
+		}
+
+		IsProcessing = false;
+		StateHasChanged();
+	}
+	private void Cancel()
+	{
+		customer = new Customers();
+		OnHandel.InvokeAsync(action);
+	}
+}

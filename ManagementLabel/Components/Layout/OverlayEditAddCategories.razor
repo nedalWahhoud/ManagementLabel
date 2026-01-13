@@ -5,13 +5,23 @@
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
 				<label>Name de</label>
-				<input class="form-control" @bind="category.Name_de" />
+				<InputText class="form-control" @bind-Value="category.Name_de" />
 				<ValidationMessage For="@(() => category.Name_de)" />
 			</div>
 			<div class="formGroupAdd">
 				<label>Name ar</label>
-				<input class="form-control" @bind="category.Name_ar" />
+				<InputText class="form-control" @bind-Value="category.Name_ar" />
 				<ValidationMessage For="@(() => category.Name_ar)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Ab 18 Jahren</label>
+		    	<InputCheckbox @bind-Value="category.Requires18Plus" />
+				<ValidationMessage For="@(() => category.Requires18Plus)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>Is Aktiv</label>
+				<InputCheckbox @bind-Value="category.IsAktiv" />
+				<ValidationMessage For="@(() => category.IsAktiv)" />
 			</div>
 			<div class="mt-3">
 				<button class="btn btn-primary me-2">

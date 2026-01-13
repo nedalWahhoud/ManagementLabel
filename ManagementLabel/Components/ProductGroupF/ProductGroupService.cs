@@ -50,12 +50,12 @@ namespace ManagementLabel.Components.ProductGroupF
                     return new ValidationResult { Result = false, Message = result?.Message ?? "Die Produktgruppe konnte nicht erstellt werden." };
                 }
                 // get Id
-                var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(); ;
+                var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(); 
                 if (result.Result && int.TryParse(idStr, out int id))
                 {
                     // Add to local list
                     groupProduct.Id = id;
-                    DownloadedproductGroups.Add(groupProduct);
+                    AddCategoriesToLocal(groupProduct);
                 }
                 else
                 {

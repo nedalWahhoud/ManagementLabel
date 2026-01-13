@@ -14,6 +14,9 @@ using ManagementLabel.Components.AddressesF;
 using Blazored.LocalStorage;
 using Microsoft.Extensions.Options;
 using ManagementLabel.Components.ImagesF;
+using ManagementLabel.Components.DistributionLinesF;
+using ManagementLabel.Components.CustomersF;
+using ManagementLabel.Components.Share;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,6 +78,12 @@ builder.Services.AddScoped<InvoiceService>();
 builder.Services.AddScoped<ProductImagesService>();
 //  Carousel Image 
 builder.Services.AddScoped<CarouselImageService>();
+//  DistributionLines Service 
+builder.Services.AddScoped<DistributionLinesService>();
+//  Customers Service 
+builder.Services.AddScoped<CustomersService>();
+//  WhatsApp Service 
+builder.Services.AddScoped<WhatsAppService>();
 //
 builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();

@@ -22,9 +22,12 @@
 @using ManagementLabel.Components.CategoriesF
 @using ManagementLabel.Components.InvoiceF
 @using ManagementLabel.Components.AddressesF
+@using ManagementLabel.Components.ImagesF
+@using ManagementLabel.Components.DistributionLinesF
+@using ManagementLabel.Components.CustomersF
+@using ManagementLabel.Components.Share
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
-@using ManagementLabel.Components.ImagesF
 
 @**@
 @inject IJSRuntime JS
@@ -43,3 +46,6 @@
 @inject InvoiceService invoiceService
 @inject ProductImagesService productImagesService
 @inject CarouselImageService carouselImageService
+@inject DistributionLinesService distributionLinesService
+@inject CustomersService customersService
+@inject WhatsAppService whatsAppService

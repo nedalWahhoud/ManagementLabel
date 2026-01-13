@@ -9,5 +9,7 @@ namespace ManagementLabel.Model
         public string? Name_de { get; set; }
         [Required(ErrorMessage = "Name ar ist erforderlich.")]
         public string? Name_ar { get; set; }
+        public bool Requires18Plus { get; set; } = false;
+        public bool IsAktiv { get; set; } = true;
     }
 }

@@ -1,0 +1,88 @@
+﻿<div class="overlay">
+	<div class="overlayEditAddForm">
+		<h4>@(action == "Add" ? "DistributionLine hinzufügen" : "DistributionLine bearbeiten")</h4>
+		<EditForm Model="@DistributionLine" OnValidSubmit="Save">
+			<DataAnnotationsValidator />
+			<div class="formGroupAdd">
+				<label>Nameline</label>
+				<InputText class="form-control" @bind-Value="DistributionLine.LineName" />
+				<ValidationMessage For="@(() => DistributionLine.LineName)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>line Beschreibung</label>
+				<InputText class="form-control" @bind-Value="DistributionLine.Description" />
+				<ValidationMessage For="@(() => DistributionLine.Description)" />
+			</div>
+			<div class="mt-3">
+				<button class="btn btn-primary me-2">
+					@if (IsProcessing)
+					{
+						<span class="spinner-border spinner-border-sm"
+						role="status"
+						aria-hidden="true"></span>
+					}
+					else
+					{
+						@(action == "Add" ? "DistributionLine hinzufügen" : "DistributionLine updaten")
+					}
+				</button>
+				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public DistributionLines DistributionLine { get; set; } = new DistributionLines();
+	[Parameter]
+	public string action { get; set; } = string.Empty;
+	[Parameter]
+	public EventCallback<string> OnHandel { get; set; }
+
+	private bool IsProcessing = false;
+	private async Task Save()
+	{
+		IsProcessing = true;
+		if (action == "Add")
+		{
+			var result = await distributionLinesService.AddDistributionLineAsync(DistributionLine);
+			if (result.Result)
+			{
+				DistributionLine = null!;
+				await OnHandel.InvokeAsync(action);
+			}
+			else
+				await JS.InvokeVoidAsync("showAlert", result.Message);
+		}
+		else
+		{
+			DistributionLines? currentDistributionLine = distributionLinesService.DownloadedDistributionLines.FirstOrDefault(c => c.Id == DistributionLine.Id);
+			if (currentDistributionLine != null)
+			{
+				bool isEdited = distributionLinesService.IsEdited(currentDistributionLine, DistributionLine);
+				if (isEdited)
+				{
+					var result = await distributionLinesService.UpdateDistributionLineAsync(DistributionLine);
+					if (result.Result)
+					{
+						DistributionLine = new();
+						await OnHandel.InvokeAsync(action);
+					}
+					else
+						await JS.InvokeVoidAsync("showAlert", result.Message);
+				}
+				else
+					await JS.InvokeVoidAsync("showAlert", "Nichts hat sich geändert");
+			}
+			else
+				await JS.InvokeVoidAsync("showAlert", "keine currentGroup gefunden");
+		}
+		IsProcessing = false;
+	}
+	private async void Cancel()
+	{
+		DistributionLine = new DistributionLines();
+		await OnHandel.InvokeAsync(action);
+	}
+}
