@@ -31,7 +31,7 @@
 					@onpointermove="OnTouchMove"
 					@onpointerup="OnTouchEnd"
 					@onclick="(e)=> OnSelectRow(distributionLine,e)"
-					class="@(selectedDistributionLine != null && selectedDistributionLine.Id == selectedDistributionLine.Id ? "selected" : "")">
+						class="@(selectedDistributionLine != null && selectedDistributionLine.Id == distributionLine.Id ? "selected" : "")">
 						<td>@distributionLine.Id</td>
 						<td>@distributionLine.LineName</td>
 						<td>@distributionLine.Description</td>
@@ -208,6 +208,7 @@ else if (IsEditing)
 		await customersService.GetAllCustomers();
 		// get customers von der distribution line 
 		List<Customers> customers = customersService.GetCustomerByDistributionLineIdLocal(selectedDistributionLine.Id);
+		customers = customers.OrderBy(c => c.StopNumber).ToList();
 		if (customers == null || !customers.Any())
 		{
 			await JS.InvokeVoidAsync("showAlert", "Keine Kunden in dieser Verteilungslinie gefunden.");

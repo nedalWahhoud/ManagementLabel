@@ -26,7 +26,7 @@
 					</button>
 				</div>
 				@* category filter *@
-				<select class="categoryDropdown" @onfocus="OnCategoryOpened" @onchange="OnCategoryChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+				<select class="categoryDropdown" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 					<option value="0">Alle</option>
 					@foreach (var category in categoryService.DownloadedCategories)
 					{
@@ -62,7 +62,6 @@
 
 			@* table *@
 			<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
-
 				<table class="table text-center align-middle">
 					<thead>
 						<tr>
@@ -388,17 +387,11 @@
 </div>
 @code{
 
-	private string GetScr(Products product)
-	{
-		string scr = productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!);
-
-		if(product.Id == 304)
-		{
-
-		}
-
-		return scr;
-	}
+	// Taks
+	Task taskCatyrories = Task.CompletedTask;
+	Task taskManufacturers = Task.CompletedTask;
+	Task taskProductGroups = Task.CompletedTask;
+	Task taskTaxRates = Task.CompletedTask;
 
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
@@ -427,9 +420,28 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	protected override async Task OnInitializedAsync()
 	{
-		_ = categoryService.GetAllCategoriesAsync();
+		taskCatyrories = categoryService.GetAllCategoriesAsync();
 
-		//await LocalStorage.RemoveItemAsync("columnOptions");
+		selectedCategoryId = await LocalStorage.GetItemAsync<int>("selectedCategoryId");
+
+		taskManufacturers = productService.GetAllManufacturers();
+		taskProductGroups = productGroupService.GetAllGroupProductsAsync();
+		taskTaxRates = productService.GetAllTaxRates();
+
+
+
+		// wenn die category filter gesetzt in latzt Sitzung wurde dann filtern nach lest gespeicherte category
+		if (selectedCategoryId > 0)
+		{
+			if (taskCatyrories.IsCompleted)
+				await taskCatyrories;
+			await OnCategoryChanged();
+		}
+		else
+		{
+			// erste Produkte laden
+			await loadInBackground();
+		}
 
 		var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
 		if (saved is not null)
@@ -451,6 +463,9 @@
 			var user = authState.User;
 			if (user.Identity?.IsAuthenticated == true)
 			{
+
+
+
 				this.user = new();
 				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
 				if (int.TryParse(userIdStr, out int userIdInt))
@@ -459,8 +474,8 @@
 				}
 				//// Reset when the page reloads
 				ResetOfPage();
-				//
-				await loadInBackground();
+
+
 				// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 				objRef = DotNetObjectReference.Create(this);
 				await Task.Delay(100);
@@ -554,7 +569,6 @@
 		IsLoadding = true;
 		var moreProducts = await productService.LoadMoreProducts();
 
-
 		// initialize CartItem for each product
 		foreach (var product in moreProducts.Items)
 		{
@@ -562,12 +576,11 @@
 		}
 		// hide the loading message
 		IsLoadingMessage = false;
-		StateHasChanged();
 		IsLoadding = false;
 		return moreProducts.AllItemsLoaded;
 	}
 	// Add Product
-	private bool IsShowAddProductForm = false; 
+	private bool IsShowAddProductForm = false;
 
 	private async void ShowAddProductFormAsync()
 	{
@@ -575,10 +588,14 @@
 		_editProduct = null!;
 
 		// get the categories and manufacturers and taxrates
-		await categoryService.GetAllCategoriesAsync();
-		await loadManufacturers();
-		await loadTaxrates();
-		await loadGroupProducts();
+		if (!taskCatyrories.IsCompleted)
+			await taskCatyrories;
+		if (!taskManufacturers.IsCompleted)
+			await taskManufacturers;
+		if (!taskProductGroups.IsCompleted)
+			await taskProductGroups;
+		if (!taskTaxRates.IsCompleted)
+			await taskTaxRates;
 
 		IsShowAddProductForm = !IsShowAddProductForm;
 		StateHasChanged();
@@ -812,81 +829,87 @@
 					.ToList();
 		return searchedProducts;
 	}
+	// filter nach category
 	private async Task OnCategoryOpened()
 	{
-		await categoryService.GetAllCategoriesAsync();
+		if(!taskCatyrories.IsCompleted)
+			await taskCatyrories;
 	}
 	private int selectedCategoryId = 0;
-	private async Task OnCategoryChanged(ChangeEventArgs e)
+	private async Task OnCategoryChanged()
 	{
 		// show loadingmessage while loading
 		IsLoadingMessage = true;
-		if (int.TryParse(e.Value?.ToString(), out int selectedId))
+
+		if (selectedCategoryId == 0)
 		{
-			if (selectedId > 0)
-			{
-				selectedCategoryId = selectedId;
-				// clear die Input search
-				await ClearInput();
-				if (productService.DownloadedProduct.Count > 0)
+			// if selectedId is 0, clear the filter
+			filterP = null!;
+			// clear die Input search
+			await ClearInput();
+		}
+		else
+		{
+			/*if (int.TryParse(e.Value?.ToString(), out int selectedId))
 				{
-					// get excludeProductsIds, from local products
-					List<int> excludeProductsIds = productService.DownloadedProduct.Where(f => f.CategoryId == selectedId)
+				if (selectedId > 0)
+
+					selectedCategoryId = selectedId;{*/
+			// clear die Input search
+			await ClearInput();
+			//	if (productService.DownloadedProduct.Count > 0)
+			//{
+			// get excludeProductsIds, from local products
+			List<int> excludeProductsIds = productService.DownloadedProduct.Where(f => f.CategoryId == selectedCategoryId)
 					.Select(f => f.Id)
 					.ToList();
 
-					int counter = 0;
-					GetItems<Products> getItems = new();
-					// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
-					filterP = new();
-					while (true)
-					{
-						if (counter > 10 || getItems.AllItemsLoaded)
-						{
-							break;
-						}
-
-						Task.Delay(100).Wait(); // wait for a short time before searching again
-						getItems = await categoryService.GetProductsByCategoryIdAsync(selectedId, 10, excludeProductsIds);
-						// get downloaded productsIds, to exclude them from the next search
-						excludeProductsIds.AddRange(getItems.Items
-							.Where(p => p.CategoryId == selectedId)
-							.Select(p => p.Id));
-						// initialize CartItem for each product
-						foreach (var product in getItems.Items)
-						{
-							product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
-						}
-						counter++;
-					}
-					// get the products by categoryId local, after downloading from server
-					filterP = productService.GetProductByCategoryIdLocal(selectedId);
+			int counter = 0;
+			GetItems<Products> getItems = new();
+			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
+			filterP = new();
+			while (true)
+			{
+				if (counter > 2 || getItems.AllItemsLoaded)
+				{
+					break;
 				}
+
+				Task.Delay(100).Wait(); // wait for a short time before searching again
+				getItems = await categoryService.GetProductsByCategoryIdAsync(selectedCategoryId, 10, excludeProductsIds);
+				// get downloaded productsIds, to exclude them from the next search
+				excludeProductsIds.AddRange(getItems.Items
+					.Where(p => p.CategoryId == selectedCategoryId)
+					.Select(p => p.Id));
+				// initialize CartItem for each product
+				foreach (var product in getItems.Items)
+				{
+					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
+				}
+				counter++;
+			}
+			// get the products by categoryId local, after downloading from server
+			filterP = productService.GetProductByCategoryIdLocal(selectedCategoryId);
+
+
+			//	}
+				/*	}
+				else
+					{
+					selectedCategoryId = 0;
+					// if selectedId is 0, clear the filter
+					filterP = null!;
+			}
 			}
 			else
-			{
-				selectedCategoryId = 0;
-				// if selectedId is 0, clear the filter
-				filterP = null!;
-			}
+				selectedCategoryId = 0;*/
 		}
-		else
-			selectedCategoryId = 0;
+
+		// save the selected category id in local storage
+		await LocalStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
 		IsLoadingMessage = false;
 	}
-	
-	// manufacturer
-	private List<Manufacturer>? Manufacturers = null;
-	private async Task loadManufacturers()
-	{
-		Manufacturers ??= await productService.LoadManufacturers();
-	}
-	// taxrates
-	private List<TaxRate> TaxRates = null!;
-	private async Task loadTaxrates()
-	{
-		TaxRates ??= await productService.LoadTaxRates();
-	}
+
 	// Invoice
 	private bool IsShowInvoice = false;
 	private bool IsShowOrder = false;
@@ -1151,12 +1174,6 @@
 		IsInvoiceVisible = false;
 		invoice = null!;
 		await InvokeAsync(StateHasChanged);
-	}
-	// group products
-	private List<GroupProducts> groupedProducts = null!;
-	private async Task loadGroupProducts()
-	{
-		groupedProducts = await productGroupService.GetAllGroupProductsAsync();
 	}
 
 	private bool IsLoadingMessage = true;

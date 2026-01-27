@@ -34,6 +34,7 @@ namespace ManagementLabel.Model
         [StringLength(200, ErrorMessage = "Note darf maximal 200 Zeichen lang sein.")]
         public string? Notes_ar { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public int StopNumber { get; set; } = 1;
 
         // 🔗 FK
         public int DistributionLineId { get; set; }

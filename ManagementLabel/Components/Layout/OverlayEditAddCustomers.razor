@@ -74,7 +74,14 @@
 				<InputText class="form-control" @bind-Value="customer.Notes_ar" />
 				<ValidationMessage For="@(() => customer.Notes_ar)" />
 			</div>
-
+			<div class="formGroupAdd">
+				<label>Haltestellennummer</label>
+				<InputNumber TValue="int"
+					         min="1"
+							 class="form-control"
+							 @bind-Value="customer.StopNumber" />
+				<ValidationMessage For="@(() => customer.StopNumber)" />
+			</div>
 			<div class="mt-3">
 				<button class="btn btn-primary me-2">
 					@if (IsProcessing)

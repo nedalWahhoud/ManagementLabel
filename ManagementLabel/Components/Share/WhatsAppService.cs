@@ -2,6 +2,7 @@
 using Microsoft.JSInterop;
 using Org.BouncyCastle.Crypto.IO;
 using System.Globalization;
+using System.Net;
 using System.Text;
 namespace ManagementLabel.Components.Share
 {
@@ -58,9 +59,6 @@ namespace ManagementLabel.Components.Share
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-
-
-
         private static string GetMessage(Customers customer)
         {
             string mapsLink;
@@ -70,8 +68,15 @@ namespace ManagementLabel.Components.Share
             }
             else
             {
-                mapsLink = $"https://maps.google.com/?q={customer.Street} {customer.BuildingNumber}, {customer.City}";
+                string addressQuery = $"{customer.Street} {customer.BuildingNumber}, {customer.PostalCode} {customer.City}";
+                // endcode the mapsLink
+                string encodedAddress = WebUtility.UrlEncode(addressQuery);
+
+                mapsLink = $"https://maps.google.com/?q={encodedAddress}";
             }
+
+            string stopNumber = $"🛑 Stop-Nummer" +
+                                $": {customer.StopNumber.ToString()}\n";
 
             string distributionLineInfo = null!;
             if(customer.DistributionLine != null)
@@ -79,6 +84,8 @@ namespace ManagementLabel.Components.Share
                 distributionLineInfo = $"🚚 Richtung: " +
                                        $"{customer.DistributionLine.LineName}\n";
             }
+
+            
 
             string name = $"👤 Kunde:{customer.Name_de} " +
                           $": {customer.Name_ar}\n";
@@ -112,6 +119,7 @@ namespace ManagementLabel.Components.Share
                 notes_ar = $"📝 Note (AR): {customer.Notes_ar}";
 
             string message =
+                             $"{stopNumber}"+
                              $"{distributionLineInfo}" +
                              $"{name}" +
                              $"{Address}" +

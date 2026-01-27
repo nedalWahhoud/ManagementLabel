@@ -1,4 +1,7 @@
-﻿/* menu */
+﻿.main {
+    min-height: 100vh;
+}
+/* menu */
 .contextMenu {
     z-index: 9999;
     background: white;

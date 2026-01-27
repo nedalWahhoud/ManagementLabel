@@ -1,4 +1,7 @@
-﻿.TopContiner {
+﻿.main {
+    min-height: 100vh;
+}
+.TopContiner {
     width: 100%;
     display: flex;
     flex-direction: row;

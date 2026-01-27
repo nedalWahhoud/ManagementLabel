@@ -61,7 +61,7 @@ namespace ManagementLabel.ProductsF
                 return new();
             }
         }
-        public async Task<List<Manufacturer>> LoadManufacturers()
+        public async Task<List<Manufacturer>> GetAllManufacturers()
         {
             if(DownloadedManufacturers.Count > 0)
                 return DownloadedManufacturers;
@@ -82,7 +82,7 @@ namespace ManagementLabel.ProductsF
                 return [];
             }
         }
-        public async Task<List<TaxRate>> LoadTaxRates()
+        public async Task<List<TaxRate>> GetAllTaxRates()
         {
             if (DownloadedTaxRates.Count > 0)
                 return DownloadedTaxRates;
@@ -149,16 +149,20 @@ namespace ManagementLabel.ProductsF
                     return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
-                return result;
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if(result?.Result == true)
+                {
+                    return result;
+                }
+
+                return result ?? new ValidationResult { Result = false, Message = "Unknown error." };
             }
             catch(Exception ex)
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-
-      
         public void Reset()
         {
             GetItems.Items.Clear();
@@ -224,7 +228,7 @@ namespace ManagementLabel.ProductsF
                 return [];
             }
         }
-        // 
+        // local
         public void AddProductToLocal(List<Products> products)
         {
             if(products.Count > 0 && DownloadedProduct.Count == 0)
@@ -286,6 +290,5 @@ namespace ManagementLabel.ProductsF
             }
         }
         // 
-       
     }
 }

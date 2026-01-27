@@ -44,6 +44,7 @@
 					<th>Notizen de</th>
 					<th>Notizen ar</th>
 					<th>Richtung</th>
+					<th>Haltestellennummer</th>
 				</tr>
 				<tbody>
 					@foreach (var customer in customersToDisplay)
@@ -54,7 +55,7 @@
 						@onpointermove="OnTouchMove"
 						@onpointerup="OnTouchEnd"
 						@onclick="(e)=> OnSelectRow(customer,e)"
-						class="@(selectedCustomer != null && selectedCustomer.Id == selectedCustomer.Id ? "selected" : "")">
+							class="@(selectedCustomer != null && selectedCustomer.Id == customer.Id ? "selected" : "")">
 							<td>@customer.Id</td>
 							<td>@customer.Name_de</td>
 							<td>@customer.Name_ar</td>
@@ -73,6 +74,7 @@
 							<td>
 								@(customer.DistributionLine?.LineName ?? "Null DistributionLine")
 							</td>
+							<td>@customer.StopNumber</td>
 							<td>
 								<button class="btn btn-sm btn-warning me-1"
 										@onclick="() => Edit(customer)" disabled="@IsProcessing.Item1">
@@ -92,6 +94,7 @@
 									}
 								</button>
 							</td>
+						
 						</tr>
 					}
 					@if (showContextMenu && selectedCustomer != null && IsProcessing.Item1 == false)
@@ -123,7 +126,6 @@ else if (IsEditing)
 	private Customers EditingCustomer = null!;
 	protected async override Task OnInitializedAsync()
 	{
-
 		var customersTask = customersService.GetAllCustomers();
 		var distributionLinesTask = distributionLinesService.GetAllDistributionLines();
 
@@ -152,7 +154,8 @@ else if (IsEditing)
 				Notes_de = customers.Notes_de,
 				Notes_ar = customers.Notes_ar,
 				DistributionLineId = customers.DistributionLineId,
-				DistributionLine = customers.DistributionLine
+				DistributionLine = customers.DistributionLine,
+				StopNumber = customers.StopNumber
 				
 			};
 
