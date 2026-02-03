@@ -429,11 +429,10 @@
 		taskTaxRates = productService.GetAllTaxRates();
 
 
-
 		// wenn die category filter gesetzt in latzt Sitzung wurde dann filtern nach lest gespeicherte category
 		if (selectedCategoryId > 0)
 		{
-			if (taskCatyrories.IsCompleted)
+			if (!taskCatyrories.IsCompleted)
 				await taskCatyrories;
 			await OnCategoryChanged();
 		}
@@ -449,7 +448,7 @@
 	}
 	private async Task OnColumnChanged()
 	{
-		// كل ما يتغير أي Checkbox، نحفظ القائمة
+		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
 		await LocalStorage.SetItemAsync("columnOptions", columnOptions);
 	}
 	// OnAfterRenderAsync
@@ -850,15 +849,9 @@
 		}
 		else
 		{
-			/*if (int.TryParse(e.Value?.ToString(), out int selectedId))
-				{
-				if (selectedId > 0)
-
-					selectedCategoryId = selectedId;{*/
 			// clear die Input search
 			await ClearInput();
-			//	if (productService.DownloadedProduct.Count > 0)
-			//{
+		
 			// get excludeProductsIds, from local products
 			List<int> excludeProductsIds = productService.DownloadedProduct.Where(f => f.CategoryId == selectedCategoryId)
 					.Select(f => f.Id)
@@ -890,19 +883,6 @@
 			}
 			// get the products by categoryId local, after downloading from server
 			filterP = productService.GetProductByCategoryIdLocal(selectedCategoryId);
-
-
-			//	}
-				/*	}
-				else
-					{
-					selectedCategoryId = 0;
-					// if selectedId is 0, clear the filter
-					filterP = null!;
-			}
-			}
-			else
-				selectedCategoryId = 0;*/
 		}
 
 		// save the selected category id in local storage

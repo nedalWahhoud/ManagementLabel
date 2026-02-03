@@ -65,13 +65,13 @@ namespace ManagementLabel.LogIn
             {
                 HttpResponseMessage response = await _http!.GetAsync($"api/Users/checkAdminStatus/{id}");
                 if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Admin check failed." };
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Administratorprüfung fehlgeschlagen." };
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
-                return result ?? new ValidationResult { Result = false, Message = "Admin check failed." };
+                return result ?? new ValidationResult { Result = false, Message = "Administratorprüfung fehlgeschlagen." };
             }
             catch (Exception ex)
             {
-                return new ValidationResult { Result = false, Message = $"An error occurred during admin check: {ex.Message}" };
+                return new ValidationResult { Result = false, Message = $"Bei der Administratorprüfung ist ein Fehler aufgetreten.: {ex.Message}" };
             }
         }
     }

@@ -36,7 +36,6 @@ else
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
-
     private bool isRended = false;
     protected override void OnAfterRender(bool firstRender)
     {
@@ -67,7 +66,7 @@ else
             {
 
                 var result = await AuthService.CheckAdminStatus(userIdInt);
-                if (!result.Result && (result.Message == "kein Admin" || result.Message == "nicht gefunden"))
+                if (!result.Result && (result.Message == "kein Admin" || result.Message == "nicht gefunden") && false)
                 {
                     await AuthService.Logout();
                 }

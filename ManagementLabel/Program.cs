@@ -17,6 +17,8 @@ using ManagementLabel.Components.ImagesF;
 using ManagementLabel.Components.DistributionLinesF;
 using ManagementLabel.Components.CustomersF;
 using ManagementLabel.Components.Share;
+using ManagementLabel.Components.DebtF;
+using ManagementLabel.Components.TransactionsCustomersF;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +42,9 @@ builder.Services.AddServerSideBlazor()
 
 // ProjectInfo 
 builder.Services.Configure<ProjectInfo>(builder.Configuration.GetSection("ProjectInfo"));
+var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSettingsSection);
+var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
 
 // app config
 builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("AppConfig"));
@@ -84,6 +89,11 @@ builder.Services.AddScoped<DistributionLinesService>();
 builder.Services.AddScoped<CustomersService>();
 //  WhatsApp Service 
 builder.Services.AddScoped<WhatsAppService>();
+//  DebtCustomers Service 
+builder.Services.AddScoped<DebtService>();
+builder.Services.AddScoped<WhatsAppService>();
+//  TransactionsCustomersService Service 
+builder.Services.AddScoped<TransactionsCustomersService>();
 //
 builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();

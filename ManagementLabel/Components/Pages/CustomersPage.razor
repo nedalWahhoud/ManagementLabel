@@ -1,12 +1,21 @@
 ﻿@page "/customers"
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
+@if (IsLoading)
+{
+	<div class="w-100 card-body text-center text-info">
+		Lädt...
+	</div>
+}
+else
+{
 <div class="main" @onclick="OnMainDiv">
 	<h3>Kunden</h3>
 	<div class="TopContiner">
 		<button class="btn btn-success" @onclick="NewCustomer">
 			➕ Add neue Customer
 		</button>
-		<select class="DistributionLinesDropdown" @onfocus="OnDistributionLineOpened" @onchange="OnDistributionLineChanged">
+		<select class="DistributionLinesDropdown" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged" @onfocus="OnDistributionLineFocus">
 			<option value="0">Alle</option>
 			@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 			{
@@ -16,7 +25,7 @@
 	</div>
 	@{
 		List<Customers> customersToDisplay = customersService.DownloadedCustomers;
-		if (FilteredCustomers != null && FilteredCustomers.Count > 0)
+		if (FilteredCustomers != null)
 		{
 			customersToDisplay = FilteredCustomers;
 		}
@@ -35,16 +44,17 @@
 			<table class="table table-bordered table-hover">
 				<tr>
 					<th>Id</th>
-					<th>Name de</th>
-					<th>Name ar</th>
+					<th>Na-De</th>
+					<th>Na-Ar</th>
 					<th>Anschrift</th>
 					<th>Koordinaten</th>
 					<th>Tel.</th>
 					<th>E-Mail</th>
-					<th>Notizen de</th>
-					<th>Notizen ar</th>
+					<th>No-De</th>
+					<th>No-Ar</th>
 					<th>Richtung</th>
-					<th>Haltestellennummer</th>
+					<th>Ha-Nu</th>
+					<th>PIN</th>
 				</tr>
 				<tbody>
 					@foreach (var customer in customersToDisplay)
@@ -55,7 +65,7 @@
 						@onpointermove="OnTouchMove"
 						@onpointerup="OnTouchEnd"
 						@onclick="(e)=> OnSelectRow(customer,e)"
-							class="@(selectedCustomer != null && selectedCustomer.Id == customer.Id ? "selected" : "")">
+						class="@(selectedCustomer != null && selectedCustomer.Id == customer.Id ? "selected" : "")">
 							<td>@customer.Id</td>
 							<td>@customer.Name_de</td>
 							<td>@customer.Name_ar</td>
@@ -75,13 +85,15 @@
 								@(customer.DistributionLine?.LineName ?? "Null DistributionLine")
 							</td>
 							<td>@customer.StopNumber</td>
+							<td>@customer.PIN</td>
+
 							<td>
 								<button class="btn btn-sm btn-warning me-1"
-										@onclick="() => Edit(customer)" disabled="@IsProcessing.Item1">
+								@onclick="() => Edit(customer)" disabled="@IsProcessing.Item1">
 									Bearbeiten
 								</button>
 								<button class="btn btn-sm btn-danger"
-										@onclick="() => Delete(customer.Id)" disabled="@IsProcessing.Item1">
+								@onclick="() => Delete(customer.Id)" disabled="@IsProcessing.Item1">
 									@if (IsProcessing.Item1 && IsProcessing.Item2 == customer.Id)
 									{
 										<span class="spinner-border spinner-border-sm"
@@ -94,7 +106,7 @@
 									}
 								</button>
 							</td>
-						
+
 						</tr>
 					}
 					@if (showContextMenu && selectedCustomer != null && IsProcessing.Item1 == false)
@@ -103,7 +115,8 @@
 						style="position: fixed; top:@menuYpx; left:@menuXpx;"
 						@onclick:stopPropagation="true">
 							<ul>
-								<li @onclick="() => viaWhatasappShre(selectedCustomer)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
+								<li @onclick="() => viaWhatasappShare(selectedCustomer)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
+								<li @onclick="() => OnDebts(selectedCustomer.Id)"><i class="bi bi-cash-stack me-3"></i> Schulden</li>
 							</ul>
 						</div>
 					}
@@ -120,17 +133,29 @@ else if (IsEditing)
 {
 	<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
 }
+}
 @code {
 	private bool IsAdding = false;
 	private bool IsEditing = false;
 	private Customers EditingCustomer = null!;
+	Task taskDistributionLines = Task.CompletedTask;
+	private bool IsLoading = true;
 	protected async override Task OnInitializedAsync()
 	{
-		var customersTask = customersService.GetAllCustomers();
-		var distributionLinesTask = distributionLinesService.GetAllDistributionLines();
+		await customersService.GetAllCustomers();
+		taskDistributionLines = distributionLinesService.GetAllDistributionLines();
 
-		await Task.WhenAll(customersTask, distributionLinesTask);
 
+		selectedDistributionLineId = await LocalStorage.GetItemAsync<int>("selectedDistributionLineId");
+		if (selectedDistributionLineId > 0)
+		{
+			if (!taskDistributionLines.IsCompleted)
+				await taskDistributionLines;
+
+			await AfterDistributionLineChanged();
+		}
+
+		IsLoading = false;
 	}
 	private void NewCustomer()
 	{
@@ -156,7 +181,7 @@ else if (IsEditing)
 				DistributionLineId = customers.DistributionLineId,
 				DistributionLine = customers.DistributionLine,
 				StopNumber = customers.StopNumber
-				
+
 			};
 
 		IsEditing = true;
@@ -195,26 +220,30 @@ else if (IsEditing)
 		}
 	}
 	// filter 
-	private List<Customers> FilteredCustomers = new List<Customers>();
-	private async Task OnDistributionLineOpened()
+	private List<Customers> FilteredCustomers = null!;
+	private int selectedDistributionLineId = 0;
+	private async Task AfterDistributionLineChanged()
 	{
-		await distributionLinesService.GetAllDistributionLines();
-	}
-	private void OnDistributionLineChanged(ChangeEventArgs e)
-	{
-		if (int.TryParse(e.Value?.ToString(), out int selectedId))
+		if (selectedDistributionLineId > 0)
 		{
-			if (selectedId > 0)
+			if (customersService.DownloadedCustomers.Count > 0)
 			{
-				if (customersService.DownloadedCustomers.Count > 0)
-				{
-					FilteredCustomers = customersService.GetCustomerByDistributionLineIdLocal(selectedId);
-				}
+				FilteredCustomers = customersService.GetCustomerByDistributionLineIdLocal(selectedDistributionLineId);
 			}
-			else
-			{
-				FilteredCustomers = new List<Customers>();
-			}
+		}
+		else
+		{
+			FilteredCustomers = null!;
+		}
+
+		// save the selected category id in local storage
+		await LocalStorage.SetItemAsync("selectedDistributionLineId", selectedDistributionLineId);
+	}
+	private async Task OnDistributionLineFocus()
+	{
+		if (!taskDistributionLines.IsCompleted)
+		{
+			await taskDistributionLines;
 		}
 	}
 	// Menu recht klicken
@@ -281,7 +310,8 @@ else if (IsEditing)
 		// Wenn der Benutzer seinen Finger schnell anhebt → das Menü öffnet sich nicht
 		longPressTimer?.Stop();
 	}
-	private async Task viaWhatasappShre(Customers customer)
+	/* teilen Whats app */
+	private async Task viaWhatasappShare(Customers customer)
 	{
 		var result = await whatsAppService.SendCustomerInfo(customer);
 		if (!result.Result)
@@ -290,8 +320,15 @@ else if (IsEditing)
 		}
 		showContextMenu = false;
 	}
+	/* Schulden */
+	private void OnDebts(int customerId)
+	{
+		NavigationManager.NavigateTo($"/debt{customerId}");
+		showContextMenu = false;
+	}
 	private void OnMainDiv()
 	{
-		showContextMenu = false;
+		if (showContextMenu)
+			showContextMenu = false;
 	}
 }

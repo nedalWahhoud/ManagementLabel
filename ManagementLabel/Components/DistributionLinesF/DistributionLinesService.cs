@@ -30,6 +30,26 @@ namespace ManagementLabel.Components.DistributionLinesF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
+        public async Task<DistributionLines> GetDistributionLineById(int id)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/DistributionLines/getDistributionLineById/{id}");
+                if (!response.IsSuccessStatusCode)
+                    return null!;
+                var distributionLine = await response.Content.ReadFromJsonAsync<DistributionLines>();
+                if(distributionLine != null)
+                {
+                    AddToLocal(distributionLine);
+                }
+
+                return distributionLine!;
+            }
+            catch
+            {
+                return null!;
+            }
+        }
         public async Task<ValidationResult> AddDistributionLineAsync(DistributionLines newDistributionLine)
         {
             try

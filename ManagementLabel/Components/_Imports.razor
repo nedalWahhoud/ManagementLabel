@@ -25,6 +25,8 @@
 @using ManagementLabel.Components.ImagesF
 @using ManagementLabel.Components.DistributionLinesF
 @using ManagementLabel.Components.CustomersF
+@using ManagementLabel.Components.DebtF
+@using ManagementLabel.Components.TransactionsCustomersF
 @using ManagementLabel.Components.Share
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
@@ -49,3 +51,5 @@
 @inject DistributionLinesService distributionLinesService
 @inject CustomersService customersService
 @inject WhatsAppService whatsAppService
+@inject DebtService debtService
+@inject TransactionsCustomersService transactionsCustomersService

@@ -64,9 +64,34 @@
               // auf Computer app nicht möglich, öffne Web
                window.open(url, '_blank');
             }
+          },
+           openWhatsApp: function(phone, message) {
+            const number = String(phone).replace(/\D/g,'');
+            const text = message ? encodeURIComponent(message) : '';
+
+            // linke
+            const appUrl = text
+              ? `whatsapp://send?phone=${number}&text=${text}`
+              : `whatsapp://send?phone=${number}`;
+            const webUrl = text
+              ? `https://api.whatsapp.com/send?phone=${number}&text=${text}`
+              : `https://wa.me/${number}`;
+
+            // Gerättype prüfen
+            const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
+            if (isMobile) {
+              // auf Handy versuche erst app zu öffnen
+              window.location = appUrl;
+            } else {
+              // auf Computer app nicht möglich, öffne Web
+               window.open(webUrl, '_blank');
+            }
           }
         };
     </script>
+
+
     <script src="_framework/blazor.web.js"></script>
 
 </body>

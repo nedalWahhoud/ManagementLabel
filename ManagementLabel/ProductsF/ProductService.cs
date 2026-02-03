@@ -110,11 +110,11 @@ namespace ManagementLabel.ProductsF
                 var response = await _http.PostAsJsonAsync("api/Products/addProduct", newProduct);
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
-                return result!;
+                return result ?? new ValidationResult { Result = false, Message = "Unbekannte Fehler." };
             }
             catch(Exception ex)
             {

@@ -69,7 +69,7 @@
 				<InputText class="form-control" @bind-Value="customer.Notes_de" />
 				<ValidationMessage For="@(() => customer.Notes_de)" />
 			</div>
-            <div class="formGroupAdd">
+			<div class="formGroupAdd">
 				<label>Notes ar</label>
 				<InputText class="form-control" @bind-Value="customer.Notes_ar" />
 				<ValidationMessage For="@(() => customer.Notes_ar)" />
@@ -77,18 +77,23 @@
 			<div class="formGroupAdd">
 				<label>Haltestellennummer</label>
 				<InputNumber TValue="int"
-					         min="1"
-							 class="form-control"
-							 @bind-Value="customer.StopNumber" />
+				min="1"
+				class="form-control"
+				@bind-Value="customer.StopNumber" />
 				<ValidationMessage For="@(() => customer.StopNumber)" />
+			</div>
+			<div class="formGroupAdd">
+				<label>PIN</label>
+				<InputText placeholder="Wird Automatisch generiert oder eingeben" maxlength="4" pattern="\d{4}" title="PIN muss genau 4 Zahlen sein" class="form-control" @bind-Value="customer.PIN" />
+				<ValidationMessage For="@(() => customer.PIN)" />
 			</div>
 			<div class="mt-3">
 				<button class="btn btn-primary me-2">
 					@if (IsProcessing)
 					{
 						<span class="spinner-border spinner-border-sm"
-							  role="status"
-							  aria-hidden="true"></span>
+						role="status"
+						aria-hidden="true"></span>
 					}
 					else
 					{
@@ -117,6 +122,11 @@
 			var result = await customersService.AddCustomer(customer);
 			if (result.Result)
 			{
+				// Verteilungslinie zuweisen
+				customer.DistributionLine = distributionLinesService.DownloadedDistributionLines
+					.Find(dl => dl.Id == customer.DistributionLineId)
+					?? await distributionLinesService.GetDistributionLineById(customer.DistributionLineId);
+
 				customer = null!;
 				await OnHandel.InvokeAsync(action);
 			}

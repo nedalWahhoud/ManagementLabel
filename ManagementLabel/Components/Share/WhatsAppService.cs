@@ -1,14 +1,21 @@
 ﻿using ManagementLabel.Model;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
 using Org.BouncyCastle.Crypto.IO;
+using System.Buffers.Text;
 using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
+using System.Web;
 namespace ManagementLabel.Components.Share
 {
-    public class WhatsAppService(IJSRuntime JS)
+    public class WhatsAppService(IJSRuntime JS, IOptions<AppConfig> appConfig)
     {
         private readonly IJSRuntime _JS = JS;
+        private readonly IOptions<AppConfig> _appConfig = appConfig;
         public async Task<ValidationResult> SendCustomerInfo(Customers customer)
         {
             try
@@ -76,16 +83,16 @@ namespace ManagementLabel.Components.Share
             }
 
             string stopNumber = $"🛑 Stop-Nummer" +
-                                $": {customer.StopNumber.ToString()}\n";
+                                $": {customer.StopNumber}\n";
 
             string distributionLineInfo = null!;
-            if(customer.DistributionLine != null)
+            if (customer.DistributionLine != null)
             {
                 distributionLineInfo = $"🚚 Richtung: " +
                                        $"{customer.DistributionLine.LineName}\n";
             }
 
-            
+
 
             string name = $"👤 Kunde:{customer.Name_de} " +
                           $": {customer.Name_ar}\n";
@@ -119,7 +126,7 @@ namespace ManagementLabel.Components.Share
                 notes_ar = $"📝 Note (AR): {customer.Notes_ar}";
 
             string message =
-                             $"{stopNumber}"+
+                             $"{stopNumber}" +
                              $"{distributionLineInfo}" +
                              $"{name}" +
                              $"{Address}" +
@@ -130,6 +137,38 @@ namespace ManagementLabel.Components.Share
                              $"{notes_ar}";
 
             return message;
+        }
+        public async Task<ValidationResult> SendTransactionCustomerNotify(Customers customer, DebtCustomers debtCustomers, TransactionsCustomers transactionsCustomers, string token)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    return new ValidationResult { Result = false, Message = "Token ist erforderlich." };
+                }
+
+                string encodedToken = HttpUtility.UrlEncode(token);
+                string baseUrl = $"{_appConfig.Value.Domin}/customerDashboard";
+
+                string urlWithToken = $"{baseUrl}?token={encodedToken}";
+                string message =
+                  $"Hallo {customer.Name_de} 👋 \n"
+                + $"✅ Eine neue Schuldentransaktion wurde abgeschlossen.\n"
+                + $"💰 Dein neuer Schuldenstand: {debtCustomers?.Balance ?? 0} €\n"
+                + $"💵 Transaktionsbetrag: {transactionsCustomers.Amount} €\n"
+                + "Hier klicken, um die Details zu sehen:\n"
+                + $"{urlWithToken}";
+
+                if (!string.IsNullOrEmpty(customer.PhoneNumber))
+                    await JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber,message);
+                else
+                    await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsAppWithoutNumber", message);
+                return new ValidationResult { Result = true, Message = "WhatsApp-Nachricht wurde erfolgreich geöffnet." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
         }
     }
 }

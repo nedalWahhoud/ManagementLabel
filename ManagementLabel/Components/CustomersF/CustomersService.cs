@@ -1,4 +1,5 @@
 ﻿using ManagementLabel.Model;
+using SkiaSharp;
 
 namespace ManagementLabel.Components.CustomersF
 {
@@ -35,6 +36,14 @@ namespace ManagementLabel.Components.CustomersF
         {
             try
             {
+                // Generate unique 4-digit PIN
+                if (string.IsNullOrEmpty(newCustomer.PIN))
+                {
+                    Random rnd = new();
+                    string pin = rnd.Next(0, 10000).ToString("D4");
+                    newCustomer.PIN = pin;
+                }
+                //
                 var response = await _http.PostAsJsonAsync("api/Customers/addCustomer", newCustomer);
                 if (!response.IsSuccessStatusCode)
                 {
@@ -127,7 +136,6 @@ namespace ManagementLabel.Components.CustomersF
                 return null!;
             }
         }
-
         // local
         public void AddToLocal(Customers customer)
         {
@@ -152,7 +160,6 @@ namespace ManagementLabel.Components.CustomersF
                 }
             }
         }
-
         public async Task<ValidationResult> UpdateCustomerLocal(int id)
         {
             var index = DownloadedCustomers.FindIndex(p => p.Id == id);
@@ -170,10 +177,13 @@ namespace ManagementLabel.Components.CustomersF
             }
             return new ValidationResult { Result = false, Message = "Kunde nicht gefunden." };
         }
-
         public List<Customers> GetCustomerByDistributionLineIdLocal(int DistributionLineId)
         {
             return DownloadedCustomers.Where(p => p.DistributionLineId == DistributionLineId).ToList();
+        }
+        public Customers? GetCustomerByIdLocal(int id)
+        {
+            return DownloadedCustomers.Find(p => p.Id == id);
         }
         public bool IsEdited(Customers currentCustomer, Customers editCustomer)
         {

@@ -35,8 +35,11 @@ namespace ManagementLabel.Model
         public string? Notes_ar { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int StopNumber { get; set; } = 1;
+        [RegularExpression(@"^\d{4}$", ErrorMessage = "PIN muss nur aus 4 Zahlen bestehen.")]
+        public string? PIN { get; set; } = string.Empty;
 
         // 🔗 FK
+        [Range(1, int.MaxValue, ErrorMessage = "DistributionLineId muss angegeben werden.")]
         public int DistributionLineId { get; set; }
         public DistributionLines? DistributionLine { get; set; }
     }
