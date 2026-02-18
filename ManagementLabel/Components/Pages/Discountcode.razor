@@ -34,12 +34,12 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Rabattprozentsatz in %</label>
-                            <InputNumber class="form-control" @bind-Value="newDiscountCategory.DiscountPercentage" />
+                            <InputNumber class="form-control" @bind-Value="newDiscountCategory.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
                             <ValidationMessage For="@(() => newDiscountCategory.DiscountPercentage)" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nutzungslimit</label>
-                            <InputNumber class="form-control" @bind-Value="newDiscountCategory.UsageLimit" />
+                            <InputNumber class="form-control" @bind-Value="newDiscountCategory.UsageLimit" @onfocus="@(e => SelectAllContent())" />
                             <ValidationMessage For="@(() => newDiscountCategory.UsageLimit)" />
                         </div>
 
@@ -83,13 +83,13 @@
 
                         <div class="mb-3">
                             <label class="form-label">Rabattprozentsatz in %</label>
-                            <InputNumber class="form-control" @bind-Value="newDiscountCode.DiscountPercentage" />
+                            <InputNumber class="form-control" @bind-Value="newDiscountCode.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
                             <ValidationMessage For="@(() => newDiscountCode.DiscountPercentage)" />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Nutzungslimit</label>
-                            <InputNumber class="form-control" @bind-Value="newDiscountCode.UsageLimit" />
+                            <InputNumber class="form-control" @bind-Value="newDiscountCode.UsageLimit" @onfocus="@(e => SelectAllContent())" />
                             <ValidationMessage For="@(() => newDiscountCode.UsageLimit)" />
                         </div>
                         <div class="mb-3">
@@ -193,6 +193,21 @@
  
     private async Task ShowAlert(string message)
     {
-        await JS.InvokeVoidAsync("showAlert", message);
+        await JS.InvokeVoidAsync("alert", message);
+    }
+
+    // select all content in input when focus
+    private async Task SelectAllContent()
+    {
+        try
+        {
+            // um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+            await Task.Delay(10);
+            await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error selecting input text: {ex.Message}");
+        }
     }
 }

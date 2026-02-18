@@ -39,7 +39,7 @@
 					</div>
 					<div class="formGroupAdd">
 						<label for="MinimumStock">Minimum Stock</label>
-						<InputNumber id="displayOrderInput" min="0" class="form-control" @bind-Value="carouselImage.DisplayOrder" @onfocus="@(e => SelectAllContent("displayOrderInput"))" />
+						<InputNumber min="0" class="form-control" @bind-Value="carouselImage.DisplayOrder" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => carouselImage.DisplayOrder)" />
 					</div>
 				</div>
@@ -198,11 +198,13 @@
 			await JS.InvokeVoidAsync("showAlert", ex.Message);
 		}
 	}
-	private async Task SelectAllContent(string id)
+	private async Task SelectAllContent()
 	{
 		try
 		{
-			await JS.InvokeVoidAsync("selectInputNumberText", id);
+			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+			await Task.Delay(10);
+			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
 		}
 		catch (Exception ex)
 		{

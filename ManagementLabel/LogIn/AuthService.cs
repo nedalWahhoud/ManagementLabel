@@ -2,20 +2,14 @@
 using ManagementLabel.Model;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace ManagementLabel.LogIn
 {
-    public class AuthService
+    public class AuthService(HttpClient http, AuthenticationStateProvider authStateProvider)
     {
-        private readonly HttpClient _http;
-        private readonly AuthenticationStateProvider _authStateProvider;
-
-        public AuthService(HttpClient http, AuthenticationStateProvider authStateProvider)
-        {
-
-            _http = http;
-            _authStateProvider = authStateProvider;
-        }
+        private readonly HttpClient _http = http;
+        private readonly AuthenticationStateProvider _authStateProvider = authStateProvider;
 
         public async Task<ValidationResult> LoginAsync(LoginModel loginModel)
         {
@@ -58,7 +52,6 @@ namespace ManagementLabel.LogIn
             }
             _http!.DefaultRequestHeaders.Authorization = null;
         }
-
         public async Task<ValidationResult> CheckAdminStatus(int id)
         {
             try
@@ -72,6 +65,79 @@ namespace ManagementLabel.LogIn
             catch (Exception ex)
             {
                 return new ValidationResult { Result = false, Message = $"Bei der Administratorprüfung ist ein Fehler aufgetreten.: {ex.Message}" };
+            }
+        }
+        // google login
+        public ValidationResult GoogleLogin(LoginModel loginModel)
+        {
+            try
+            {
+                (_authStateProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(loginModel.Token);
+
+                // Save token to localStorage
+                if (loginModel.RememberMe)
+                    (_authStateProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", loginModel.Token);
+                else
+                    (_authStateProvider as CustomAuthStateProvider)?.SessionStorageSet("authToken", loginModel.Token);
+
+                return new ValidationResult { Result = true, Message = "erfolgreich eingeloggt" };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        // users
+        public GetItems<Users> GetItemsUsers { get; set; } = new();
+        public List<Users> DownloadedUsers { get; set; } = [];
+        public async Task<ValidationResult> GetAllUsers()
+        {
+            if (GetItemsUsers.AllItemsLoaded)
+            {
+                return new ValidationResult() { Result = true, Message = string.Empty };
+            }
+
+            try
+            {
+                HttpResponseMessage response = await _http.GetAsync($"api/Users/getAllUsers?CurrentPage={GetItemsUsers.CurrentPage}&PageSize={GetItemsUsers.PageSize}&AllItemsLoaded={GetItemsUsers.AllItemsLoaded}");
+                var result = await response.Content.ReadFromJsonAsync<GetItems<Users>>();
+                if (result == null)
+                    return new ValidationResult() { Result = false, Message = "" };
+                else
+                {
+                    GetItemsUsers.CurrentPage = result.CurrentPage;
+                    GetItemsUsers.AllItemsLoaded = result.AllItemsLoaded;
+
+                    AddToLocal(result.Items);
+                    return new ValidationResult() { Result = true, Message = "" };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult() { Result = false, Message = ex.Message };
+            }
+        }
+        // local
+        public void AddToLocal(List<Users> users)
+        {
+            if (users.Count > 0 && DownloadedUsers.Count == 0)
+            {
+                DownloadedUsers.AddRange(users);
+                return;
+            }
+            foreach (var user in users)
+            {
+                if (!DownloadedUsers.Any(p => p.Id == user.Id))
+                {
+                    DownloadedUsers.Add(user);
+                }
+            }
+        }
+        public void AddToLocal(Users user, int index)
+        {
+            if (!DownloadedUsers.Any(p => p.Id == user.Id))
+            { 
+                DownloadedUsers.Insert(index, user);
             }
         }
     }

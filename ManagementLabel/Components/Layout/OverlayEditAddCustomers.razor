@@ -46,12 +46,12 @@
 			</div>
 			<div class="formGroupAdd">
 				<label>Latitude</label>
-				<InputNumber TValue="decimal" class="form-control" @bind-Value="customer.Latitude" />
+				<InputNumber TValue="double" class="form-control" @bind-Value="customer.Latitude" @onfocus="@(e => SelectAllContent())" />
 				<ValidationMessage For="@(() => customer.Latitude)" />
 			</div>
 			<div class="formGroupAdd">
 				<label>Longitude</label>
-				<InputNumber TValue="decimal" class="form-control" @bind-Value="customer.Longitude" />
+				<InputNumber TValue="double" class="form-control" @bind-Value="customer.Longitude" @onfocus="@(e => SelectAllContent())" />
 				<ValidationMessage For="@(() => customer.Longitude)" />
 			</div>
 			<div class="formGroupAdd">
@@ -76,10 +76,7 @@
 			</div>
 			<div class="formGroupAdd">
 				<label>Haltestellennummer</label>
-				<InputNumber TValue="int"
-				min="1"
-				class="form-control"
-				@bind-Value="customer.StopNumber" />
+				<InputNumber TValue="int" min="1" class="form-control" @bind-Value="customer.StopNumber" @onfocus="@(e => SelectAllContent())" />
 				<ValidationMessage For="@(() => customer.StopNumber)" />
 			</div>
 			<div class="formGroupAdd">
@@ -165,5 +162,19 @@
 	{
 		customer = new Customers();
 		OnHandel.InvokeAsync(action);
+	}
+
+	private async Task SelectAllContent()
+	{
+		try
+		{
+			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+			await Task.Delay(10);
+			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
+		}
 	}
 }

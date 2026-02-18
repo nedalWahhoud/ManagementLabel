@@ -79,7 +79,7 @@
 	{
 		if (id <= 0 )
 		{
-			await JS.InvokeVoidAsync("showAlert", "Please select a Group");
+			await JS.InvokeVoidAsync("alert", "Please select a Group");
 			return;
 		}
 		IsDeletingProcessing = (true,id);
@@ -89,7 +89,7 @@
 			var result = await productGroupService.DeleteGroupProducts(id);
 			if (!result.Result)
 			{
-				await JS.InvokeVoidAsync("showAlert", result.Message);
+				await JS.InvokeVoidAsync("alert", result.Message);
 			}
 			
 		}

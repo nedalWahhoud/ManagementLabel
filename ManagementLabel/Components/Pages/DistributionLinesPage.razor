@@ -109,7 +109,7 @@ else if (IsEditing)
 	{
 		if (id <= 0)
 		{
-			await JS.InvokeVoidAsync("showAlert", "Please select a DistributionLine");
+			await JS.InvokeVoidAsync("alert", "Please select a DistributionLine");
 			return;
 		}
 		IsDeletingProcessing = (true, id);
@@ -119,7 +119,7 @@ else if (IsEditing)
 			var result = await distributionLinesService.DeleteDistributionLineAsync(id);
 			if (!result.Result)
 			{
-				await JS.InvokeVoidAsync("showAlert", result.Message);
+				await JS.InvokeVoidAsync("alert", result.Message);
 			}
 
 		}
@@ -207,11 +207,11 @@ else if (IsEditing)
 		// get all customers
 		await customersService.GetAllCustomers();
 		// get customers von der distribution line 
-		List<Customers> customers = customersService.GetCustomerByDistributionLineIdLocal(selectedDistributionLine.Id);
+		List<Customers> customers = customersService.DownloadedCustomers.Where(c => c.DistributionLineId == selectedDistributionLine.Id).ToList();
 		customers = customers.OrderBy(c => c.StopNumber).ToList();
 		if (customers == null || !customers.Any())
 		{
-			await JS.InvokeVoidAsync("showAlert", "Keine Kunden in dieser Verteilungslinie gefunden.");
+			await JS.InvokeVoidAsync("alert", "Keine Kunden in dieser Verteilungslinie gefunden.");
 			showContextMenu = false;
 			return;
 		}
@@ -219,7 +219,7 @@ else if (IsEditing)
 		var result = await whatsAppService.SendCustomerInfo(customers);
 		if (!result.Result)
 		{
-			await JS.InvokeVoidAsync("showAlert", result.Message);
+			await JS.InvokeVoidAsync("alert", result.Message);
 		}
 		showContextMenu = false;
 	}

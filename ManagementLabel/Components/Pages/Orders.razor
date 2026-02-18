@@ -434,7 +434,7 @@
     // show alert
     private async Task ShowAlert(string message)
     {
-        await JS.InvokeVoidAsync("showAlert", message);
+        await JS.InvokeVoidAsync("alert", message);
     }
     // search 
     public async void OnStatusChanged(ChangeEventArgs e)

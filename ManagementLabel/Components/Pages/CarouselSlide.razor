@@ -100,7 +100,7 @@ else if (IsEditing)
 		if (resultConfirm)
 		{
 		    var result = await carouselImageService.DeleteCarouselImageAsync(id);
-			await JS.InvokeVoidAsync("showAlert", result.Message);
+			await JS.InvokeVoidAsync("alert", result.Message);
 		}
 		IsProcessing = (false,id);
     }

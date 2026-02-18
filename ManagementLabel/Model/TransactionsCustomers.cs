@@ -8,7 +8,8 @@ namespace ManagementLabel.Model
         public int CustomerId { get; set; }
         public TransactionType Type { get; set; } 
         public decimal Amount { get; set; }
-        public DateTime TransactionDate { get; set; } 
+        public DateTime TransactionDate { get; set; }
+        public string? Notes { get; set; }
         [JsonIgnore]
         public decimal AmountInput { get; set; }
         [JsonIgnore]

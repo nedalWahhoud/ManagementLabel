@@ -36,13 +36,8 @@ namespace ManagementLabel.Components.CustomersF
         {
             try
             {
-                // Generate unique 4-digit PIN
-                if (string.IsNullOrEmpty(newCustomer.PIN))
-                {
-                    Random rnd = new();
-                    string pin = rnd.Next(0, 10000).ToString("D4");
-                    newCustomer.PIN = pin;
-                }
+                //  unique 4-digit PIN wird in Trigger generatieret generiert
+             
                 //
                 var response = await _http.PostAsJsonAsync("api/Customers/addCustomer", newCustomer);
                 if (!response.IsSuccessStatusCode)
@@ -54,11 +49,21 @@ namespace ManagementLabel.Components.CustomersF
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if (result?.Result == true)
                 {
-                    var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-                    if (result.Result && int.TryParse(idStr, out int id))
+                    if (result.NewId.HasValue)
                     {
-                        newCustomer.Id = id;
-                        AddToLocal(newCustomer);
+                        newCustomer.Id = result.NewId.Value;
+
+                        var addedCustomer = await GetCustomerByIdAsync(newCustomer.Id);
+
+                        if (addedCustomer != null)
+                        {
+                            AddToLocal(addedCustomer);
+                            return new ValidationResult { Result = true, Message = "Kunde erfolgreich hinzugefügt." };
+                        }
+                        else
+                        {
+                            return new ValidationResult { Result = false, Message = "Fehler beim Abrufen des hinzugefügten Kunden." };
+                        }
                     }
                 }
                 return result ?? new ValidationResult { Result = false, Message = "Es ist ein unbekannter Fehler aufgetreten." };
@@ -102,10 +107,10 @@ namespace ManagementLabel.Components.CustomersF
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if (result?.Result == true)
                 {
-                    int index = DownloadedCustomers.FindIndex(p => p.Id == customerId);
-                    if (index != -1)
+                    var customerToRemove = DownloadedCustomers.FirstOrDefault(p => p.Id == customerId);
+                    if (customerToRemove != null)
                     {
-                        DownloadedCustomers.RemoveAt(index);
+                        DownloadedCustomers.Remove(customerToRemove);
                     }
                 }
                 return result ?? new ValidationResult { Result = false, Message = "Es ist ein unbekannter Fehler aufgetreten." };
@@ -126,7 +131,6 @@ namespace ManagementLabel.Components.CustomersF
                 var customer = await response.Content.ReadFromJsonAsync<Customers>();
                 if (customer != null)
                 {
-                    AddToLocal(customer);
                     return customer;
                 }
                 return null!;
@@ -137,28 +141,20 @@ namespace ManagementLabel.Components.CustomersF
             }
         }
         // local
-        public void AddToLocal(Customers customer)
+        private void AddToLocal(Customers customer)
         {
             if (!DownloadedCustomers.Any(p => p.Id == customer.Id))
             {
                 DownloadedCustomers.Add(customer);
             }
         }
-        public void AddToLocal(List<Customers> customers)
+        private void AddToLocal(List<Customers> customers)
         {
-            if (customers.Count > 0 && customers.Count == 0)
-            {
-                DownloadedCustomers.AddRange(customers);
-                return;
-            }
+            if (customers == null || customers.Count == 0) return;
 
-            foreach (var customer in DownloadedCustomers)
-            {
-                if (!DownloadedCustomers.Any(p => p.Id == customer.Id))
-                {
-                    DownloadedCustomers.Add(customer);
-                }
-            }
+            var newItems = customers.ExceptBy(DownloadedCustomers.Select(c => c.Id), c => c.Id).ToList();
+
+            DownloadedCustomers.AddRange(newItems);
         }
         public async Task<ValidationResult> UpdateCustomerLocal(int id)
         {
@@ -176,10 +172,6 @@ namespace ManagementLabel.Components.CustomersF
 
             }
             return new ValidationResult { Result = false, Message = "Kunde nicht gefunden." };
-        }
-        public List<Customers> GetCustomerByDistributionLineIdLocal(int DistributionLineId)
-        {
-            return DownloadedCustomers.Where(p => p.DistributionLineId == DistributionLineId).ToList();
         }
         public Customers? GetCustomerByIdLocal(int id)
         {
@@ -200,7 +192,8 @@ namespace ManagementLabel.Components.CustomersF
                    currentCustomer.Email != editCustomer.Email ||
                    currentCustomer.Notes_de != editCustomer.Notes_de ||
                    currentCustomer.Notes_ar != editCustomer.Notes_ar ||
-                   currentCustomer.StopNumber != editCustomer.StopNumber;
+                   currentCustomer.StopNumber != editCustomer.StopNumber ||
+                   currentCustomer.PIN != editCustomer.PIN;
         }
     }
 }

@@ -20,7 +20,7 @@
                         </span>
                         <span class="ms-2">Produkte</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnOrder" >
+                    <NavLink href="/order" class="nav-link d-flex align-items-center" style="height: 50px;">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <span class="bi bi-bag-check fs-3"></span>
                             @* noch nicht fertige Bestellungen (Gelb) *@
@@ -33,41 +33,47 @@
                         </span>
                         <span class="ms-2">Bestellungen</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnDiscountCode">
+                    <NavLink href="/discountcode" class="nav-link d-flex align-items-center" style="height: 50px;">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-tag fs-3 "></i>
                         </span>
                         <span class="ms-2">Discount</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnCategories">
+                    <NavLink href="/categories" class="nav-link d-flex align-items-center" style="height: 50px;">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-grid-3x3-gap fs-3"></i>
                         </span>
                         <span class="ms-2">Categories</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnGroupProduct">
+                    <NavLink href="/groupproduct" class="nav-link d-flex align-items-center" style="height: 50px;">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-stack fs-3"></i>
                         </span>
                         <span class="ms-2">Produktgruppe</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnCarousel">
+                    <NavLink href="/carousel" class="nav-link d-flex align-items-center" style="height: 50px;">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-display fs-3"></i>
                         </span>
                         <span class="ms-2">Bildkarussell</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnDistributionLines">
+                    <NavLink href="/distributionlines" class="nav-link d-flex align-items-center" style="height: 50px;">
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-truck fs-3"></i>
                         </span>
                         <span class="ms-2">Verteilungslinien</span>
                     </NavLink>
-                    <NavLink class="nav-link d-flex align-items-center" style="height: 50px;" @onclick="OnCustomers">
+                    <NavLink href="/customers" class="nav-link d-flex align-items-center" style="height: 50px;" >
                         <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
                             <i class="bi bi-people fs-3"></i>
                         </span>
                         <span class="ms-2">Kunden</span>
+                    </NavLink>
+                    <NavLink href="/users" class="nav-link d-flex align-items-center" style="height: 50px;">
+                        <span class="position-relative me-2 d-inline-block" style="line-height: 1;">
+                            <i class="bi bi-person-circle fs-3"></i>
+                        </span>
+                        <span class="ms-2">Benutzern</span>
                     </NavLink>
                 </div>
                 <!-- Spacer to push logout to bottom -->
@@ -108,43 +114,9 @@
 
     private async Task HandleLogout()
     {
-        await AuthService.Logout();
+        await authService.Logout();
     }
-    // order 
-	private void OnOrder()
-	{
-		NavigationManager.NavigateTo("/order",false);
-	}
-	// discount code
-	private void OnDiscountCode()
-    {
-		NavigationManager.NavigateTo("/discountcode", false);
-	}
-    // group product
-	private void OnGroupProduct()
-	{
-		NavigationManager.NavigateTo("/groupproduct", false);
-	}
-    // carousel
-	private void OnCarousel()
-    {
-        NavigationManager.NavigateTo("/carousel", false);
-	}
-    // categories
-	private void OnCategories()
-    {
-        NavigationManager.NavigateTo("/categories", false);
-	}
-	// distribution lines
-    private void OnDistributionLines()
-    {
-        NavigationManager.NavigateTo("/distributionlines", false);
-    }
-    // customers
-	private void OnCustomers()
-	{
-		NavigationManager.NavigateTo("/customers", false);
-	}
+    
     public void Dispose()
     {
         orderService.OnChange -= HandleOpenOrderCountChange;

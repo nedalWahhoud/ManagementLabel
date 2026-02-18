@@ -4,7 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using static System.Net.WebRequestMethods;
 
 namespace ManagementLabel.Components.TransactionsCustomersF
 {
@@ -31,12 +30,11 @@ namespace ManagementLabel.Components.TransactionsCustomersF
 
                 if (result != null && result.Result == true)
                 {
-                    var idStr = result.Message?.Split(':').LastOrDefault();
-                    if (int.TryParse(idStr, out int id))
-                    {
-                        transaction.Id = id;
-                    }
-                    AddToLocal(transaction,0);
+                    transaction = await GetTransactionsCustomerByIdAsync(result.NewId!.Value);
+                    if(transaction == null)
+                        return new ValidationResult { Result = false, Message = "Transaktion konnte nicht gefunden werden." };  
+
+                    AddToLocal(transaction, 0);
                     return result;
                 }
                 else
@@ -53,9 +51,7 @@ namespace ManagementLabel.Components.TransactionsCustomersF
         {
 
             if (GetItems.AllItemsLoaded)
-            {
-                return new ValidationResult() { Result = true, Message = "" };
-            }
+                return new ValidationResult() { Result = true, Message = string.Empty };
 
             try
             {
@@ -64,7 +60,6 @@ namespace ManagementLabel.Components.TransactionsCustomersF
                 {
                     return new ValidationResult() { Result = false, Message = "" };
                 }
-
 
                 var result = await response.Content.ReadFromJsonAsync<GetItems<TransactionsCustomers>>();
                 if (result == null)
@@ -83,7 +78,24 @@ namespace ManagementLabel.Components.TransactionsCustomersF
                 return new ValidationResult() { Result = false, Message = ex.Message };
             }
         }
-
+        public async Task<TransactionsCustomers> GetTransactionsCustomerByIdAsync(int id)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/TransactionsCustomers/getTransactionsCustomerById?id={id}");
+                if (!response.IsSuccessStatusCode)
+                    return null!;
+                var result = await response.Content.ReadFromJsonAsync<TransactionsCustomers>();
+                if (result == null)
+                    return null!;
+                else
+                    return result;
+            }
+            catch
+            {
+                return null!;
+            }
+        }
         // local
         public void AddToLocal(List<TransactionsCustomers> transactionsCustomers)
         {
@@ -122,7 +134,7 @@ namespace ManagementLabel.Components.TransactionsCustomersF
                 issuer: _jwtSettings.Value.Issuer,
                 audience: _jwtSettings.Value.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: DateTime.UtcNow.AddDays(1),
                 signingCredentials: creds
             );
 

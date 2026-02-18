@@ -22,16 +22,20 @@ using ManagementLabel.Components.TransactionsCustomersF;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+// Netzwerk anhören
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5105); 
+});
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddServerSideBlazor()
     .AddHubOptions(options =>
     {
-        options.ClientTimeoutInterval = TimeSpan.FromMinutes(5); // Wartet 5 Minuten, bevor die Verbindung getrennt wird
+        options.ClientTimeoutInterval = TimeSpan.FromMinutes(10); // Wartet 10 Minuten, bevor die Verbindung getrennt wird
         options.KeepAliveInterval = TimeSpan.FromSeconds(15);    // Alle 15 Sekunden ein Ping durchführen, um die Verbindung aufrechtzuerhalten
-        options.HandshakeTimeout = TimeSpan.FromSeconds(30);   
+        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
     })
     .AddCircuitOptions(options =>
     {
@@ -39,7 +43,6 @@ builder.Services.AddServerSideBlazor()
         options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
         options.JSInteropDefaultCallTimeout = TimeSpan.FromSeconds(30);
     });
-
 // ProjectInfo 
 builder.Services.Configure<ProjectInfo>(builder.Configuration.GetSection("ProjectInfo"));
 var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");

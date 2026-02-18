@@ -2,8 +2,11 @@
 
 @if (!isRended)
 {
-    <div class="lodingContainer">
-        <p>wird geladen... </p>
+    <div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 100vh;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5 class="mt-3 text-muted fw-light">Wird geladen...</h5>
     </div>
 }
 else
@@ -17,7 +20,7 @@ else
             </Authorized>
         </AuthorizeView>
         <main>
-            <article class="content px-4">
+            <article class="content">
                 @Body
             </article>
         </main>
@@ -30,18 +33,13 @@ else
     </div>
 }
 @code {
-    protected override void OnInitialized()
-    {
-        // Subscribe to location changes
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
 
     private bool isRended = false;
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            _ = CheckAdminStatusAsync();
+            await  CheckAdminStatusAsync();
             // Initialize the orderService to start count funktion of openOrders 
             orderService.InitializeAsync();
 
@@ -49,11 +47,6 @@ else
             StateHasChanged();
         }
     }
-    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        _ = CheckAdminStatusAsync();
-    }
-
     private async Task CheckAdminStatusAsync()
     {
         // check admin status
@@ -65,17 +58,14 @@ else
             if (int.TryParse(userIdStr, out int userIdInt))
             {
 
-                var result = await AuthService.CheckAdminStatus(userIdInt);
-                if (!result.Result && (result.Message == "kein Admin" || result.Message == "nicht gefunden") && false)
+                var result = await authService.CheckAdminStatus(userIdInt);
+                if (!result.Result && (result.Message == "kein Admin" || result.Message == "nicht gefunden"))
                 {
-                    await AuthService.Logout();
+                    await authService.Logout();
                 }
             }
         }
     }
 
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
+  
 }

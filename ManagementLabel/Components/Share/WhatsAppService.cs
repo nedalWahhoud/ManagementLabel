@@ -16,6 +16,7 @@ namespace ManagementLabel.Components.Share
     {
         private readonly IJSRuntime _JS = JS;
         private readonly IOptions<AppConfig> _appConfig = appConfig;
+
         public async Task<ValidationResult> SendCustomerInfo(Customers customer)
         {
             try
@@ -143,24 +144,23 @@ namespace ManagementLabel.Components.Share
             try
             {
                 if (string.IsNullOrEmpty(token))
-                {
                     return new ValidationResult { Result = false, Message = "Token ist erforderlich." };
-                }
 
+                string transactionType = transactionsCustomers?.Type == TransactionType.Repay ? "zurückgezahlt" : "ausgeliehen";
+                // url encode the token 
                 string encodedToken = HttpUtility.UrlEncode(token);
                 string baseUrl = $"{_appConfig.Value.Domin}/customerDashboard";
-
                 string urlWithToken = $"{baseUrl}?token={encodedToken}";
                 string message =
                   $"Hallo {customer.Name_de} 👋 \n"
-                + $"✅ Eine neue Schuldentransaktion wurde abgeschlossen.\n"
-                + $"💰 Dein neuer Schuldenstand: {debtCustomers?.Balance ?? 0} €\n"
-                + $"💵 Transaktionsbetrag: {transactionsCustomers.Amount} €\n"
+                + $"🔔 Benachrichtigung über Ihren aktuellen Kontostand.\n"
+                + $"💰 Dein Schuldenstand: {debtCustomers?.Balance ?? 0} €\n"
+                + $"💵 Letzter Transaktionsbetrag: {transactionsCustomers?.Amount ?? 0} €  {transactionType} \n"
                 + "Hier klicken, um die Details zu sehen:\n"
                 + $"{urlWithToken}";
 
                 if (!string.IsNullOrEmpty(customer.PhoneNumber))
-                    await JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber,message);
+                    await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber,message);
                 else
                     await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsAppWithoutNumber", message);
                 return new ValidationResult { Result = true, Message = "WhatsApp-Nachricht wurde erfolgreich geöffnet." };

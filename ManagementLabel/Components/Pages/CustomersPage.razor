@@ -9,132 +9,223 @@
 }
 else
 {
-<div class="main" @onclick="OnMainDiv">
-	<h3>Kunden</h3>
-	<div class="TopContiner">
-		<button class="btn btn-success" @onclick="NewCustomer">
-			➕ Add neue Customer
-		</button>
-		<select class="DistributionLinesDropdown" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged" @onfocus="OnDistributionLineFocus">
-			<option value="0">Alle</option>
-			@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
-			{
-				<option value="@distributionLine.Id">@distributionLine.LineName</option>
-			}
-		</select>
-	</div>
-	@{
-		List<Customers> customersToDisplay = customersService.DownloadedCustomers;
-		if (FilteredCustomers != null)
-		{
-			customersToDisplay = FilteredCustomers;
-		}
+	<div class="main">
+		<h3>Kunden</h3>
+		<div class="TopContiner">
+			<div class="col-md-4 col-sm-12 position-relative">
+				<input id="searchCustomer"
+				type="text"
+				placeholder="Suche in name_de/name_ar"
+				class="form-control p-2 pe-5"
+				@oninput="OnTextChanged"
+				@onfocus="@(e => SelectAllContent())" />
 
-		if (customersToDisplay == null || !customersToDisplay.Any())
-		{
-			<div class="d-flex justify-content-center align-items-center"
-			style="min-height: 60vh;">
-				<p class="text-muted fs-5">
-					Keine Customer gefunden.
-				</p>
+				<button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0"
+				type="button"
+				@onclick="ClearSearch"
+				style="z-index: 5;">
+					<i class="bi bi-x-lg text-muted"></i>
+				</button>
 			</div>
-		}
-		else
-		{
-			<table class="table table-bordered table-hover">
-				<tr>
-					<th>Id</th>
-					<th>Na-De</th>
-					<th>Na-Ar</th>
-					<th>Anschrift</th>
-					<th>Koordinaten</th>
-					<th>Tel.</th>
-					<th>E-Mail</th>
-					<th>No-De</th>
-					<th>No-Ar</th>
-					<th>Richtung</th>
-					<th>Ha-Nu</th>
-					<th>PIN</th>
-				</tr>
-				<tbody>
-					@foreach (var customer in customersToDisplay)
+			<div>
+				<div class="dropdown">
+					<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+						Wähle Spalten
+					</button>
+					<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+						@foreach (var col in columnOptions)
+						{
+							<li>
+								<div class="form-check form-switch">
+									<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
+									<label class="form-check-label" for="@col.Key">
+										@col.Label
+									</label>
+								</div>
+							</li>
+						}
+					</ul>
+				</div>
+			</div>
+			<div class="d-flex">
+				<button class="btn btn-success flex-grow-0" style="white-space: nowrap;" @onclick="NewCustomer">
+					➕ Add neue Customer
+				</button>
+			</div>
+			<div class="d-flex flex-column">
+				<label for="distributionLineSelect">Filter nach Linie:</label>
+				<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged" @onfocus="OnDistributionLineFocus">
+					<option value="0">Alle</option>
+					@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 					{
-						<tr @oncontextmenu:preventDefault="true"
-						@oncontextmenu="@(e => OnSelectRow(customer, e))"
-						@onpointerdown="(e) => OnTouchStart(customer, e)"
-						@onpointermove="OnTouchMove"
-						@onpointerup="OnTouchEnd"
-						@onclick="(e)=> OnSelectRow(customer,e)"
-						class="@(selectedCustomer != null && selectedCustomer.Id == customer.Id ? "selected" : "")">
-							<td>@customer.Id</td>
-							<td>@customer.Name_de</td>
-							<td>@customer.Name_ar</td>
-							<td>
-								@customer.Street @customer.BuildingNumber<br />
-								@customer.PostalCode @customer.City 
-							</td>
-							<td>
-								La: @customer.Latitude <br/>
-								Lo: @customer.Longitude
-							</td>
-							<td>@customer.PhoneNumber</td>
-							<td>@customer.Email</td>
-							<td>@customer.Notes_de</td>
-							<td>@customer.Notes_ar</td>
-							<td>
-								@(customer.DistributionLine?.LineName ?? "Null DistributionLine")
-							</td>
-							<td>@customer.StopNumber</td>
-							<td>@customer.PIN</td>
-
-							<td>
-								<button class="btn btn-sm btn-warning me-1"
-								@onclick="() => Edit(customer)" disabled="@IsProcessing.Item1">
-									Bearbeiten
-								</button>
-								<button class="btn btn-sm btn-danger"
-								@onclick="() => Delete(customer.Id)" disabled="@IsProcessing.Item1">
-									@if (IsProcessing.Item1 && IsProcessing.Item2 == customer.Id)
-									{
-										<span class="spinner-border spinner-border-sm"
-										role="status"
-										aria-hidden="true"></span>
-									}
-									else
-									{
-										<span>Löschen</span>
-									}
-								</button>
-							</td>
-
-						</tr>
+						<option value="@distributionLine.Id">@distributionLine.LineName</option>
 					}
-					@if (showContextMenu && selectedCustomer != null && IsProcessing.Item1 == false)
+				</select>
+			</div>
+			<div class="d-flex flex-column">
+				<label for="stopNumberSelect">Filter nach Ha-Nr:</label>
+				<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
+					<option value="0">Alle</option>
+					@foreach (var customer in customersService.DownloadedCustomers.DistinctBy(c => c.StopNumber).OrderBy(c => c.StopNumber))
 					{
-						<div class="contextMenu"
-						style="position: fixed; top:@menuYpx; left:@menuXpx;"
-						@onclick:stopPropagation="true">
-							<ul>
-								<li @onclick="() => viaWhatasappShare(selectedCustomer)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
-								<li @onclick="() => OnDebts(selectedCustomer.Id)"><i class="bi bi-cash-stack me-3"></i> Schulden</li>
-							</ul>
-						</div>
+						<option value="@customer.StopNumber">@customer.StopNumber</option>
 					}
-				</tbody>
-			</table>
+				</select>
+			</div>
+		</div>
+		@{
+			List<Customers> customersToDisplay = customersService.DownloadedCustomers;
+			if (FilteredCustomers != null)
+			{
+				customersToDisplay = FilteredCustomers;
+			}
+
+			if (customersToDisplay == null || !customersToDisplay.Any())
+			{
+				<div class="d-flex justify-content-center align-items-center"
+				style="min-height: 60vh;">
+					<p class="text-muted fs-5">
+						Keine Customer gefunden.
+					</p>
+				</div>
+			}
+			else
+			{
+				<table class="table table-bordered table-hover">
+					<tr>
+						@if (ShowColumn("Id")){<th>Id</th>}
+						@if (ShowColumn("Name_de")){<th>Na-De</th>}
+						@if (ShowColumn("Name_ar")){<th>Na-Ar</th>}
+						@if (ShowColumn("Address")){<th>Anschrift</th>}
+						@if (ShowColumn("Coordinates")){<th>Koordinaten</th>}
+						@if (ShowColumn("PhoneNumber")){<th>Tel.</th>}
+						@if (ShowColumn("EMail")){<th>E-Mail</th>}
+						@if (ShowColumn("NoteDe")){<th>No-De</th>}
+						@if (ShowColumn("NoteAr")){<th>No-Ar</th>}
+						@if (ShowColumn("Direction")){<th>Richtung</th>}
+						@if (ShowColumn("StopNumber")){<th>Ha-Nr</th>}
+						@if (ShowColumn("PIN")){<th>PIN</th>}
+						<th style="min-width:40px;">⋮</th>
+					</tr>
+					<tbody>
+						@foreach (var customer in customersToDisplay)
+						{
+							<tr>
+								@if (ShowColumn("Id")){<td>@customer.Id</td>}
+								@if (ShowColumn("Name_de")){<td>@customer.Name_de</td>}
+								@if (ShowColumn("Name_ar")){<td>@customer.Name_ar</td>}
+								@if (ShowColumn("Address"))
+								{
+									<td>
+										@customer.Street @customer.BuildingNumber<br />
+										@customer.PostalCode @customer.City 
+									</td>
+								}
+								@if (ShowColumn("Coordinates"))
+								{
+									<td>
+										La: @customer.Latitude <br/>
+										Lo: @customer.Longitude
+									</td>
+								}
+								@if (ShowColumn("PhoneNumber")){<td>@customer.PhoneNumber</td>}
+								@if (ShowColumn("EMail")){<td>@customer.Email</td>}
+								@if (ShowColumn("NoteDe")){<td>@customer.Notes_de</td>}
+								@if (ShowColumn("NoteAr")){<td>@customer.Notes_ar</td>}
+								@if (ShowColumn("Direction")){<td>@(customer.DistributionLine?.LineName ?? "Null DistributionLine")</td>}
+								@if (ShowColumn("StopNumber")){<td>@customer.StopNumber</td>}
+								@if (ShowColumn("PIN")){<td>@customer.PIN</td>}
+								<td>
+									<div class="dropdown">
+										<button disabled="@IsProcessing.Item1" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" data-bs-container="body">
+											@if (IsProcessing.Item1 && IsProcessing.Item2 == customer.Id)
+											{
+												<span class="spinner-border spinner-border-sm"
+												role="status"
+												aria-hidden="true"></span>
+											}
+											else
+											{
+												<span>⋮</span>
+											}
+										</button>
+										<ul class="dropdown-menu customDropdown dropdown-menu-end">
+											<li>
+												<a class="dropdown-item"
+												@onclick="() => OnDebts(customer.Id)">
+													<i class="bi bi-cash-stack me-1"></i>
+													Schulden
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												@onclick="() => OnMap(customer)">
+													<i class="bi bi-geo-alt me-1"></i>
+													Navigieren
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												@onclick="() => Edit(customer)">
+													<i class="bi bi-pencil-square me-1"></i>
+													Bearbeiten
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												@onclick="() => Delete(customer.Id)">
+													<i class="bi bi-trash3 me-1"></i>
+													Löschen
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												@onclick="() => viaWhatasappShare(customer)">
+													<i class="bi bi-whatsapp me-1"></i>
+													Teilen über WhatsApp
+												</a>
+											</li>
+										</ul>
+									</div>
+								</td>
+
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
 		}
+	</div>
+	@if (IsAdding)
+	{
+		<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
 	}
-</div>
-@if (IsAdding)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
-}
-else if (IsEditing)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
-}
+	else if (IsEditing)
+	{
+		<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
+	}
 }
 @code {
+
+
+	// Column
+	private List<ColumnOption> columnOptions = new()
+	{
+	  new("Id", "Id", false),
+	  new("Na-De", "Name_de", true),
+	  new("Na-Ar", "Name_ar", false),
+	  new("Anschrift", "Address", true),
+	  new("Koordinaten", "Coordinates", false),
+	  new("Tel.", "PhoneNumber", true),
+	  new("E-Mail", "EMail", true),
+	  new("No-De", "NoteDe", true),
+	  new("No-Ar", "NoteAr", true),
+	  new("Richtung", "Direction", true),
+	  new("Ha-Nr", "StopNumber", true),
+	  new("PIN", "PIN", true),
+	};
+	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
+
 	private bool IsAdding = false;
 	private bool IsEditing = false;
 	private Customers EditingCustomer = null!;
@@ -145,7 +236,7 @@ else if (IsEditing)
 		await customersService.GetAllCustomers();
 		taskDistributionLines = distributionLinesService.GetAllDistributionLines();
 
-
+		// load the selected distributionLine id from local storage
 		selectedDistributionLineId = await LocalStorage.GetItemAsync<int>("selectedDistributionLineId");
 		if (selectedDistributionLineId > 0)
 		{
@@ -155,7 +246,24 @@ else if (IsEditing)
 			await AfterDistributionLineChanged();
 		}
 
+		selectedStopNumberId = await LocalStorage.GetItemAsync<int>("selectedStopNummerId");
+		if (selectedStopNumberId > 0)
+		{
+			await AfterStopNumberChanged();
+		}
+
+		// die Spaltenoptionen aus dem Local Storage laden
+		var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptionsCustomers");
+		if (saved is not null)
+			columnOptions = saved;
+
 		IsLoading = false;
+	}
+
+	private async Task OnColumnChanged()
+	{
+		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
+		await LocalStorage.SetItemAsync("columnOptionsCustomers", columnOptions);
 	}
 	private void NewCustomer()
 	{
@@ -180,8 +288,8 @@ else if (IsEditing)
 				Notes_ar = customers.Notes_ar,
 				DistributionLineId = customers.DistributionLineId,
 				DistributionLine = customers.DistributionLine,
-				StopNumber = customers.StopNumber
-
+				StopNumber = customers.StopNumber,
+				PIN = customers.PIN
 			};
 
 		IsEditing = true;
@@ -189,25 +297,42 @@ else if (IsEditing)
 	private (bool, int) IsProcessing = (false, 0);
 	private async Task Delete(int id)
 	{
-		if (id <= 0)
+		try
 		{
-			await JS.InvokeVoidAsync("showAlert", "Please select a DistributionLine");
-			return;
-		}
-		IsProcessing = (true, id);
-		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
-		if (resultConfirm)
-		{
-			var result = await customersService.DeleteCustomer(id);
-			if (!result.Result)
+			if (id <= 0)
 			{
-				await JS.InvokeVoidAsync("showAlert", result.Message);
+				await JS.InvokeVoidAsync("alert", "Please select a DistributionLine");
+				return;
 			}
+			IsProcessing = (true, id);
+			var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
+			if (resultConfirm)
+			{
+				var result = await customersService.DeleteCustomer(id);
+				if (!result.Result)
+				{
+					await JS.InvokeVoidAsync("alert", result.Message);
+				}
+				// Remove the deleted customer from the filtered list if it exists
+				if (FilteredCustomers != null)
+				{
+					var customerToRemove = FilteredCustomers.FirstOrDefault(c => c.Id == id);
+					if (customerToRemove != null)
+					{
+						FilteredCustomers.Remove(customerToRemove);
+					}
+				}
 
+			}
+			IsProcessing = (false, id);
 		}
-		IsProcessing = (false, id);
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error deleting customer: {ex.Message}");
+			IsProcessing = (false, id);
+		}
 	}
-	private void HandleEditAddDistributionLine(string action)
+	private async Task HandleEditAddDistributionLine(string action)
 	{
 		if (action == "Add")
 		{
@@ -218,18 +343,21 @@ else if (IsEditing)
 			IsEditing = false;
 			EditingCustomer = null!;
 		}
+		if (selectedDistributionLineId > 0)
+		{
+			await AfterDistributionLineChanged();
+		}
 	}
 	// filter 
 	private List<Customers> FilteredCustomers = null!;
 	private int selectedDistributionLineId = 0;
 	private async Task AfterDistributionLineChanged()
 	{
-		if (selectedDistributionLineId > 0)
+		if (customersService.DownloadedCustomers.Count > 0)
 		{
-			if (customersService.DownloadedCustomers.Count > 0)
-			{
-				FilteredCustomers = customersService.GetCustomerByDistributionLineIdLocal(selectedDistributionLineId);
-			}
+			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.DistributionLineId == selectedDistributionLineId || selectedDistributionLineId == 0)
+			&& (c.StopNumber == selectedStopNumberId || selectedStopNumberId == 0)
+			).ToList();
 		}
 		else
 		{
@@ -246,69 +374,46 @@ else if (IsEditing)
 			await taskDistributionLines;
 		}
 	}
-	// Menu recht klicken
-	private bool showContextMenu = false;
-	private double menuX;
-	private double menuY;
-	private string menuXpx => $"{menuX}px";
-	private string menuYpx => $"{menuY}px";
-	private System.Timers.Timer? longPressTimer;
-	private double startX, startY;
-	private bool isDragging = false;
-	private Customers? selectedCustomer;
-
-	private void OnSelectRow(Customers customer, MouseEventArgs e)
+	private int selectedStopNumberId = 0;
+	private async Task AfterStopNumberChanged()
 	{
-		if (e.Button == 2) // right click
+		if (customersService.DownloadedCustomers.Count > 0)
 		{
-			selectedCustomer = customer;
-			menuX = e.ClientX;
-			menuY = e.ClientY;
-			showContextMenu = true;
+			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.StopNumber == selectedStopNumberId || selectedStopNumberId == 0)
+			&& (c.DistributionLineId == selectedDistributionLineId || selectedDistributionLineId == 0)
+			).ToList();
 		}
-		selectedCustomer = customer;
-	}
-	private void OnTouchStart(Customers customer, PointerEventArgs e)
-	{
-		startX = e.ClientX;
-		startY = e.ClientY;
-		isDragging = false;
-
-		//Timer für langes Drücken (eine halbe Sekunde)
-		longPressTimer = new System.Timers.Timer(600);
-		longPressTimer.Elapsed += (_, __) =>
+		else
 		{
-			if (!isDragging) // nur wenn nicht gezogen wird
-			{
-				InvokeAsync(() =>
-				{
-					selectedCustomer = customer;
-					menuX = e.ClientX;
-					menuY = e.ClientY;
-					showContextMenu = true;
-					StateHasChanged();
-				});
-			}
-			longPressTimer?.Stop();
-		};
-		longPressTimer.AutoReset = false;
-		longPressTimer.Start();
-		// select die Row
-		selectedCustomer = customer;
-	}
-	private void OnTouchMove(PointerEventArgs e)
-	{
-		// إذا تحرك الإصبع أكثر من 10px → اعتبره سحب
-		if (Math.Abs(e.ClientX - startX) > 10 || Math.Abs(e.ClientY - startY) > 10)
-		{
-			isDragging = true;
-			longPressTimer?.Stop();
+			FilteredCustomers = null!;
 		}
+
+		// save the selected category id in local storage
+		await LocalStorage.SetItemAsync("selectedStopNummerId", selectedStopNumberId);
 	}
-	private void OnTouchEnd(PointerEventArgs e)
+	private async Task OnTextChanged(ChangeEventArgs e)
 	{
-		// Wenn der Benutzer seinen Finger schnell anhebt → das Menü öffnet sich nicht
-		longPressTimer?.Stop();
+		string searchText = e.Value?.ToString()?.Trim() ?? string.Empty;
+		if ((customersService.DownloadedCustomers.Count == 0 || string.IsNullOrEmpty(searchText)))
+		{
+			await ClearSearch();
+		}
+		FilteredCustomers = customersService.DownloadedCustomers
+			.Where(p =>
+				string.IsNullOrWhiteSpace(searchText) ||
+				(!string.IsNullOrEmpty(p.Name_de) && p.Name_de.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+				(!string.IsNullOrEmpty(p.Name_ar) && p.Name_ar.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+			.Where(p => selectedDistributionLineId == 0 || p.DistributionLineId == selectedDistributionLineId)
+		.ToList();
+	}
+
+	private async Task ClearSearch()
+	{
+		// clear searchCustomer
+		await JS.InvokeVoidAsync("eval", @"var el = document.getElementById('searchCustomer');if(el) { el.value = ''; }");
+
+		await AfterDistributionLineChanged();
+		await AfterStopNumberChanged();
 	}
 	/* teilen Whats app */
 	private async Task viaWhatasappShare(Customers customer)
@@ -316,19 +421,58 @@ else if (IsEditing)
 		var result = await whatsAppService.SendCustomerInfo(customer);
 		if (!result.Result)
 		{
-			await JS.InvokeVoidAsync("showAlert", result.Message);
+			await JS.InvokeVoidAsync("alert", result.Message);
 		}
-		showContextMenu = false;
 	}
 	/* Schulden */
 	private void OnDebts(int customerId)
 	{
 		NavigationManager.NavigateTo($"/debt{customerId}");
-		showContextMenu = false;
 	}
-	private void OnMainDiv()
+	// map
+	private async Task OnMap(Customers customer)
 	{
-		if (showContextMenu)
-			showContextMenu = false;
+		if (customer == null)
+			return;
+
+		// Address aufbauen
+		var addressParts = new List<string>();
+
+		if (!string.IsNullOrWhiteSpace(customer.Street))
+			addressParts.Add(customer.Street);
+
+		if (!string.IsNullOrWhiteSpace(customer.BuildingNumber))
+			addressParts.Add(customer.BuildingNumber);
+
+		if (!string.IsNullOrWhiteSpace(customer.PostalCode) ||
+			!string.IsNullOrWhiteSpace(customer.City))
+			addressParts.Add($"{customer.PostalCode} {customer.City}");
+
+		var fullAddress = string.Join(" ", addressParts).Trim();
+
+		bool hasAddress = !string.IsNullOrWhiteSpace(fullAddress);
+		bool hasCoordinates = customer.Latitude != 0 && customer.Longitude != 0;
+
+		if (!hasAddress && !hasCoordinates)
+		{
+			Console.WriteLine("Keine Adresse oder Koordinaten vorhanden.");
+			return;
+		}
+
+		await JS.InvokeVoidAsync("mapRedirect.openMap",customer.Latitude,customer.Longitude,hasAddress ? fullAddress : "");
+	}
+	// select all kontekt
+	private async Task SelectAllContent()
+	{
+		try
+		{
+			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+			await Task.Delay(10);
+			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
+		}
 	}
 }

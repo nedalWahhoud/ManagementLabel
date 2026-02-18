@@ -15,16 +15,35 @@
             </div>
             <div class="formGroup">
                 <label for="password">Password</label>
-                <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+                <InputText @ref="passwordField" id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
             </div>
             <div class="RememberMe">
                 <InputCheckbox @bind-Value="loginModel.RememberMe" />
                 <span>An mich erinneren</span>
             </div>
             <div class="formGroup">
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary" disabled="@(isSingInLoading || isSingInLoading)">
+                    @if (isSingInLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    }
+                    else
+                    {
+                        <span>Login</span>
+                    }
+                </button>
             </div>
         </EditForm>
+       @* <button type="submit" @onclick="GoogleSingup" class="googleBtn" disabled="@(isGoogleLoading || isSingInLoading)">
+            @if (isGoogleLoading)
+            {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            }
+            else
+            {
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google Logo" />
+            }
+        </button>*@
         <div class="signupLink">
             <p>Don't have an account? <a href="#" @onclick="OnRegisterClicked1" >Sign up</a></p>
         </div>
@@ -39,22 +58,28 @@
     private async Task HandleLogin()
     {
         loginModel.SignupProvider = "Manual";
-        ValidationResult result = await AuthService.LoginAsync(loginModel);
+        ValidationResult result = await authService.LoginAsync(loginModel);
         if (result.Result)
         {
             NavigationManager!.NavigateTo("/", true);
         }
         else
-            _ = JS.InvokeVoidAsync("showAlert", result.Message);
+            _ = JS.InvokeVoidAsync("alert", result.Message);
     }
     // keydown
     private bool IsUsernameFocused = false;
-    private void KeyDown(KeyboardEventArgs e)
+    private InputText? passwordField;
+    private async Task KeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
         {
             if (IsUsernameFocused)
-                _ = JS.InvokeVoidAsync("focusElement", "password");
+            {
+                if (passwordField?.Element != null)
+                {
+                    await passwordField.Element.Value.FocusAsync();
+                }
+            }
         }
     }
     // register
@@ -63,4 +88,17 @@
         NavigationManager!.NavigateTo("/register", true);
        
     }
+    // google
+    private bool isSingInLoading = false;
+   /* private bool isGoogleLoading = false;
+    private void GoogleSingup()
+    {
+        isGoogleLoading = true;
+        string currenApiUrl = appConfig.Value.ApiBaseUrl;
+
+        NavigationManager.NavigateTo($"{appConfig.Value.GoogleApiUrl}?rememberMe={loginModel.RememberMe}", true);
+
+        isGoogleLoading = false;
+    }*/
+
 }

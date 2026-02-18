@@ -10,13 +10,18 @@
 else
 {
 
-	<h1>Schulden von <strong>@(customer?.Name_de ?? "Fehler")</strong></h1>
+	<div class="d-flex flex-row gap-2">
+		<button class="btn btn-outline-secondary mb-3" @onclick="GoBack">
+			<i class="bi bi-arrow-left"></i> Zurück
+		</button>
+		<h1>Schulden von <strong>@(customer?.Name_de ?? "Fehler")</strong></h1>
+	</div>
 	<div class="w-100">
 		@* Schulden anzeigen *@
 		<div class="card mb-3 shadow-sm">
 			<div class="card-body text-center">
 				<h5 class="text-muted mb-2">Aktueller Schuldenbetrag</h5>
-				´   	<h2 class=" @(debtCustomers?.Balance > 0 ? "text-danger" : "text-success")  fw-bold">
+				   	<h2 class=" @(debtCustomers?.Balance > 0 ? "text-danger" : "text-success")  fw-bold">
 					@(debtCustomers?.Balance.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("de-DE")))
 				</h2>
 			</div>
@@ -29,7 +34,7 @@ else
 				<div class="row g-3 align-items-end">
 					<div class="col-md-6">
 						<label class="form-label">Betrag</label>
-						<InputNumber min="0" class="form-control text-center" id="transactionsAmunt" @bind-Value="transactionsCustomers.AmountInput"  @onfocus="@(e => SelectAllContent("transactionsAmunt"))" />
+						<InputNumber inputmode="decimal" step="0.01" min="0" class="form-control text-center" @bind-Value="transactionsCustomers.AmountInput" @onfocus="@(e => SelectAllContent())" />
 					</div>
 					<div class="col-md-6 d-flex flex-column align-items-center justify-content-center gap-3">
 
@@ -73,36 +78,45 @@ else
 
 					</div>
 				</div>
-
 			</div>
-			<div class="d-flex align-items-center justify-content-center gap-3 mt-4 m-4"
-			style="min-height: 120px;">
+			<div class="row justify-content-center align-items-center m-2" >
+				<InputTextArea @bind-Value="transactionsCustomers.Notes" class="form-control" maxlength="255" placeholder="Gib die Kommentare ein..." />
+			</div>
+			<div class="row justify-content-center align-items-center mt-1 m-2" style="min-height: 120px;">
 
-				<button class="btn btn-primary px-5"
-				@onclick="SaveTransactionAsync"
-				disabled="@IsProcessing">
-					@if (IsProcessing)
-					{
-						<span class="spinner-border spinner-border-sm"
-						role="status"
-						aria-hidden="true"></span>
-					}
-					else
-					{
-						<span>Speichern</span>
-					}
-				</button>
-
-				<div class="form-check text-center px-5 d-flex align-items-center">
-					<InputCheckbox class="form-check-input"
-					id="notifyCustomerCheckbox"
-					@bind-Value="NotifyCustomer"
-					disabled="@IsProcessing" />
-					<label class="form-check-label ms-2"
-					for="notifyCustomerCheckbox">
-						Kunde benachrichtigen
-					</label>
+				<div class="col-12 col-md-auto d-flex justify-content-center mb-3 mb-md-0">
+					<button class="btn btn-primary px-5 shadow-sm py-2"
+					style="min-width: 200px; width: inherit;"
+					@onclick="SaveTransactionAsync"
+					disabled="@IsProcessing">
+						@if (IsProcessing)
+						{
+							<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+						}
+						else
+						{
+							<span class="fw-bold">Speichern</span>
+						}
+					</button>
 				</div>
+
+				<div class="col-12 col-md-auto d-flex justify-content-center">
+					<button class="btn btn-outline-success px-5 shadow-sm py-2"
+					style="min-width: 200px; width: inherit;"
+					@onclick="OnNotifyCustomer"
+					disabled="@IsProcessing">
+						@if (IsProcessing)
+						{
+							<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+						}
+						else
+						{
+							<i class="bi bi-whatsapp me-2"></i> <span class="fw-bold">Kunde benachrichtigen</span>
+						}
+					</button>
+
+				</div>
+
 			</div>
 
 
@@ -114,10 +128,11 @@ else
 					<thead class="table-dark">
 						<tr>
 							<th>#</th>
-							<th>Customer ID</th>
+							<th>Kunde Id</th>
 							<th>Type</th>
-							<th>Amount</th>
-							<th>Created At</th>
+							<th>Betrag</th>
+							<th>Erstellt</th>
+							<th>An-</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -130,14 +145,15 @@ else
 									<td>@t.CustomerId</td>
 									<td class="@(t.Type == TransactionType.Repay ? "text-success" : "text-danger")">@t.Type.ToString()</td>
 									<td>@t.Amount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("de-DE"))</td>
-									<td>@t.TransactionDate.ToString("g")</td>
+									<td>@t.TransactionDate.ToString("dd.MM.yyyy HH:mm 'Uhr'")</td>
+									<td>@t.Notes</td>
 								</tr>
 							}
 						}
 						else
 						{
 							<tr>
-								<td colspan="5" class="text-center">Keine Transaktionen gefunden.</td>
+								<td colspan="6" class="text-center">Keine Transaktionen gefunden.</td>
 							</tr>
 						}
 					</tbody>
@@ -174,6 +190,8 @@ else
 	[Parameter]
 	public int customerId { get; set; }
 
+
+
 	private Customers customer = null!;
 	private DebtCustomers debtCustomers = null!;
 	private TransactionsCustomers transactionsCustomers = new TransactionsCustomers();
@@ -188,18 +206,19 @@ else
 
 		// initialize draft balance
 		debtCustomers.DraftBalance = debtCustomers.Balance;
-		// initialize TransactionsCustomers list
+		// initialize  transactionsCustomersService
 		transactionsCustomersService.GetItems = new GetItems<TransactionsCustomers> { Id = customerId, PageSize = 10, };
-		await OnMoreLoadTransactionsCustomers();
+
 		// clear list if customerId changed
 		if (transactionsCustomersService.DownloadedTransactionsCustomers != null && transactionsCustomersService.DownloadedTransactionsCustomers.Count > 0
 			&& transactionsCustomersService.DownloadedTransactionsCustomers[0].CustomerId != customerId)
 		{
 			transactionsCustomersService.DownloadedTransactionsCustomers = new List<TransactionsCustomers>();
 		}
+		// get first transactions
+		await OnMoreLoadTransactionsCustomers();
 
 		IsLoading = false;
-
 	}
 
 	private void PreviewTransaction(TransactionType transactionType)
@@ -212,7 +231,6 @@ else
 		debtCustomers.DraftBalance = debtCustomers.Balance + transactionsCustomers.DraftAmount;
 		transactionsCustomers.DraftType = transactionType;
 	}
-
 	private void ResetToDefault()
 	{
 		transactionsCustomers.DraftAmount = 0;
@@ -220,9 +238,7 @@ else
 		debtCustomers.DraftBalance = debtCustomers.Balance;
 		transactionsCustomers = new ();
 	}
-
 	private bool IsProcessing = false;
-	private bool NotifyCustomer = true;
 	private async Task SaveTransactionAsync()
 	{
 		IsProcessing = true;
@@ -234,9 +250,9 @@ else
 			return;
 		}
 		// set transaction type
-		transactionsCustomers.Type = transactionsCustomers.DraftAmount < debtCustomers.Balance
-				? TransactionType.Repay
-				: TransactionType.Borrow;
+		transactionsCustomers.Type = transactionsCustomers.DraftAmount > 0
+				? TransactionType.Borrow
+				: TransactionType.Repay;
 		transactionsCustomers.Amount = Math.Abs(transactionsCustomers.DraftAmount);
 		transactionsCustomers.CustomerId = customerId;
 
@@ -247,15 +263,8 @@ else
 			debtCustomers = await debtService.GetDebtCustomerByIdAsync(customerId);
 			debtCustomers ??= new DebtCustomers { CustomerId = customerId, Balance = 0 };
 
-			// notify customer
-			if (NotifyCustomer)
-			{
-				string token = transactionsCustomersService.GetCustomerNotificationToken(customerId);
-				await whatsAppService.SendTransactionCustomerNotify(customer, debtCustomers, transactionsCustomers, token);
-			}
-
 			ResetToDefault();
-			
+
 		}
 		else
 		{
@@ -265,12 +274,37 @@ else
 		IsProcessing = false;
 	}
 
+	private async Task OnNotifyCustomer()
+	{
+		if (transactionsCustomersService.DownloadedTransactionsCustomers?.Any() == true)
+		{
+			var lastTransaction = transactionsCustomersService.DownloadedTransactionsCustomers
+				.OrderBy(t => t.TransactionDate) 
+				.LastOrDefault(t => t.CustomerId == customerId);
+
+			if (lastTransaction != null)
+			{
+				string token = transactionsCustomersService.GetCustomerNotificationToken(customerId);
+				await whatsAppService.SendTransactionCustomerNotify(customer, debtCustomers, lastTransaction, token);
+			}
+			else
+			{
+				await JS.InvokeVoidAsync("alert", "Dieser Kunde hat keine erfassten Transaktionen.");
+			}
+		}
+		else
+		{
+			await JS.InvokeVoidAsync("alert", "Die Transaktionenliste ist leer.");
+		}
+	}
 	// select all content in input when focus
-	private async Task SelectAllContent(string id)
+	private async Task SelectAllContent()
 	{
 		try
 		{
-			await JS.InvokeVoidAsync("selectInputNumberText", id);
+			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+			await Task.Delay(10);
+			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
 		}
 		catch (Exception ex)
 		{
@@ -281,10 +315,14 @@ else
 	private async Task OnMoreLoadTransactionsCustomers()
 	{
 		IsProcessing = true;
-		
+
 		// Load more transactions
-	    await transactionsCustomersService.GetTransactionsCustomersAsync();
-		
+		await transactionsCustomersService.GetTransactionsCustomersAsync();
+
 		IsProcessing = false;
+	}
+	private void GoBack()
+	{
+		NavigationManager.NavigateTo("/customers");
 	}
 }

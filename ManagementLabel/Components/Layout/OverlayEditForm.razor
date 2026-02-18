@@ -42,22 +42,22 @@
 					</div>
 					<div class="formGroupAdd">
 						<label for="Quantity">Quantity</label>
-						<InputNumber id="quantityInput" min="0" class="form-control" @bind-Value="GetProducts.Quantity" @onfocus="@(e => SelectAllContent("quantityInput"))" />
+						<InputNumber  min="0" class="form-control" @bind-Value="GetProducts.Quantity" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => GetProducts.Quantity)" />
 					</div>
 					<div class="formGroupAdd">
 						<label for="PurchasePrice">Purchase Price</label>
-						<InputNumber id="purchasePriceInput" min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" @onfocus="@(e => SelectAllContent("purchasePriceInput"))" />
+						<InputNumber  min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => GetProducts.PurchasePrice)" />
 					</div>
 					<div class="formGroupAdd">
 						<label for="SalePrice">Selling Price</label>
-						<InputNumber id="salePriceInput" min="0" class="form-control" @bind-Value="GetProducts.SalePrice" @onfocus="@(e => SelectAllContent("salePriceInput"))" />
+						<InputNumber min="0" class="form-control" @bind-Value="GetProducts.SalePrice" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => GetProducts.SalePrice)" />
 					</div>
 					<div class="formGroupAdd">
 						<label for="MinimumStock">Minimum Stock</label>
-						<InputNumber id="minimumStockInput" min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" @onfocus="@(e => SelectAllContent("minimumStockInput"))" />
+						<InputNumber min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => GetProducts.MinimumStock)" />
 					</div>
 					<div class="formGroupAdd">
@@ -105,7 +105,7 @@
 					</div>
 					<div class="formGroupAdd">
 						<label for="ImAngebot">Im Angebot</label>
-						<InputNumber id="onOfferInput" min="0" class="form-control" @bind-Value="GetProducts.DiscountedPrice" @onfocus="@(e => SelectAllContent("onOfferInput"))" />
+						<InputNumber min="0" class="form-control" @bind-Value="GetProducts.DiscountedPrice" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => GetProducts.DiscountedPrice)" />
 					</div>
 					<div class="formGroupAdd">
@@ -321,11 +321,13 @@
 		}
 	}
 	// select all content in input when focus
-	private async Task SelectAllContent(string id)
+	private async Task SelectAllContent()
 	{
 		try
 		{
-			await JS.InvokeVoidAsync("selectInputNumberText", id);
+			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+			await Task.Delay(10);
+			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
 		}
 		catch (Exception ex)
 		{

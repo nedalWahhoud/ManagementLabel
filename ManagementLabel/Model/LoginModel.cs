@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using System.Text.Json.Serialization;
 namespace ManagementLabel.Model
 {
     public class LoginModel
@@ -14,6 +14,8 @@ namespace ManagementLabel.Model
         public string BirthDate { get; set; } = DateTime.Now.ToString("yyyy.MM.dd");
         public bool IsGuest { get; set; }
         public string SignupProvider { get; set; } = string.Empty;
+        [JsonIgnore]
         public bool RememberMe { get; set; } = false;
+        public string Token { get; set; } = string.Empty;
     }
 }

@@ -178,8 +178,15 @@
 								style="position: fixed; top:@menuYpx; left:@menuXpx;"
 								@onclick:stopPropagation="true">
 									<ul>
-										<li @onclick="() => EditProduct(selectedProduct)">✏️ Bearbeiten</li>
-										<li @onclick="() => DeleteProduct(selectedProduct)">🗑️ Löschen</li>
+										<li @onclick="() => EditProduct(selectedProduct)">
+											<i class="fa-solid fa-pen-to-square"></i> Bearbeiten
+										</li>
+										<li @onclick="() => DeleteProduct(selectedProduct)">
+											<i class="fa-solid fa-trash-can"></i> Löschen
+										</li>
+										<li @onclick="() => OnEnterBarcode(selectedProduct)">
+											<i class="fa-solid fa-barcode"></i> Barcode eingeben
+										</li>
 									</ul>
 								</div>
 							}
@@ -441,7 +448,7 @@
 			// erste Produkte laden
 			await loadInBackground();
 		}
-
+		// die Spaltenoptionen aus dem Local Storage laden
 		var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
 		if (saved is not null)
 			columnOptions = saved;
@@ -462,9 +469,6 @@
 			var user = authState.User;
 			if (user.Identity?.IsAuthenticated == true)
 			{
-
-
-
 				this.user = new();
 				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
 				if (int.TryParse(userIdStr, out int userIdInt))
@@ -473,7 +477,6 @@
 				}
 				//// Reset when the page reloads
 				ResetOfPage();
-
 
 				// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 				objRef = DotNetObjectReference.Create(this);
@@ -609,7 +612,7 @@
 	{
 		if (SelectedProduct == null || IsDeleting)
 		{
-			await ShowAlert("Please select a product");
+			await JS.InvokeVoidAsync("alert", "Please select a product");
 			return;
 		}
 		// hide die context menu
@@ -630,11 +633,11 @@
 					filterP.RemoveAll(p => p.Id == SelectedProduct.Id);
 				}
 				selectedRow = null;
-				_ = ShowAlert(result.Message!);
+				await JS.InvokeVoidAsync("alert", result.Message ?? "Message ist Null");
 			}
 			else
 			{
-				_ = ShowAlert(result.Message!);
+				await JS.InvokeVoidAsync("alert", result.Message ?? "Message ist Null");
 			}
 		}
 		else
@@ -652,7 +655,7 @@
 	{
 		if (SelectedProduct == null)
 		{
-			await ShowAlert("Please select a product");
+			await JS.InvokeVoidAsync("alert", "Please select a product");
 			return;
 		}
 		// hide die context menu
@@ -762,14 +765,10 @@
 			// if a category is selected, filter the products by category and search text
 			filterP = productService.DownloadedProduct
 				.Where(p => p.CategoryId == selectedCategoryId &&
-					(p.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+					(
 					p.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Category!.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Quantity.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Manufacturer!.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.PurchasePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.SalePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.MinimumStock.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+					p.Name_ar!.Contains(searchText, StringComparison.OrdinalIgnoreCase) 
+					))
 				.ToList();
 		}
 		else if (productService.DownloadedProduct.Count > 0)
@@ -804,9 +803,7 @@
 				filterP = null!;
 			}
 			else
-			{
 				await JS.InvokeVoidAsync("clearSearchBox", "searchBox");
-			}
 		}
 		catch
 		{
@@ -817,14 +814,8 @@
 	{
 		var searchedProducts = productService.DownloadedProduct
 					.Where(p =>
-					p.Id.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
 					p.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Category!.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Quantity.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Manufacturer!.Name!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.PurchasePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.SalePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.MinimumStock.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase))
+					p.Name_ar!.Contains(searchText, StringComparison.OrdinalIgnoreCase))
 					.ToList();
 		return searchedProducts;
 	}
@@ -925,7 +916,7 @@
 	{
 		if (cartService.CartItems.Count == 0)
 		{
-			_ = ShowAlert("Bitte legen Sie Produkte in den Warenkorb, bevor Sie eine Bestellung aufgeben.");
+			await JS.InvokeVoidAsync("alert", "Bitte legen Sie Produkte in den Warenkorb, bevor Sie eine Bestellung aufgeben.");
 			return;
 		}
 		// get payment methods
@@ -1177,19 +1168,29 @@
 	// reset
 	private void ResetOfPage()
 	{
-
 		startIndex = 0;
-	}
-	// show alert
-	private async Task ShowAlert(string message)
-	{
-		await JS.InvokeVoidAsync("showAlert", message);
 	}
 	// Scroll
 	[JSInvokable]
 	public void OnScrollEnd()
 	{
 		_ = loadInBackground();
+	}
+	// barcode scanning
+	[JSInvokable]
+	public async Task HandleBarcodeResult(string barcode)
+	{
+		if (selectedProduct != null)
+		{
+			selectedProduct.Barcode = barcode; 
+		}
+	}
+
+	public async Task OnEnterBarcode(Products product)
+	{
+		selectedProduct = product;
+		// JavaScript aufrufen, um die Kamera zu starten
+		await JS.InvokeVoidAsync("startBarcodeScanner", DotNetObjectReference.Create(this));
 	}
 }
 
