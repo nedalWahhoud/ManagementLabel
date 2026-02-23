@@ -1,5 +1,4 @@
 ﻿using ManagementLabel.Model;
-using SkiaSharp;
 
 namespace ManagementLabel.Components.CustomersF
 {

@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using ManagementLabel.Model;
-using Newtonsoft.Json.Linq;
 using System.Security.Claims;
-using System.Collections.Generic;
 
 namespace ManagementLabel.LogIn
 {

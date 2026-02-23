@@ -1,4 +1,5 @@
 ﻿using ManagementLabel.Model;
+using System.Net.Http;
 
 
 namespace ManagementLabel.ProductsF
@@ -146,7 +147,7 @@ namespace ManagementLabel.ProductsF
                 var response = await _http.PostAsJsonAsync("api/Products/updateProduct", editProduct);
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler aufgetreten." };
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
@@ -156,7 +157,7 @@ namespace ManagementLabel.ProductsF
                     return result;
                 }
 
-                return result ?? new ValidationResult { Result = false, Message = "Unknown error." };
+                return result ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler aufgetreten." };
             }
             catch(Exception ex)
             {
@@ -289,6 +290,32 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-        // 
+        // barcode
+        public async Task<ValidationResult> UpdateBarcodeAsync(int id, string barcode)
+        {
+            try
+            {
+                var response = await _http.PostAsJsonAsync($"api/products/updateBarcode/{id}", barcode);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorResult = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                    return errorResult ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler aufgetreten." };
+                }
+
+
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler aufgetreten." };
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult
+                {
+                    Result = false,
+                    Message = $"Verbindung zum Server fehlgeschlagen: {ex.Message}"
+                };
+            }
+        }
     }
 }

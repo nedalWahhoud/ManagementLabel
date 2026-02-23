@@ -1,10 +1,9 @@
 ﻿@page "/"
-@using ManagementLabel.ProductsF;
-@using ManagementLabel.Model;
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
-@rendermode InteractiveServer
+@rendermode InteractiveAuto
+@implements IDisposable
 
-<div @onclick="OnMainDiv">
+<div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
 			<!-- user info -->
@@ -13,6 +12,31 @@
 			</p>
 			@* top continer *@
 			<div class="TopContiner">
+				@* choose the Columns *@
+				<div class="mb-3">
+					<div class="dropdown">
+						<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+							Wähle Spalten
+						</button>
+						<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+							@foreach (var col in columnOptions)
+							{
+								<li>
+									<div class="form-check form-switch">
+										<input class="form-check-input"
+										type="checkbox"
+										id="@col.Key"
+										@bind="col.IsVisible"
+										@bind:after="OnColumnChanged" />
+										<label class="form-check-label" for="@col.Key">
+											@col.Label
+										</label>
+									</div>
+								</li>
+							}
+						</ul>
+					</div>
+				</div>
 				<button class="@(!IsShowAddProductForm ? "btn addProductTopB" : "btn addProductCancelB")" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)">
 					@(!IsShowAddProductForm ? "Produkt hinzufügen" : "Hinzufügen Abbrechen")
 				</button>
@@ -34,38 +58,11 @@
 					}
 				</select>
 			</div>
-			@* choose the Columns *@
-			<div class="mb-3">
-				<div class="dropdown">
-					<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
-						Wähle Spalten
-					</button>
-					<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-						@foreach (var col in columnOptions)
-						{
-							<li>
-								<div class="form-check form-switch">
-									<input class="form-check-input"
-									type="checkbox"
-									id="@col.Key"
-									@bind="col.IsVisible"
-									@bind:after="OnColumnChanged" />
-									<label class="form-check-label" for="@col.Key">
-										@col.Label
-									</label>
-								</div>
-							</li>
-						}
-					</ul>
-				</div>
-			</div>
-
 			@* table *@
 			<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
 				<table class="table text-center align-middle">
 					<thead>
 						<tr>
-							@if (ShowColumn("Index")) {<th>Index</th>}
 							@if (ShowColumn("Id"))	{<th>Id</th>}
 							@if (ShowColumn("Name_de")){<th>Name de</th>}
 							@if (ShowColumn("Description_de")){<th>Beschreibung de</th>}
@@ -97,106 +94,115 @@
 						</tr>
 						@* table *@
 						@{
-							List<Products> htmlProducts = null!;
-							if (filterP == null)
-								htmlProducts = productService.DownloadedProduct;
-							else
-								htmlProducts = filterP;
-							if (htmlProducts.Count > 0)
-							{
-								for (int i = 0; i < htmlProducts.Count; i++)
-								{
-									Products thisProducts = htmlProducts[i];
-									<tr
-									@oncontextmenu:preventDefault="true"
-									@oncontextmenu="@(e => OnSelectRow(thisProducts, e))"
-									@onpointerdown="(e) => OnTouchStart(thisProducts, e)"
-									@onpointermove="OnTouchMove"
-									@onpointerup="OnTouchEnd"
-									@onclick="(e)=> OnSelectRow(thisProducts,e)"
-									class="@(selectedRow != null && selectedRow.Id == thisProducts.Id ? "selected" : "")">
-										@if (ShowColumn("Index")){<td>@(startIndex + i + 1)</td>}
-										@if (ShowColumn("Id")){<td>@htmlProducts[i].Id</td>}
-										@if (ShowColumn("Name_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_de</td>}
-										@if (ShowColumn("Description_de")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_de</td>}
-										@if (ShowColumn("Name_ar")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Name_ar</td> }
-										@if (ShowColumn("Description_ar")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Description_ar</td>}
-										@if (ShowColumn("Category")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Category!.Name_de</td>}
-										@if (ShowColumn("Barcode")) { <td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Barcode</td> }
-										@if (ShowColumn("Quantity")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;" class="@(htmlProducts[i].MinimumStock >= htmlProducts[i].Quantity ? "IsMinimumStock" : "")">@htmlProducts[i].Quantity</td>}
-										@if (ShowColumn("PurchasePrice")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
-										@if (ShowColumn("SellePrice")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
-										@if (ShowColumn("MinimumStock")) {<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].MinimumStock</td>}
-										@if (ShowColumn("ExpDate"))
-										{
-											@* check exp date *@
-											var expDate = htmlProducts[i].EXPDate;
-											string backgroundcolor = ""; // Default color
-											string color = "";
+							var dataSource = filterP ?? productService.DownloadedProduct;
 
-											if (expDate < DateTime.Today)
-											{
-												backgroundcolor = "red"; // Abgelaufen
-												color = "white";
-											}
-											else if (expDate <= DateTime.Today.AddMonths(1))
-											{
-												backgroundcolor = "orange"; // Weniger als ein Monat übrig
-												color = "white";
-											}
+							<Virtualize Items="dataSource" Context="product" OverscanCount="10">
+								<tr @key="product.Id"
+								@oncontextmenu:preventDefault="true"
+								@oncontextmenu="@(e => OnSelectRow(product, e))"
+								@onclick="(e) => OnSelectRow(product, e)"
+								@ondblclick="(e) => OnDoubleTap(product, e)"
+								class="@(selectedRow?.Id == product.Id ? "selected" : "")">
+									@if (ShowColumn("Id")){<td>@product.Id</td>}
+									@if (ShowColumn("Name_de")){<td>@product.Name_de</td>}
+									@if (ShowColumn("Description_de")){<td>@product.Description_de</td>}
+									@if (ShowColumn("Name_ar")){<td>@product.Name_ar</td>}
+									@if (ShowColumn("Description_ar")){<td>@product.Description_ar</td>}
+									@if (ShowColumn("Category")){<td>@product.Category!.Name_de</td>}
+									@if (ShowColumn("Barcode")){<td>@product.Barcode</td>}
+									@if (ShowColumn("Quantity")){<td class="@(product.MinimumStock >= product.Quantity ? "IsMinimumStock" : "")">@product.Quantity</td>}
+									@if (ShowColumn("PurchasePrice")){<td>@product.PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
+									@if (ShowColumn("SellePrice"))
+									{
+										<td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+									}
+									@if (ShowColumn("MinimumStock"))
+									{
+										<td>@product.MinimumStock</td>
+									}
+									@if (ShowColumn("ExpDate"))
+									{
+										@* check exp date *@
+										var expDate = product.EXPDate;
+										string backgroundcolor = ""; // Default color
+										string color = "";
 
-											<td style="max-width: 200px; word-wrap: break-word; white-space: normal; background-color:@backgroundcolor; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
-										}
-										@if (ShowColumn("Manufacturer")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].Manufacturer!.Name</td>}
-										@if (ShowColumn("TaxRate")) {<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@((htmlProducts[i].TaxRate?.Rate.ToString("0") + "%") ?? "")</td>}
-										@if (ShowColumn("Group")) {<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].ProductGroup?.GroupName_de ?? "")</td>}
-										@if (ShowColumn("IsShippable")){<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].IsShippable</td>}
-										@if (ShowColumn("DiscountedPrice")){<td style="max-width: 200px; word-wrap: break-word; white-space: normal;">@htmlProducts[i].DiscountedPrice</td>}
-										@if (ShowColumn("Username")){<td style="max-width: 100px; word-wrap: break-word; white-space: normal;">@(htmlProducts[i].User?.UserName ?? "")</td>}
-										@if (ShowColumn("Img"))
+										if (expDate < DateTime.Today)
 										{
-											<td><img src="@productImagesService.GetProductImageUrl(htmlProducts[i].ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
+											backgroundcolor = "red"; // Abgelaufen
+											color = "white";
 										}
-										@* Rechnung *@
-										<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
-											<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@thisProducts.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
-										</td>
-									</tr>
-								}
-							}
-							else if(!IsLoadingMessage&&startIndex==0)
-							{
-								<tr>
-									<td colspan="11" class="loadingMessage">
-										Keine Bestellungen gefunden.
+										else if (expDate <= DateTime.Today.AddMonths(1))
+										{
+											backgroundcolor = "orange"; // Weniger als ein Monat übrig
+											color = "white";
+										}
+
+										<td style="background-color:@backgroundcolor!; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
+									}
+									@if (ShowColumn("Manufacturer"))
+									{
+										<td>@product.Manufacturer!.Name</td>
+									}
+									@if (ShowColumn("TaxRate"))
+									{
+										<td>@((product.TaxRate?.Rate.ToString("0") + "%") ?? "")</td>
+									}
+									@if (ShowColumn("Group"))
+									{
+										<td>@(product.ProductGroup?.GroupName_de ?? "")</td>
+									}
+									@if (ShowColumn("IsShippable"))
+									{
+										<td>@product.IsShippable</td>
+									}
+									@if (ShowColumn("DiscountedPrice")){<td>@product.DiscountedPrice</td>}
+									@if (ShowColumn("Username"))
+									{
+										<td>@(product.User?.UserName ?? "")</td>
+									}
+									@if (ShowColumn("Img"))
+									{
+										<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
+									}
+									@* Rechnung *@
+									<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
+										<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@product.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
 									</td>
 								</tr>
-							}
-							@if (showContextMenu && selectedProduct != null)
-							{
-								<div class="contextMenu"
-								style="position: fixed; top:@menuYpx; left:@menuXpx;"
-								@onclick:stopPropagation="true">
-									<ul>
-										<li @onclick="() => EditProduct(selectedProduct)">
-											<i class="fa-solid fa-pen-to-square"></i> Bearbeiten
-										</li>
-										<li @onclick="() => DeleteProduct(selectedProduct)">
-											<i class="fa-solid fa-trash-can"></i> Löschen
-										</li>
-										<li @onclick="() => OnEnterBarcode(selectedProduct)">
-											<i class="fa-solid fa-barcode"></i> Barcode eingeben
-										</li>
-									</ul>
-								</div>
-							}
+							</Virtualize>
 
-							htmlProducts = null!;
+							@if (!IsLoadingMessage && dataSource.Count == 0)
+							{
+								<tr>
+									<td colspan="20" class="loadingMessage">Keine Produkte gefunden.</td>
+								</tr>
+							}
 						}
+
 					</tbody>
 				</table>
 			</div>
 
+			@* menu context *@
+			@if (showContextMenu && selectedProduct != null)
+			{
+				<div class="contextMenu dropdown-menu-end dropdown-menu"
+				style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
+				@onclick:stopPropagation="true">
+					<ul>
+						<li @onclick="() => EditProduct(selectedProduct)">
+							<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+						</li>
+						<li @onclick="() => DeleteProduct(selectedProduct)">
+							<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+						</li>
+						<li @onclick="OpenScanner">
+							<a><i class="fa-solid fa-barcode"></i> Barcode eingeben</a>
+						</li>
+					</ul>
+				</div>
+			}
 			@* Add Product form *@
 			@if (IsShowAddProductForm)
 			{
@@ -273,7 +279,7 @@
 								@for (int i = 0; i < orderService.DownloadedPaymentMethods.Count; i++)
 								{
 									if (orderService.DownloadedPaymentMethods[i].Id == 1 || orderService.DownloadedPaymentMethods[i].Id == 2 ||
-						orderService.DownloadedPaymentMethods[i].Id == 5)
+							orderService.DownloadedPaymentMethods[i].Id == 5)
 									{
 										var paymentMethod = orderService.DownloadedPaymentMethods[i];
 										<label>
@@ -386,6 +392,13 @@
 			}
 			@* Rechnung *@
 			<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice" IsInvoiceVisible="IsInvoiceVisible" OnClose="HandleInvoiceClose" />
+			@if (ShowScanner)
+			{
+				<div class="scanner-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+					<div id="reader" style="width: 300px; background:white; border-radius:10px; overflow:hidden;"></div>
+					<button class="btn btn-danger mt-3" @onclick="CloseScanner">Abbrechen</button>
+				</div>
+			}
 		</Authorized>
 		<NotAuthorized>
 			<ManagementLabel.Components.Pages.LogIn />
@@ -403,7 +416,6 @@
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
     {
-	  new("Index", "Index", true),
 	  new("Id", "Id", false),
 	  new("Name de", "Name_de", true),
 	  new("Beschreibung de", "Description_de", true),
@@ -475,8 +487,6 @@
 				{
 					this.user.Id = userIdInt;
 				}
-				//// Reset when the page reloads
-				ResetOfPage();
 
 				// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 				objRef = DotNetObjectReference.Create(this);
@@ -501,66 +511,35 @@
 	private void HideContextMenu() => showContextMenu = false;
 	// Select
 	private Products? selectedRow;
-	private void OnSelectRow(Products product, MouseEventArgs e)
+	private void OnDoubleTap(Products product, MouseEventArgs e)
 	{
-		// wenn in Bearbeitungsmodus, Addsmodus,Deletsmodus, Invoicesmodus oder Ordersmodus, kein Kontextmenü anzeigen
 		if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
 			return;
 
-		if (e.Button == 2) // right click
+		selectedProduct = product;
+		selectedRow = product;
+
+		menuX = e.ClientX;
+		menuY = e.ClientY;
+		showContextMenu = true;
+
+		StateHasChanged();
+	}
+
+	private void OnSelectRow(Products product, MouseEventArgs e)
+	{
+		if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+			return;
+
+		if (e.Button == 2)
 		{
 			selectedProduct = product;
 			menuX = e.ClientX;
 			menuY = e.ClientY;
 			showContextMenu = true;
 		}
-		selectedRow = product;
-	}
-	private void OnTouchStart(Products product, PointerEventArgs e)
-	{
-		// wenn in Bearbeitungsmodus, Addsmodus,Deletsmodus, Invoicesmodus oder Ordersmodus, kein Kontextmenü anzeigen
-		if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
-			return;
 
-		startX = e.ClientX;
-		startY = e.ClientY;
-		isDragging = false;
-
-		//Timer für langes Drücken (eine halbe Sekunde)
-		longPressTimer = new System.Timers.Timer(600);
-		longPressTimer.Elapsed += (_, __) =>
-		{
-			if (!isDragging) // nur wenn nicht gezogen wird
-			{
-				InvokeAsync(() =>
-				{
-					selectedProduct = product;
-					menuX = e.ClientX;
-					menuY = e.ClientY;
-					showContextMenu = true;
-					StateHasChanged();
-				});
-			}
-			longPressTimer?.Stop();
-		};
-		longPressTimer.AutoReset = false;
-		longPressTimer.Start();
-		// select die Row
 		selectedRow = product;
-	}
-	private void OnTouchMove(PointerEventArgs e)
-	{
-		// إذا تحرك الإصبع أكثر من 10px → اعتبره سحب
-		if (Math.Abs(e.ClientX - startX) > 10 || Math.Abs(e.ClientY - startY) > 10)
-		{
-			isDragging = true;
-			longPressTimer?.Stop();
-		}
-	}
-	private void OnTouchEnd(PointerEventArgs e)
-	{
-		// Wenn der Benutzer seinen Finger schnell anhebt → das Menü öffnet sich nicht
-		longPressTimer?.Stop();
 	}
 
 	// load products
@@ -784,8 +763,8 @@
 				filterP = SearchInProductsLocal(searchText);
 				if (filterP.Count > 0)
 					break;
-				Task.Delay(100).Wait(); // wait for a short time before searching again
-										// if no products found, load more products
+				await Task.Delay(300); // wait for a short time before searching again
+												// if no products found, load more products
 				bool AllItemsLoaded = await loadInBackground();
 				if (AllItemsLoaded) break;
 				counter++;
@@ -842,7 +821,7 @@
 		{
 			// clear die Input search
 			await ClearInput();
-		
+
 			// get excludeProductsIds, from local products
 			List<int> excludeProductsIds = productService.DownloadedProduct.Where(f => f.CategoryId == selectedCategoryId)
 					.Select(f => f.Id)
@@ -1148,7 +1127,6 @@
 	}
 
 	private bool IsLoadingMessage = true;
-	private int startIndex = 0;
 	// Key Down
 	private void KeyDown(KeyboardEventArgs e)
 	{
@@ -1165,11 +1143,7 @@
 		// hide die Menu if sichtbar
 		showContextMenu = false;
 	}
-	// reset
-	private void ResetOfPage()
-	{
-		startIndex = 0;
-	}
+
 	// Scroll
 	[JSInvokable]
 	public void OnScrollEnd()
@@ -1177,20 +1151,70 @@
 		_ = loadInBackground();
 	}
 	// barcode scanning
-	[JSInvokable]
-	public async Task HandleBarcodeResult(string barcode)
+	private bool ShowScanner = false;
+
+	private async Task OpenScanner()
 	{
-		if (selectedProduct != null)
+		ShowScanner = true;
+		StateHasChanged(); // Wir bitten Blizzard, zuerst das "Reder"-Div zu zeichnen.
+
+		await Task.Delay(100); // Eine kurze Verzögerung, um sicherzustellen, dass der Browser das Element gezeichnet hat.
+
+		try
 		{
-			selectedProduct.Barcode = barcode; 
+			// JavaScript aufrufen und Kamera starten
+			await JS.InvokeVoidAsync("startLiveScanner", DotNetObjectReference.Create(this));
+		}
+		catch(Exception ex)
+		{
+			await JS.InvokeVoidAsync("alert", ex.Message);
 		}
 	}
 
-	public async Task OnEnterBarcode(Products product)
+	[JSInvokable]
+	public async Task OnBarcodeScanned(string code)
 	{
-		selectedProduct = product;
-		// JavaScript aufrufen, um die Kamera zu starten
-		await JS.InvokeVoidAsync("startBarcodeScanner", DotNetObjectReference.Create(this));
+		// Diese Funktion wird unmittelbar nach dem Einlesen des Codes von JavaScript aufgerufen.
+		if (!string.IsNullOrEmpty(code) && (selectedProduct != null && selectedProduct.Id != 0))
+		{
+
+			var result = await productService.UpdateBarcodeAsync(selectedProduct.Id, code);
+			if (result.Result)
+			{
+				selectedProduct.Barcode = code;
+				ShowScanner = false;
+				showContextMenu = false;
+				StateHasChanged();
+				return;
+			}
+			else
+			{
+				await JS.InvokeVoidAsync("alert", result.Message);
+				await OpenScanner();
+				return;
+			}
+		}
+		else
+			await JS.InvokeVoidAsync("alert", "code oder selectedProduct ist null");
+	}
+
+	private async Task CloseScanner()
+	{
+		try
+		{
+			await JS.InvokeVoidAsync("stopLiveScanner");
+		}
+		catch (Exception ex)
+		{
+			await JS.InvokeVoidAsync("alert", ex.Message);
+		}
+		ShowScanner = false;
+		showContextMenu = false;
+	}
+
+	public void Dispose()
+	{
+		objRef?.Dispose();
 	}
 }
 

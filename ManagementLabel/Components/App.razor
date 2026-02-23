@@ -26,11 +26,10 @@
 
     <Routes />
     <!---->
-    <script src="_framework/blazor.server.js" autostart="false"></script>
-    <script src="js/pngPdfDownload.js"></script>
     <script src="js/scrollHelper.js"></script>
     <script src="js/script.js"></script>
-    <script src="js/print.js"></script>
+    <script src="_framework/blazor.server.js" autostart="false"></script>
+  
  
     <!---->
     @* clear search box *@
@@ -87,6 +86,7 @@
           }
         };
     </script>
+    @* Verbindung wiederherstellen *@
     <script>
         Blazor.start({
             ssr: {
@@ -120,42 +120,6 @@
                 console.log("Reconnection attempt failed, but Blazor will keep trying...");
             }
         });
-    </script>
-    @* barcode scannen *@
-    <script>
-     window.startBarcodeScanner = async (dotNetHelper) => {
-            try {
-                // 1. Eine Liste der verfügbaren Geräte (Kameras) abrufen
-                const devices = await Html5Qrcode.getCameras();
-
-                if (devices && devices.length > 0) {
-                    // Das Gerät enthält mindestens eine Kamera
-                    const html5QrCode = new Html5Qrcode("reader");
-                    document.getElementById("reader").style.display = "block";
-
-                    const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-
-                    await html5QrCode.start(
-                        { facingMode: "environment" },
-                        config,
-                        (decodedText) => {
-                            dotNetHelper.invokeMethodAsync('HandleBarcodeResult', decodedText);
-                            html5QrCode.stop();
-                            document.getElementById("reader").style.display = "none";
-                        },
-                        (errorMessage) => { /* Vorübergehender Fehler beim Scannen */ }
-                    );
-                } else {
-                  // Keine Kamera
-                    alert("Dieses Gerät verfügt über keine Kamera.");
-                    console.warn("No cameras found on this device.");
-                }
-            } catch (err) {
-               // Kamerazugriffsfehler (z. B. Benutzer hat die Berechtigung verweigert)
-                console.error("Error accessing camera:", err);
-                alert("Auf die Kamera konnte nicht zugegriffen werden. Bitte stellen Sie sicher, dass Sie die erforderlichen Berechtigungen erteilt haben.");
-            }
-        };
     </script>
     @* OnMap *@
     <script>
@@ -206,8 +170,43 @@
           }
         };
     </script>
+    @* Kamera barcode *@
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    @* barcode scannen *@
+    <script>
+        var html5QrCode;
 
+        window.startLiveScanner = (dotNetHelper) => {
+            // Erstelle das Objekt und verknüpfe es mit dem Element mit der ID "reader"
+            html5QrCode = new Html5Qrcode("reader");
 
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 150 } //Definition des Untersuchungsgebiets
+            };
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // Rückfahrkamera
+                config,
+                (decodedText) => {
+                    // Wenn die Messung erfolgreich ist, senden wir das Ergebnis an Bledzor.
+                    dotNetHelper.invokeMethodAsync('OnBarcodeScanned', decodedText);
+                    window.stopLiveScanner(); // Schalten Sie die Kamera nach dem Lesen aus.
+                },
+                (errorMessage) => { /* Die Suche wird fortgesetzt... */ }
+            ).catch(err => {
+                console.error("Unable to start scanning.", err);
+            });
+        };
+
+        window.stopLiveScanner = () => {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                });
+            }
+        };
+    </script>
 </body>
 
 </html>

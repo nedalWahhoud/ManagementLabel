@@ -1,13 +1,8 @@
 ﻿using ManagementLabel.Model;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
-using Org.BouncyCastle.Crypto.IO;
-using System.Buffers.Text;
 using System.Globalization;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
 using System.Web;
 namespace ManagementLabel.Components.Share

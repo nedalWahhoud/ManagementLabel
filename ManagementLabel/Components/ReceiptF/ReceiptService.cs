@@ -1,6 +1,4 @@
 ﻿using ManagementLabel.Model;
-using SkiaSharp;
-using System.Drawing;
 
 namespace ManagementLabel.Components.ReceiptF
 {

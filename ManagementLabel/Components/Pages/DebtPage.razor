@@ -21,7 +21,7 @@ else
 		<div class="card mb-3 shadow-sm">
 			<div class="card-body text-center">
 				<h5 class="text-muted mb-2">Aktueller Schuldenbetrag</h5>
-				   	<h2 class=" @(debtCustomers?.Balance > 0 ? "text-danger" : "text-success")  fw-bold">
+				<h2 class=" @(debtCustomers?.Balance > 0 ? "text-danger" : "text-success")  fw-bold">
 					@(debtCustomers?.Balance.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("de-DE")))
 				</h2>
 			</div>
@@ -34,7 +34,7 @@ else
 				<div class="row g-3 align-items-end">
 					<div class="col-md-6">
 						<label class="form-label">Betrag</label>
-						<InputNumber inputmode="decimal" step="0.01" min="0" class="form-control text-center" @bind-Value="transactionsCustomers.AmountInput" @onfocus="@(e => SelectAllContent())" />
+						<InputNumber id="amountInput" inputmode="decimal" pattern="[0-9]*" step="0.01" min="0" class="form-control text-center" @bind-Value="transactionsCustomers.AmountInput" @onfocus="@(e => SelectAllContent())" />
 					</div>
 					<div class="col-md-6 d-flex flex-column align-items-center justify-content-center gap-3">
 
@@ -231,12 +231,14 @@ else
 		debtCustomers.DraftBalance = debtCustomers.Balance + transactionsCustomers.DraftAmount;
 		transactionsCustomers.DraftType = transactionType;
 	}
-	private void ResetToDefault()
+	private async Task ResetToDefault()
 	{
 		transactionsCustomers.DraftAmount = 0;
 		transactionsCustomers.AmountInput = 0;
 		debtCustomers.DraftBalance = debtCustomers.Balance;
 		transactionsCustomers = new ();
+
+		await Task.Delay(50);
 	}
 	private bool IsProcessing = false;
 	private async Task SaveTransactionAsync()

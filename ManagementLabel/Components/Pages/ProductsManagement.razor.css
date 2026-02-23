@@ -1,17 +1,23 @@
-﻿/* top continer */
+﻿.mainDiv {
+    padding: 10px;
+}
+/* top continer */
 .TopContiner {
     display: flex;
     flex-direction: row;
     gap: 50px;
     width: 100%;
-    height:50px;
+    height: 50px;
     justify-content: center;
+    margin: 10px 14px;
 }
-    .TopContiner  {
-        margin: 0;
-        margin: 10px 14px;
-    }
-
+#reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    background: black;
+    min-height: 250px;
+}
 /* table */
 .tableContiner {
     max-height: 500px;
@@ -41,6 +47,9 @@
         vertical-align: middle;
         text-align: center;
         height: 120px;
+        max-width: 200px;
+        word-wrap: break-word;
+        white-space: normal;
     }
 /* selected */
     .table tbody tr:nth-child(2n+1) {
@@ -68,7 +77,6 @@
     width: 100%;
     max-width: 400px;
 }
-
 .searchInput {
     width: 100%;
     padding: 10px 40px 10px 14px; /* تعطي مساحة كافية لزر المسح (يمين) */
@@ -343,11 +351,17 @@
         padding: 0;
     }
 
-    .contextMenu li {
+    .contextMenu li a {
+        display: block;
         padding: 8px 12px;
         cursor: pointer;
     }
-
+    .contextMenu a {
+        list-style: none;
+        display: block;
+        padding: 8px 12px;
+        cursor: pointer;
+    }
         .contextMenu li:hover {
             background-color: #007bff;
             color: white;
@@ -386,8 +400,7 @@
     /* Suchen */
     .searchWrapper,
     .filterContainer {
-        max-width: 100%;
-        margin: 8px 0;
+        max-width: 90%;
     }
 
     .searchInput {
@@ -411,22 +424,5 @@
     .overlayOrderForm {
         max-width: 95%;
         padding: 1rem;
-    }
-
-    .buttonMethods {
-        flex-direction: column;
-        padding: 10px;
-        gap: 12px;
-    }
-
-    .CaschButton,
-    .EcButton {
-        width: 100%;
-        padding: 16px;
-        font-size: 14px;
-    }
-
-    .productInfo p {
-        font-size: 14px;
     }
 }

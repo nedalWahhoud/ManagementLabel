@@ -20,12 +20,18 @@ using ManagementLabel.Components.Share;
 using ManagementLabel.Components.DebtF;
 using ManagementLabel.Components.TransactionsCustomersF;
 
-
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
-builder.WebHost.ConfigureKestrel(options =>
+/*builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5105); 
+});*/
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(7122, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
 });
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -39,6 +45,7 @@ builder.Services.AddServerSideBlazor()
     })
     .AddCircuitOptions(options =>
     {
+        options.DetailedErrors = true;
         // Speichert den Benutzerstatus für 10 Minuten nach Verbindungsverlust
         options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
         options.JSInteropDefaultCallTimeout = TimeSpan.FromSeconds(30);
