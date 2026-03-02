@@ -32,6 +32,7 @@
 			<div class="formGroupAdd">
 				<label>Hausnummer</label>
 				<InputText class="form-control" @bind-Value="customer.BuildingNumber" />
+				<InputCheckbox class="form-check-input" @bind-Value="customer.shouldStopnummerShift" /> Sollte verschieben 
 				<ValidationMessage For="@(() => customer.BuildingNumber)" />
 			</div>
 			<div class="formGroupAdd">
@@ -76,7 +77,17 @@
 			</div>
 			<div class="formGroupAdd">
 				<label>Haltestellennummer</label>
-				<InputNumber TValue="int" min="1" class="form-control" @bind-Value="customer.StopNumber" @onfocus="@(e => SelectAllContent())" />
+				<div class="d-flex align-items-center gap-3">
+				  <div class="flex-grow-1">
+				    <InputNumber TValue="int" min="1" class="form-control" @bind-Value="customer.StopNumber" @onfocus="@(e => SelectAllContent())" />
+				  </div>
+				  <div class="form-check">
+					<InputCheckbox class="form-check-input" @bind-Value="customer.shouldStopnummerShift" id="shiftCheck" />
+					<label class="form-check-label" for="shiftCheck">
+					   Sollte verschieben
+					</label>
+				  </div>
+			    </div>
 				<ValidationMessage For="@(() => customer.StopNumber)" />
 			</div>
 			<div class="formGroupAdd">

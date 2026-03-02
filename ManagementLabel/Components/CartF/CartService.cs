@@ -161,7 +161,7 @@ namespace ManagementLabel.Components.CartF
             // Fetch products from server for those not found locally and update cart items
             if (idsUnlocalProducts.Count > 0)
             {
-                var products = await _productService.GetProductByIdsServer(idsUnlocalProducts);
+                var products = await _productService.GetProductByIdsAsync(idsUnlocalProducts);
                 if (products != null && products.Count > 0)
                 {
                     foreach (var product in products)

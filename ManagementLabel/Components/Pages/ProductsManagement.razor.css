@@ -1,6 +1,4 @@
-﻿.mainDiv {
-    padding: 10px;
-}
+﻿
 /* top continer */
 .TopContiner {
     display: flex;
@@ -20,27 +18,25 @@
 }
 /* table */
 .tableContiner {
-    max-height: 500px;
+    max-height: 550px;
     overflow-y: scroll;
     border: 1px solid #ccc;
     width: 100%;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
 }
 .table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
-    height: auto;
 }
     .table thead th {
         position: sticky;
-        top: 0;
-        background-color:#ffffff;
-        z-index: 2; /* يخلي العناوين فوق بقية الخلايا */
-        border-bottom: 2px solid #ccc;
+        top: 65px;
+        background-color: #ffffff;
+        z-index: 2;
+        border-bottom: 2px solid #cccccc;
     }
     .table tbody tr td {
         font-size: 15px;
@@ -50,6 +46,37 @@
         max-width: 200px;
         word-wrap: break-word;
         white-space: normal;
+    }
+.topTable {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: #cccccc;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.addProductB {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 45px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin: 10px;
+}
+    .addProductB:hover {
+        background-color: #0b5ed7;
+        transform: scale(1.1); 
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
     }
 /* selected */
     .table tbody tr:nth-child(2n+1) {
@@ -71,27 +98,6 @@
     justify-content:center;
     gap: 1px;
 }
-/* search */
-.searchWrapper {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-}
-.searchInput {
-    width: 100%;
-    padding: 10px 40px 10px 14px; /* تعطي مساحة كافية لزر المسح (يمين) */
-    font-size: 16px;
-    border: 2px solid #007bff;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-    .searchInput:focus {
-        border-color: #0056b3;
-        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
-    }
 
 .clearButton {
     position: absolute;
@@ -113,18 +119,6 @@
         border-radius: 50%;
         
     }
-.categoryDropdown {
-    padding: 0px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    outline: none;
-    cursor: pointer;
-}
-    .categoryDropdown:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
-    }
 /* product image */
 .productImg {
     width: 75px;
@@ -132,7 +126,6 @@
     border-radius: 12px;
 }
 /* add product */
-
 .overlayAddForm {
     display: flex;
     flex-direction: column;
@@ -142,59 +135,13 @@
     border-radius: 8px;
     max-width: 600px;
     width: 100%;
-    max-height: 90vh; /* يمنع الطلوع خارج الشاشة */
-    overflow-y: auto; /* يسمح بالتمرير */
+    max-height: 90vh; 
+    overflow-y: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
-.formGroupAdd {
-    margin: 10px;
-}
 
-.addProductCancelB {
-    background-color: #757e84;
-    color: white;
-}
 
-    .addProductCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
-/* etikettBarcode erlement */
-.addProductTopB {
-    background-color: #007bff;
-    color: white;
-}
-
-    .addProductTopB:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
-
-.addProductCancelB {
-    color: white;
-    background-color: #757e84;
-}
-
-    .addProductCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
 /* Invoice */
-.InvoiceB {
-    color: white;
-    background-color: #16A34A;
-}
-    .InvoiceB:hover {
-        background-color: #15803D;
-    }
-.InvoiceCancelB {
-    color: white;
-    background-color: #757e84;
-}
-    .InvoiceCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
 .InvoiceGeB {
     color: white;
     background-color: #7C3AED;
@@ -203,16 +150,8 @@
         background-color: #6D28D9;
         transform: scale(1.05);
     }
-/* Button-Styling */
-.btn {
-    padding: 10px 16px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
 
+/* Button-Styling */
 .overlay {
     position: fixed;
     top: 0;
@@ -370,16 +309,15 @@
 @media (max-width: 768px) {
     .TopContiner {
                 flex-direction: column; 
-                gap: 15px;
+                gap: 10px;
                 height: auto;
                 align-items: center;
             }
     .tableContiner {
-        max-height: 60vh; /* ارتفاع محدد بالنسبة للشاشة */
-        overflow-y: auto; /* scroll عمودي */
-        overflow-x: hidden; /* scroll أفقي */
-        display: block; /* منع flex من تعطيل scroll */
-        padding: 0 5px;
+        max-height: 55vh; 
+        overflow-y: auto; 
+        overflow-x: hidden; 
+        display: block; 
     }
 
         .tableContiner tr {
@@ -387,10 +325,9 @@
             -webkit-touch-callout: none;
         }
     .table {
-        width: 100%; /* يجعل الجدول يملأ عرض الشاشة */
+        width: 100%; 
         font-size: 13px;
-        margin-top: 1rem;
-        table-layout: auto; /* الأعمدة تتوزع حسب المحتوى */
+        table-layout: auto; 
     }
         .table tbody tr td {
             font-size: 13px;
@@ -398,14 +335,8 @@
             padding: 8px;
         }
     /* Suchen */
-    .searchWrapper,
     .filterContainer {
         max-width: 90%;
-    }
-
-    .searchInput {
-        font-size: 14px;
-        padding: 8px 35px 8px 10px;
     }
 
     .clearButton {

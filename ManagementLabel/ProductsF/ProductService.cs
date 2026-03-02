@@ -1,4 +1,5 @@
 ﻿using ManagementLabel.Model;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http;
 
 
@@ -7,14 +8,12 @@ namespace ManagementLabel.ProductsF
     public class ProductService(HttpClient http)
     {
         private readonly HttpClient _http = http;
-
         private GetItems<Products> GetItems { get; set; } = new();
-
         public List<Products> DownloadedProduct { get; set; } = [];
 
         public List<Manufacturer> DownloadedManufacturers { get; set; } = [];
         public List<TaxRate> DownloadedTaxRates { get; set; } = [];
-        public async Task<List<Products>> GetProductByIdsServer(List<int> productIds)
+        public async Task<List<Products>> GetProductByIdsAsync(List<int> productIds)
         {
             try
             {
@@ -164,6 +163,70 @@ namespace ManagementLabel.ProductsF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
+        public async Task<GetItems<Products>> GetProductsLowStockAsync(GetItems<Products> _getItems, List<int>? excludeProductsIds = null)
+        {
+            try
+            {
+                if (_getItems.AllItemsLoaded)
+                    return _getItems;
+
+                var queryParams = new Dictionary<string, string>{
+                    { "CurrentPage", _getItems.CurrentPage.ToString() },
+                    { "PageSize", _getItems.PageSize.ToString() },
+                    { "AllItemsLoaded", _getItems.AllItemsLoaded.ToString() }};
+
+                var url = QueryHelpers.AddQueryString("api/Products/getProductsLowStock", queryParams!);
+
+                if (excludeProductsIds != null && excludeProductsIds.Any())
+                {
+                    foreach (var id in excludeProductsIds)
+                    {
+                        url = QueryHelpers.AddQueryString(url, "excludeProductsIds", id.ToString());
+                    }
+                }
+
+                var response = await _http.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null!;
+                }
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>() ?? null;
+
+                if (getItems != null)
+                {
+                    AddProductToLocal(getItems.Items);
+                }
+
+                return getItems!;
+            }
+            catch
+            {
+                return null!;
+            }
+        }
+        public async Task<Products> GetProductByIdAsync(int productId)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/Products/getProductById/{productId}");
+
+                if (!response.IsSuccessStatusCode)
+                    return null!;
+                var product = await response.Content.ReadFromJsonAsync<Products>();
+                if (product != null)
+                {
+                    // add the product to the local list
+                    AddProductToLocal(product!);
+                    return product!;
+                }
+                return null!;
+            }
+            catch
+            {
+                return null!;
+            }
+        }
         public void Reset()
         {
             GetItems.Items.Clear();
@@ -256,6 +319,7 @@ namespace ManagementLabel.ProductsF
         {
             return DownloadedProduct
                     .Where(p => p.CategoryId == categoryId)
+                    .OrderBy(p => p.Name_de)
                     .ToList();
         }
         public Products GetProductByIdLocal(int productId)
@@ -268,28 +332,7 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-        public async Task<Products> GetProductByIdAsync(int productId)
-        {
-            try
-            {
-                var response = await _http.GetAsync($"api/Products/getProductById/{productId}");
-
-                if (!response.IsSuccessStatusCode)
-                    return null!;
-                var product = await response.Content.ReadFromJsonAsync<Products>();
-                if (product != null)
-                {
-                    // add the product to the local list
-                    AddProductToLocal(product!);
-                    return product!;
-                }
-                return null!;
-            }
-            catch
-            {
-                return null!;
-            }
-        }
+       
         // barcode
         public async Task<ValidationResult> UpdateBarcodeAsync(int id, string barcode)
         {

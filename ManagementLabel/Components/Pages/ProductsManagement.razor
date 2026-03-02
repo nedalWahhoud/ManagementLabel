@@ -13,9 +13,8 @@
 			@* top continer *@
 			<div class="TopContiner">
 				@* choose the Columns *@
-				<div class="mb-3">
-					<div class="dropdown">
-						<button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown">
+				<div class="h-100 d-flex">
+					<button class="btn btn-info btn-outline-secondary dropdown-toggle text-white border-0 h-100 w-100" type="button" data-bs-toggle="dropdown">
 							Wähle Spalten
 						</button>
 						<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
@@ -35,34 +34,41 @@
 								</li>
 							}
 						</ul>
-					</div>
 				</div>
-				<button class="@(!IsShowAddProductForm ? "btn addProductTopB" : "btn addProductCancelB")" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)">
-					@(!IsShowAddProductForm ? "Produkt hinzufügen" : "Hinzufügen Abbrechen")
-				</button>
-				<button class="@(!IsShowInvoice ? "btn InvoiceB" : "btn InvoiceCancelB")" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
+				<button class="btn @(IsShowInvoice ? "btn-secondary" : "btn-success")" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
 					@(!IsShowInvoice ? "Rechnung erstellen" : "Rechnung Abbrechen")
 				</button>
-				<div class="searchWrapper">
-					<input id="searchBox" type="text" placeholder="Searching..." class="searchInput" @oninput="OnTextChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)" />
-					<button class="clearButton" @onclick="ClearInput" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-						X
-					</button>
+				@* filter *@
+				<div class="d-flex flex-column flex-md-row gap-3 align-items-center">
+					@* Lagerstand Filter  *@
+					<select id="stockFilter" class="form-select" @bind="selectedValuesFilter" @bind:after="OnStockFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+						<option value="0">Alle</option>
+						<option value="1">Geringer Lagerbestand</option>
+					</select>
+					@* category filter *@
+					<select class="form-select" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+						<option value="0">Alle</option>
+						@foreach (var category in categoryService.DownloadedCategories)
+						{
+							<option value="@category.Id">@category.Name_de</option>
+						}
+					</select>
 				</div>
-				@* category filter *@
-				<select class="categoryDropdown" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-					<option value="0">Alle</option>
-					@foreach (var category in categoryService.DownloadedCategories)
-					{
-						<option value="@category.Id">@category.Name_de</option>
-					}
-				</select>
 			</div>
 			@* table *@
 			<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
+				<div class="topTable">
+				<button class="btn addProductB"
+						@onclick="ShowAddProductFormAsync"
+						disabled="@(IsLoadingMessage)"
+						title="Add neues Produkt">
+						<span>+</span>
+				</button>
+				</div>
 				<table class="table text-center align-middle">
 					<thead>
 						<tr>
+							@if (ShowColumn("Index")){<th>Index</th>}
 							@if (ShowColumn("Id"))	{<th>Id</th>}
 							@if (ShowColumn("Name_de")){<th>Name de</th>}
 							@if (ShowColumn("Description_de")){<th>Beschreibung de</th>}
@@ -95,7 +101,6 @@
 						@* table *@
 						@{
 							var dataSource = filterP ?? productService.DownloadedProduct;
-
 							<Virtualize Items="dataSource" Context="product" OverscanCount="10">
 								<tr @key="product.Id"
 								@oncontextmenu:preventDefault="true"
@@ -103,6 +108,7 @@
 								@onclick="(e) => OnSelectRow(product, e)"
 								@ondblclick="(e) => OnDoubleTap(product, e)"
 								class="@(selectedRow?.Id == product.Id ? "selected" : "")">
+									@if (ShowColumn("Index")){<td>@(dataSource.IndexOf(product) + 1)</td> }
 									@if (ShowColumn("Id")){<td>@product.Id</td>}
 									@if (ShowColumn("Name_de")){<td>@product.Name_de</td>}
 									@if (ShowColumn("Description_de")){<td>@product.Description_de</td>}
@@ -113,13 +119,9 @@
 									@if (ShowColumn("Quantity")){<td class="@(product.MinimumStock >= product.Quantity ? "IsMinimumStock" : "")">@product.Quantity</td>}
 									@if (ShowColumn("PurchasePrice")){<td>@product.PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
 									@if (ShowColumn("SellePrice"))
-									{
-										<td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
-									}
+									{<td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
 									@if (ShowColumn("MinimumStock"))
-									{
-										<td>@product.MinimumStock</td>
-									}
+									{<td>@product.MinimumStock</td>}
 									@if (ShowColumn("ExpDate"))
 									{
 										@* check exp date *@
@@ -178,7 +180,7 @@
 									<td colspan="20" class="loadingMessage">Keine Produkte gefunden.</td>
 								</tr>
 							}
-						}
+						  }
 
 					</tbody>
 				</table>
@@ -416,6 +418,7 @@
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
     {
+	  new("Index", "Index", false),
 	  new("Id", "Id", false),
 	  new("Name de", "Name_de", true),
 	  new("Beschreibung de", "Description_de", true),
@@ -504,9 +507,6 @@
 	private string menuXpx => $"{menuX}px";
 	private string menuYpx => $"{menuY}px";
 	private Products? selectedProduct;
-	private System.Timers.Timer? longPressTimer;
-	private double startX, startY;
-	private bool isDragging = false;
 
 	private void HideContextMenu() => showContextMenu = false;
 	// Select
@@ -543,11 +543,15 @@
 	}
 
 	// load products
-	private bool IsLoadding = false;
+	private bool IsLoadingMessage = false;
+
 	private async Task<bool> loadInBackground()
 	{
-		if (IsLoadding) return false;
-		IsLoadding = true;
+		if (IsLoadingMessage == true || selectedCategoryId != 0 || selectedValuesFilter != 0)
+			return false;
+
+		IsLoadingMessage = true;
+
 		var moreProducts = await productService.LoadMoreProducts();
 
 		// initialize CartItem for each product
@@ -557,8 +561,13 @@
 		}
 		// hide the loading message
 		IsLoadingMessage = false;
-		IsLoadding = false;
+
+		await InvokeAsync(StateHasChanged);
+
+
+
 		return moreProducts.AllItemsLoaded;
+
 	}
 	// Add Product
 	private bool IsShowAddProductForm = false;
@@ -730,74 +739,7 @@
 	}
 	// Search
 	private List<Products> filterP = null!;
-	private string searchText = string.Empty;
-	public async void OnTextChanged(ChangeEventArgs e)
-	{
-		searchText = e.Value?.ToString()?.Trim() ?? string.Empty;
-		if ((productService.DownloadedProduct.Count == 0 || string.IsNullOrEmpty(searchText)) && selectedCategoryId == 0)
-		{
-			filterP = null!;
-			return;
-		}
-		else if(selectedCategoryId != 0)
-		{
-			// if a category is selected, filter the products by category and search text
-			filterP = productService.DownloadedProduct
-				.Where(p => p.CategoryId == selectedCategoryId &&
-					(
-					p.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Name_ar!.Contains(searchText, StringComparison.OrdinalIgnoreCase) 
-					))
-				.ToList();
-		}
-		else if (productService.DownloadedProduct.Count > 0)
-		{
-			int counter = 0;
-			while (true)
-			{
-				if (counter > 10) 
-				{
-					break;
-				}
 
-				filterP = SearchInProductsLocal(searchText);
-				if (filterP.Count > 0)
-					break;
-				await Task.Delay(300); // wait for a short time before searching again
-												// if no products found, load more products
-				bool AllItemsLoaded = await loadInBackground();
-				if (AllItemsLoaded) break;
-				counter++;
-			}
-		}
-	}
-	private async Task ClearInput()
-	{
-		try
-		{
-			if (selectedCategoryId == 0)
-			{
-				await JS.InvokeVoidAsync("clearSearchBox", "searchBox");
-
-				filterP = null!;
-			}
-			else
-				await JS.InvokeVoidAsync("clearSearchBox", "searchBox");
-		}
-		catch
-		{
-
-		}
-	}
-	private List<Products> SearchInProductsLocal(string searchText)
-	{
-		var searchedProducts = productService.DownloadedProduct
-					.Where(p =>
-					p.Name_de!.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-					p.Name_ar!.Contains(searchText, StringComparison.OrdinalIgnoreCase))
-					.ToList();
-		return searchedProducts;
-	}
 	// filter nach category
 	private async Task OnCategoryOpened()
 	{
@@ -809,34 +751,26 @@
 	{
 		// show loadingmessage while loading
 		IsLoadingMessage = true;
+		// reset values filter
+		selectedValuesFilter = 0;
 
 		if (selectedCategoryId == 0)
 		{
 			// if selectedId is 0, clear the filter
 			filterP = null!;
-			// clear die Input search
-			await ClearInput();
 		}
 		else
 		{
-			// clear die Input search
-			await ClearInput();
-
 			// get excludeProductsIds, from local products
 			List<int> excludeProductsIds = productService.DownloadedProduct.Where(f => f.CategoryId == selectedCategoryId)
 					.Select(f => f.Id)
 					.ToList();
 
-			int counter = 0;
 			GetItems<Products> getItems = new();
 			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
 			filterP = new();
-			while (true)
+			while (!getItems.AllItemsLoaded)
 			{
-				if (counter > 2 || getItems.AllItemsLoaded)
-				{
-					break;
-				}
 
 				Task.Delay(100).Wait(); // wait for a short time before searching again
 				getItems = await categoryService.GetProductsByCategoryIdAsync(selectedCategoryId, 10, excludeProductsIds);
@@ -849,7 +783,6 @@
 				{
 					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
 				}
-				counter++;
 			}
 			// get the products by categoryId local, after downloading from server
 			filterP = productService.GetProductByCategoryIdLocal(selectedCategoryId);
@@ -859,7 +792,60 @@
 		await LocalStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
 		IsLoadingMessage = false;
 	}
+	// filter nach Lagerbestand
+	private int selectedValuesFilter = 0;
+	private async Task OnStockFilterChanged()
+	{
+		IsLoadingMessage = true;
 
+		// reset category filter
+		selectedCategoryId = 0;
+
+		if (selectedValuesFilter == 1)
+		{
+			// get excludeProductsIds nur ein mal, von local products, damit die produkte die schon in local sind, nicht nochmal in der nächsten suche kommen
+			List<int> excludeProductsIds = productService.DownloadedProduct
+					.Where(p => p.Quantity <= p.MinimumStock)
+					.Select(f => f.Id)
+					.ToList();
+			GetItems<Products> getItems = new();
+			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
+			filterP = new();
+
+
+			while (!getItems.AllItemsLoaded)
+			{
+				await Task.Delay(100); // wait for a short time before searching again
+
+				// get locale products, nur ein mal wenn currentPage 0 ist dann ist sicher erstmal loop.
+				//  hier weil ist nach await um "lädt..." zeigen zulassen, damit nicht direkt die produkte die in local sind zeigen
+				if (getItems.CurrentPage == 0)
+					filterP.AddRange(productService.DownloadedProduct.Where(p => p.Quantity <= p.MinimumStock).ToList());
+
+				var result = await productService.GetProductsLowStockAsync(getItems, excludeProductsIds);
+
+				if (result == null || result.Items == null) break;
+
+
+
+				getItems = result;
+
+				// initialize CartItem for each product
+				foreach (var product in getItems.Items)
+				{
+					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
+					filterP.Add(product);
+				}
+			}
+			filterP = filterP.OrderBy(p => p.Name_de).ToList();
+		}
+		else
+		{
+			filterP = null!;
+		}
+
+		IsLoadingMessage = false;
+	}
 	// Invoice
 	private bool IsShowInvoice = false;
 	private bool IsShowOrder = false;
@@ -1126,7 +1112,6 @@
 		await InvokeAsync(StateHasChanged);
 	}
 
-	private bool IsLoadingMessage = true;
 	// Key Down
 	private void KeyDown(KeyboardEventArgs e)
 	{
@@ -1146,9 +1131,9 @@
 
 	// Scroll
 	[JSInvokable]
-	public void OnScrollEnd()
+	public async Task OnScrollEnd()
 	{
-		_ = loadInBackground();
+		await loadInBackground();
 	}
 	// barcode scanning
 	private bool ShowScanner = false;

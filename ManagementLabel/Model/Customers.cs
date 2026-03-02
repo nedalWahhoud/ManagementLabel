@@ -31,6 +31,7 @@ namespace ManagementLabel.Model
         public string? Notes_ar { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int StopNumber { get; set; } = 1;
+        public bool shouldStopnummerShift { get; set; } = false;
         [RegularExpression(@"^\d{4}$", ErrorMessage = "PIN muss nur aus 4 Zahlen bestehen.")]
         public string? PIN { get; set; } 
 
