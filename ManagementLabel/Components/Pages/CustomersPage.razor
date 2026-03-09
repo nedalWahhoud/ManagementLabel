@@ -166,6 +166,20 @@ else
 											</li>
 											<li>
 												<a class="dropdown-item"
+												@onclick="() => OnPhone(customer)">
+													<i class="bi bi-telephone me-1"></i>
+													Telefonieren
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
+												@onclick="() => viaWhatasappShare(customer)">
+													<i class="bi bi-whatsapp me-1"></i>
+													Teilen über WhatsApp
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item"
 												@onclick="() => Edit(customer)">
 													<i class="bi bi-pencil-square me-1"></i>
 													Bearbeiten
@@ -178,17 +192,10 @@ else
 													Löschen
 												</a>
 											</li>
-											<li>
-												<a class="dropdown-item"
-												@onclick="() => viaWhatasappShare(customer)">
-													<i class="bi bi-whatsapp me-1"></i>
-													Teilen über WhatsApp
-												</a>
-											</li>
+
 										</ul>
 									</div>
 								</td>
-
 							</tr>
 						}
 					</tbody>
@@ -463,6 +470,24 @@ else
 		}
 
 		await JS.InvokeVoidAsync("mapRedirect.openMap",customer.Latitude,customer.Longitude,hasAddress ? fullAddress : "");
+	}
+	// Phone
+	private async Task OnPhone(Customers customer)
+	{
+		try
+		{
+			if (customer == null || string.IsNullOrWhiteSpace(customer.PhoneNumber))
+			{
+				await JS.InvokeVoidAsync("alert", "Keine Telefonnummer vorhanden.");
+				return;
+			}
+
+			await JS.InvokeVoidAsync("phoneRedirect.openPhoneDialer", customer.PhoneNumber);
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine($"Error redirecting to phone: {ex.Message}");
+		}
 	}
 	// select all kontekt
 	private async Task SelectAllContent()

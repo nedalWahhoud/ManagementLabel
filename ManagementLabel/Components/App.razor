@@ -170,6 +170,18 @@
           }
         };
     </script>
+    @* OnPhone *@
+    <script>
+        window.phoneRedirect = {
+            openPhoneDialer: function(phone) {
+                const number = String(phone).replace(/[^\d+]/g, '');
+
+                if (number) {
+                    window.location.href = `tel:${number}`;
+                }
+            }
+        };
+    </script>
     @* Kamera barcode *@
     <script src="https://unpkg.com/html5-qrcode"></script>
     @* barcode scannen *@

@@ -1,12 +1,15 @@
 ﻿@rendermode InteractiveServer
 @implements IDisposable
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">ManagementLabel</a>
-    </div>
-</div>
-
+ <AuthorizeView>
+    <Authorized Context="authContext">
+        <div class="top-row ps-3 navbar navbar-dark">
+           <div class="container-fluid">
+                <a class="navbar-brand" href="#">@authContext.User.Identity!.Name</a>
+            </div>
+        </div>
+    </Authorized>
+</AuthorizeView>
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">

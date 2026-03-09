@@ -10,21 +10,46 @@
 else
 {
 
-	<div class="d-flex flex-row gap-2">
-		<button class="btn btn-outline-secondary mb-3" @onclick="GoBack">
-			<i class="bi bi-arrow-left"></i> Zurück
-		</button>
-		<h1>Schulden von <strong>@(customer?.Name_de ?? "Fehler")</strong></h1>
+	<div class="container-fluid px-2">
+		<div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+
+			<button class="btn btn-sm btn-outline-danger ps-3" @onclick="GoBack" title="Zurück zur Liste">
+				<i class="bi bi-arrow-return-left fs-5"></i>
+			</button>
+
+			<div class="d-flex align-items-center flex-grow-1 justify-content-center gap-3">
+				<button class="btn btn-outline-secondary btn-sm" @onclick="PreviousDebtCustomer">
+					<i class="bi bi-chevron-left"></i>
+				</button>
+
+				<div class="text-center flex-grow-1" style="max-width: 180px;">
+					<h2 class="h6 m-0 text-truncate" title="@(customer?.Name_de)">
+						<strong>@(customer?.Name_de ?? "Fehler")</strong>
+					</h2>
+					<span class="badge rounded-pill bg-primary text-white" style="font-size: 0.75rem;">
+						Stop: @(customer?.StopNumber ?? 0)
+					</span>
+				</div>
+
+				<button class="btn btn-outline-secondary btn-sm" @onclick="NextDebtCustomer">
+					<i class="bi bi-chevron-right"></i>
+				</button>
+			</div>
+
+			<div style="width: 45px;"></div>
+		</div>
 	</div>
 	<div class="w-100">
 		@* Schulden anzeigen *@
 		<div class="card mb-3 shadow-sm">
+		
 			<div class="card-body text-center">
 				<h5 class="text-muted mb-2">Aktueller Schuldenbetrag</h5>
 				<h2 class=" @(debtCustomers?.Balance > 0 ? "text-danger" : "text-success")  fw-bold">
 					@(debtCustomers?.Balance.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("de-DE")))
 				</h2>
 			</div>
+			
 		</div>
 		@* schulden bearbeiten *@
 		<div class="card shadow-sm m-3">
@@ -326,5 +351,53 @@ else
 	private void GoBack()
 	{
 		NavigationManager.NavigateTo("/customers");
+	}
+
+	private async void NextDebtCustomer()
+	{
+		// wenn die Kundenliste noch nicht geladen ist, lade alle Kunden
+		if (customersService.DownloadedCustomers == null || customersService.DownloadedCustomers.Count == 0)
+			await customersService.GetAllCustomers();
+
+		// sortiere die Kunden nach StopNumber innerhalb der gleichen DistributionLineId
+		var sortedCustomers = customersService.DownloadedCustomers!
+		.Where(c => c.DistributionLineId  == customer.DistributionLineId)
+		.OrderBy(c => c.StopNumber).ToList();
+
+		int currentIndex = sortedCustomers.FindIndex(c => c.Id == customerId);
+		if (currentIndex != -1 && currentIndex < sortedCustomers.Count - 1)
+		{
+			var nextCustomer = sortedCustomers[currentIndex + 1];
+
+			NavigationManager.NavigateTo($"/debt{nextCustomer.Id}", true);
+
+		}
+		else
+		{
+			await JS.InvokeVoidAsync("alert", "Es gibt keinen nächsten Kunden auf der Liste.");
+		}
+
+	}
+	private async Task PreviousDebtCustomer()
+	{
+		if (customersService.DownloadedCustomers == null || customersService.DownloadedCustomers.Count == 0)
+			await customersService.GetAllCustomers();
+
+		var sortedCustomers = customersService.DownloadedCustomers!
+			.Where(c => c.DistributionLineId == customer.DistributionLineId)
+			.OrderBy(c => c.StopNumber).ToList();
+
+		int currentIndex = sortedCustomers.FindIndex(c => c.Id == customerId);
+
+		if (currentIndex > 0)
+		{
+			var previousCustomer = sortedCustomers[currentIndex - 1];
+
+			NavigationManager.NavigateTo($"/debt{previousCustomer.Id}", true);
+		}
+		else
+		{
+			await JS.InvokeVoidAsync("alert", "Dies ist der erste Kunde auf der Liste; es gibt keinen vorherigen Kunden.");
+		}
 	}
 }

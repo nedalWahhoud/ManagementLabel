@@ -6,40 +6,11 @@
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			<!-- user info -->
-			<p class="userInfo">
-				<span class="userName">User Name: @authContext.User.Identity!.Name</span>
-			</p>
 			@* top continer *@
 			<div class="TopContiner">
-				@* choose the Columns *@
-				<div class="h-100 d-flex">
-					<button class="btn btn-info btn-outline-secondary dropdown-toggle text-white border-0 h-100 w-100" type="button" data-bs-toggle="dropdown">
-							Wähle Spalten
-						</button>
-						<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-							@foreach (var col in columnOptions)
-							{
-								<li>
-									<div class="form-check form-switch">
-										<input class="form-check-input"
-										type="checkbox"
-										id="@col.Key"
-										@bind="col.IsVisible"
-										@bind:after="OnColumnChanged" />
-										<label class="form-check-label" for="@col.Key">
-											@col.Label
-										</label>
-									</div>
-								</li>
-							}
-						</ul>
-				</div>
-				<button class="btn @(IsShowInvoice ? "btn-secondary" : "btn-success")" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
-					@(!IsShowInvoice ? "Rechnung erstellen" : "Rechnung Abbrechen")
-				</button>
+			
 				@* filter *@
-				<div class="d-flex flex-column flex-md-row gap-3 align-items-center">
+				<div class="d-flex flex-column flex-md-row gap-1 align-items-center">
 					@* Lagerstand Filter  *@
 					<select id="stockFilter" class="form-select" @bind="selectedValuesFilter" @bind:after="OnStockFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 						<option value="0">Alle</option>
@@ -58,12 +29,39 @@
 			@* table *@
 			<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
 				<div class="topTable">
-				<button class="btn addProductB"
+					@* add neu Product *@
+			  	   <button class="btn addProductB"
 						@onclick="ShowAddProductFormAsync"
 						disabled="@(IsLoadingMessage)"
 						title="Add neues Produkt">
-						<span>+</span>
-				</button>
+						+
+				   </button>
+					@* choose the Columns *@
+					<div class="h-100 d-flex">
+						<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+							
+						<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+							@foreach (var col in columnOptions)
+							{
+								<li>
+									<div class="form-check form-switch">
+										<input class="form-check-input"
+											   type="checkbox"
+											   id="@col.Key"
+											   @bind="col.IsVisible"
+											   @bind:after="OnColumnChanged" />
+										<label class="form-check-label" for="@col.Key">
+											@col.Label
+										</label>
+									</div>
+								</li>
+							}
+						</ul>
+					</div>
+					@* Rechnung *@
+					<button class="btn @(IsShowInvoice ? "btn-secondary" : "btn-success") InvoiceB" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
+						@(!IsShowInvoice ? "R" : "A")
+					</button>
 				</div>
 				<table class="table text-center align-middle">
 					<thead>
