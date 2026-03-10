@@ -22,7 +22,7 @@ namespace ManagementLabel.Model
         [Range(1, int.MaxValue, ErrorMessage = "Minimum Stock muss größer als 0 sein.")]
         public int MinimumStock { get; set; }
         [Required(ErrorMessage = "Startdatum ist erforderlich.")]
-        [DateInFuture(ErrorMessage = "Startdatum muss in der Zukunft liegen.")]
+        [DateInFuture(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
         public DateTime EXPDate { get; set; } = DateTime.Today;
         [Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
         public int? ManufacturerId { get; set; }
@@ -40,7 +40,7 @@ namespace ManagementLabel.Model
         public int? ProductGroupID { get; set; }
         public GroupProducts? ProductGroup { get; set; }
         public bool IsShippable { get; set; } = true;
-        public double DiscountedPrice { get; set; } = 0;
+        public ProductDiscounts? ProductDiscount { get; set; } = new();
         //
         public CartItem CartItem { get; set; } = null!;
         public void InitializeCartItem(int quantity)

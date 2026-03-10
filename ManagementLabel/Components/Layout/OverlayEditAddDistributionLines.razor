@@ -53,7 +53,7 @@
 				await OnHandel.InvokeAsync(action);
 			}
 			else
-				await JS.InvokeVoidAsync("showAlert", result.Message);
+				await JS.InvokeVoidAsync("window.alert", result.Message);
 		}
 		else
 		{
@@ -70,13 +70,13 @@
 						await OnHandel.InvokeAsync(action);
 					}
 					else
-						await JS.InvokeVoidAsync("showAlert", result.Message);
+						await JS.InvokeVoidAsync("window.alert", result.Message);
 				}
 				else
-					await JS.InvokeVoidAsync("showAlert", "Nichts hat sich geändert");
+					await JS.InvokeVoidAsync("window.alert", "Nichts hat sich geändert");
 			}
 			else
-				await JS.InvokeVoidAsync("showAlert", "keine currentGroup gefunden");
+				await JS.InvokeVoidAsync("window.alert", "keine currentGroup gefunden");
 		}
 		IsProcessing = false;
 	}

@@ -66,7 +66,6 @@
 						<ValidationMessage For="@(() => GetProducts.EXPDate)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="manufacturer">Manufacturer</label>
 						<InputSelect id="category" class="form-control" @bind-Value="GetProducts.ManufacturerId">
 							<option value="0">Select Manufacturer</option>
 							@foreach (var Manufacturer in productService.DownloadedManufacturers!)
@@ -77,7 +76,6 @@
 						<ValidationMessage For="@(() => GetProducts.ManufacturerId)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="TaxRate">Steuersatz</label>
 						<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">
 							<option value="0">Select Rate</option>
 							@foreach (var rate in productService.DownloadedTaxRates)
@@ -88,7 +86,6 @@
 						<ValidationMessage For="@(() => GetProducts.TaxRateId)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="ProductGroup">Product Gruppe</label>
 						<InputSelect class="form-control" @bind-Value="GetProducts.ProductGroupID">
 							<option value="0">wählen Product Gruppe aus</option>
 							@foreach (var groupProduct in productGroupService.DownloadedproductGroups)
@@ -104,12 +101,26 @@
 						<ValidationMessage For="@(() => GetProducts.IsShippable)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="ImAngebot">Im Angebot</label>
-						<InputNumber min="0" class="form-control" @bind-Value="GetProducts.DiscountedPrice" @onfocus="@(e => SelectAllContent())" />
-						<ValidationMessage For="@(() => GetProducts.DiscountedPrice)" />
+						@if (GetProducts.ProductDiscount != null)
+						{
+							<label for="ImAngebot">Im Angebot</label>
+							<div class="card p-3 mb-3 gap-1">
+								<InputNumber class="form-control" min="0" @bind-Value="GetProducts.ProductDiscount.DiscountedPrice" @onfocus="@(e => SelectAllContent())" />
+								<ValidationMessage For="@(() => GetProducts!.ProductDiscount.DiscountedPrice)" />
+								<div class="row">
+									<div class="col-md-6">
+										<InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.StartDate" />
+										<ValidationMessage For="@(() => GetProducts!.ProductDiscount.StartDate)" />
+									</div>
+									<div class="col-md-6">
+										<InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.EndDate" />
+										<ValidationMessage For="@(() => GetProducts!.ProductDiscount.EndDate)" />
+									</div>
+								</div>
+							</div>
+						}
 					</div>
 					<div class="formGroupAdd">
-						<label for="Image">Image</label>
 						<div class="imageUpload">
 							<InputFile id="Image" class="form-control" OnChange="ImageUpload" />
 							@if (GetProducts.ProductImages != null && GetProducts.ProductImages.Count > 0)
@@ -136,14 +147,14 @@
 						@if (IsProcessing)
 						{
 							<span class="spinner-border spinner-border-sm"
-								  role="status"
-								  aria-hidden="true"></span>
+							role="status"
+							aria-hidden="true"></span>
 						}
 						else
 						{
-						 @(ButtonName ?? "Fehler")
+							@(ButtonName ?? "Fehler")
 						}					
-						</button>
+					</button>
 					<button type="button" class="btn addProductCancelB" @onclick="CancelSubmit">Abbrechen</button>
 				</EditForm>
 			</div>
@@ -164,11 +175,11 @@
 	[Parameter]
 	public EventCallback<(Products product, string Action, bool ActionState)> OnHandel { get; set; }
 
-	
+
 	private bool IsProcessing = false;
 	protected override void OnInitialized()
 	{
-		// get default image for add action
+		// get default image for add action, and Initialize die ProductDiscount
 		if (Action == "Add")
 		{
 			GetProducts.ProductImages.Add(productImagesService.GetDefaultImage());
@@ -180,18 +191,20 @@
 		IsProcessing = true;
 		if (Action == "Edit")
 		{
-			// if null
+			// wenn null 
 			if (GetProducts == null)
 			{
-				await ShowAlert("Nichts hat sich geändert");
+				await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
+				IsProcessing = false;
 				return;
 			}
-			// if no edited
+			// wenn  nicht edited
 			Products? currentProduct = productService.DownloadedProduct.Find(p => p.Id == GetProducts.Id);
 			bool isEdited = productService.IsEditedProduct(currentProduct!, GetProducts);
 			if (!isEdited)
 			{
-				await ShowAlert("Nichts hat sich geändert");
+				await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
+				IsProcessing = false;
 				return;
 			}
 
@@ -213,12 +226,18 @@
 				await OnHandel.InvokeAsync((GetProducts, Action, false));
 			}
 			else
-			{
-				await ShowAlert(result.Message!);
-			}
+				await JS.InvokeVoidAsync("window.alert", result.Message!);
 		}
 		else if (Action == "Add")
 		{
+
+			var isValid = productService.IsValidProduct(GetProducts!);
+			if (isValid.Result == false)
+			{
+				await JS.InvokeVoidAsync("window.alert", isValid.Message!);
+				return;
+			}
+
 			// add user, the new Product added
 			GetProducts!.UserId = user?.Id ?? 0;
 
@@ -227,13 +246,19 @@
 
 			// Perform your logic to add the product to the database
 			var result = await productService.AddProductAsync(GetProducts!);
-			var idStr = result.Message?.Split(':').LastOrDefault();
 			// Check if the result is successful and Get the ID returned by the database
-			if (result.Result && int.TryParse(idStr, out int id))
+			if (result.Result)
 			{
-				// get added Product
-				var addedProduct = await productService.GetProductByIdAsync(id);
-				GetProducts = addedProduct;
+				// get neue Products von Database um auch die Id von Image und ProductDiscount mitzuholen
+				var editedProduct = await productService.GetProductByIdAsync(result.NewId ?? 0);
+				if (editedProduct == null)
+				{
+					await JS.InvokeVoidAsync("window.alert", "Fehler bei Holung des neue Product von Database");
+					IsProcessing = false;
+					return;
+				}
+				GetProducts = editedProduct;
+
 				// initaialize the caritem for this new product
 				GetProducts.InitializeCartItem(0);
 
@@ -244,12 +269,9 @@
 				await OnHandel.InvokeAsync((GetProducts, Action, false));
 			}
 			else
-			{
-				_ = ShowAlert(result.Message!);
-			}
+				await JS.InvokeVoidAsync("window.alert", result.Message!);
 		}
 		IsProcessing = false;
-		StateHasChanged();
 	}
 	private void CancelSubmit()
 	{
@@ -317,7 +339,7 @@
 		}
 		catch (Exception ex)
 		{
-			_ = ShowAlert($"Error uploading image: {ex.Message}");
+			await JS.InvokeVoidAsync("window.alert", $"Error uploading image: {ex.Message}");
 		}
 	}
 	// select all content in input when focus
@@ -334,11 +356,7 @@
 			Console.WriteLine($"Error selecting input text: {ex.Message}");
 		}
 	}
-
-	private async Task ShowAlert(string message)
-	{
-		await JS.InvokeVoidAsync("showAlert", message);
-	}
+	
 	public void Dispose()
 	{
 		GetProducts = null!;

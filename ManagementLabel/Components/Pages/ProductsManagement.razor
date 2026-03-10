@@ -156,7 +156,7 @@
 									{
 										<td>@product.IsShippable</td>
 									}
-									@if (ShowColumn("DiscountedPrice")){<td>@product.DiscountedPrice</td>}
+									@if (ShowColumn("DiscountedPrice")){<td>@(product.ProductDiscount == null ? 0 : product.ProductDiscount.DiscountedPrice)</td>}
 									@if (ShowColumn("Username"))
 									{
 										<td>@(product.User?.UserName ?? "")</td>
@@ -569,7 +569,6 @@
 	}
 	// Add Product
 	private bool IsShowAddProductForm = false;
-
 	private async void ShowAddProductFormAsync()
 	{
 		// cancel all other processes
@@ -672,7 +671,17 @@
 					TaxRateId = SelectedProduct.TaxRateId,
 					ProductGroupID = SelectedProduct.ProductGroupID,
 					IsShippable = SelectedProduct.IsShippable,
-					DiscountedPrice = SelectedProduct.DiscountedPrice,
+					//DiscountedPrice = SelectedProduct.DiscountedPrice,
+					ProductDiscount = (selectedProduct?.ProductDiscount == null)
+			                        ? new ()
+			                        : new ()
+		             {
+				          Id = selectedProduct.ProductDiscount.Id,
+				          ProductsId = selectedProduct.ProductDiscount.ProductsId,
+				          DiscountedPrice = selectedProduct.ProductDiscount.DiscountedPrice,
+				          StartDate = selectedProduct.ProductDiscount.StartDate,
+				          EndDate = selectedProduct.ProductDiscount.EndDate
+			         },
 					//Image = SelectedProduct.Image,
 					ProductImages = SelectedProduct.ProductImages?
 		             .Select(img => new ProductImages

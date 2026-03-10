@@ -320,9 +320,7 @@
                 AllItemsLoaded = true;
         }
         else
-        {
-            _ = ShowAlert($"Fehler beim Laden der Bestellungen: {result.Message}");
-        }
+            _ = JS.InvokeVoidAsync($"Fehler beim Laden der Bestellungen: {result.Message}");
     }
     // change status table
     private async Task OnStatusChangedItem(Order order, string value)
@@ -349,7 +347,8 @@
             }
         }
         else
-            _ = ShowAlert("Fehler bei Statusänderung: Ungültige Status-ID");
+            _ = JS.InvokeVoidAsync("Fehler bei Statusänderung: Ungültige Status-ID");
+
         order.IsUpdatingStatus = false;
         StateHasChanged();
     }
@@ -358,7 +357,7 @@
         var result = await orderService.UpdateStatusOrder(order.Id, statusId);
         if (result.Result)
         {
-            _ = ShowAlert("Status erfolgreich geändert");
+            _ = JS.InvokeVoidAsync("window.alert", "Status erfolgreich geändert");
 
             // update exist order status
             order.StatusId = statusId;
@@ -369,7 +368,7 @@
             return;
         }
         else
-            _ = ShowAlert($"Fehler bei Statusänderung: {result.Message}");
+            await JS.InvokeVoidAsync("window.alert", $"Fehler bei Statusänderung: {result.Message}");
     }
     // Overlay click table
     private bool IsOverlayVisible { get; set; } = false;
@@ -431,11 +430,7 @@
         if (address == null) return "Keine Adresse";
         return $"{address.FirstName} {address.LastName}, {address.Street}, {address.ZipCode} {address.City}, {address.Country}, 📞 {address.Phone}";
     }
-    // show alert
-    private async Task ShowAlert(string message)
-    {
-        await JS.InvokeVoidAsync("alert", message);
-    }
+   
     // search 
     public async void OnStatusChanged(ChangeEventArgs e)
     {
@@ -462,7 +457,7 @@
         // check if order is not null
         if (order == null)
         {
-            _ = ShowAlert("Keine Bestellung ausgewählt.");
+            _ = JS.InvokeVoidAsync("Keine Bestellung ausgewählt.");
             return;
         }
         // Vorbereitung die orderAddTrackingNumber von anfang damit die änderung bei orderAddTrackingNumber nicht an ursprüngliche order geändert wird
@@ -481,13 +476,13 @@
 
         if (string.IsNullOrEmpty(orderAddTrackingNumber.TrackingNumber))
         {
-            _ = ShowAlert("Bitte geben Sie eine Trackingnummer ein.");
+            _ = JS.InvokeVoidAsync("Bitte geben Sie eine Trackingnummer ein.");
             return;
         }
         var result = await orderService.AddOrUpdateTrackingNumber(orderAddTrackingNumber.Id, orderAddTrackingNumber.TrackingNumber);
         if (result.Result)
         {
-            _ = ShowAlert(result.Message!);
+            _ = JS.InvokeVoidAsync(result.Message!);
             // update die trackingnummer in ursprüngliche order
             var orderToUpdate = orders.FirstOrDefault(o => o.Id == orderAddTrackingNumber.Id);
             if (orderToUpdate != null)
@@ -502,7 +497,7 @@
         else
         {
             orderAddTrackingNumber.TrackingNumber = null!;
-            _ = ShowAlert($"Fehler beim Hinzufügen der Sendungsnummer: {result.Message}");
+            _ = JS.InvokeVoidAsync($"Fehler beim Hinzufügen der Sendungsnummer: {result.Message}");
         }
 
         IsAddTrackingNumberLoading = false;
@@ -537,7 +532,7 @@
         }
         else
         {
-            _ = ShowAlert($"{result.Message}");
+            _ = JS.InvokeVoidAsync($"{result.Message}");
             IsInvoiceVisible = false;
             return;
         }

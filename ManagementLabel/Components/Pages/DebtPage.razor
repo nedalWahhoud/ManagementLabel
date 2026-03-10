@@ -290,7 +290,7 @@ else
 			debtCustomers = await debtService.GetDebtCustomerByIdAsync(customerId);
 			debtCustomers ??= new DebtCustomers { CustomerId = customerId, Balance = 0 };
 
-			ResetToDefault();
+			await ResetToDefault();
 
 		}
 		else

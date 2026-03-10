@@ -29,7 +29,7 @@
 					</div>
 					<div class="formGroupAdd">
 						<label for="Start">Expiration Date</label>
-						<InputDate TValue="DateTime" class="form-control" @bind-Value="carouselImage.StartDate" />
+						<InputDate TValue="DateTime" class="form-control" @bind-Value="carouselImage!.StartDate" />
 						<ValidationMessage For="@(() => carouselImage.StartDate)" />
 					</div>
 					<div class="formGroupAdd">
@@ -89,7 +89,7 @@
 				var result = await carouselImageService.AddCarouselImageAsync(carouselImage);
 				if (result.Result == false)
 				{
-					await JS.InvokeVoidAsync("showAlert", result.Message);
+					await JS.InvokeVoidAsync("window.alert", result.Message);
 					return;
 				}
 				var idStr = result.Message?.Split(':').LastOrDefault();
@@ -99,7 +99,7 @@
 					var addedCarousel = await carouselImageService.GetCarouselImageByIdAsync(id);
 					if (addedCarousel == null)
 					{
-						await JS.InvokeVoidAsync("showAlert", "Fehler beim Laden des hinzugefügten Carousel Image");
+						await JS.InvokeVoidAsync("window.alert", "Fehler beim Laden des hinzugefügten Carousel Image");
 						return;
 					}
 					// Add the new product to the products list
@@ -110,25 +110,25 @@
 				}
 				else
 				{
-					await JS.InvokeVoidAsync("showAlert", result.Message);
+					await JS.InvokeVoidAsync("window.alert", result.Message);
 				}
 			}
 			else
 			{
 				if (carouselImage == null)
 				{
-					await JS.InvokeVoidAsync("showAlert", "Fehler: Kein Carousel Image zum Aktualisieren ausgewählt");
+					await JS.InvokeVoidAsync("window.alert", "Fehler: Kein Carousel Image zum Aktualisieren ausgewählt");
 					return;
 				}
 				var result = await carouselImageService.UpdateCarouselImageAsync(carouselImage);
-				await JS.InvokeVoidAsync("showAlert", result.Message);
+				await JS.InvokeVoidAsync("window.alert", result.Message);
 				if (result.Result == false)
 					return;
 
 				var updatedCarousel = await carouselImageService.GetCarouselImageByIdAsync(carouselImage.Id);
 				if (updatedCarousel == null)
 				{
-					await JS.InvokeVoidAsync("showAlert", "Fehler beim Laden des aktualisierten Carousel Image");
+					await JS.InvokeVoidAsync("window.alert", "Fehler beim Laden des aktualisierten Carousel Image");
 					return;
 				}
 				int index = carouselImageService.DownloadedCarouselImage.FindIndex(p => p.Id == updatedCarousel.Id);
@@ -172,7 +172,7 @@
 				}
 				else
 				{
-					await JS.InvokeVoidAsync("showAlert", "Fehler keine Image Data gefunden");
+					await JS.InvokeVoidAsync("window.alert", "Fehler keine Image Data gefunden");
 					return;
 				}
 			}
@@ -185,7 +185,7 @@
 				string imageUrl = $"data:image/jpeg;base64,{base64}";
 				if (imageBytes == null || carouselImage == null)
 				{
-					await JS.InvokeVoidAsync("showAlert", "Fehler keine Image Data gefunden");
+					await JS.InvokeVoidAsync("window.alert", "Fehler keine Image Data gefunden");
 					return;
 				}
 				carouselImage.ImageUrlLocal = imageUrl;
@@ -195,7 +195,7 @@
 		}
 		catch (Exception ex)
 		{
-			await JS.InvokeVoidAsync("showAlert", ex.Message);
+			await JS.InvokeVoidAsync("window.alert", ex.Message);
 		}
 	}
 	private async Task SelectAllContent()

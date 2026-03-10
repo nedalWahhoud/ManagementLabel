@@ -129,14 +129,12 @@
         var result = await discountService.AddDiscountCode(newDiscountCode);
         if (result.Result)
         {
-            _ = ShowAlert("Rabattcode erfolgreich hinzugefügt!");
+            await JS.InvokeVoidAsync("window.alert", "Rabattcode erfolgreich hinzugefügt!");
             CloseAddCodeForm();
             StateHasChanged();
         }
         else
-        {
-            _ = ShowAlert(result.Message!);
-        }
+            await JS.InvokeVoidAsync("window.alert", result.Message!);
     }
     private bool IsOverlayAddCode = false;
     private void OpenAddForm()
@@ -169,13 +167,13 @@
         var result = await discountService.AddDiscountCategory(newDiscountCategory);
         if (result.Result)
         {
-            _ = ShowAlert("Rabattkategorie erfolgreich hinzugefügt!");
+            await JS.InvokeVoidAsync("window.alert", "Rabattkategorie erfolgreich hinzugefügt!");
             CloseAddCategoryForm();
             StateHasChanged();
         }
         else
         {
-            _ = ShowAlert(result.Message!);
+            await JS.InvokeVoidAsync("window.alert", result.Message!);
         }
 
     }
@@ -191,11 +189,7 @@
         newDiscountCategory = new DiscountCategory(); // Reset the form
     }
  
-    private async Task ShowAlert(string message)
-    {
-        await JS.InvokeVoidAsync("alert", message);
-    }
-
+ 
     // select all content in input when focus
     private async Task SelectAllContent()
     {

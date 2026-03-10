@@ -215,7 +215,7 @@
 		}
 		catch (Exception ex)
 		{
-			 _ =  JS.InvokeVoidAsync("showAlert", $"Fehler beim Speichern der Rechnung: {ex.Message}");
+			_ = JS.InvokeVoidAsync("window.alert", $"Fehler beim Speichern der Rechnung: {ex.Message}");
 		}
 	}
 }

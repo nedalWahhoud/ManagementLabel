@@ -114,9 +114,14 @@ namespace ManagementLabel.ProductsF
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
-                return result ?? new ValidationResult { Result = false, Message = "Unbekannte Fehler." };
+
+                if (result?.Result == true &&  result.NewId != null)
+                    return result;
+                else
+                    return new ValidationResult { Result = false, Message = "Unbekannte Fehler." };
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
@@ -177,7 +182,7 @@ namespace ManagementLabel.ProductsF
 
                 var url = QueryHelpers.AddQueryString("api/Products/getProductsLowStock", queryParams!);
 
-                if (excludeProductsIds != null && excludeProductsIds.Any())
+                if (excludeProductsIds != null && excludeProductsIds.Count != 0)
                 {
                     foreach (var id in excludeProductsIds)
                     {
@@ -216,8 +221,6 @@ namespace ManagementLabel.ProductsF
                 var product = await response.Content.ReadFromJsonAsync<Products>();
                 if (product != null)
                 {
-                    // add the product to the local list
-                    AddProductToLocal(product!);
                     return product!;
                 }
                 return null!;
@@ -267,12 +270,92 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.IsShippable != editProduct.IsShippable)
                 return true;
-            if (currentProduct.DiscountedPrice != editProduct.DiscountedPrice)
+            if (HasDiscountChanged(currentProduct.ProductDiscount,editProduct.ProductDiscount))
                 return true;
             if (currentProduct.ProductImages.FirstOrDefault(i => i.IsMain)?.LastModified != editProduct.ProductImages.FirstOrDefault(i => i.IsMain)?.LastModified)
                 return true;
 
             return false;
+        }
+        private bool HasDiscountChanged(ProductDiscounts? oldDiscount, ProductDiscounts? newDiscount)
+        {
+            var effectiveOld = (oldDiscount == null || oldDiscount.DiscountedPrice <= 0) ? null : oldDiscount;
+            var effectiveNew = (newDiscount == null || newDiscount.DiscountedPrice <= 0) ? null : newDiscount;
+
+
+            if (effectiveOld == null && effectiveNew == null)
+                return false;
+
+            if (effectiveOld == null || effectiveNew == null)
+                return true;
+
+            return effectiveOld.DiscountedPrice != effectiveNew.DiscountedPrice ||
+                   effectiveOld.StartDate != effectiveNew.StartDate ||
+                   effectiveOld.EndDate != effectiveNew.EndDate;
+        }
+        public ValidationResult IsValidProduct(Products newProduct)
+        {
+            if (string.IsNullOrWhiteSpace(newProduct.Name_de))
+            {
+                return new ValidationResult () { NewId = null, Result = false, Message = "Die Angabe des Produktnamens ist erforderlich." };
+            }
+
+            if (string.IsNullOrWhiteSpace(newProduct.Description_de))
+            {
+                return new ValidationResult() { Result = false, Message = "Die Angabe der Produktbeschreibung ist erforderlich." };
+            }
+            if (string.IsNullOrWhiteSpace(newProduct.Name_ar))
+            {
+                return new ValidationResult() { Result = false, Message = "Die Angabe des Produktnamens_ar ist erforderlich." };
+            }
+
+            if (string.IsNullOrWhiteSpace(newProduct.Description_ar))
+            {
+                return new ValidationResult() { Result = false, Message = "Die Angabe der Produktbeschreibung_ar ist erforderlich." };
+              
+            }
+
+            if (newProduct!.CategoryId <= 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Eine Kategorie ist erforderlich." };
+            }
+            if (newProduct.Quantity < 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Die Menge muss größer als -1 sein." };
+            }
+            if (newProduct.SalePrice <= 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Der Verkaufspreis muss größer als 0 sein." };
+            }
+            if (newProduct.PurchasePrice <= 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Der Einkaufspreis muss größer als 0 sein." };
+            }
+            if (newProduct.MinimumStock < 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Der Mindestbestand muss größer als -1 sein." };
+            }
+            if (newProduct.ManufacturerId <= 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Ein Hersteller ist erforderlich." };
+            }
+            if (newProduct.TaxRateId <= 0)
+            {
+                return new ValidationResult() { Result = false, Message = "Ein Steuersatz ist erforderlich." };
+            }
+           /* if (newProduct.EXPDate < DateTime.Now)
+            {
+                return new ValidationResult() {Result = false, Message = "Das Ablaufdatum muss größer als das aktuelle Datum sein." };
+            }*/
+            foreach (var item in newProduct.ProductImages)
+            {
+
+                if (item.ImageBytes == null || (item.ImageBytes != null && item.ImageBytes.Length <= 0))
+                {
+                    return new ValidationResult() {Result = false, Message = "Das Hauptbild ist erforderlich." };
+                }
+            }
+            return new ValidationResult() {Result = true, Message =string.Empty };
         }
         //
         public async Task<List<PaymentMethod>> GetPaymentMethodsAsync()
@@ -317,10 +400,9 @@ namespace ManagementLabel.ProductsF
         }
         public List<Products> GetProductByCategoryIdLocal(int categoryId)
         {
-            return DownloadedProduct
+            return [.. DownloadedProduct
                     .Where(p => p.CategoryId == categoryId)
-                    .OrderBy(p => p.Name_de)
-                    .ToList();
+                    .OrderBy(p => p.Name_de)];
         }
         public Products GetProductByIdLocal(int productId)
         {
