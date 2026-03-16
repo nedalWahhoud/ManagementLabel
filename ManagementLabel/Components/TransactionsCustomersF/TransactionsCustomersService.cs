@@ -30,17 +30,27 @@ namespace ManagementLabel.Components.TransactionsCustomersF
 
                 if (result != null && result.Result == true)
                 {
-                    transaction = await GetTransactionsCustomerByIdAsync(result.NewId!.Value);
-                    if(transaction == null)
-                        return new ValidationResult { Result = false, Message = "Transaktion konnte nicht gefunden werden." };  
+                    // -100 ist ein spezieller Wert, der anzeigt, dass die Transaktion erfolgreich hinzugefügt wurde, aber die ID nicht zurückgegeben werden kann, da sie von einem Trigger alle Transaktons gelöscht wurden, weil die Balance == 0.
+                    if (result.NewId != -100)
+                    {
+                        transaction = await GetTransactionsCustomerByIdAsync(result.NewId!.Value);
+                        if (transaction == null)
+                            return new ValidationResult { Result = false, Message = "Transaktion konnte nicht gefunden werden." };
 
-                    AddToLocal(transaction, 0);
-                    return result;
+                        AddToLocal(transaction, 0);
+                        return result;
+                    }
+                    else
+                    {
+                        // Lokalen Cache leeren und Transaktionen neu laden
+                        DownloadedTransactionsCustomers.Clear();
+                        // Alle Transaktionen abrufen, um den lokalen Cache zu aktualisieren
+                        await GetTransactionsCustomersAsync();
+                        return result;
+                    }
                 }
                 else
-                {
                     return result ?? new ValidationResult { Result = false, Message = "Unbekannte Fehler." };
-                }
             }
             catch (Exception ex)
             {

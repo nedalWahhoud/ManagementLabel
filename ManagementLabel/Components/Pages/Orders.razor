@@ -252,7 +252,10 @@
 
         </div>
         @* Rechnung *@
-        <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice" IsInvoiceVisible="IsInvoiceVisible" OnClose="HandleInvoiceClose" />
+        @if (IsInvoiceVisible)
+        {
+            <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnClose="HandleInvoiceClose" />
+        }
     </Authorized>
     <NotAuthorized>
         <ManagementLabel.Components.Pages.LogIn />

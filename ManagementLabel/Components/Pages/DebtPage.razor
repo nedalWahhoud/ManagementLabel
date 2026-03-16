@@ -42,14 +42,14 @@ else
 	<div class="w-100">
 		@* Schulden anzeigen *@
 		<div class="card mb-3 shadow-sm">
-		
+
 			<div class="card-body text-center">
 				<h5 class="text-muted mb-2">Aktueller Schuldenbetrag</h5>
 				<h2 class=" @(debtCustomers?.Balance > 0 ? "text-danger" : "text-success")  fw-bold">
 					@(debtCustomers?.Balance.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("de-DE")))
 				</h2>
 			</div>
-			
+
 		</div>
 		@* schulden bearbeiten *@
 		<div class="card shadow-sm m-3">
@@ -211,11 +211,8 @@ else
 @code {
 
 	/* debtCustomers funktion werden in trigger gemacht */
-
 	[Parameter]
 	public int customerId { get; set; }
-
-
 
 	private Customers customer = null!;
 	private DebtCustomers debtCustomers = null!;
@@ -231,8 +228,8 @@ else
 
 		// initialize draft balance
 		debtCustomers.DraftBalance = debtCustomers.Balance;
-		// initialize  transactionsCustomersService
-		transactionsCustomersService.GetItems = new GetItems<TransactionsCustomers> { Id = customerId, PageSize = 10, };
+		// initialize  transactionsCustomersService und setze customerId für GetItems
+		transactionsCustomersService.GetItems = new GetItems<TransactionsCustomers> { Id = customerId, PageSize = 10 };
 
 		// clear list if customerId changed
 		if (transactionsCustomersService.DownloadedTransactionsCustomers != null && transactionsCustomersService.DownloadedTransactionsCustomers.Count > 0
