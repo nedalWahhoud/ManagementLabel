@@ -3,258 +3,265 @@
 
 <AuthorizeView>
     <Authorized Context="authContext">
-        <!-- user info -->
-        <p class="userInfo">
-            <span class="userName">User Name: @authContext.User.Identity!.Name</span>
-        </p>
-        @* top continer *@
-        <div class="@(Isloading ? "hidden":"topContiner")">
-            <!-- Dropdown -->
-            <select class="statusDropdown" @onchange="OnStatusChanged">
-                <option value="0">Alle Bestellungen</option>
-                @foreach (var status in orderService.OrderStatusList)
-                {
-                    <option value="@status.Id">@status.Status_de</option>
-                }
-            </select>
-        </div>
-        @* table *@
-        <div class="tableContiner">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">B-Nr.</th>
-                        <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">U-Nr.</th>
-                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Benutzer</th>
-                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Datum</th>
-                        <th style="min-width:140px; max-width: 150px; word-break: break-word; white-space: normal;">Z-Methode</th>
-                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Rabatt</th>
-                        <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">G-preis</th>
-                        <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Status</th>
-                        <th style="min-width:150px; max-width: 50px; word-break: break-word; white-space: normal;">V-kosten</th>
-                        <th style="min-width:120px; max-width: 50px; word-break: break-word; white-space: normal;">V-anbieter</th>
-                        <th style="min-width:120px; max-width: 50px; word-break: break-word; white-space: normal;">V-nummer</th>
-                        <th style="min-width:80px; max-width: 250px; word-break: break-word; white-space: normal;">Notiz</th>
-                        <th style="min-width:40px;">⋮</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    @* Loading message *@
-                    @if (Isloading || IsOrdersLoading)
+        @if (authContext.User.HasClaim("permission", "manageOrders") || authContext.User.HasClaim("permission", "fullAccess"))
+        { 
+            @* top continer *@
+            <div class="@(Isloading ? "hidden":"topContiner")">
+                <!-- Dropdown -->
+                <select class="statusDropdown" @onchange="OnStatusChanged">
+                    <option value="0">Alle Bestellungen</option>
+                    @foreach (var status in orderService.OrderStatusList)
                     {
-                        <tr>
-                            <td colspan="12" class="loadingMessage">
-                                Lädt...
-                            </td>
-                        </tr>
+                        <option value="@status.Id">@status.Status_de</option>
                     }
-                    @for (int i = 0; i < orders.Count; i++)
-                    {
-                        var order = orders[i];
+                </select>
+            </div>
+            @* table *@
+            <div class="tableContiner">
+                <table class="table">
+                    <thead>
                         <tr>
-                            @{
-                                var germanCulture = new System.Globalization.CultureInfo("de-DE");
-                            }
-                            <td>@order.Id</td>
-                            <td>@order.UserId</td>
-                            <td>@(order.User?.UserName ?? "Kein Unsername")</td>
-                            <td>@order.OrderDate.ToString("d", germanCulture)</td>
-                            <td>@order.PaymentMethod?.Description_de</td>
-                            <td>
-                                @* Discount *@
-                                @if (order.DiscountCode != null)
-                                {
-                                    var discountDetails = invoiceService.GetDetailsDiscountCode(order);
+                            <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">B-Nr.</th>
+                            <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">U-Nr.</th>
+                            <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Benutzer</th>
+                            <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Datum</th>
+                            <th style="min-width:140px; max-width: 150px; word-break: break-word; white-space: normal;">Z-Methode</th>
+                            <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Rabatt</th>
+                            <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">G-preis</th>
+                            <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Status</th>
+                            <th style="min-width:150px; max-width: 50px; word-break: break-word; white-space: normal;">V-kosten</th>
+                            <th style="min-width:120px; max-width: 50px; word-break: break-word; white-space: normal;">V-anbieter</th>
+                            <th style="min-width:120px; max-width: 50px; word-break: break-word; white-space: normal;">V-nummer</th>
+                            <th style="min-width:80px; max-width: 250px; word-break: break-word; white-space: normal;">Notiz</th>
+                            <th style="min-width:40px;">⋮</th>
 
-                                    @($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* Loading message *@
+                        @if (Isloading || IsOrdersLoading)
+                        {
+                            <tr>
+                                <td colspan="12" class="loadingMessage">
+                                    Lädt...
+                                </td>
+                            </tr>
+                        }
+                        @for (int i = 0; i < orders.Count; i++)
+                        {
+                            var order = orders[i];
+                            <tr>
+                                @{
+                                    var germanCulture = new System.Globalization.CultureInfo("de-DE");
                                 }
-                                else if (order.DiscountCategory != null)
-                                {
-                                    var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
-
-                                    @($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
-                                }
-                                else
-                                {
-                                    <span>Kein Rabatt</span>
-                                }
-                            </td>
-                            <td>@order.TotalPrice.ToString("C", germanCulture)</td>
-                            <td>
-                                <InputSelect Value="@order.StatusId"
-                                ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
-                                ValueExpression="() => order.StatusId"
-                                class="form-select"
-                                disabled="@order.IsUpdatingStatus">
-                                    @foreach (var status in orderService.OrderStatusList)
+                                <td>@order.Id</td>
+                                <td>@order.UserId</td>
+                                <td>@(order.User?.UserName ?? "Kein Unsername")</td>
+                                <td>@order.OrderDate.ToString("d", germanCulture)</td>
+                                <td>@order.PaymentMethod?.Description_de</td>
+                                <td>
+                                    @* Discount *@
+                                    @if (order.DiscountCode != null)
                                     {
-                                        <option value="@status.Id">@status.Status_de</option>
+                                        var discountDetails = invoiceService.GetDetailsDiscountCode(order);
+
+                                        @($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
                                     }
-                                </InputSelect>
+                                    else if (order.DiscountCategory != null)
+                                    {
+                                        var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
 
-                                @if (order.IsUpdatingStatus)
-                                {
-                                    <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
-                                        <span class="visually-hidden">Laden...</span>
-                                    </div>
-                                }
-                            </td>
-                            <td>
-                                @order.ShippingProviders?.PublicShippingCost.ToString("C", germanCulture)
-                            </td>
-                            <td>
-                                @if(order.ShippingProviderId != null && order.ShippingProviders != null)
-                                {
-                                    @order.ShippingProviders.Name_de
-                                }
-                            </td>
-                            <td>
-                                @if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber == null)
-                                {
-                                    <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(order)">Add Sendungsnummer</button>
-                                }
-                                else if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber != null)
-                                {
-                                    <span style="cursor:pointer;" @ondblclick=" ()=> OnAddOrUpdateTrackingNumberShowOverlay(order)">@order.TrackingNumber</span>
-                                }
-                                else
-                                {
-                                    <span>Nicht Möglich</span>
-                                }
-                            </td>
-                            <td>@order.Notes</td>
-                            <td>
-                                <div class="dropdown">
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        ⋮
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnAddress(order.Address!)">Adresse anzeigen</a></li>
-                                        <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnEmail(order.User?.Email)">E-mail anzeigen</a></li>
-                                        <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">Rechnung erstellen</a></li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="8">
-                                <table class="table tableSm">
-                                    <thead>
-                                        <tr>
-                                            <th>Image</th>
-                                            <th>Produkt</th>
-                                            <th>Menge</th>
-                                            <th>Einzelpreis</th>
-                                            <th>Gesamt</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in order.OrderItems)
+                                        @($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
+                                    }
+                                    else
+                                    {
+                                        <span>Kein Rabatt</span>
+                                    }
+                                </td>
+                                <td>@order.TotalPrice.ToString("C", germanCulture)</td>
+                                <td>
+                                    <InputSelect Value="@order.StatusId"
+                                    ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
+                                    ValueExpression="() => order.StatusId"
+                                    class="form-select"
+                                    disabled="@order.IsUpdatingStatus">
+                                        @foreach (var status in orderService.OrderStatusList)
                                         {
-                                            <tr>
-                                                <td>
-                                                    <img src="@productImagesService.GetProductImageUrl(item.Product?.ProductImages.FirstOrDefault(img => img.IsMain)!)" class="productImg" />
-                                                </td>
-                                                <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
-                                                <td>@item.Quantity</td>
-                                                <td>@item.UnitPrice.ToString("C", germanCulture)</td>
-                                                <td>@((item.UnitPrice * item.Quantity).ToString("C", germanCulture))</td>
-
-                                            </tr>
+                                            <option value="@status.Id">@status.Status_de</option>
                                         }
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                    }
-                    @* No orders found *@
-                    @if (orders.Count == 0 && !Isloading && !IsOrdersLoading)
-                    {
-                        <tr>
-                            <td colspan="12" class="loadingMessage">
-                                Keine Bestellungen gefunden.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            @* Mehr laden *@
-            @if (orders.Count > 0)
-            {
-                <button type="submit" class="btn btn-primary" @onclick="() => OnMoreLoad()" disabled="@(IsOrdersLoading || AllItemsLoaded)">
-                    @if (IsOrdersLoading)
-                    {
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span class="ms-2">Lädt...</span>
-                    }
-                    else if (!AllItemsLoaded)
-                    {
-                        <span>Mehr laden</span>
-                    }
-                    @if (AllItemsLoaded)
-                    {
-                        <span>Alle geladen</span>
-                    }
-                </button>
-            }
-            @* show address *@
-            @if (IsOverlayVisible &&  overlayItems != null)
-            {
-                <div class="overlay" @onclick="CloseAddress">
-                    <div class="overlayForm">
-                        @if (string.IsNullOrEmpty(overlayItems.NoData))
-                        {
-                            <h4>@overlayItems.Title</h4>
-                            @((MarkupString)overlayItems.P1)
-                            @((MarkupString)overlayItems.P2)
-                            @((MarkupString)overlayItems.P3)
-                            @((MarkupString)overlayItems.P4)
-                            @((MarkupString)overlayItems.P5)
+                                    </InputSelect>
+
+                                    @if (order.IsUpdatingStatus)
+                                    {
+                                        <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
+                                            <span class="visually-hidden">Laden...</span>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @order.ShippingProviders?.PublicShippingCost.ToString("C", germanCulture)
+                                </td>
+                                <td>
+                                    @if(order.ShippingProviderId != null && order.ShippingProviders != null)
+                                    {
+                                        @order.ShippingProviders.Name_de
+                                    }
+                                </td>
+                                <td>
+                                    @if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber == null)
+                                    {
+                                        <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(order)">Add Sendungsnummer</button>
+                                    }
+                                    else if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && order.TrackingNumber != null)
+                                    {
+                                        <span style="cursor:pointer;" @ondblclick=" ()=> OnAddOrUpdateTrackingNumberShowOverlay(order)">@order.TrackingNumber</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Nicht Möglich</span>
+                                    }
+                                </td>
+                                <td>@order.Notes</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            ⋮
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnAddress(order.Address!)">Adresse anzeigen</a></li>
+                                            <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnEmail(order.User?.Email)">E-mail anzeigen</a></li>
+                                            <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">Rechnung erstellen</a></li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="8">
+                                    <table class="table tableSm">
+                                        <thead>
+                                            <tr>
+                                                <th>Image</th>
+                                                <th>Produkt</th>
+                                                <th>Menge</th>
+                                                <th>Einzelpreis</th>
+                                                <th>Gesamt</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in order.OrderItems)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <img src="@productImagesService.GetProductImageUrl(item.Product?.ProductImages.FirstOrDefault(img => img.IsMain)!)" class="productImg" />
+                                                    </td>
+                                                    <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
+                                                    <td>@item.Quantity</td>
+                                                    <td>@item.UnitPrice.ToString("C", germanCulture)</td>
+                                                    <td>@((item.UnitPrice * item.Quantity).ToString("C", germanCulture))</td>
+
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
                         }
-                        else
+                        @* No orders found *@
+                        @if (orders.Count == 0 && !Isloading && !IsOrdersLoading)
                         {
-                            @((MarkupString)overlayItems.NoData)
+                            <tr>
+                                <td colspan="12" class="loadingMessage">
+                                    Keine Bestellungen gefunden.
+                                </td>
+                            </tr>
                         }
-                        <button class="btn btn-primary" @onclick="CloseAddress">Schließen</button>
+                    </tbody>
+                </table>
+                @* Mehr laden *@
+                @if (orders.Count > 0)
+                {
+                    <button type="submit" class="btn btn-primary" @onclick="() => OnMoreLoad()" disabled="@(IsOrdersLoading || AllItemsLoaded)">
+                        @if (IsOrdersLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-2">Lädt...</span>
+                        }
+                        else if (!AllItemsLoaded)
+                        {
+                            <span>Mehr laden</span>
+                        }
+                        @if (AllItemsLoaded)
+                        {
+                            <span>Alle geladen</span>
+                        }
+                    </button>
+                }
+                @* show address *@
+                @if (IsOverlayVisible &&  overlayItems != null)
+                {
+                    <div class="overlay" @onclick="CloseAddress">
+                        <div class="overlayForm">
+                            @if (string.IsNullOrEmpty(overlayItems.NoData))
+                            {
+                                <h4>@overlayItems.Title</h4>
+                                @((MarkupString)overlayItems.P1)
+                                @((MarkupString)overlayItems.P2)
+                                @((MarkupString)overlayItems.P3)
+                                @((MarkupString)overlayItems.P4)
+                                @((MarkupString)overlayItems.P5)
+                            }
+                            else
+                            {
+                                @((MarkupString)overlayItems.NoData)
+                            }
+                            <button class="btn btn-primary" @onclick="CloseAddress">Schließen</button>
+                        </div>
                     </div>
-                </div>
-            }
-            @* show Add Tracking Number *@
-            @if(IsAddTrackingNumberVisible)
-            {
-                <div class="overlay">
-                    <div class="overlayForm">
-                        <EditForm Model="orderAddTrackingNumber" OnValidSubmit="OnAddOrUpdateTrackingNumber">
-                            <DataAnnotationsValidator />
-                            <p>Bitte geben Sie die Trackingnummer ein:</p>
-                            <div class="formGroupAdd">
-                                <InputText class="form-control" @bind-value="orderAddTrackingNumber.TrackingNumber" placeholder="Trackingnummer" />
-                                <ValidationMessage For="@(() => orderAddTrackingNumber.TrackingNumber)" />
-                            </div>
-                            <button type="submit" class="btn btn-primary mt-2" disabled="@IsAddTrackingNumberLoading">
-                                @if (IsAddTrackingNumberLoading)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span class="ms-2">Ladt...</span>
-                                }
-                                else
-                                {
-                                    <span>Hinzufügen</span>
-                                }
-                            </button>
-                            <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">Abbrechen</button>
-                        </EditForm>
+                }
+                @* show Add Tracking Number *@
+                @if(IsAddTrackingNumberVisible)
+                {
+                    <div class="overlay">
+                        <div class="overlayForm">
+                            <EditForm Model="orderAddTrackingNumber" OnValidSubmit="OnAddOrUpdateTrackingNumber">
+                                <DataAnnotationsValidator />
+                                <p>Bitte geben Sie die Trackingnummer ein:</p>
+                                <div class="formGroupAdd">
+                                    <InputText class="form-control" @bind-value="orderAddTrackingNumber.TrackingNumber" placeholder="Trackingnummer" />
+                                    <ValidationMessage For="@(() => orderAddTrackingNumber.TrackingNumber)" />
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-2" disabled="@IsAddTrackingNumberLoading">
+                                    @if (IsAddTrackingNumberLoading)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        <span class="ms-2">Ladt...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Hinzufügen</span>
+                                    }
+                                </button>
+                                <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">Abbrechen</button>
+                            </EditForm>
+                        </div>
                     </div>
-                </div>
-            }
+                }
 
 
-        </div>
-        @* Rechnung *@
-        @if (IsInvoiceVisible)
+            </div>
+            @* Rechnung *@
+            @if (IsInvoiceVisible)
+            {
+                <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnClose="HandleInvoiceClose" />
+            }
+        }
+        else
         {
-            <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnClose="HandleInvoiceClose" />
+            <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+                <div class="alert alert-danger text-center">
+                    Sie haben keine Berechtigung für diese Seite
+                </div>
+            </div>
         }
     </Authorized>
     <NotAuthorized>
@@ -267,14 +274,20 @@
     private List<Order> orders = new List<Order>();
     protected override async Task OnInitializedAsync()
     {
-        Isloading = true;
-        // get BankTransferDetails
-        _ = invoiceService.GetBankTransferDetailsAsync();
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var canViewCoupons = user.HasClaim("permission", "manageOrders") ||
+                                user.HasClaim("permission", "fullAccess");
+        if (canViewCoupons)
+        {
+            // get BankTransferDetails
+            _ = invoiceService.GetBankTransferDetailsAsync();
 
-        // get orderstatus list
-        await orderService.GetOrderStatusListAsync();
-        // get first orders
-        await OnMoreLoad();
+            // get orderstatus list
+            await orderService.GetOrderStatusListAsync();
+            // get first orders
+            await OnMoreLoad();
+        }
 
         Isloading = false;
     }

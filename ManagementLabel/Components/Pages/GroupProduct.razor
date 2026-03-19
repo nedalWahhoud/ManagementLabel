@@ -1,63 +1,86 @@
 ﻿@page "/groupproduct"
-<h3>Produktgruppen</h3>
-<div class="main">
-	<button class="btn btn-success mb-3" @onclick="NewGroup">
-		➕ Add neue Gruppe
-	</button>
-	<table class="table table-bordered table-hover">
-		<tr>
-			<th>Id</th>
-			<th>Name de</th>
-			<th>Name ar</th>
-		</tr>
-		<tbody>
-			@foreach (var group in productGroupService.DownloadedproductGroups)
+<AuthorizeView>
+	<Authorized Context="authContext">
+		<div class="main">
+			@if (authContext.User.HasClaim("permission", "manageProduct_groups") || authContext.User.HasClaim("permission", "fullAccess"))
 			{
-				<tr>
-					<td>@group.Id</td>
-					<td>@group.GroupName_de</td>
-					<td>@group.GroupName_ar</td>
-					<td>
-						<button class="btn btn-sm btn-warning me-1"
-								@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessing.Item1">
-							Bearbeiten
-						</button>
-						<button class="btn btn-sm btn-danger"
-								@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessing.Item1">
-							@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == group.Id)
-							{
-								<span class="spinner-border spinner-border-sm"
-									  role="status"
-									  aria-hidden="true"></span>
-							}
-							else
-							{
-								<span>Löschen</span>
-							}
-						</button>
-					</td>
-				</tr>
+				<button class="btn btn-success mb-3" @onclick="NewGroup">
+					➕ Add neue Gruppe
+				</button>
+				<table class="table table-bordered table-hover">
+					<tr>
+						<th>Id</th>
+						<th>Name de</th>
+						<th>Name ar</th>
+					</tr>
+					<tbody>
+						@foreach (var group in productGroupService.DownloadedproductGroups)
+						{
+							<tr>
+								<td>@group.Id</td>
+								<td>@group.GroupName_de</td>
+								<td>@group.GroupName_ar</td>
+								<td>
+									<button class="btn btn-sm btn-warning me-1"
+									@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessing.Item1">
+										Bearbeiten
+									</button>
+									<button class="btn btn-sm btn-danger"
+									@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessing.Item1">
+										@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == group.Id)
+										{
+											<span class="spinner-border spinner-border-sm"
+											role="status"
+											aria-hidden="true"></span>
+										}
+										else
+										{
+											<span>Löschen</span>
+										}
+									</button>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
 			}
-		</tbody>
-	</table>
-</div>
+			else
+			{
+				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+					<div class="alert alert-danger text-center">
+						Sie haben keine Berechtigung für diese Seite
+					</div>
+				</div>
+			}
+		</div>
 
-@if (IsAdding)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="new GroupProducts()" Action="Add" OnHandel="HandleEditAddGroupProduct" />
-}
-@if (IsEditing)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="EditingGroupProduct" Action="Edit" OnHandel="HandleEditAddGroupProduct" />
-}
-
+		@if (IsAdding)
+		{
+			<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="new GroupProducts()" Action="Add" OnHandel="HandleEditAddGroupProduct" />
+		}
+		@if (IsEditing)
+		{
+			<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="EditingGroupProduct" Action="Edit" OnHandel="HandleEditAddGroupProduct" />
+		}
+	</Authorized>
+	<NotAuthorized>
+		<ManagementLabel.Components.Pages.LogIn />
+	</NotAuthorized>
+</AuthorizeView>
 @code {
 	private GroupProducts EditingGroupProduct = null!;
 	private bool IsEditing = false;
 	private bool IsAdding = false;
 	protected async override Task OnInitializedAsync()
 	{
-		await productGroupService.GetAllGroupProductsAsync();
+		var authState = await authProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var canViewCoupons = user.HasClaim("permission", "manageProduct_groups") ||
+								user.HasClaim("permission", "fullAccess");
+		if (canViewCoupons)
+		{
+			await productGroupService.GetAllGroupProductsAsync();
+		}
 	}
 
 	private void NewGroup()

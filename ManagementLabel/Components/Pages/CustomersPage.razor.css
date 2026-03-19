@@ -63,7 +63,14 @@
                 background-color: #007bff;
                 color: white;
             }
-
+/* dropdown */
+.disabledItem {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+    text-decoration: none;
+    color: gray;
+}
 .dropdown-menu {
     margin-top: 5px;
 }

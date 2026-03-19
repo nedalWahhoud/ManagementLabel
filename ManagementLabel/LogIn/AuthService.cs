@@ -44,27 +44,35 @@ namespace ManagementLabel.LogIn
         }
         public async Task Logout()
         {
-            if (_authStateProvider is CustomAuthStateProvider customAuthStateProvider)
-            {
-                await customAuthStateProvider.NotifyUserLogout();
-            }
-            _http!.DefaultRequestHeaders.Authorization = null;
-        }
-        public async Task<ValidationResult> CheckAdminStatus(int id)
-        {
             try
             {
-                HttpResponseMessage response = await _http!.GetAsync($"api/Users/checkAdminStatus/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Administratorprüfung fehlgeschlagen." };
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
-                return result ?? new ValidationResult { Result = false, Message = "Administratorprüfung fehlgeschlagen." };
+                if (_authStateProvider is CustomAuthStateProvider customAuthStateProvider)
+                {
+                    await customAuthStateProvider.NotifyUserLogout();
+                }
+                _http!.DefaultRequestHeaders.Authorization = null;
             }
             catch (Exception ex)
             {
-                return new ValidationResult { Result = false, Message = $"Bei der Administratorprüfung ist ein Fehler aufgetreten.: {ex.Message}" };
+                Console.WriteLine($"An error occurred during logout: {ex.Message}");
             }
         }
+        public async Task<LoginModel> GetItemsUsersAsync(int id)
+        {
+            try
+            {
+                HttpResponseMessage response = await _http!.GetAsync($"api/Users/getUserById/{id}");
+                if (!response.IsSuccessStatusCode)
+                    return null!;
+                var result = await response.Content.ReadFromJsonAsync<LoginModel>();
+                return result ?? null!;
+            }
+            catch
+            {
+                return null!;
+            }
+        }
+
         // google login
         public ValidationResult GoogleLogin(LoginModel loginModel)
         {

@@ -35,37 +35,64 @@ else
 @code {
 
     private bool isRended = false;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await  CheckAdminStatusAsync();
-            // Initialize the orderService to start count funktion of openOrders 
-            orderService.InitializeAsync();
+            try
+            {
+                await CheckAdminStatusAsync();
+                // Initialize the orderService to start count funktion of openOrders
+                orderService.InitializeAsync();
 
-            isRended = true;
+                isRended = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler bei der Initialisierung von MainLyout: {ex.Message}");
+                // Optionally, you can set isRended to true to show the UI even if there's an error
+                isRended = true;
+            }
+
             StateHasChanged();
         }
     }
+
     private async Task CheckAdminStatusAsync()
     {
         // check admin status
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        if (user.Identity != null && user.Identity.IsAuthenticated)
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var localUser = authState.User;
+        if (localUser.Identity != null && localUser.Identity.IsAuthenticated)
         {
-            var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
+            var userIdStr = localUser.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
             if (int.TryParse(userIdStr, out int userIdInt))
             {
+                LoginModel loginModel = await authService.GetItemsUsersAsync(userIdInt);
 
-                var result = await authService.CheckAdminStatus(userIdInt);
-                if (!result.Result && (result.Message == "kein Admin" || result.Message == "nicht gefunden"))
+                if (loginModel == null)
                 {
                     await authService.Logout();
+                    return;
+                }
+                else
+                {
+                    var claimsIdentity = (authProvider as CustomAuthStateProvider)?.GetIdentity(loginModel.Token);
+                    if (claimsIdentity == null)
+                        return;
+
+					if (!claimsIdentity.HasClaim(ClaimTypes.Role, "admin"))
+                    {
+                        await authService.Logout();
+                        return;
+                    }
+                    // Benachrichtige den Anbieter des Authentifizierungsstatus über den neuen Authentifizierungsstatus.
+                    (authProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(loginModel.Token);
+                    // aktualisieren Sie den Token im Local Storage
+                    (authProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", loginModel.Token);
                 }
             }
         }
     }
-
-  
 }

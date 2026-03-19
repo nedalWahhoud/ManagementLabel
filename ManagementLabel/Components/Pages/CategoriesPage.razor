@@ -1,67 +1,92 @@
 ﻿@page "/categories"
-<h3>Categories</h3>
-<div class="main">
-	<button class="btn btn-success mb-3" @onclick="NewCategory">
-		➕ Add neue Category
-	</button>
-	<table class="table table-bordered table-hover">
-		<tr>
-			<th>Id</th>
-			<th>Name de</th>
-			<th>Name ar</th>
-			<th>Ab 18 Jahren</th>
-			<th>Ist Aktiv</th>
-		</tr>
-		<tbody>
-			@foreach (var category in categoryService.DownloadedCategories)
+<AuthorizeView>
+	<Authorized Context="authContext">
+		<div class="main">
+			@if (authContext.User.HasClaim("permission", "manageCategories") || authContext.User.HasClaim("permission", "fullAccess"))
 			{
-				<tr>
-					<td>@category.Id</td>
-					<td>@category.Name_de</td>
-					<td>@category.Name_ar</td>
-					<td><InputCheckbox @bind-Value="category.Requires18Plus" /></td>
-					<td><InputCheckbox @bind-Value="category.IsAktiv" /></td>
-					<td>
-						<button class="btn btn-sm btn-warning me-1"
-								@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
-							Bearbeiten
-						</button>
-						<button class="btn btn-sm btn-danger"
-						@onclick="() => DeleteGroup(category.Id)" disabled="@IsDeletingProcessing.Item1">
-						@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == category.Id)
+				<button class="btn btn-success mb-3" @onclick="NewCategory">
+					➕ Add neue Category
+				</button>
+				<table class="table table-bordered table-hover">
+					<tr>
+						<th>Id</th>
+						<th>Name de</th>
+						<th>Name ar</th>
+						<th>Ab 18 Jahren</th>
+						<th>Ist Aktiv</th>
+					</tr>
+					<tbody>
+						@foreach (var category in categoryService.DownloadedCategories)
 						{
-								<span class="spinner-border spinner-border-sm"
-									  role="status"
-									  aria-hidden="true"></span>
+							<tr>
+								<td>@category.Id</td>
+								<td>@category.Name_de</td>
+								<td>@category.Name_ar</td>
+								<td><InputCheckbox @bind-Value="category.Requires18Plus" /></td>
+								<td><InputCheckbox @bind-Value="category.IsAktiv" /></td>
+								<td>
+									<button class="btn btn-sm btn-warning me-1"
+									@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
+										Bearbeiten
+									</button>
+									<button class="btn btn-sm btn-danger"
+									@onclick="() => DeleteGroup(category.Id)" disabled="@IsDeletingProcessing.Item1">
+										@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == category.Id)
+										{
+											<span class="spinner-border spinner-border-sm"
+											role="status"
+											aria-hidden="true"></span>
+										}
+										else
+										{
+											<span>Löschen</span>
+										}
+									</button>
+								</td>
+							</tr>
 						}
-						else
-						{
-								<span>Löschen</span>
-						}
-						</button>
-					</td>
-				</tr>
+					</tbody>
+				</table>
 			}
-		</tbody>
-	</table>
-</div>
+			else
+			{
+				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+					<div class="alert alert-danger text-center">
+						Sie haben keine Berechtigung für diese Seite
+					</div>
+				</div>
+			}
+		</div>
+		@if (IsAdding)
+		{
+			<ManagementLabel.Components.Layout.OverlayEditAddCategories category="new Categories()" Action="Add" OnHandel="HandleEditCategory" />
+		}
+		@if (IsEditing)
+		{
+			<ManagementLabel.Components.Layout.OverlayEditAddCategories category="EditingCategory" Action="Edit" OnHandel="HandleEditCategory" />
+		}
+	</Authorized>
+	<NotAuthorized>
+		<ManagementLabel.Components.Pages.LogIn />
+	</NotAuthorized>
+</AuthorizeView>
 
-@if (IsAdding)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddCategories category="new Categories()" Action="Add" OnHandel="HandleEditCategory" />
-}
-@if (IsEditing)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddCategories category="EditingCategory" Action="Edit" OnHandel="HandleEditCategory" />
-}
+
 @code {
 	private Categories EditingCategory = null!;
 	private bool IsAdding = false;
 	private bool IsEditing = false;
 	protected async override Task OnInitializedAsync()
 	{
-		// get all categories
-		await categoryService.GetAllCategoriesAsync();
+		var authState = await authProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var canViewCoupons = user.HasClaim("permission", "manageCategories") ||
+								user.HasClaim("permission", "fullAccess");
+		if (canViewCoupons)
+		{
+			// get all categories
+			await categoryService.GetAllCategoriesAsync();
+		}
 	}
 	private void NewCategory()
 	{

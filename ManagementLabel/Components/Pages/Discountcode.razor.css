@@ -31,3 +31,35 @@
     width: 100%;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
+
+
+.customTable {
+    font-size: 15px;
+}
+
+    .customTable td,
+    .customTable th {
+        vertical-align: middle;
+    }
+
+
+    .customTable td {
+        white-space: nowrap;
+    }
+
+
+@media (max-width: 768px) {
+    .table-responsive {
+        border-radius: 10px;
+        overflow-x: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .customTable {
+        font-size: 12px;
+    }
+
+        .customTable td,
+        .customTable th {
+            padding: 6px;
+        }
+}

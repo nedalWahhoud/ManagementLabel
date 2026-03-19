@@ -1,83 +1,99 @@
 ﻿@page "/distributionlines"
-<div class="main" @onclick="OnMainDiv">
-	<h3>Verteilungslinen</h3>
-
-	<button class="btn btn-success mb-3" @onclick="NewDistributionLine">
-		➕ Add neue DistributionLine
-	</button>
-	@if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
-	{
-		<div class="d-flex justify-content-center align-items-center"
-		style="min-height: 60vh;">
-			<p class="text-muted fs-5">
-				Keine Verteilungslinien gefunden.
-			</p>
-		</div>
-	}
-	else
-	{
-		<table class="table table-bordered table-hover">
-			<tr>
-				<th>Id</th>
-				<th>Name Line</th>
-				<th>Beschreibung</th>
-			</tr>
-			<tbody>
-				@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
+<AuthorizeView>
+	<Authorized Context="authContext">
+		@if (authContext.User.HasClaim("permission", "manageDistribution_lines") || authContext.User.HasClaim("permission", "fullAccess"))
+		{
+			<div class="main" @onclick="OnMainDiv">
+				<button class="btn btn-success mb-3" @onclick="NewDistributionLine">
+					➕ Add neue DistributionLine
+				</button>
+				@if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
 				{
-					<tr @oncontextmenu:preventDefault="true"
-					@oncontextmenu="@(e => OnSelectRow(distributionLine, e))"
-					@onpointerdown="(e) => OnTouchStart(distributionLine, e)"
-					@onpointermove="OnTouchMove"
-					@onpointerup="OnTouchEnd"
-					@onclick="(e)=> OnSelectRow(distributionLine,e)"
-						class="@(selectedDistributionLine != null && selectedDistributionLine.Id == distributionLine.Id ? "selected" : "")">
-						<td>@distributionLine.Id</td>
-						<td>@distributionLine.LineName</td>
-						<td>@distributionLine.Description</td>
-						<td>
-							<button class="btn btn-sm btn-warning me-1"
-							@onclick="() => EditDistributionLine(distributionLine)" disabled="@IsDeletingProcessing.Item1">
-								Bearbeiten
-							</button>
-							<button class="btn btn-sm btn-danger"
-							@onclick="() => DeleteDistributionLine(distributionLine.Id)" disabled="@IsDeletingProcessing.Item1">
-								@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == distributionLine.Id)
-								{
-									<span class="spinner-border spinner-border-sm"
-									role="status"
-									aria-hidden="true"></span>
-								}
-								else
-								{
-									<span>Löschen</span>
-								}
-							</button>
-						</td>
-					</tr>
-				}
-				@if (showContextMenu && selectedDistributionLine != null && IsDeletingProcessing.Item1 == false)
-				{
-					<div class="contextMenu"
-					style="position: fixed; top:@(menuYpx); left:@(menuXpx);"
-					@onclick:stopPropagation="true">
-						<ul>
-							<li @onclick="() => viaWhatasappShre(selectedDistributionLine)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
-						</ul>
+					<div class="d-flex justify-content-center align-items-center"
+					style="min-height: 60vh;">
+						<p class="text-muted fs-5">
+							Keine Verteilungslinien gefunden.
+						</p>
 					</div>
 				}
-			</tbody>
-		</table>
-	}
-</div>
-@if (IsAdding)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="new DistributionLines()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
-}
-else if (IsEditing)
-{
-	<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="EditingDistributionLine" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
-}
+				else
+				{
+					<table class="table table-bordered table-hover">
+						<tr>
+							<th>Id</th>
+							<th>Name Line</th>
+							<th>Beschreibung</th>
+						</tr>
+						<tbody>
+							@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
+							{
+								<tr @oncontextmenu:preventDefault="true"
+								@oncontextmenu="@(e => OnSelectRow(distributionLine, e))"
+								@onpointerdown="(e) => OnTouchStart(distributionLine, e)"
+								@onpointermove="OnTouchMove"
+								@onpointerup="OnTouchEnd"
+								@onclick="(e)=> OnSelectRow(distributionLine,e)"
+								class="@(selectedDistributionLine != null && selectedDistributionLine.Id == distributionLine.Id ? "selected" : "")">
+									<td>@distributionLine.Id</td>
+									<td>@distributionLine.LineName</td>
+									<td>@distributionLine.Description</td>
+									<td>
+										<button class="btn btn-sm btn-warning me-1"
+										@onclick="() => EditDistributionLine(distributionLine)" disabled="@IsDeletingProcessing.Item1">
+											Bearbeiten
+										</button>
+										<button class="btn btn-sm btn-danger"
+										@onclick="() => DeleteDistributionLine(distributionLine.Id)" disabled="@IsDeletingProcessing.Item1">
+											@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == distributionLine.Id)
+											{
+												<span class="spinner-border spinner-border-sm"
+												role="status"
+												aria-hidden="true"></span>
+											}
+											else
+											{
+												<span>Löschen</span>
+											}
+										</button>
+									</td>
+								</tr>
+							}
+							@if (showContextMenu && selectedDistributionLine != null && IsDeletingProcessing.Item1 == false)
+							{
+								<div class="contextMenu"
+								style="position: fixed; top:@(menuYpx); left:@(menuXpx);"
+								@onclick:stopPropagation="true">
+									<ul>
+										<li @onclick="() => viaWhatasappShre(selectedDistributionLine)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
+									</ul>
+								</div>
+							}
+						</tbody>
+					</table>
+				}
+			</div>
+			@if (IsAdding)
+			{
+				<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="new DistributionLines()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
+			}
+			else if (IsEditing)
+			{
+				<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="EditingDistributionLine" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
+			}
+		}
+		else
+		{
+			<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+				<div class="alert alert-danger text-center">
+					Sie haben keine Berechtigung für diese Seite
+				</div>
+			</div>
+		}
+	</Authorized>
+	<NotAuthorized>
+		<ManagementLabel.Components.Pages.LogIn />
+	</NotAuthorized>
+</AuthorizeView>
 @code {
 
 	private bool IsAdding = false;
@@ -86,7 +102,14 @@ else if (IsEditing)
 
 	protected async override Task OnInitializedAsync()
 	{
-		await distributionLinesService.GetAllDistributionLines();
+		var authState = await authProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var canViewCoupons = user.HasClaim("permission", "manageDistribution_lines") ||
+								user.HasClaim("permission", "fullAccess");
+		if (canViewCoupons)
+		{
+			await distributionLinesService.GetAllDistributionLines();
+		}
 	}
 
 	private void NewDistributionLine()

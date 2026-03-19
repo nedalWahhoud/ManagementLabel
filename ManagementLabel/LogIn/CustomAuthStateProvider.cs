@@ -9,7 +9,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 {
     private readonly IJSRuntime _js;
     private readonly ProductService _productService;
-
+    public const string Permission = "Permission";
     public CustomAuthStateProvider(IJSRuntime js, ProductService productService)
     {
         _js = js;
@@ -98,7 +98,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
              ClaimTypes.Name,
              ClaimTypes.Email,
              ClaimTypes.Role,
-             ClaimTypes.DateOfBirth
+             ClaimTypes.DateOfBirth,
+             Permission
             };
 
         var filteredClaims = jwtToken.Claims

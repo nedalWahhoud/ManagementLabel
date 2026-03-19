@@ -4,6 +4,8 @@ namespace ManagementLabel.Components.DiscountF
     public class DiscountService(HttpClient http)
     {
         private readonly HttpClient _http = http;
+        public List<DiscountCodes> DownloadedDiscountCodes { get; private set; } = [];
+        public List<DiscountCategory> DownloadedDiscountCategory { get; private set; } = [];
         public async Task<ValidationResult> AddDiscountCode(DiscountCodes newDiscountCode)
         {
             try
@@ -52,6 +54,48 @@ namespace ManagementLabel.Components.DiscountF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
+
+        public async Task<ValidationResult> GetAllDiscountCodes()
+        {
+            try
+            {
+                var response = await _http.GetAsync("api/Discounts/getAllDiscountCodes");
+                if (!response.IsSuccessStatusCode)
+                    return new ValidationResult { Result = false, Message = "Fehler beim Abrufen." };
+                var discountCodes = await response.Content.ReadFromJsonAsync<List<DiscountCodes>>();
+                if (discountCodes != null)
+                {
+                    DownloadedDiscountCodes = discountCodes;
+                    return new ValidationResult { Result = true, Message = "Erfolgreich abgerufen." };
+                }
+                return new ValidationResult { Result = false, Message = "Keine Discount-Codes gefunden." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task<ValidationResult> GetAllDiscountCategory()
+        {
+            try
+            {
+                var response = await _http.GetAsync("api/Discounts/getAllDiscountCategories");
+                if (!response.IsSuccessStatusCode)
+                    return new ValidationResult { Result = false, Message = "Fehler beim Abrufen." };
+                var discountCategory = await response.Content.ReadFromJsonAsync<List<DiscountCategory>>();
+                if (discountCategory != null)
+                {
+                    DownloadedDiscountCategory = discountCategory;
+                    return new ValidationResult { Result = true, Message = "Erfolgreich abgerufen." };
+                }
+                return new ValidationResult { Result = false, Message = "Keine Discount-Kategorien gefunden." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+
         public async Task<(ValidationResult validationResult, DiscountCategory discountCategory)> CheckDiscountCategory(string code)
         {
             if (string.IsNullOrWhiteSpace(code) || code.Length < 8)

@@ -1,88 +1,107 @@
 ﻿@page "/users"
-<h3>Users</h3>
-
-@if (IsLoading)
-{
-	<div class="w-100 card-body text-center text-info">
-		Lädt...
-	</div>
-}
-else
-{
-    <div class="table-responsive shadow-sm rounded">
-        <table class="table table-hover align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>E-Mail</th>
-                    <th>Rolle</th>
-                    <th>Geburtsdatum</th>
-                    <th>IsGuest</th>
-                    <th>IsAktiv</th>
-					<th>sigupprovieder</th>
-                    <th>Erstellt</th>
-                </tr>
-            </thead>
-            <tbody>
-				@foreach (var user in authService.DownloadedUsers)
-                {
-                    <tr>
-                        <td><span class="fw-bold">@user.Id</span></td>
-                        <td>@user.UserName</td>
-                        <td>@user.Email</td>
-                        <td>
-                            <span class="badge @(user.Role.ToLower() == "Admin".ToLower() ? "bg-primary" : "bg-secondary")">
-                                @user.Role.ToUpper()
-                            </span>
-                        </td>
-                        <td>@user.BirthDate</td>
-						<td>@(user.IsGuest ? "Ja" : "Nein")</td>
-                        <td class="text-center">
-                            <span class="badge @(user.IsAktiv ? "bg-success" : "bg-warning text-dark")">
-                                @(user.IsAktiv ? "Ja" : "Nein")
-                            </span>
-                        </td>
-						<td>@user.SignUpProvider</td>
-						<td>@user.CreatedAt</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-      
-    </div>
-	<div class="d-flex justify-content-center mt-3">
-		<button @onclick="OnMoreLoadUsers" class="btn btn-success"
-				disabled="@(authService.GetItemsUsers.AllItemsLoaded || IsProcessing)">
-			@if (IsProcessing)
+<AuthorizeView>
+	<Authorized Context="authContext">
+		@if (authContext.User.HasClaim("permission", "manageUsers") || authContext.User.HasClaim("permission", "fullAccess"))
+		{
+			@if (IsLoading)
 			{
-				<span class="spinner-border spinner-border-sm"
-					  role="status"
-					  aria-hidden="true"></span>
-			}
-			else if (authService.GetItemsUsers.AllItemsLoaded)
-			{
-				<span>Alle geladen</span>
+				<div class="w-100 card-body text-center text-info">
+					Lädt...
+				</div>
 			}
 			else
 			{
-				<span>Mehr Laden</span>
+				<div class="table-responsive shadow-sm rounded">
+					<table class="table table-hover align-middle">
+						<thead class="table-dark">
+							<tr>
+								<th>ID</th>
+								<th>User</th>
+								<th>E-Mail</th>
+								<th>Rolle</th>
+								<th>Geburtsdatum</th>
+								<th>IsGuest</th>
+								<th>IsAktiv</th>
+								<th>sigupprovieder</th>
+								<th>Erstellt</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var user in authService.DownloadedUsers)
+							{
+								<tr>
+									<td><span class="fw-bold">@user.Id</span></td>
+									<td>@user.UserName</td>
+									<td>@user.Email</td>
+									<td>
+										<span class="badge @(user.Role.ToLower() == "Admin".ToLower() ? "bg-primary" : "bg-secondary")">
+											@user.Role.ToUpper()
+										</span>
+									</td>
+									<td>@user.BirthDate</td>
+									<td>@(user.IsGuest ? "Ja" : "Nein")</td>
+									<td class="text-center">
+										<span class="badge @(user.IsAktiv ? "bg-success" : "bg-warning text-dark")">
+											@(user.IsAktiv ? "Ja" : "Nein")
+										</span>
+									</td>
+									<td>@user.SignUpProvider</td>
+									<td>@user.CreatedAt</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+				<div class="d-flex justify-content-center mt-3">
+					<button @onclick="OnMoreLoadUsers" class="btn btn-success"
+					disabled="@(authService.GetItemsUsers.AllItemsLoaded || IsProcessing)">
+						@if (IsProcessing)
+						{
+							<span class="spinner-border spinner-border-sm"
+							role="status"
+							aria-hidden="true"></span>
+						}
+						else if (authService.GetItemsUsers.AllItemsLoaded)
+						{
+							<span>Alle geladen</span>
+						}
+						else
+						{
+							<span>Mehr Laden</span>
+						}
+					</button>
+				</div>
 			}
-		</button>
-	</div>
-}
-
+		}
+		else
+		{
+			<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+				<div class="alert alert-danger text-center">
+					Sie haben keine Berechtigung für diese Seite
+				</div>
+			</div>
+		}
+	</Authorized>
+	<NotAuthorized>
+		<ManagementLabel.Components.Pages.LogIn />
+	</NotAuthorized>
+</AuthorizeView>
 @code {
 
-	private bool IsLoading = false;
+	private bool IsLoading = true;
 	protected override async Task OnInitializedAsync()
 	{
-		IsLoading = true;
-		await authService.GetAllUsers();
+		var authState = await authProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+		var canViewCoupons = user.HasClaim("permission", "manageUsers") ||
+								user.HasClaim("permission", "fullAccess");
+		if (canViewCoupons)
+		{
+			await authService.GetAllUsers();
 
-		// initzialize GetItems 
-		authService.GetItemsUsers  = new GetItems<Users> {CurrentPage = 1,PageSize = 10};
-
+			// initzialize GetItems 
+			authService.GetItemsUsers = new GetItems<Users> { CurrentPage = 1, PageSize = 10 };
+		}
 		IsLoading = false;
 	}
 
