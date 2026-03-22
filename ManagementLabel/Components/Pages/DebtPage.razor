@@ -1,8 +1,12 @@
-﻿@page "/debt{customerId:int}"
+﻿@page "/debt/{customerId:int}"
 
 <AuthorizeView>
 	<Authorized Context="authContext">
-		@if (authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess"))
+		@{
+			var isManage = authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess");
+			var isEdit = authContext.User.HasClaim("permission", "editCustomers") || authContext.User.HasClaim("permission", "fullAccess");
+		}
+		@if (isManage)
 		{
 			@if (IsLoading)
 			{
@@ -39,7 +43,26 @@
 							</button>
 						</div>
 
-						<div style="width: 45px;"></div>
+						<div class="dropdown">
+							<button disabled="@IsProcessing"
+									class="btn btn-light btn-sm rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
+									style="width: 35px; height: 35px;"
+									type="button"
+									data-bs-toggle="dropdown"
+									data-bs-container="body">
+								@if (IsProcessing)
+								{
+									<span class="spinner-border spinner-border-sm"
+										  role="status"
+										  aria-hidden="true"></span>
+								}
+								else
+								{
+									<span>⋮</span>
+								}
+							</button>
+							<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="null" isEdit="isEdit" OnHandel="HandleCustomDropdown" />
+						</div>
 					</div>
 				</div>
 				<div class="w-100">
@@ -209,6 +232,11 @@
 						</div>
 					</div>
 				</div>
+
+				if (IsEditing)
+				{
+					<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
+				}
 			}
 		}
 		else
@@ -322,26 +350,12 @@
 
 	private async Task OnNotifyCustomer()
 	{
-		if (transactionsCustomersService.DownloadedTransactionsCustomers?.Any() == true)
-		{
-			var lastTransaction = transactionsCustomersService.DownloadedTransactionsCustomers
-				.OrderBy(t => t.TransactionDate) 
-				.LastOrDefault(t => t.CustomerId == customerId);
+		var lastTransaction = transactionsCustomersService.DownloadedTransactionsCustomers
+			.OrderBy(t => t.TransactionDate)
+			.LastOrDefault(t => t.CustomerId == customerId);
 
-			if (lastTransaction != null)
-			{
-				string token = transactionsCustomersService.GetCustomerNotificationToken(customerId);
-				await whatsAppService.SendTransactionCustomerNotify(customer, debtCustomers, lastTransaction, token);
-			}
-			else
-			{
-				await JS.InvokeVoidAsync("alert", "Dieser Kunde hat keine erfassten Transaktionen.");
-			}
-		}
-		else
-		{
-			await JS.InvokeVoidAsync("alert", "Die Transaktionenliste ist leer.");
-		}
+		string token = transactionsCustomersService.GetCustomerNotificationToken(customerId);
+		await whatsAppService.SendTransactionCustomerNotify(customer, debtCustomers, lastTransaction!, token);
 	}
 	// select all content in input when focus
 	private async Task SelectAllContent()
@@ -417,6 +431,39 @@
 		else
 		{
 			await JS.InvokeVoidAsync("alert", "Dies ist der erste Kunde auf der Liste; es gibt keinen vorherigen Kunden.");
+		}
+	}
+
+	private void HandleEditAddDistributionLine(string action)
+	{
+		 if (action == "Edit")
+		{
+			IsEditing = false;
+			EditingCustomer = null!;
+		}
+		else if (action == "Cancel")
+		{
+			IsEditing = false;
+			EditingCustomer = null!;
+		}
+		// nach dem Hinzufügen oder Bearbeiten einer Verteilungslinie die Liste der Verteilungslinien aktualisieren
+		if (action == "Add" || action == "Edit")
+			StateHasChanged();
+
+	}
+	// Handle Custom Dropdown Actions
+	private bool IsEditing = false;
+	private Customers EditingCustomer = null!;
+	private void HandleCustomDropdown((string action, (bool, int) IsProcessing, Customers EditingCustomer, bool IsEditing) args)
+	{
+		if (args.action == "Delete")
+		{
+			this.IsProcessing = args.IsProcessing.Item1;
+		}
+		else if (args.action == "Edit")
+		{
+			this.EditingCustomer = args.EditingCustomer;
+			this.IsEditing = args.IsEditing!;
 		}
 	}
 }

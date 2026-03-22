@@ -141,23 +141,46 @@ namespace ManagementLabel.Components.Share
                 if (string.IsNullOrEmpty(token))
                     return new ValidationResult { Result = false, Message = "Token ist erforderlich." };
 
+                // last transaction konfigurieren
                 string transactionType = transactionsCustomers?.Type == TransactionType.Repay ? "zurückgezahlt" : "ausgeliehen";
+                string lastTransactionInfo = string.Empty;
+                if (transactionsCustomers != null)
+                    lastTransactionInfo = $"💵 Letzter Transaktionsbetrag: {transactionsCustomers?.Amount ?? 0} €  {transactionType} \n";
+
                 // url encode the token 
                 string encodedToken = HttpUtility.UrlEncode(token);
                 string baseUrl = $"{_appConfig.Value.Domin}/customerDashboard";
                 string urlWithToken = $"{baseUrl}?token={encodedToken}";
+
+
                 string message =
                   $"Hallo {customer.Name_de} 👋 \n"
                 + $"🔔 Benachrichtigung über Ihren aktuellen Kontostand.\n"
                 + $"💰 Dein Schuldenstand: {debtCustomers?.Balance ?? 0} €\n"
-                + $"💵 Letzter Transaktionsbetrag: {transactionsCustomers?.Amount ?? 0} €  {transactionType} \n"
+                + lastTransactionInfo
                 + "Hier klicken, um die Details zu sehen:\n"
                 + $"{urlWithToken}";
 
                 if (!string.IsNullOrEmpty(customer.PhoneNumber))
-                    await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber,message);
+                    await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber, message);
                 else
                     await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsAppWithoutNumber", message);
+                return new ValidationResult { Result = true, Message = "WhatsApp-Nachricht wurde erfolgreich geöffnet." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task<ValidationResult> SendMassage(Customers customer)
+        {
+            try
+            {
+                if (customer == null)
+                    return new ValidationResult { Result = false, Message = "Kundendaten sind null." };
+                if (string.IsNullOrEmpty(customer.PhoneNumber))
+                    return new ValidationResult { Result = false, Message = "Keine Telefonnummer für diesen Kunden vorhanden." };
+                await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber, string.Empty);
                 return new ValidationResult { Result = true, Message = "WhatsApp-Nachricht wurde erfolgreich geöffnet." };
             }
             catch (Exception ex)

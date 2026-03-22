@@ -157,45 +157,7 @@
 															<span>⋮</span>
 														}
 													</button>
-													<ul class="dropdown-menu customDropdown dropdown-menu-end">
-														<li>
-															<a class="dropdown-item"  @onclick="() => OnDebts(customer.Id)">
-																<i class="bi bi-cash-stack me-1"></i>
-																Schulden
-															</a>
-														</li>
-														<li>
-															<a class="dropdown-item" @onclick="() => OnMap(customer)">
-																<i class="bi bi-geo-alt me-1"></i>
-																Navigieren
-															</a>
-														</li>
-														<li>
-															<a class="dropdown-item"  @onclick="() => OnPhone(customer)">
-																<i class="bi bi-telephone me-1"></i>
-																Telefonieren
-															</a>
-														</li>
-														<li>
-															<a class="dropdown-item"  @onclick="() => viaWhatasappShare(customer)">
-																<i class="bi bi-whatsapp me-1"></i>
-																Teilen über WhatsApp
-															</a>
-														</li>
-														<li >
-															<a class="@(isEdit  ? "dropdown-item" : "disabledItem")"  @onclick="@(isEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Edit(customer))  : default!)">
-																<i class="bi bi-pencil-square me-1"></i>
-																Bearbeiten
-															</a>
-														</li>
-														<li>
-															<a class="@(isEdit  ? "dropdown-item" : "disabledItem")"  @onclick="@(isEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Delete(customer.Id))  : default!)">
-																<i class="bi bi-trash3 me-1"></i>
-																Löschen
-															</a>
-														</li>
-
-													</ul>
+													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" isEdit="isEdit" OnHandel="HandleCustomDropdown" />
 												</div>
 											</td>
 										</tr>
@@ -253,8 +215,6 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 
 	private bool IsAdding = false;
-	private bool IsEditing = false;
-	private Customers EditingCustomer = null!;
 	Task taskDistributionLines = Task.CompletedTask;
 	private bool IsLoading = true;
 	protected async override Task OnInitializedAsync()
@@ -301,69 +261,7 @@
 	{
 		IsAdding = true;
 	}
-	private void Edit(Customers customers)
-	{
-		EditingCustomer = new Customers
-			{
-				Id = customers.Id,
-				Name_de = customers.Name_de,
-				Name_ar = customers.Name_ar,
-				Street = customers.Street,
-				BuildingNumber = customers.BuildingNumber,
-				PostalCode = customers.PostalCode,
-				City = customers.City,
-				Latitude = customers.Latitude,
-				Longitude = customers.Longitude,
-				PhoneNumber = customers.PhoneNumber,
-				Email = customers.Email,
-				Notes_de = customers.Notes_de,
-				Notes_ar = customers.Notes_ar,
-				DistributionLineId = customers.DistributionLineId,
-				DistributionLine = customers.DistributionLine,
-				StopNumber = customers.StopNumber,
-				PIN = customers.PIN
-			};
 
-		IsEditing = true;
-	}
-	private (bool, int) IsProcessing = (false, 0);
-	private async Task Delete(int id)
-	{
-		try
-		{
-			if (id <= 0)
-			{
-				await JS.InvokeVoidAsync("alert", "Please select a DistributionLine");
-				return;
-			}
-			IsProcessing = (true, id);
-			var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
-			if (resultConfirm)
-			{
-				var result = await customersService.DeleteCustomer(id);
-				if (!result.Result)
-				{
-					await JS.InvokeVoidAsync("alert", result.Message);
-				}
-				// Remove the deleted customer from the filtered list if it exists
-				if (FilteredCustomers != null)
-				{
-					var customerToRemove = FilteredCustomers.FirstOrDefault(c => c.Id == id);
-					if (customerToRemove != null)
-					{
-						FilteredCustomers.Remove(customerToRemove);
-					}
-				}
-
-			}
-			IsProcessing = (false, id);
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error deleting customer: {ex.Message}");
-			IsProcessing = (false, id);
-		}
-	}
 	private async Task HandleEditAddDistributionLine(string action)
 	{
 		if (action == "Add")
@@ -457,68 +355,20 @@
 		await AfterDistributionLineChanged();
 		await AfterStopNumberChanged();
 	}
-	/* teilen Whats app */
-	private async Task viaWhatasappShare(Customers customer)
+
+	private Customers EditingCustomer = null!;
+	private (bool, int) IsProcessing = (false, 0);
+	private bool IsEditing = false;
+	private void HandleCustomDropdown((string action, (bool, int) IsProcessing, Customers EditingCustomer, bool IsEditing) args)
 	{
-		var result = await whatsAppService.SendCustomerInfo(customer);
-		if (!result.Result)
+		if (args.action == "Delete")
 		{
-			await JS.InvokeVoidAsync("alert", result.Message);
+			this.IsProcessing = args.IsProcessing;
 		}
-	}
-	/* Schulden */
-	private void OnDebts(int customerId)
-	{
-		NavigationManager.NavigateTo($"/debt{customerId}");
-	}
-	// map
-	private async Task OnMap(Customers customer)
-	{
-		if (customer == null)
-			return;
-
-		// Address aufbauen
-		var addressParts = new List<string>();
-
-		if (!string.IsNullOrWhiteSpace(customer.Street))
-			addressParts.Add(customer.Street);
-
-		if (!string.IsNullOrWhiteSpace(customer.BuildingNumber))
-			addressParts.Add(customer.BuildingNumber);
-
-		if (!string.IsNullOrWhiteSpace(customer.PostalCode) ||
-			!string.IsNullOrWhiteSpace(customer.City))
-			addressParts.Add($"{customer.PostalCode} {customer.City}");
-
-		var fullAddress = string.Join(" ", addressParts).Trim();
-
-		bool hasAddress = !string.IsNullOrWhiteSpace(fullAddress);
-		bool hasCoordinates = customer.Latitude != 0 && customer.Longitude != 0;
-
-		if (!hasAddress && !hasCoordinates)
+		else if (args.action == "Edit")
 		{
-			Console.WriteLine("Keine Adresse oder Koordinaten vorhanden.");
-			return;
-		}
-
-		await JS.InvokeVoidAsync("mapRedirect.openMap",customer.Latitude,customer.Longitude,hasAddress ? fullAddress : "");
-	}
-	// Phone
-	private async Task OnPhone(Customers customer)
-	{
-		try
-		{
-			if (customer == null || string.IsNullOrWhiteSpace(customer.PhoneNumber))
-			{
-				await JS.InvokeVoidAsync("alert", "Keine Telefonnummer vorhanden.");
-				return;
-			}
-
-			await JS.InvokeVoidAsync("phoneRedirect.openPhoneDialer", customer.PhoneNumber);
-		}
-		catch(Exception ex)
-		{
-			Console.WriteLine($"Error redirecting to phone: {ex.Message}");
+			this.EditingCustomer = args.EditingCustomer;
+			this.IsEditing = args.IsEditing!;
 		}
 	}
 	// select all kontekt
