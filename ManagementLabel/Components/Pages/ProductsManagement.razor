@@ -208,11 +208,11 @@
 				@* Add Product form *@
 				@if (IsShowAddProductForm)
 				{
-					<ManagementLabel.Components.Layout.OverlayEditForm Action="Add" Title="Ein neues Produkt hinzufügen" ButtonName="Produkt hinzufügen" GetProducts="newProduct" user ="user" OnHandel="HandleEditProduct" />
+					<ManagementLabel.Components.Layout.OverlayEditForm Action="Add"  GetProducts="newProduct" user ="user" OnHandel="HandleEditProduct" />
 				}
 				else if (_editProduct != null)
 				{
-					<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" Title="Produkt bearbeiten" ButtonName="Produkt Updaten" GetProducts="_editProduct" user="user" OnHandel="HandleEditProduct" />
+					<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" GetProducts="_editProduct" user="user" OnHandel="HandleEditProduct" />
 				}
 				@* order erstellen *@
 				@if (IsShowOrder)
@@ -721,7 +721,7 @@
 		}
 	}
 	// Overlay Form Handel
-	private void HandleEditProduct((Products product, string Action, bool ActionState) data)
+	private void HandleEditProduct((Products product, string Action) data)
 	{
 		if (data.Action == "Edit")
 		{
@@ -738,12 +738,8 @@
 				}
 				data.product = null!;
 			}
-
-			if (!data.ActionState)
-			{
-				// Hide the edit form
-				_editProduct = null!;
-			}
+			// Hide the edit form
+			_editProduct = null!;
 		}
 		else if (data.Action == "Add")
 		{
@@ -753,16 +749,19 @@
 				if (filterP != null && filterP.Count > 0)
 				{
 					// Add the new product to the filtered list
-					filterP.Insert(0,data.product); 
+					filterP.Insert(0, data.product);
 				}
 			}
 
-			if (!data.ActionState)
-			{
-				// Hide the add form
-				IsShowAddProductForm = false;
-				newProduct = new();
-			}
+			// Hide the add form
+			IsShowAddProductForm = false;
+			newProduct = new();
+		}
+		else
+		{
+			IsShowAddProductForm = false;
+			newProduct = new();
+			_editProduct = null!;
 		}
 	}
 	// Search

@@ -1,71 +1,7 @@
-﻿.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 1rem;
-    box-sizing: border-box;
-}
-.overlayAddForm {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh; 
-    overflow-y: auto; 
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-.productForm {
-    display: flex;
-    flex-direction: column;
-    align-items: inherit;
-    margin-top: 3rem;
-    margin-bottom: 3rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    border: 1px solid #ccc;
-    padding: 10px 16px;
-    gap: 10px;
-}
-.formGroupAdd {
-    margin: 10px;
-}
-.btn {
-    padding: 10px 16px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-.addProductB {
-    margin: 10px;
-    background-color: #007bff;
-    color: white;
+﻿.formGroupAdd {
+    margin-bottom: 12px;
 }
 
-    .addProductB:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
-.addProductCancelB {
-    background-color: #757e84;
-    color: white;
-}
-
-    .addProductCancelB:hover {
-        background-color: #5a6268;
-        transform: scale(1.05);
-    }
 .imageUpload {
     display: flex;
     align-items: center;
@@ -81,15 +17,46 @@
 }
 
 @media (max-width: 768px) {
-            .overlayAddForm,
-            .overlayOrderForm {
-                max-width: 95%;
-                padding: 1rem;
-            }
+    .overlay {
+        padding: 0;
+        align-items: flex-start;
+    }
 
-            .productForm {
-                margin-top: 1rem;
-                margin-bottom: 1rem;
-                padding: 8px;
-            }
+    .customForm {
+        padding: 1.5rem 1rem;
+        gap: 12px;
+        max-height: 85vh;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.3s ease-out;
+    }
+
+
+    .form-control {
+        font-size: 16px !important;
+        padding: 8px;
+    }
+
+    .mt-3 {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .mt-3 button {
+            width: 100%;
+            padding: 12px;
         }
+}
+
+/* حركة الدخول من الأسفل */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

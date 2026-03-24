@@ -1,6 +1,5 @@
 ﻿<div class="overlay">
-	<div class="overlayEditAddForm">
-		<h4>@(action == "Add" ? "Gruppe hinzufügen" : "Gruppe bearbeiten")</h4>
+	<div class="standardOverlayForm">
 		<EditForm Model="@groupProduct" OnValidSubmit="SaveGroup">
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
@@ -14,7 +13,7 @@
 				<ValidationMessage For="@(() => groupProduct.GroupName_ar)" />
 			</div>
 			<div class="mt-3">
-				<button class="btn btn-primary me-2">
+				<button class="btn btn-primary me-2" disabled="@IsProcessing">
 					@if (IsProcessing)
 					{
 						<span class="spinner-border spinner-border-sm"

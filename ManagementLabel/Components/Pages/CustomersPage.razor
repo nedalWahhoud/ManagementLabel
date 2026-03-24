@@ -99,8 +99,9 @@
 						}
 						else
 						{
-							<table class="table table-bordered table-hover">
-								<tr>
+							<div class="tableResponsive">
+								<table class="table table-bordered table-hover customTable">
+								 <tr>
 									@if (ShowColumn("Id")){<th>Id</th>}
 									@if (ShowColumn("Name_de")){<th>Na-De</th>}
 									@if (ShowColumn("Name_ar")){<th>Na-Ar</th>}
@@ -115,7 +116,7 @@
 									@if (ShowColumn("PIN")){<th>PIN</th>}
 									<th style="min-width:40px;">⋮</th>
 								</tr>
-								<tbody>
+								 <tbody>
 									@foreach (var customer in customersToDisplay)
 									{
 										<tr>
@@ -162,8 +163,9 @@
 											</td>
 										</tr>
 									}
-								</tbody>
-							</table>
+								 </tbody>
+							  </table>
+							</div>
 						}
 					}
 				</div>

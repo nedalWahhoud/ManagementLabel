@@ -1,36 +1,24 @@
-﻿@implements IDisposable
-
-@if(GetProducts != null)
-{
-	<div class="overlay">
-		<div class="overlayAddForm">
-			<div class="productForm">
-				<h3>@(Title ?? "Fehler")</h3>
+﻿	<div class="overlay">
+	<div class="standardOverlayForm">
 				<EditForm Model="@GetProducts" OnValidSubmit="HandleSubmit">
-
 					<DataAnnotationsValidator />
 					<div class="formGroupAdd">
-						<label for="Name">Product Name DE</label>
-						<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_de" />
+					<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_de" placeholder="Name de" />
 						<ValidationMessage For="@(() => GetProducts.Name_de)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="Description">Description DE</label>
-						<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_de" />
+					<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
 						<ValidationMessage For="@(() => GetProducts.Description_de)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="Name">اسم المنتج بل عربية</label>
-						<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_ar" />
+					<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_ar" placeholder="اسم المنتج بل عربية" />
 						<ValidationMessage For="@(() => GetProducts.Name_ar)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="Description">وصف المنتج بل عربية</label>
-						<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_ar" />
+					<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_ar" placeholder="وصف المنتج بل عربية" />
 						<ValidationMessage For="@(() => GetProducts.Description_ar)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="category">Category</label>
 						<InputSelect id="category" class="form-control" @bind-Value="GetProducts.CategoryId">
 							<option value="0">Select Category</option>
 							@foreach (var category in categoryService.DownloadedCategories)
@@ -41,28 +29,38 @@
 						<ValidationMessage For="@(() => GetProducts.CategoryId)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="Quantity">Quantity</label>
-						<InputNumber  min="0" class="form-control" @bind-Value="GetProducts.Quantity" @onfocus="@(e => SelectAllContent())" />
-						<ValidationMessage For="@(() => GetProducts.Quantity)" />
+					    <div class="input-group">
+						  <span class="input-group-text customLatIcon">Me</span>
+						  <InputNumber  min="0" class="form-control" @bind-Value="GetProducts.Quantity" @onfocus="@(e => SelectAllContent())" />
+						</div>
+					   <ValidationMessage For="@(() => GetProducts.Quantity)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="PurchasePrice">Purchase Price</label>
-						<InputNumber  min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" @onfocus="@(e => SelectAllContent())" />
+					    <div class="input-group">
+					 	  <span class="input-group-text customLatIcon">KaPr</span>
+						  <InputNumber  min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" @onfocus="@(e => SelectAllContent())" />
+						</div>
 						<ValidationMessage For="@(() => GetProducts.PurchasePrice)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="SalePrice">Selling Price</label>
-						<InputNumber min="0" class="form-control" @bind-Value="GetProducts.SalePrice" @onfocus="@(e => SelectAllContent())" />
+					    <div class="input-group">
+						  <span class="input-group-text customLatIcon">VePr</span>
+						  <InputNumber min="0" class="form-control" @bind-Value="GetProducts.SalePrice" @onfocus="@(e => SelectAllContent())" />
+					    </div>
 						<ValidationMessage For="@(() => GetProducts.SalePrice)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="MinimumStock">Minimum Stock</label>
-						<InputNumber min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" @onfocus="@(e => SelectAllContent())" />
+					    <div class="input-group">
+						   <span class="input-group-text customLatIcon">MiBe</span>
+						   <InputNumber min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" @onfocus="@(e => SelectAllContent())" />
+						</div>
 						<ValidationMessage For="@(() => GetProducts.MinimumStock)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="EXPDate">Expiration Date</label>
-						<InputDate id="EXPDate" class="form-control" @bind-Value="GetProducts.EXPDate" />
+					    <div class="input-group">
+						   <span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i> AbDa</span>
+						   <InputDate id="EXPDate" class="form-control" @bind-Value="GetProducts.EXPDate" />
+						</div>
 						<ValidationMessage For="@(() => GetProducts.EXPDate)" />
 					</div>
 					<div class="formGroupAdd">
@@ -96,8 +94,14 @@
 						<ValidationMessage For="@(() => GetProducts.ProductGroupID)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="ProductGroup">Versandfähig</label>
-						<InputCheckbox @bind-Value="GetProducts.IsShippable" />
+					    <div class="input-group">
+						  <span class="input-group-text customLatIcon">
+							<i class="bi bi-box-seam me-1"></i> Versandfähig
+						  </span>
+						<div class="form-control d-flex justify-content-center align-items-center">
+							<InputCheckbox @bind-Value="GetProducts.IsShippable" class="form-check-input m-0" />
+						</div>
+						</div>
 						<ValidationMessage For="@(() => GetProducts.IsShippable)" />
 					</div>
 					<div class="formGroupAdd">
@@ -105,15 +109,26 @@
 						{
 							<label for="ImAngebot">Im Angebot</label>
 							<div class="card p-3 mb-3 gap-1">
-								<InputNumber class="form-control" min="0" @bind-Value="GetProducts.ProductDiscount.DiscountedPrice" @onfocus="@(e => SelectAllContent())" />
+							    <div class="formGroupAdd">
+								   <div class="input-group">
+									 <span class="input-group-text"><i class="bi bi-tag-fill me-1"></i> </span>
+								     <InputNumber class="form-control" min="0" @bind-Value="GetProducts.ProductDiscount.DiscountedPrice" @onfocus="@(e => SelectAllContent())" />
+								   </div>
+							    </div>
 								<ValidationMessage For="@(() => GetProducts!.ProductDiscount.DiscountedPrice)" />
 								<div class="row">
 									<div class="col-md-6">
-										<InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.StartDate" />
+									    <div class="input-group">
+										   <span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i>StDa</span>
+										   <InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.StartDate" />
+										</div>
 										<ValidationMessage For="@(() => GetProducts!.ProductDiscount.StartDate)" />
 									</div>
 									<div class="col-md-6">
-										<InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.EndDate" />
+									    <div class="input-group">
+										   <span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i>AbDa</span>
+										   <InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.EndDate" />
+										</div>
 										<ValidationMessage For="@(() => GetProducts!.ProductDiscount.EndDate)" />
 									</div>
 								</div>
@@ -143,7 +158,8 @@
 							}
 						</div>
 					</div>
-					<button type="submit" class="btn addProductB">
+				<div class="mt-3">
+				    <button type="submit" class="btn btn-primary me-2" disabled="@IsProcessing">
 						@if (IsProcessing)
 						{
 							<span class="spinner-border spinner-border-sm"
@@ -152,29 +168,23 @@
 						}
 						else
 						{
-							@(ButtonName ?? "Fehler")
+						@(Action == "Add" ? "Produkt hinzufügen" : "Produkt Updaten")
 						}					
-					</button>
-					<button type="button" class="btn addProductCancelB" @onclick="CancelSubmit">Abbrechen</button>
+				    </button>
+				    <button type="button" class="btn btn-secondary" @onclick="CancelSubmit">Abbrechen</button>
+                </div>
 				</EditForm>
-			</div>
 		</div>
 	</div>
-}
 @code {
 	[Parameter]
-	public string Title { get; set; } = string.Empty;
-	[Parameter]
-	public string ButtonName { get; set; } = null!;
-	[Parameter]
-	public Products GetProducts { get; set; } = null!;
+	public Products GetProducts { get; set; } = new Products();
 	[Parameter]
 	public string Action { get; set; } = string.Empty;
 	[Parameter]
 	public Users? user { get; set; }
 	[Parameter]
-	public EventCallback<(Products product, string Action, bool ActionState)> OnHandel { get; set; }
-
+	public EventCallback<(Products product, string Action)> OnHandel { get; set; }
 
 	private bool IsProcessing = false;
 	protected override void OnInitialized()
@@ -191,13 +201,6 @@
 		IsProcessing = true;
 		if (Action == "Edit")
 		{
-			// wenn null 
-			if (GetProducts == null)
-			{
-				await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
-				IsProcessing = false;
-				return;
-			}
 			// wenn  nicht edited
 			Products? currentProduct = productService.DownloadedProduct.Find(p => p.Id == GetProducts.Id);
 			bool isEdited = productService.IsEditedProduct(currentProduct!, GetProducts);
@@ -223,7 +226,7 @@
 				productService.DownloadedProduct[index] = GetProducts!; // Update the product in the list
 
 				// Benachrichtigen Sie die Vater Komponente über das Update
-				await OnHandel.InvokeAsync((GetProducts, Action, false));
+				await OnHandel.InvokeAsync((GetProducts, Action));
 			}
 			else
 				await JS.InvokeVoidAsync("window.alert", result.Message!);
@@ -266,7 +269,7 @@
 				productService.DownloadedProduct.Insert(0, GetProducts!); // Add the new product to the products list
 
 				// Benachrichtigen Sie die Vater Komponente über das Update
-				await OnHandel.InvokeAsync((GetProducts, Action, false));
+				await OnHandel.InvokeAsync((GetProducts, Action));
 			}
 			else
 				await JS.InvokeVoidAsync("window.alert", result.Message!);
@@ -275,8 +278,8 @@
 	}
 	private void CancelSubmit()
 	{
-		GetProducts = null!;
-		OnHandel.InvokeAsync((GetProducts, Action,false));
+		GetProducts = new();
+		OnHandel.InvokeAsync((GetProducts, "Cancel"));
 	}
 	// image 
 	private async Task ImageUpload(InputFileChangeEventArgs e)
@@ -355,10 +358,5 @@
 		{
 			Console.WriteLine($"Error selecting input text: {ex.Message}");
 		}
-	}
-	
-	public void Dispose()
-	{
-		GetProducts = null!;
 	}
 }

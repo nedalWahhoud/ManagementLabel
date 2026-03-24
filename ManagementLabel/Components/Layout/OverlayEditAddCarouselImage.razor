@@ -1,8 +1,5 @@
-﻿@if (carouselImage != null)
-{
-	<div class="overlay">
-		<div class="overlayEditAddForm">
-			<h4>@(action == "Add" ? "Carousel Image hinzufügen" : "Carousel Image bearbeiten")</h4>
+﻿	<div class="overlay">
+	<div class="standardOverlayForm">
 			<EditForm Model="@carouselImage" OnValidSubmit="Save">
 				<DataAnnotationsValidator />
 				<div class="formGroupAdd">
@@ -61,7 +58,6 @@
 			</EditForm>
 		</div>
 	</div>
-}
 @code {
 
 	[Parameter]

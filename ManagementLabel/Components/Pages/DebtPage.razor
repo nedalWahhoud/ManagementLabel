@@ -165,17 +165,12 @@
 										<i class="bi bi-whatsapp me-2"></i> <span class="fw-bold">Kunde benachrichtigen</span>
 									}
 								</button>
-
 							</div>
-
 						</div>
-
-
 					</div>
 					@* transactions anzeigen *@
-					<div class="transactions-container p-3 border rounded">
-						<div class="table-responsive">
-							<table class="table table-striped table-bordered mb-0">
+						<div class="tableResponsive p-3">
+							<table class="table table-striped table-bordered mb-0 customTable">
 								<thead class="table-dark">
 									<tr>
 										<th>#</th>
@@ -209,28 +204,26 @@
 									}
 								</tbody>
 							</table>
+							<div class="d-flex justify-content-center mt-3">
+							<button @onclick="OnMoreLoadTransactionsCustomers" class="btn btn-success btnMobileSmall"
+										disabled="@(transactionsCustomersService.GetItems.AllItemsLoaded || IsProcessing)">
+									@if (IsProcessing)
+									{
+										<span class="spinner-border spinner-border-sm"
+											  role="status"
+											  aria-hidden="true"></span>
+									}
+									else if (transactionsCustomersService.GetItems.AllItemsLoaded)
+									{
+										<span>Alle geladen</span>
+									}
+									else
+									{
+										<span>Mehr Laden</span>
+									}
+								</button>
+							</div>
 						</div>
-
-						<div class="d-flex justify-content-center mt-3">
-							<button @onclick="OnMoreLoadTransactionsCustomers" class="btn btn-success"
-							disabled="@(transactionsCustomersService.GetItems.AllItemsLoaded || IsProcessing)">
-								@if (IsProcessing)
-								{
-									<span class="spinner-border spinner-border-sm"
-									role="status"
-									aria-hidden="true"></span>
-								}
-								else if (transactionsCustomersService.GetItems.AllItemsLoaded)
-								{
-									<span>Alle geladen</span>
-								}
-								else
-								{
-									<span>Mehr Laden</span>
-								}
-							</button>
-						</div>
-					</div>
 				</div>
 
 				if (IsEditing)
@@ -402,7 +395,7 @@
 		{
 			var nextCustomer = sortedCustomers[currentIndex + 1];
 
-			NavigationManager.NavigateTo($"/debt{nextCustomer.Id}", true);
+			NavigationManager.NavigateTo($"/debt/{nextCustomer.Id}", true);
 
 		}
 		else
@@ -426,7 +419,7 @@
 		{
 			var previousCustomer = sortedCustomers[currentIndex - 1];
 
-			NavigationManager.NavigateTo($"/debt{previousCustomer.Id}", true);
+			NavigationManager.NavigateTo($"/debt/{previousCustomer.Id}", true);
 		}
 		else
 		{

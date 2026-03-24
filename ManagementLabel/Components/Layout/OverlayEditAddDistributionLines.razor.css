@@ -1,28 +1,48 @@
-﻿.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 1rem;
-    box-sizing: border-box;
+﻿.formGroupAdd {
+    margin-bottom: 12px;
 }
 
-.overlayEditAddForm {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+@media (max-width: 768px) {
+    .overlay {
+        padding: 0;
+        align-items: flex-start;
+    }
+
+    .customForm {
+        padding: 1.5rem 1rem;
+        gap: 12px;
+        max-height: 85vh;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+        animation: slideUp 0.3s ease-out;
+    }
+
+
+    .form-control {
+        font-size: 16px !important;
+        padding: 8px;
+    }
+
+    .mt-3 {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .mt-3 button {
+            width: 100%;
+            padding: 12px;
+        }
+}
+
+/* حركة الدخول من الأسفل */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }

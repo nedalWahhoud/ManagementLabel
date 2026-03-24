@@ -1,6 +1,5 @@
 ﻿<div class="overlay">
-	<div class="overlayEditAddForm">
-		<h4>@(action == "Add" ? "Category hinzufügen" : "Category bearbeiten")</h4>
+	<div class="standardOverlayForm">
 		<EditForm Model="@category" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
@@ -24,7 +23,7 @@
 				<ValidationMessage For="@(() => category.IsAktiv)" />
 			</div>
 			<div class="mt-3">
-				<button class="btn btn-primary me-2">
+				<button class="btn btn-primary me-2" disabled="@IsProcessing">
 					@if (IsProcessing)
 					{
 						<span class="spinner-border spinner-border-sm"
