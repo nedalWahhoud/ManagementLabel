@@ -10,16 +10,17 @@
 			{
 				@* top continer *@
 				<div class="TopContiner">
-
 					@* filter *@
-					<div class="d-flex flex-column flex-md-row gap-1 align-items-center">
-						@* Lagerstand Filter  *@
-						<select id="stockFilter" class="form-select" @bind="selectedValuesFilter" @bind:after="OnStockFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+					@* Lagerstand Filter  *@
+					<div class="d-flex flex-column">
+						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnStockFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 							<option value="0">Alle</option>
 							<option value="1">Geringer Lagerbestand</option>
 						</select>
-						@* category filter *@
-						<select class="form-select" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+						</div>
+					@* category filter *@
+					<div class="d-flex flex-column">
+						<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 							<option value="0">Alle</option>
 							@foreach (var category in categoryService.DownloadedCategories)
 							{
@@ -32,12 +33,7 @@
 				<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
 					<div class="topTable">
 						@* add neu Product *@
-						<button class="btn addProductB"
-						@onclick="ShowAddProductFormAsync"
-						disabled="@(IsLoadingMessage)"
-						title="Add neues Produkt">
-							+
-						</button>
+						<button class="btn addProductB" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)" title="Add neues Produkt">+</button>
 						@* choose the Columns *@
 						<div class="h-100 d-flex">
 							<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
