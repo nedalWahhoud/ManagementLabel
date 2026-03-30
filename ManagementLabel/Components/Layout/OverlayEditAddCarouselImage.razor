@@ -26,17 +26,17 @@
 					</div>
 					<div class="formGroupAdd">
 						<label for="Start">Expiration Date</label>
-						<InputDate TValue="DateTime" class="form-control" @bind-Value="carouselImage!.StartDate" />
+					<InputDate id="Start" TValue="DateTime" class="form-control" @bind-Value="carouselImage!.StartDate" />
 						<ValidationMessage For="@(() => carouselImage.StartDate)" />
 					</div>
 					<div class="formGroupAdd">
 						<label for="Ende">Expiration Date</label>
-						<InputDate class="form-control" @bind-Value="carouselImage.EndDate" />
+					<InputDate id="Ende" class="form-control" @bind-Value="carouselImage.EndDate" />
 						<ValidationMessage For="@(() => carouselImage.EndDate)" />
 					</div>
 					<div class="formGroupAdd">
-						<label for="MinimumStock">Minimum Stock</label>
-						<InputNumber min="0" class="form-control" @bind-Value="carouselImage.DisplayOrder" @onfocus="@(e => SelectAllContent())" />
+					     <label for="DisplayOrder">Anzeigereihenfolge</label>
+					     <InputNumber id="DisplayOrder" min="0" class="form-control" @bind-Value="carouselImage.DisplayOrder" @onfocus="@(e => SelectAllContent())" />
 						<ValidationMessage For="@(() => carouselImage.DisplayOrder)" />
 					</div>
 				</div>
