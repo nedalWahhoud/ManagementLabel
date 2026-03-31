@@ -50,27 +50,35 @@ openWhatsApp: function(phone, message) {
 };
 //  Verbindung wiederherstellen
 Blazor.start({
-        ssr: {
-            disablePrerendering: false // Für schnelleres Laden auf „false“ setzen
-        },
-        circuit: {
-            reconnectionHandler: {
-                onConnectionDown: (options, error) => {
-                    // Versuch, die Verbindung sofort und ohne Unterbrechung wiederherzustellen
-                    return new Promise(resolve => {
-                        const attempt = () => {
-                            if (navigator.onLine) {
-                                resolve();
+    circuit: {
+        reconnectionHandler: {
+            onConnectionDown: (options, error) => {
+                return new Promise((resolve, reject) => {
+                    const maxRetries = 5; // Anzahl der Versuche
+                    let count = 0;
+
+                    const attempt = () => {
+                        count++;
+                        if (navigator.onLine) {
+                            resolve(); // Versuch, die Verbindung wiederherzustellen
+                        } else {
+                            if (count > maxRetries) {
+                                location.reload(); // Wenn es 5 Mal fehlschlägt, führe eine vollständige Aktualisierung durch
                             } else {
-                                setTimeout(attempt, 1000);
+                                setTimeout(attempt, 2000); // Warten Sie zwei Sekunden und versuchen Sie es erneut.
                             }
-                        };
-                        attempt();
-                    });
-                }
+                        }
+                    };
+                    attempt();
+                });
+            },
+            // Wenn der Server die alte Sitzung nicht erkennt (der Hauptgrund für den weißen Bildschirm)
+            onConnectionUp: () => {
+                // Stellen Sie sicher, dass das System funktioniert, andernfalls aktualisieren Sie es.
             }
         }
-    });
+    }
+});
 // Code zum Wiederverbinden nach der Rückkehr von WhatsApp oder aus dem Hintergrund
 window.addEventListener('focus', async () => {
     try {

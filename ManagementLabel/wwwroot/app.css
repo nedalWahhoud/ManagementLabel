@@ -5,7 +5,10 @@
     --btnBackgroundColorProductAdded: #4CAF50;
     --btnBackgroundColorProductAddedHover: #45a049;
 }
-
+/* Blende die widerliche Standard-Wiederverbindungsnachricht aus */
+#components-reconnect-modal {
+    display: none !important;
+}
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
