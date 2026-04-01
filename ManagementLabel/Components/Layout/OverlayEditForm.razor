@@ -1,181 +1,213 @@
-﻿	<div class="overlay">
-	<div class="standardOverlayForm">
-				<EditForm Model="@GetProducts" OnValidSubmit="HandleSubmit">
-					<DataAnnotationsValidator />
-					<div class="formGroupAdd">
-					<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_de" placeholder="Name de" />
-						<ValidationMessage For="@(() => GetProducts.Name_de)" />
+﻿<div class="overlay">
+	<div class="productOverlayForm">
+		<EditForm Model="@GetProducts" OnValidSubmit="HandleSubmit">
+			<DataAnnotationsValidator />
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Name_de)">
+						<i class="fas fa-copy"></i>
+					</button>
+					<InputText id="productNameDe" class="form-control" @bind-Value="GetProducts!.Name_de" placeholder="Name de" />
+					<button class="btn btn-outline-danger" type="button"@onclick="() => ClearInput(val => GetProducts.Name_de = val)">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<ValidationMessage For="@(() => GetProducts.Name_de)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Description_de)">
+						<i class="fas fa-copy"></i>
+					</button>
+				    <InputText id="productDescriptionDe" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
+					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Description_de = val)">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<ValidationMessage For="@(() => GetProducts.Description_de)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Name_ar)">
+						<i class="fas fa-copy"></i>
+					</button>
+					<InputText id="productNameAr" class="form-control" @bind-Value="GetProducts.Name_ar" placeholder="اسم المنتج بل عربية" />
+					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Name_ar = val)">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<ValidationMessage For="@(() => GetProducts.Name_ar)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Description_ar)">
+						<i class="fas fa-copy"></i>
+					</button>
+					<InputText id="productDescriptionAr" class="form-control" @bind-Value="GetProducts.Description_ar" placeholder="وصف المنتج بل عربية" />
+					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Description_ar = val)">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<ValidationMessage For="@(() => GetProducts.Description_ar)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputSelect id="category" class="form-control" @bind-Value="GetProducts.CategoryId">
+					<option value="0">Select Category</option>
+					@foreach (var category in categoryService.DownloadedCategories)
+					{
+						<option value="@category.Id">@category.Name_de</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => GetProducts.CategoryId)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<span class="input-group-text customLatIcon">Me</span>
+					<InputNumber id="productQuantity" min="0" class="form-control" @bind-Value="GetProducts.Quantity" @onfocus="@(e => SelectAllContent("productQuantity"))" />
+				</div>
+				<ValidationMessage For="@(() => GetProducts.Quantity)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<span class="input-group-text customLatIcon">KaPr</span>
+					<InputNumber id="productPurchasePrice" min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" @onfocus="@(e => SelectAllContent("productPurchasePrice"))" />
+				</div>
+				<ValidationMessage For="@(() => GetProducts.PurchasePrice)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<span class="input-group-text customLatIcon">VePr</span>
+					<InputNumber id="productSalePrice" min="0" class="form-control" @bind-Value="GetProducts.SalePrice" @onfocus="@(e => SelectAllContent("productSalePrice"))" />
+				</div>
+				<ValidationMessage For="@(() => GetProducts.SalePrice)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<span class="input-group-text customLatIcon">MiBe</span>
+					<InputNumber id="productMinimumStock" min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" @onfocus="@(e => SelectAllContent("productMinimumStock"))" />
+				</div>
+				<ValidationMessage For="@(() => GetProducts.MinimumStock)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i> AbDa</span>
+					<InputDate id="EXPDate" class="form-control" @bind-Value="GetProducts.EXPDate" />
+				</div>
+				<ValidationMessage For="@(() => GetProducts.EXPDate)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputSelect id="category" class="form-control" @bind-Value="GetProducts.ManufacturerId">
+					<option value="0">Select Manufacturer</option>
+					@foreach (var Manufacturer in productService.DownloadedManufacturers!)
+					{
+						<option value="@Manufacturer.Id">@Manufacturer.Name</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => GetProducts.ManufacturerId)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">
+					<option value="0">Select Rate</option>
+					@foreach (var rate in productService.DownloadedTaxRates)
+					{
+						<option value="@rate.Id">@rate.Rate</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => GetProducts.TaxRateId)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputSelect class="form-control" @bind-Value="GetProducts.ProductGroupID">
+					<option value="0">wählen Product Gruppe aus</option>
+					@foreach (var groupProduct in productGroupService.DownloadedproductGroups)
+					{
+						<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
+					}
+				</InputSelect>
+				<ValidationMessage For="@(() => GetProducts.ProductGroupID)" />
+			</div>
+			<div class="formGroupAdd">
+				<div class="input-group">
+					<span class="input-group-text customLatIcon">
+						<i class="bi bi-box-seam me-1"></i>Versandfähig
+					</span>
+					<div class="form-control d-flex justify-content-center align-items-center">
+						<InputCheckbox @bind-Value="GetProducts.IsShippable" class="form-check-input m-0" />
 					</div>
-					<div class="formGroupAdd">
-					<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
-						<ValidationMessage For="@(() => GetProducts.Description_de)" />
-					</div>
-					<div class="formGroupAdd">
-					<InputText id="Name" class="form-control" @bind-Value="GetProducts!.Name_ar" placeholder="اسم المنتج بل عربية" />
-						<ValidationMessage For="@(() => GetProducts.Name_ar)" />
-					</div>
-					<div class="formGroupAdd">
-					<InputText id="Description" class="form-control" @bind-Value="GetProducts.Description_ar" placeholder="وصف المنتج بل عربية" />
-						<ValidationMessage For="@(() => GetProducts.Description_ar)" />
-					</div>
-					<div class="formGroupAdd">
-						<InputSelect id="category" class="form-control" @bind-Value="GetProducts.CategoryId">
-							<option value="0">Select Category</option>
-							@foreach (var category in categoryService.DownloadedCategories)
-							{
-								<option value="@category.Id">@category.Name_de</option>
-							}
-						</InputSelect>
-						<ValidationMessage For="@(() => GetProducts.CategoryId)" />
-					</div>
-					<div class="formGroupAdd">
-					    <div class="input-group">
-						  <span class="input-group-text customLatIcon">Me</span>
-						  <InputNumber  min="0" class="form-control" @bind-Value="GetProducts.Quantity" @onfocus="@(e => SelectAllContent())" />
-						</div>
-					   <ValidationMessage For="@(() => GetProducts.Quantity)" />
-					</div>
-					<div class="formGroupAdd">
-					    <div class="input-group">
-					 	  <span class="input-group-text customLatIcon">KaPr</span>
-						  <InputNumber  min="0" class="form-control" @bind-Value="GetProducts.PurchasePrice" @onfocus="@(e => SelectAllContent())" />
-						</div>
-						<ValidationMessage For="@(() => GetProducts.PurchasePrice)" />
-					</div>
-					<div class="formGroupAdd">
-					    <div class="input-group">
-						  <span class="input-group-text customLatIcon">VePr</span>
-						  <InputNumber min="0" class="form-control" @bind-Value="GetProducts.SalePrice" @onfocus="@(e => SelectAllContent())" />
-					    </div>
-						<ValidationMessage For="@(() => GetProducts.SalePrice)" />
-					</div>
-					<div class="formGroupAdd">
-					    <div class="input-group">
-						   <span class="input-group-text customLatIcon">MiBe</span>
-						   <InputNumber min="0" class="form-control" @bind-Value="GetProducts.MinimumStock" @onfocus="@(e => SelectAllContent())" />
-						</div>
-						<ValidationMessage For="@(() => GetProducts.MinimumStock)" />
-					</div>
-					<div class="formGroupAdd">
-					    <div class="input-group">
-						   <span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i> AbDa</span>
-						   <InputDate id="EXPDate" class="form-control" @bind-Value="GetProducts.EXPDate" />
-						</div>
-						<ValidationMessage For="@(() => GetProducts.EXPDate)" />
-					</div>
-					<div class="formGroupAdd">
-						<InputSelect id="category" class="form-control" @bind-Value="GetProducts.ManufacturerId">
-							<option value="0">Select Manufacturer</option>
-							@foreach (var Manufacturer in productService.DownloadedManufacturers!)
-							{
-								<option value="@Manufacturer.Id">@Manufacturer.Name</option>
-							}
-						</InputSelect>
-						<ValidationMessage For="@(() => GetProducts.ManufacturerId)" />
-					</div>
-					<div class="formGroupAdd">
-						<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">
-							<option value="0">Select Rate</option>
-							@foreach (var rate in productService.DownloadedTaxRates)
-							{
-								<option value="@rate.Id">@rate.Rate</option>
-							}
-						</InputSelect>
-						<ValidationMessage For="@(() => GetProducts.TaxRateId)" />
-					</div>
-					<div class="formGroupAdd">
-						<InputSelect class="form-control" @bind-Value="GetProducts.ProductGroupID">
-							<option value="0">wählen Product Gruppe aus</option>
-							@foreach (var groupProduct in productGroupService.DownloadedproductGroups)
-							{
-								<option value="@groupProduct.Id">@groupProduct.GroupName_de</option>
-							}
-						</InputSelect>
-						<ValidationMessage For="@(() => GetProducts.ProductGroupID)" />
-					</div>
-					<div class="formGroupAdd">
-					    <div class="input-group">
-						  <span class="input-group-text customLatIcon">
-							<i class="bi bi-box-seam me-1"></i> Versandfähig
-						  </span>
-						<div class="form-control d-flex justify-content-center align-items-center">
-							<InputCheckbox @bind-Value="GetProducts.IsShippable" class="form-check-input m-0" />
-						</div>
-						</div>
-						<ValidationMessage For="@(() => GetProducts.IsShippable)" />
-					</div>
-					<div class="formGroupAdd">
-						@if (GetProducts.ProductDiscount != null)
-						{
-							<label for="ImAngebot">Im Angebot</label>
-							<div class="card p-3 mb-3 gap-1">
-							    <div class="formGroupAdd">
-								   <div class="input-group">
-									 <span class="input-group-text"><i class="bi bi-tag-fill me-1"></i> </span>
-								     <InputNumber class="form-control" min="0" @bind-Value="GetProducts.ProductDiscount.DiscountedPrice" @onfocus="@(e => SelectAllContent())" />
-								   </div>
-							    </div>
-								<ValidationMessage For="@(() => GetProducts!.ProductDiscount.DiscountedPrice)" />
-								<div class="row">
-									<div class="col-md-6">
-									    <div class="input-group">
-										   <span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i>StDa</span>
-										   <InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.StartDate" />
-										</div>
-										<ValidationMessage For="@(() => GetProducts!.ProductDiscount.StartDate)" />
-									</div>
-									<div class="col-md-6">
-									    <div class="input-group">
-										   <span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i>AbDa</span>
-										   <InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.EndDate" />
-										</div>
-										<ValidationMessage For="@(() => GetProducts!.ProductDiscount.EndDate)" />
-									</div>
-								</div>
+				</div>
+				<ValidationMessage For="@(() => GetProducts.IsShippable)" />
+			</div>
+			<div class="formGroupAdd">
+				@if (GetProducts.ProductDiscount != null)
+				{
+					<label for="ImAngebot">Im Angebot</label>
+					<div class="card p-3 mb-3 gap-1">
+						<div class="formGroupAdd">
+							<div class="input-group">
+								<span class="input-group-text"><i class="bi bi-tag-fill me-1"></i> </span>
+								<InputNumber id="productDiscountedPrice" class="form-control" min="0" @bind-Value="GetProducts.ProductDiscount.DiscountedPrice" @onfocus="@(e => SelectAllContent("productDiscountedPrice"))" />
 							</div>
-						}
-					</div>
-					<div class="formGroupAdd">
-						<div class="imageUpload">
-							<InputFile id="Image" class="form-control" OnChange="ImageUpload" />
-							@if (GetProducts.ProductImages != null && GetProducts.ProductImages.Count > 0)
-							{
-								ProductImages mainImage = GetProducts.ProductImages.FirstOrDefault(i => i.IsMain)!;
-								string imgScr = string.Empty;
-								if (!string.IsNullOrEmpty(mainImage.ImageUrlLocal))
-								{
-									imgScr = mainImage.ImageUrlLocal;
-								}
-								else
-								{
-									imgScr = productImagesService.GetProductImageUrl(mainImage);
-
-								}
-								<img src="@imgScr"
-								alt="Product Image"
-								class="previewImage" />
-								<ValidationMessage For="@(() => GetProducts!.ProductImages)" />
-							}
+						</div>
+						<ValidationMessage For="@(() => GetProducts!.ProductDiscount.DiscountedPrice)" />
+						<div class="row">
+							<div class="col-md-6">
+								<div class="input-group">
+									<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i>StDa</span>
+									<InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.StartDate" />
+								</div>
+								<ValidationMessage For="@(() => GetProducts!.ProductDiscount.StartDate)" />
+							</div>
+							<div class="col-md-6">
+								<div class="input-group">
+									<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i>AbDa</span>
+									<InputDate class="form-control" @bind-Value="GetProducts.ProductDiscount.EndDate" />
+								</div>
+								<ValidationMessage For="@(() => GetProducts!.ProductDiscount.EndDate)" />
+							</div>
 						</div>
 					</div>
-				<div class="mt-3">
-				    <button type="submit" class="btn btn-primary me-2" disabled="@IsProcessing">
-						@if (IsProcessing)
+				}
+			</div>
+			<div class="formGroupAdd">
+				<div class="imageUpload">
+					<InputFile id="Image" class="form-control" OnChange="ImageUpload" />
+					@if (GetProducts.ProductImages != null && GetProducts.ProductImages.Count > 0)
+					{
+						ProductImages mainImage = GetProducts.ProductImages.FirstOrDefault(i => i.IsMain)!;
+						string imgScr = string.Empty;
+						if (!string.IsNullOrEmpty(mainImage.ImageUrlLocal))
 						{
-							<span class="spinner-border spinner-border-sm"
-							role="status"
-							aria-hidden="true"></span>
+							imgScr = mainImage.ImageUrlLocal;
 						}
 						else
 						{
+							imgScr = productImagesService.GetProductImageUrl(mainImage);
+
+						}
+						<img src="@imgScr"
+						alt="Product Image"
+						class="previewImage" />
+						<ValidationMessage For="@(() => GetProducts!.ProductImages)" />
+					}
+				</div>
+			</div>
+			<div class="mt-3">
+				<button type="submit" class="btn btn-primary me-2" disabled="@IsProcessing">
+					@if (IsProcessing)
+					{
+						<span class="spinner-border spinner-border-sm"
+						role="status"
+						aria-hidden="true"></span>
+					}
+					else
+					{
 						@(Action == "Add" ? "Produkt hinzufügen" : "Produkt Updaten")
-						}					
-				    </button>
-				    <button type="button" class="btn btn-secondary" @onclick="CancelSubmit">Abbrechen</button>
-                </div>
-				</EditForm>
-		</div>
+					}					
+				</button>
+				<button type="button" class="btn btn-secondary" @onclick="CancelSubmit">Abbrechen</button>
+			</div>
+		</EditForm>
 	</div>
+</div>
 @code {
 	[Parameter]
 	public Products GetProducts { get; set; } = new Products();
@@ -346,17 +378,37 @@
 		}
 	}
 	// select all content in input when focus
-	private async Task SelectAllContent()
+	private async Task SelectAllContent(string id)
 	{
 		try
 		{
-			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
-			await Task.Delay(10);
-			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+			await Task.Delay(50);
+			await JS.InvokeVoidAsync("selectTextById", id);
 		}
 		catch (Exception ex)
 		{
-			Console.WriteLine($"Error selecting input text: {ex.Message}");
+			Console.WriteLine($"Error: {ex.Message}");
 		}
+	}
+
+	// kopie funktion
+	private async Task CopyFromInput(string? text)
+	{
+		try
+		{
+			if (!string.IsNullOrEmpty(text))
+			{
+				await JS.InvokeVoidAsync("copyTextToClipboard", text);
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error copying text: {ex.Message}");
+		}
+	}
+	// löschen funktion
+	private void ClearInput(Action<string> setter)
+	{
+		setter(string.Empty);
 	}
 }

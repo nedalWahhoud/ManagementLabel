@@ -41,8 +41,19 @@ html, body {
     overflow-y: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
-
-
+.productOverlayForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
 /* Buchstabe Icon */
 .customLatIcon {
     background-color: #e9ecef;
