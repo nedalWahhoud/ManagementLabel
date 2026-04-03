@@ -26,13 +26,20 @@ var builder = WebApplication.CreateBuilder(args);
 {
     options.ListenAnyIP(5105); 
 });*/
-builder.WebHost.ConfigureKestrel(options =>
+/*builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(7122, listenOptions =>
     {
         listenOptions.UseHttps();
     });
+});*/
+
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5105);
 });
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -116,7 +123,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();

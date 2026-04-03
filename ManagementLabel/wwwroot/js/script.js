@@ -7,34 +7,6 @@ window.clearSearchBox = (id) => {
 
         }
 };
-// kopie von input text
-window.copyTextToClipboard = (text) => {
-    var textArea = document.createElement("textarea");
-
-    textArea.value = text;
-
-    textArea.style.position = "fixed";
-    textArea.style.left = "-9999px";
-    textArea.style.top = "0";
-
-    document.body.appendChild(textArea);
-
-    textArea.focus();
-    textArea.select();
-
-    try {
-        var successful = document.execCommand('copy');
-        if (successful) {
-            console.log("Text copied successfully using fallback");
-        } else {
-            console.log("Unable to copy");
-        }
-    } catch (err) {
-        console.error("Fallback: Oops, unable to copy", err);
-    }
-
-    document.body.removeChild(textArea);
-};
 // select text in input
 window.selectTextById = (id) => {
     const el = document.getElementById(id);

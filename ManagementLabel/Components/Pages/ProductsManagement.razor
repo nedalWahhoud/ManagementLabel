@@ -30,7 +30,7 @@
 					</div>
 				</div>
 				@* table *@
-				<div tabindex="0"  @onkeydown="KeyDown" id="scrollContainer" class="tableContiner">
+				<div tabindex="0" id="scrollContainer" class="tableContiner">
 					<div class="topTable">
 						@* add neu Product *@
 						<button class="btn addProductB" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)" title="Add neues Produkt">+</button>
@@ -523,7 +523,6 @@
 	private string menuYpx => $"{menuY}px";
 	private Products? selectedProduct;
 
-	private void HideContextMenu() => showContextMenu = false;
 	// Select
 	private Products? selectedRow;
 	private void OnDoubleTap(Products product, MouseEventArgs e)
@@ -1135,23 +1134,11 @@
 		await InvokeAsync(StateHasChanged);
 	}
 
-	// Key Down
-	private void KeyDown(KeyboardEventArgs e)
-	{
-		if (e.Key == "Escape")
-		{
-			// Reset the selected row
-			selectedRow = null!;
-			// Hide the edit form
-			_editProduct = null!;
-		}
-	}
 	private void OnMainDiv()
 	{
 		// hide die Menu if sichtbar
 		showContextMenu = false;
 	}
-
 	// Scroll
 	[JSInvokable]
 	public async Task OnScrollEnd()
@@ -1160,7 +1147,6 @@
 	}
 	// barcode scanning
 	private bool ShowScanner = false;
-
 	private async Task OpenScanner()
 	{
 		ShowScanner = true;
@@ -1178,7 +1164,6 @@
 			await JS.InvokeVoidAsync("alert", ex.Message);
 		}
 	}
-
 	[JSInvokable]
 	public async Task OnBarcodeScanned(string code)
 	{

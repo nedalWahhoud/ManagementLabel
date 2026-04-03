@@ -4,7 +4,7 @@
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
 				<div class="input-group">
-					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Name_de)">
+					<button class="btn btn-outline-secondary" type="button" onclick="window.copyTextToClipboard('@GetProducts.Name_de')">
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productNameDe" class="form-control" @bind-Value="GetProducts!.Name_de" placeholder="Name de" />
@@ -16,7 +16,7 @@
 			</div>
 			<div class="formGroupAdd">
 				<div class="input-group">
-					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Description_de)">
+					<button class="btn btn-outline-secondary" type="button" onclick="window.copyTextToClipboard('@GetProducts.Description_de')">
 						<i class="fas fa-copy"></i>
 					</button>
 				    <InputText id="productDescriptionDe" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
@@ -28,7 +28,7 @@
 			</div>
 			<div class="formGroupAdd">
 				<div class="input-group">
-					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Name_ar)">
+					<button class="btn btn-outline-secondary" type="button" onclick="window.copyTextToClipboard('@GetProducts.Name_ar')">
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productNameAr" class="form-control" @bind-Value="GetProducts.Name_ar" placeholder="اسم المنتج بل عربية" />
@@ -40,7 +40,7 @@
 			</div>
 			<div class="formGroupAdd">
 				<div class="input-group">
-					<button class="btn btn-outline-secondary" type="button" @onclick="() => CopyFromInput(GetProducts.Description_ar)">
+					<button class="btn btn-outline-secondary" type="button" onclick="window.copyTextToClipboard('@GetProducts.Description_ar')">
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productDescriptionAr" class="form-control" @bind-Value="GetProducts.Description_ar" placeholder="وصف المنتج بل عربية" />
@@ -265,7 +265,6 @@
 		}
 		else if (Action == "Add")
 		{
-
 			var isValid = productService.IsValidProduct(GetProducts!);
 			if (isValid.Result == false)
 			{
@@ -388,22 +387,6 @@
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Error: {ex.Message}");
-		}
-	}
-
-	// kopie funktion
-	private async Task CopyFromInput(string? text)
-	{
-		try
-		{
-			if (!string.IsNullOrEmpty(text))
-			{
-				await JS.InvokeVoidAsync("copyTextToClipboard", text);
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error copying text: {ex.Message}");
 		}
 	}
 	// löschen funktion

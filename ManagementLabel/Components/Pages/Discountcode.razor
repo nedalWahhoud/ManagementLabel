@@ -1,213 +1,149 @@
 ﻿@page "/discountcode"
 
-<AuthorizeView>
-    <Authorized Context="authContext">
-        @if (isLoading)
-        {
-          @if (authContext.User.HasClaim("permission", "manageDiscounts") || authContext.User.HasClaim("permission", "fullAccess"))
-          {
-             <div class="addFormBtn">
-                <button class="btn btn-primary" @onclick="OpenAddForm" disabled="@IsOverlayAddCode">Neuen Rabattcode hinzufügen</button>
-                <button class="btn btn-success" @onclick="OpenAddCategoryForm" disabled="@IsOverlayAddCategory">Neuen Category Rabattcode hinzufügen</button>
-            </div>
-             @* Rabatt kategorie *@
-             @if(IsOverlayAddCategory)
+<div class="p-2" @onclick="OnMainDiv">
+    <AuthorizeView>
+        <Authorized Context="authContext">
+            @if (isLoading)
             {
-                <div class="overlay">
-                    <div class="AddCodeForm">
-                        <EditForm Model="@newDiscountCategory" OnValidSubmit="OnSaveCategory">
-                            <DataAnnotationsValidator />
-                            <div class="mb-3">
-                                <label class="form-label">Code</label>
-                                <InputText class="form-control" @bind-Value="newDiscountCategory.Code" />
-                                <ValidationMessage For="@(() => newDiscountCategory.Code)" />
-                            </div>
-                            <div class="mb-3">
-                                <InputSelect class="form-control" @bind-Value="newDiscountCategory.CategoriesId">
-                                    <option value="0">Select Category</option>
-                                    @foreach (var category in categories!)
-                                    {
-                                        <option value="@category.Id">@category.Name_de</option>
-                                    }
-                                </InputSelect>
-                                <ValidationMessage For="@(() => newDiscountCategory.CategoriesId)" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Rabattprozentsatz in %</label>
-                                <InputNumber class="form-control" @bind-Value="newDiscountCategory.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
-                                <ValidationMessage For="@(() => newDiscountCategory.DiscountPercentage)" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Nutzungslimit</label>
-                                <InputNumber class="form-control" @bind-Value="newDiscountCategory.UsageLimit" @onfocus="@(e => SelectAllContent())" />
-                                <ValidationMessage For="@(() => newDiscountCategory.UsageLimit)" />
-                            </div>
+                @if (authContext.User.HasClaim("permission", "manageDiscounts") || authContext.User.HasClaim("permission", "fullAccess"))
+                {
+                    <div class="addFormBtn">
+                        <button class="btn btn-primary" @onclick="() => OpenAddForm(true,true)">Neuen Rabattcode hinzufügen</button>
+                        <button class="btn btn-success" @onclick="() => OpenAddForm(false,true)">Neuen Category Rabattcode hinzufügen</button>
+                    </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Startdatum</label>
-                                <InputDate class="form-control" @bind-Value="newDiscountCategory.StartDate" />
-                                <ValidationMessage For="@(() => newDiscountCategory.StartDate)" />
-                            </div>
+                    @* table discount codes *@
+                    <div class="tableResponsive">
+                        <table class="table discountTable">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Usage</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in discountService.DownloadedDiscountCodes)
+                                {
+                                    DateTime now = DateTime.Now;
 
-                            <div class="mb-3">
-                                <label class="form-label">Enddatum</label>
-                                <InputDate class="form-control" @bind-Value="newDiscountCategory.EndDate" />
-                                <ValidationMessage For="@(() => newDiscountCategory.EndDate)" />
-                            </div>
+                                    var isActiveNow = item.IsActive
+                                    && item.StartDate <= now
+                                    && item.EndDate >= now;
+                                    <tr @key="item.Id"
+                                    @oncontextmenu:preventDefault="true"
+                                    @oncontextmenu="@(e => OnSelectRow(item,null!, e))"
+                                    @onclick="(e) => OnSelectRow(item,null!, e)"
+                                    @ondblclick="(e) => OnDoubleTap(item,null!, e)"
 
-                            <div class="form-check mb-3">
-                                <InputCheckbox class="form-check-input" @bind-Value="newDiscountCategory.IsActive" />
-                                <label class="form-check-label">Ist aktiv</label>
-                            </div>
-                            <button type="button" class="btn btn-success" @onclick="OnGenerateCategory">Code generieren</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="submit" class="btn btn-secondary" @onclick="() => IsOverlayAddCategory = false">Abbrechen</button>
-                        </EditForm>
+                                    class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
+                                        <td>@item.Code</td>
+                                        <td>@item.DiscountPercentage %</td>
+                                        <td>@item.TimesUsed / @item.UsageLimit</td>
+                                        <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@item.IsActive</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @* table discount category *@
+                    <div class="table-responsive">
+                        <table class="table discountTable">
+                            <thead>
+                                <tr>
+                                    <th>Kategore</th>
+                                    <th>Code</th>
+                                    <th>Discount</th>
+                                    <th>Usage</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in discountService.DownloadedDiscountCategory)
+                                {
+                                    DateTime now = DateTime.Now;
+
+                                    var isActiveNow = item.IsActive
+                                    && item.StartDate <= now
+                                    && item.EndDate >= now;
+                                    <tr @key="item.Id"
+                                    @oncontextmenu:preventDefault="true"
+                                    @oncontextmenu="@(e => OnSelectRow(null!,item, e))"
+                                    @onclick="(e) => OnSelectRow(null!,item, e)"
+                                    @ondblclick="(e) => OnDoubleTap(null!,item, e)"
+                                    class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
+                                        <td>@(item.Category != null ? item.Category.Name_de : "Fehler")</td>
+                                        <td>@item.Code</td>
+                                        <td>@item.DiscountPercentage %</td>
+                                        <td>@item.TimesUsed / @item.UsageLimit</td>
+                                        <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
+                                        <td>@item.IsActive</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    @* menu context *@
+                    @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
+                    {
+                        <div class="contextMenu dropdown-menu-end dropdown-menu"
+                        style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"
+                        @onclick:stopPropagation="true">
+                            <ul>
+                                <li @onclick="() => Edit(selectedRowDiscountCodes!,selectedRowDiscountCategory!)">
+                                    <a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+                                </li>
+                                <li @onclick="() => Delete(selectedRowDiscountCodes!,selectedRowDiscountCategory!)">
+                                    <a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+                        <div class="alert alert-danger text-center">
+                            Sie haben keine Berechtigung für diese Seite
+                        </div>
+                    </div>
+                }
+                @if (showDiscountFormAction != null)
+                {
+                    if (showDiscountFormAction.Value.ifAdd)
+                    {
+                        <ManagementLabel.Components.Layout.OverlayEditAddDiscount discountCode="newDiscountCode" discountCategory="newDiscountCategory" action="showDiscountFormAction.Value" OnHandel="HandleAddEditDiscount" />
+                    }
+                    else
+                    {
+                        <ManagementLabel.Components.Layout.OverlayEditAddDiscount discountCode="editDiscountCode" discountCategory="editDiscountCategory" action="showDiscountFormAction.Value" OnHandel="HandleAddEditDiscount" />
+                    }
+                }
+            }
+            else
+            {
+                <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-
             }
-             @* Rabattcode *@
-             @if (IsOverlayAddCode)
-            {
-                <div class="overlay">
-                    <div class="AddCodeForm">
-                        <EditForm Model="@newDiscountCode" OnValidSubmit="OnSave">
-                            <DataAnnotationsValidator />
-
-                            <div class="mb-3">
-                                <label class="form-label">Code</label>
-                                <InputText class="form-control" @bind-Value="newDiscountCode.Code" />
-                                <ValidationMessage For="@(() => newDiscountCode.Code)" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Rabattprozentsatz in %</label>
-                                <InputNumber class="form-control" @bind-Value="newDiscountCode.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
-                                <ValidationMessage For="@(() => newDiscountCode.DiscountPercentage)" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Nutzungslimit</label>
-                                <InputNumber class="form-control" @bind-Value="newDiscountCode.UsageLimit" @onfocus="@(e => SelectAllContent())" />
-                                <ValidationMessage For="@(() => newDiscountCode.UsageLimit)" />
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Startdatum</label>
-                                <InputDate class="form-control" @bind-Value="newDiscountCode.StartDate" />
-                                <ValidationMessage For="@(() => newDiscountCode.StartDate)" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Enddatum</label>
-                                <InputDate class="form-control" @bind-Value="newDiscountCode.EndDate" />
-                                <ValidationMessage For="@(() => newDiscountCode.EndDate)" />
-                            </div>
-
-                            <div class="form-check mb-3">
-                                <InputCheckbox class="form-check-input" @bind-Value="newDiscountCode.IsActive" />
-                                <label class="form-check-label">Ist aktiv</label>
-                            </div>
-                            <button type="button" class="btn btn-success" @onclick="OnGenerate">Code generieren</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <button type="submit" class="btn btn-secondary" @onclick="() => IsOverlayAddCode = false">Abbrechen</button>
-                        </EditForm>
-                    </div>
-                </div>
-            }
-
-            @* table discount codes *@
-            <div class="tableResponsive">
-                <table class="table customTable">
-                    <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Discount</th>
-                            <th>Usage</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in discountService.DownloadedDiscountCodes)
-                        {
-                            DateTime now = DateTime.Now;
-
-                            var isActiveNow = item.IsActive
-                            && item.StartDate <= now
-                            && item.EndDate >= now;
-                            <tr class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
-                                <td>@item.Code</td>
-                                <td>@item.DiscountPercentage %</td>
-                                <td>@item.TimesUsed / @item.UsageLimit</td>
-                                <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
-                                <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
-                                <td>@item.IsActive</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-             </div>
-             @* table discount category *@
-             <div class="table-responsive">
-                  <table class="table customTable">
-                    <thead>
-                        <tr>
-                            <th>Kategore</th>
-                            <th>Code</th>
-                            <th>Discount</th>
-                            <th>Usage</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in discountService.DownloadedDiscountCategory)
-                        {
-                            DateTime now = DateTime.Now;
-
-                            var isActiveNow = item.IsActive
-                            && item.StartDate <= now
-                            && item.EndDate >= now;
-                            <tr class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
-                                <td>@(item.Category != null ? item.Category.Name_de : "Fehler")</td>
-                                <td>@item.Code</td>
-                                <td>@item.DiscountPercentage %</td>
-                                <td>@item.TimesUsed / @item.UsageLimit</td>
-                                <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
-                                <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
-                                <td>@item.IsActive</td>
-                            </tr>
-                        }
-                    </tbody>
-                 </table>
-                </div>
-          }
-          else
-          {
-             <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-                <div class="alert alert-danger text-center">
-                    Sie haben keine Berechtigung für diese Seite
-                </div>
-             </div>
-           }
-		}
-		else
-		{
-			<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-				<div class="spinner-border text-primary" role="status">
-					<span class="visually-hidden">Loading...</span>
-				</div>
-			</div>
-		}
-    </Authorized>
-    <NotAuthorized>
-        <ManagementLabel.Components.Pages.LogIn />
-    </NotAuthorized>
-</AuthorizeView>
-
+        </Authorized>
+        <NotAuthorized>
+            <ManagementLabel.Components.Pages.LogIn />
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
 @code {
 
     private bool isLoading = false;
@@ -227,86 +163,131 @@
         }
         isLoading = true;
     }
-    // Discount code
-    private DiscountCodes newDiscountCode = new DiscountCodes();
-    private async void OnSave()
-    {
-        var result = await discountService.AddDiscountCode(newDiscountCode);
-        if (result.Result)
-        {
-            await JS.InvokeVoidAsync("window.alert", "Rabattcode erfolgreich hinzugefügt!");
-            CloseAddCodeForm();
-            StateHasChanged();
-        }
-        else
-            await JS.InvokeVoidAsync("window.alert", result.Message!);
-    }
-    private bool IsOverlayAddCode = false;
-    private void OpenAddForm()
-    {
-        IsOverlayAddCode = true;
-    }
-    public void OnGenerate()
-    {
-        // Generate a random code
-        var randomCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-        newDiscountCode.Code = randomCode;
-    }
-    public void CloseAddCodeForm()
-    {
-        IsOverlayAddCode = false;
-        newDiscountCode = new DiscountCodes(); // Reset the form
 
-    }
-    // Discount category 
-    private List<Categories>? categories = null;
-    private DiscountCategory newDiscountCategory = new DiscountCategory();
-    private bool IsOverlayAddCategory = false;
-    private async Task OpenAddCategoryForm()
+    private (bool ifdicountCode, bool ifAdd)? showDiscountFormAction;
+    private void OpenAddForm(bool ifDiscountCode,bool ifAdd)
     {
-        categories ??= await categoryService.GetAllCategoriesAsync();
-        IsOverlayAddCategory = true;
+        showDiscountFormAction = (ifDiscountCode, ifAdd);
     }
-    private async Task OnSaveCategory()
+
+    private void Edit(DiscountCodes discountCodes, DiscountCategory discountCategory)
     {
-        var result = await discountService.AddDiscountCategory(newDiscountCategory);
-        if (result.Result)
+        if (discountCodes != null)
         {
-            await JS.InvokeVoidAsync("window.alert", "Rabattkategorie erfolgreich hinzugefügt!");
-            CloseAddCategoryForm();
-            StateHasChanged();
+            editDiscountCode = new DiscountCodes
+                {
+                    Id = discountCodes.Id,
+                    Code = discountCodes.Code,
+                    DiscountPercentage = discountCodes.DiscountPercentage,
+                    UsageLimit = discountCodes.UsageLimit,
+                    StartDate = discountCodes.StartDate,
+                    EndDate = discountCodes.EndDate,
+                    IsActive = discountCodes.IsActive,
+                };
+            OpenAddForm(true, false);
         }
-        else
+        else if (discountCategory != null)
         {
-            await JS.InvokeVoidAsync("window.alert", result.Message!);
+            editDiscountCategory = new DiscountCategory
+                {
+                    Id = discountCategory.Id,
+                    Code = discountCategory.Code,
+                    DiscountPercentage = discountCategory.DiscountPercentage,
+                    UsageLimit = discountCategory.UsageLimit,
+                    StartDate = discountCategory.StartDate,
+                    EndDate = discountCategory.EndDate,
+                    IsActive = discountCategory.IsActive,
+                    CategoriesId = discountCategory.CategoriesId,
+                };
+            OpenAddForm(false, false);
         }
 
+        showContextMenu = false;
     }
-    public void OnGenerateCategory()
+    private async Task Delete(DiscountCodes discountCodes, DiscountCategory discountCategory)
     {
-        // Generate a random code
-        var randomCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
-        newDiscountCategory.Code = randomCode;
-    }
-    public void CloseAddCategoryForm()
-    {
-        IsOverlayAddCategory = false;
-        newDiscountCategory = new DiscountCategory(); // Reset the form
-    }
- 
- 
-    // select all content in input when focus
-    private async Task SelectAllContent()
-    {
-        try
+        var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das Discount mit der Code {discountCodes?.Code ?? discountCategory?.Code} wirklich löschen?");
+        if (resultConfirm)
         {
-            // um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
-            await Task.Delay(10);
-            await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+
+            if (discountCodes != null)
+            {
+                var result = await discountService.DeleteDiscountCode(discountCodes.Id);
+                if (result.Result)
+                    StateHasChanged();
+                else
+                    await JS.InvokeVoidAsync("window.alert", result.Message!);
+            }
+            else if (discountCategory != null)
+            {
+                var result = await discountService.DeleteDiscountCategory(discountCategory.Id);
+                if (result.Result)
+                    StateHasChanged();
+                else
+                    await JS.InvokeVoidAsync("window.alert", result.Message!);
+
+            }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error selecting input text: {ex.Message}");
-        }
+        showContextMenu = false;
     }
+    // select DiscountCategory
+    private DiscountCategory? selectedRowDiscountCategory;
+    // select DiscountCodes
+    private DiscountCodes? selectedRowDiscountCodes;
+    private void OnDoubleTap(DiscountCodes item,DiscountCategory item1, MouseEventArgs e)
+    {
+        /*if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+            return;*/
+
+        selectedRowDiscountCodes = item;
+        selectedRowDiscountCategory = item1;
+
+        menuX = e.ClientX;
+        menuY = e.ClientY;
+        showContextMenu = true;
+
+        StateHasChanged();
+    }
+
+    private void OnSelectRow(DiscountCodes item,DiscountCategory item1, MouseEventArgs e)
+    {
+        /*if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+            return;*/
+
+        if (e.Button == 2)
+        {
+            selectedRowDiscountCodes = item;
+            selectedRowDiscountCategory = item1;
+            menuX = e.ClientX;
+            menuY = e.ClientY;
+            showContextMenu = true;
+        }
+
+
+    }
+
+    // Menu recht klicken
+    private bool showContextMenu = false;
+    private double menuX;
+    private double menuY;
+    private string menuXpx => $"{menuX}px";
+    private string menuYpx => $"{menuY}px";
+
+    //
+    private DiscountCodes newDiscountCode = new();
+    private DiscountCategory newDiscountCategory = new();
+    private DiscountCodes editDiscountCode = new();
+    private DiscountCategory editDiscountCategory = new();
+    private void HandleAddEditDiscount(string Action)
+    {
+        showDiscountFormAction = null;
+    }
+
+    private void OnMainDiv()
+	{
+		// hide die Menu if sichtbar
+		showContextMenu = false;
+	}
+
+    
 }

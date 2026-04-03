@@ -1,0 +1,266 @@
+﻿@* Rabattcode *@
+@if (action.ifdicountCode)
+{
+    <div class="overlay">
+        <div class="AddCodeForm">
+            <EditForm Model="@discountCode" OnValidSubmit="OnSave">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <InputText class="form-control" @bind-Value="discountCode.Code" placeholder="Code" />
+                        <button class="btn btn-outline-primary" type="button" @onclick="() => OnGenerate(true)">
+                            <i class="fas fa-random"></i>
+                        </button>
+                    </div>
+                    <ValidationMessage For="@(() => discountCode.Code)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">R %</span>
+                        <InputNumber class="form-control" @bind-Value="discountCode.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCode.DiscountPercentage)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">NuLi</span>
+                        <InputNumber class="form-control" @bind-Value="discountCode.UsageLimit" @onfocus="@(e => SelectAllContent())" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCode.UsageLimit)" />
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">StDa</span>
+                        <InputDate class="form-control" @bind-Value="discountCode.StartDate" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCode.StartDate)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">EnDa</span>
+                        <InputDate class="form-control" @bind-Value="discountCode.EndDate" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCode.EndDate)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Ist aktiv</span>
+                        <InputCheckbox class="form-check-input ms-4" @bind-Value="discountCode.IsActive" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+            </EditForm>
+        </div>
+    </div>
+}
+@* Rabatt kategorie *@
+@if (!action.ifdicountCode)
+{
+    <div class="overlay">
+        <div class="AddCodeForm">
+            <EditForm Model="@discountCategory" OnValidSubmit="OnSave">
+                <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <div class="input-group">
+                        <InputText class="form-control" @bind-Value="discountCategory.Code" placeholder="Code" />
+                        <button class="btn btn-outline-primary" type="button" @onclick="() => OnGenerate(false)">
+                            <i class="fas fa-random"></i>
+                        </button>
+                    </div>
+                    <ValidationMessage For="@(() => discountCategory.Code)" />
+                </div>
+                <div class="mb-3">
+                    <InputSelect class="form-control" @bind-Value="discountCategory.CategoriesId">
+                        <option value="0">Kategorie auswählen</option>
+                        @foreach (var category in categories ?? new List<Categories>())
+                        {
+                            <option value="@category.Id">@category.Name_de</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => discountCategory.CategoriesId)" />
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">R %</span>
+                        <InputNumber class="form-control" @bind-Value="discountCategory.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCategory.DiscountPercentage)" />
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">NuLi</span>
+                        <InputNumber class="form-control" @bind-Value="discountCategory.UsageLimit" @onfocus="@(e => SelectAllContent())" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCategory.UsageLimit)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">StDa</span>
+                        <InputDate class="form-control" @bind-Value="discountCategory.StartDate" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCategory.StartDate)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">EnDa</span>
+                        <InputDate class="form-control" @bind-Value="discountCategory.EndDate" />
+                    </div>
+                    <ValidationMessage For="@(() => discountCategory.EndDate)" />
+                </div>
+
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Ist aktiv</span>
+                        <InputCheckbox class="form-check-input ms-4" @bind-Value="discountCategory.IsActive" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+            </EditForm>
+        </div>
+    </div>
+
+}
+@code {
+    [Parameter]
+    public DiscountCategory discountCategory { get; set; } = new();
+    [Parameter]
+    public DiscountCodes discountCode { get; set; } = new();
+    [Parameter]
+    public (bool ifdicountCode, bool ifAdd) action { get; set; } = (false, false);
+    [Parameter]
+    public EventCallback<string> OnHandel { get; set; }
+
+    private bool IsProcessing = false;
+    // category
+    private List<Categories>? categories = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // get default image for add action, and Initialize die ProductDiscount
+        if (!action.ifdicountCode)
+        {
+            categories ??= await categoryService.GetAllCategoriesAsync();
+        }
+    }
+
+    private async Task OnSave()
+    {
+        if (action.ifdicountCode)
+        {
+            if (action.ifAdd)
+            {
+                var result = await discountService.AddDiscountCode(discountCode);
+                if (result.Result)
+                {
+                    discountCode = new DiscountCodes(); // Reset the form
+                }
+                else
+                    await JS.InvokeVoidAsync("window.alert", result.Message!);
+            }
+            else
+            {
+                 DiscountCodes currentProduct = discountService.DownloadedDiscountCodes.Find(p => p.Id == discountCode.Id) ?? new();
+                bool isEdited = discountService.IsEditedDiscountCode(currentProduct, discountCode);
+                if (!isEdited)
+                {
+                    await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
+                    IsProcessing = false;
+                    return;
+                }
+
+                var result = await discountService.UpdateDiscountCode(discountCode);
+                if (result.Result)
+                {
+                    // Code aktualisiert, keine weiteren Aktionen erforderlich
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("window.alert", result.Message!);
+                }
+            }
+        }
+        else
+        {
+            if (action.ifAdd)
+            {
+                var result = await discountService.AddDiscountCategory(discountCategory);
+                if (result.Result)
+                {
+                    discountCategory = new DiscountCategory(); // Reset the form
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("window.alert", result.Message!);
+                }
+            }
+            else
+            {
+                DiscountCategory currentProduct = discountService.DownloadedDiscountCategory.Find(p => p.Id == discountCategory.Id) ?? new();
+                bool isEdited = discountService.IsEditedDiscountCategory(currentProduct, discountCategory);
+                if (!isEdited)
+                {
+                    await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
+                    IsProcessing = false;
+                    return;
+                }
+
+				var result = await discountService.updateDiscountCategory(discountCategory);
+				if (result.Result)
+				{
+					// Code aktualisiert, keine weiteren Aktionen erforderlich
+				}
+				else
+				{
+					await JS.InvokeVoidAsync("window.alert", result.Message!);
+				}
+
+            }
+        }
+
+        if (action.ifAdd)
+            await OnHandel.InvokeAsync("Add");
+        else
+            await OnHandel.InvokeAsync("Edit");
+    }
+    public void OnGenerate(bool ifDiscountCode)
+    {
+        var randomCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+
+		if (ifDiscountCode)
+		{
+			discountCode.Code = randomCode;
+		}
+		else
+		{
+			discountCategory.Code = randomCode;
+		}
+    }
+   
+    private void Cancel()
+    {
+		OnHandel.InvokeAsync("Cancel");
+    }
+    // Den gesamten Inhalt im Eingabefeld auswählen, wenn der Fokus
+    private async Task SelectAllContent()
+    {
+        try
+        {
+            // um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+            await Task.Delay(10);
+            await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error selecting input text: {ex.Message}");
+        }
+    }
+}

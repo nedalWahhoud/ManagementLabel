@@ -7,7 +7,7 @@ namespace ManagementLabel.Model
         public int Id { get; set; }
         [Required(ErrorMessage = "Category ist erforderlich.")]
         public int CategoriesId { get; set; }
-        public Categories Category { get; set; } = new ();
+        public Categories? Category { get; set; }
         [Required(ErrorMessage = "Name ist erforderlich.")]
         [StringLength(8, MinimumLength = 8, ErrorMessage = "Code muss genau 8 Zeichen lang sein.")]
         public string Code { get; set; } = string.Empty;

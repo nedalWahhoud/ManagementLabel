@@ -1,9 +1,11 @@
-﻿using ManagementLabel.Model;
+﻿using ManagementLabel.Components.CategoriesF;
+using ManagementLabel.Model;
 namespace ManagementLabel.Components.DiscountF
 {
-    public class DiscountService(HttpClient http)
+    public class DiscountService(HttpClient http,CategoryService categoryService)
     {
         private readonly HttpClient _http = http;
+        private readonly CategoryService _categoryService = categoryService;
         public List<DiscountCodes> DownloadedDiscountCodes { get; private set; } = [];
         public List<DiscountCategory> DownloadedDiscountCategory { get; private set; } = [];
         public async Task<ValidationResult> AddDiscountCode(DiscountCodes newDiscountCode)
@@ -13,18 +15,16 @@ namespace ManagementLabel.Components.DiscountF
                 var response = await _http.PostAsJsonAsync("api/Discounts/addDiscountCode", newDiscountCode);
                 if (!response.IsSuccessStatusCode)
                     return new ValidationResult { Result = false, Message = "Failed to add discount code." };
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error occurred." };
 
-                if (result?.Result == true)
+                if (result.Result == true)
                 {
-                    var idStr = result.Message?.Split(':').LastOrDefault();
-                    if (result.Result && int.TryParse(idStr, out int id))
-                    {
-                        newDiscountCode.Id = id;
-                    }
+                    newDiscountCode.Id = result.NewId!.Value;
+                    // Lokale Liste aktualisieren
+                    DownloadedDiscountCodes.Add(newDiscountCode);
                 }
 
-                return result ?? new ValidationResult { Result = false, Message = "Unknown error occurred." };
+                return result;
             }
             catch (Exception ex)
             {
@@ -38,23 +38,111 @@ namespace ManagementLabel.Components.DiscountF
                 var response = await _http.PostAsJsonAsync("api/Discounts/addDiscountCategory", newDiscountCategory);
                 if (!response.IsSuccessStatusCode)
                     return new ValidationResult { Result = false, Message = "Failed to add discount category." };
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
-                if (result?.Result == true)
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error occurred." };
+                if (result.Result == true)
                 {
-                    var idStr = result.Message?.Split(':').LastOrDefault();
-                    if (result.Result && int.TryParse(idStr, out int id))
-                    {
-                        newDiscountCategory.Id = id;
-                    }
+                    newDiscountCategory.Id = result.NewId!.Value;
+                    // Lokale Liste aktualisieren
+                    newDiscountCategory.Category = _categoryService.DownloadedCategories.FirstOrDefault(c => c.Id == newDiscountCategory.CategoriesId) 
+                        ?? await _categoryService.GetCategoryById(newDiscountCategory.CategoriesId);
+                    DownloadedDiscountCategory.Add(newDiscountCategory);
                 }
-                return result ?? new ValidationResult { Result = false, Message = "Unknown error occurred." };
+                return result;
             }
             catch (Exception ex)
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-
+        public async Task<ValidationResult> DeleteDiscountCode(int id)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"api/Discounts/deleteDiscountCode/{id}");
+                if (!response.IsSuccessStatusCode)
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Fehler beim Löschen." };
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler." };
+                // Lokale Liste aktualisieren
+                if (result.Result)
+                {
+                    DownloadedDiscountCodes.RemoveAll(dc => dc.Id == id);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task<ValidationResult> DeleteDiscountCategory(int id)
+        {
+            try
+            {
+                var response = await _http.DeleteAsync($"api/Discounts/deleteDiscountCategory/{id}");
+                if (!response.IsSuccessStatusCode)
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Fehler beim Löschen." };
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler." };
+                // Lokale Liste aktualisieren
+                if (result.Result)
+                {
+                    DownloadedDiscountCategory.RemoveAll(dc => dc.Id == id);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task<ValidationResult> UpdateDiscountCode(DiscountCodes updatedDiscountCode)
+        {
+            try
+            {
+                var response = await _http.PutAsJsonAsync("api/Discounts/updateDiscountCode", updatedDiscountCode);
+                if (!response.IsSuccessStatusCode)
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Fehler beim Aktualisieren." };
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler." };
+                if (result.Result)
+                {
+                    var index = DownloadedDiscountCodes.FindIndex(dc => dc.Id == updatedDiscountCode.Id);
+                    if (index != -1)
+                    {
+                        DownloadedDiscountCodes[index] = updatedDiscountCode;
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
+        public async Task<ValidationResult> updateDiscountCategory(DiscountCategory updatedDiscountCategory)
+        {
+            try
+            {
+                var response = await _http.PutAsJsonAsync("api/Discounts/updateDiscountCategory", updatedDiscountCategory);
+                if (!response.IsSuccessStatusCode)
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Fehler beim Aktualisieren." };
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler." };
+                if (result.Result)
+                {
+                    var index = DownloadedDiscountCategory.FindIndex(dc => dc.Id == updatedDiscountCategory.Id);
+                    if (index != -1)
+                    {
+                        // get category nach dem Update, Wir nehmen es nicht vom ursprünglichen Variable entgegen, um Konflikte zu vermeiden.
+                        updatedDiscountCategory.Category = _categoryService.DownloadedCategories.FirstOrDefault(c => c.Id == updatedDiscountCategory.CategoriesId)
+                            ?? await _categoryService.GetCategoryById(updatedDiscountCategory.CategoriesId);
+                        DownloadedDiscountCategory[index] = updatedDiscountCategory;
+                    }
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
         public async Task<ValidationResult> GetAllDiscountCodes()
         {
             try
@@ -95,7 +183,6 @@ namespace ManagementLabel.Components.DiscountF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-
         public async Task<(ValidationResult validationResult, DiscountCategory discountCategory)> CheckDiscountCategory(string code)
         {
             if (string.IsNullOrWhiteSpace(code) || code.Length < 8)
@@ -143,6 +230,25 @@ namespace ManagementLabel.Components.DiscountF
             {
                 return (new ValidationResult { Result = false, Message = $"Fehler: {ex.Message}" }, null!);
             }
+        }
+        public bool IsEditedDiscountCode(DiscountCodes original, DiscountCodes edited)
+        {
+            return original.Code != edited.Code ||
+                   original.DiscountPercentage != edited.DiscountPercentage ||
+                   original.UsageLimit != edited.UsageLimit ||
+                   original.StartDate != edited.StartDate ||
+                   original.EndDate != edited.EndDate ||
+                   original.IsActive != edited.IsActive;
+        }
+        public bool IsEditedDiscountCategory(DiscountCategory original, DiscountCategory edited)
+        {
+            return original.Code != edited.Code ||
+                   original.DiscountPercentage != edited.DiscountPercentage ||
+                   original.UsageLimit != edited.UsageLimit ||
+                   original.StartDate != edited.StartDate ||
+                   original.EndDate != edited.EndDate ||
+                   original.IsActive != edited.IsActive ||
+                   original.CategoriesId != edited.CategoriesId;
         }
     }
 }
