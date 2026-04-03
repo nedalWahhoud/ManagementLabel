@@ -12,7 +12,7 @@ namespace ManagementLabel.Model
         [NotInPast(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
         public DateTime StartDate { get; set; } = DateTime.Today;
         [NotInPast(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
-        public DateTime EndDate { get; set; } = DateTime.Today.AddDays(2);
+        public DateTime EndDate { get; set; } = DateTime.Today.AddDays(30);
         [JsonIgnore]
         public Products? Product { get; set; }
 

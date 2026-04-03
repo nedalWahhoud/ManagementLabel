@@ -16,8 +16,9 @@
 						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnStockFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 							<option value="0">Alle</option>
 							<option value="1">Geringer Lagerbestand</option>
+							<option value="2">Im Angebot</option>
 						</select>
-						</div>
+					</div>
 					@* category filter *@
 					<div class="d-flex flex-column">
 						<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
@@ -845,6 +846,46 @@
 					filterP.AddRange(productService.DownloadedProduct.Where(p => p.Quantity <= p.MinimumStock).ToList());
 
 				var result = await productService.GetProductsLowStockAsync(getItems, excludeProductsIds);
+
+				if (result == null || result.Items == null) break;
+
+
+
+				getItems = result;
+
+				// initialize CartItem for each product
+				foreach (var product in getItems.Items)
+				{
+					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
+					filterP.Add(product);
+				}
+			}
+			filterP = filterP.OrderBy(p => p.Name_de).ToList();
+		}
+		else if (selectedValuesFilter == 2)
+		{
+			// get excludeProductsIds nur ein mal, von local products, damit die produkte die schon in local sind, nicht nochmal in der nächsten suche kommen
+			List<int> excludeProductsIds = productService.DownloadedProduct
+					.Where(p => p.ProductDiscount?.DiscountedPrice > 0 &&
+		                        DateTime.Today >= p.ProductDiscount.StartDate.Date &&
+		                        DateTime.Today <= p.ProductDiscount.EndDate.Date)
+					.Select(f => f.Id)
+					.ToList();
+			GetItems<Products> getItems = new();
+			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
+			filterP = new();
+
+
+			while (!getItems.AllItemsLoaded)
+			{
+				// get locale products, nur ein mal wenn currentPage 0 ist dann ist sicher erstmal loop.
+				//  hier weil ist nach await um "lädt..." zeigen zulassen, damit nicht direkt die produkte die in local sind zeigen
+				if (getItems.CurrentPage == 0)
+					filterP.AddRange(productService.DownloadedProduct.Where(p => p.ProductDiscount?.DiscountedPrice > 0 &&
+								DateTime.Today >= p.ProductDiscount.StartDate.Date &&
+								DateTime.Today <= p.ProductDiscount.EndDate.Date).ToList());
+
+				var result = await productService.GetProductsOnOfferAsync(getItems, excludeProductsIds);
 
 				if (result == null || result.Items == null) break;
 
