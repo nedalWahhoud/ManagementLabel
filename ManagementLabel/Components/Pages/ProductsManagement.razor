@@ -1105,7 +1105,8 @@
 				{
 					ProductId = item.ProductId,
 					Quantity = item.Quantity,
-					UnitPrice = item.Product?.SalePrice ?? 0
+					UnitPrice = item.Product?.SalePrice ?? 0,
+					CategoryId = item.Product?.CategoryId ?? 0
 				}).ToList(),
 				TotalPrice = order.TotalPrice,
 				OrderDate = DateTime.Now,

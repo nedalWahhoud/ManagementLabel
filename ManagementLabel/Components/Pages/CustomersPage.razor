@@ -47,17 +47,6 @@
 							customersToDisplay = FilteredCustomers;
 						}
 
-						if (customersToDisplay == null || !customersToDisplay.Any())
-						{
-							<div class="d-flex justify-content-center align-items-center"
-							style="min-height: 60vh;">
-								<p class="text-muted fs-5">
-									Keine Customer gefunden.
-								</p>
-							</div>
-						}
-						else
-						{
 							<div class="tableResponsive">
 							    <div class="topTable">
 									@* add neu Product *@
@@ -81,10 +70,12 @@
 									</div>
 									@* Suchen Input*@
 									<div class="position-relative ms-auto me-1">
-										<input id="searchCustomer" type="text" placeholder="Suche in name_de/name_ar" class="form-control p-2 pe-5" @oninput="OnTextChanged" @onfocus="@(e => SelectAllContent())" />
-										<button class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0" type="button" @onclick="ClearSearch" style="z-index: 5;">
-											<i class="bi bi-x-lg text-muted"></i>
-										</button>
+										<div class="input-group">
+										   <input id="searchCustomer" type="text" placeholder="Suche in name_de/name_ar" class="form-control p-2 pe-5" @oninput="OnTextChanged" @onfocus="@(e => SelectAllContent())" />
+										   <button class="btn btn-danger" type="button" @onclick="ClearSearch">
+											  <i class="fas fa-times"></i>
+										   </button>
+										</div>
 									</div>
 								</div>
 								<table class="table table-bordered table-hover customTable">
@@ -104,9 +95,19 @@
 									<th style="min-width:40px;">⋮</th>
 								</tr>
 								 <tbody>
-									@foreach (var customer in customersToDisplay)
+									@if (customersToDisplay == null || customersToDisplay.Count == 0)
 									{
-										<tr>
+										<tr id="loadingMessage">
+											<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+												<i class="bi bi-exclamation-circle mr-2"></i> Keine Customer gefunden.
+											</td>
+										</tr>
+									}
+									else
+									{
+									   @foreach (var customer in customersToDisplay)
+									   {
+										 <tr>
 											@if (ShowColumn("Id")){<td>@customer.Id</td>}
 											@if (ShowColumn("Name_de")){<td>@customer.Name_de</td>}
 											@if (ShowColumn("Name_ar")){<td>@customer.Name_ar</td>}
@@ -148,17 +149,16 @@
 													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" isEdit="isEdit" OnHandel="HandleCustomDropdown" />
 												</div>
 											</td>
-										</tr>
+										 </tr>
+									   }
 									}
 								 </tbody>
 							  </table>
 							</div>
-						}
 					}
 				</div>
 
-				@* *@
-
+				@* Add und Edit *@
 				@if (IsAdding)
 				{
 					<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAddDistributionLine" />

@@ -55,13 +55,31 @@ openWhatsApp: function(phone, message) {
         }
     }
 };
+// Funktion zur Statusprüfung bei der Rückkehr zum Browser
+function checkAndReloadIfDead() {
+    // Wenn der Benutzer zum Browser zurückkehrt und die Meldung „Verbindung wiederherstellen“ sieht, bedeutet dies, dass die Sitzung unterbrochen ist.
+
+    // Wir laden die Seite sofort neu, um die korrekte Funktion der Schaltflächen zu gewährleisten.
+    const reconnectModal = document.querySelector('.components-reconnect-show');
+    if (reconnectModal) {
+        console.log("Mobile browser resumed with dead session. Reloading...");
+        location.reload();
+    }
+}
+
+// Überwachung der Rückkehr des Nutzers zum Browser (nur mobil)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        checkAndReloadIfDead();
+    }
+});
 //  Verbindung wiederherstellen
 Blazor.start({
     circuit: {
         reconnectionHandler: {
             onConnectionDown: (options, error) => {
                 return new Promise((resolve, reject) => {
-                    const maxRetries = 5; // Anzahl der Versuche
+                    const maxRetries = 8; // Anzahl der Versuche
                     let count = 0;
 
                     const attempt = () => {
@@ -70,18 +88,22 @@ Blazor.start({
                             resolve(); // Versuch, die Verbindung wiederherzustellen
                         } else {
                             if (count > maxRetries) {
-                                location.reload(); // Wenn es 5 Mal fehlschlägt, führe eine vollständige Aktualisierung durch
+                                location.reload(); // Wenn es 10 Mal fehlschlägt, führe eine vollständige Aktualisierung durch
                             } else {
-                                setTimeout(attempt, 2000); // Warten Sie zwei Sekunden und versuchen Sie es erneut.
+                                const delay = Math.min(1000 * count, 5000); // Die einfache Strategie des „exponentiellen Rückgangs“: Die Wartezeit verlängert sich mit jedem Fehlschlag
+                                setTimeout(attempt, delay); // Warten Sie und versuchen Sie es erneut.
                             }
                         }
                     };
                     attempt();
                 });
             },
-            // Wenn der Server die alte Sitzung nicht erkennt (der Hauptgrund für den weißen Bildschirm)
+            // Wenn der Server die alte Sitzung nicht erkennt 
             onConnectionUp: () => {
-                // Stellen Sie sicher, dass das System funktioniert, andernfalls aktualisieren Sie es.
+                const checkCircuit = setTimeout(() => {
+                    console.warn("Schaltkreis wiederhergestellt, reagiert aber nicht. Wird neu geladen...");
+                    location.reload();
+                }, 3000);
             }
         }
     }

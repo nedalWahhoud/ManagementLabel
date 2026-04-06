@@ -339,7 +339,7 @@ namespace ManagementLabel.Components.InvoiceF
             double categoryitemsPrice = 0;
             foreach (var item in order.OrderItems)
             {
-                if ((item.Product?.CategoryId ?? 0) == (order.DiscountCategory?.CategoriesId ?? 0))
+                if (item.CategoryId == (order.DiscountCategory?.CategoriesId ?? 0))
                 {
                     categoryitemsPrice += item.UnitPrice * item.Quantity;
                 }
@@ -352,7 +352,7 @@ namespace ManagementLabel.Components.InvoiceF
 
             discountDetails.categoryName = order.DiscountCategory?.Category?.Name_de ?? "Kein Kategorie";
             var matchedItem = order.OrderItems
-            .FirstOrDefault(o => o.Product?.CategoryId == order.DiscountCategory?.CategoriesId);
+            .FirstOrDefault(o => o.CategoryId == order.DiscountCategory?.CategoriesId);
             discountDetails.categoryName = matchedItem?.Product?.Category?.Name_de ?? "null";
 
             return discountDetails;
@@ -369,7 +369,7 @@ namespace ManagementLabel.Components.InvoiceF
                 double categoryitemsPrice = 0;
                 foreach (var item in order.OrderItems)
                 {
-                    if ((item.Product?.CategoryId ?? 0) == (order.DiscountCategory?.CategoriesId ?? 0))
+                    if (item.CategoryId == (order.DiscountCategory?.CategoriesId ?? 0))
                     {
                         categoryitemsPrice += item.UnitPrice * item.Quantity;
                     }
@@ -402,7 +402,7 @@ namespace ManagementLabel.Components.InvoiceF
                     {
                         totalPrice += itemPreis - ((itemPreis / 100) * order.DiscountCode.DiscountPercentage);
                     }
-                    else if (order.DiscountCategory != null && order.DiscountCategory.CategoriesId == item.Product?.CategoryId)
+                    else if (order.DiscountCategory != null && order.DiscountCategory.CategoriesId == item.CategoryId)
                     {
                         totalPrice += itemPreis - ((itemPreis / 100) * order.DiscountCategory.DiscountPercentage);
                     }

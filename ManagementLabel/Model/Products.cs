@@ -14,16 +14,16 @@ namespace ManagementLabel.Model
         public int CategoryId { get; set; }
         public Categories? Category { get; set; }
         public string? Barcode { get; set; } = "BarcodeNull";
-        public int Quantity { get; set; }
+        public int Quantity { get; set; } = 50;
         [Range(0.01, double.MaxValue, ErrorMessage = "Purchase Price muss größer als 0 sein.")]
         public double PurchasePrice { get; set; }
         [Range(0.01, double.MaxValue, ErrorMessage = "Sale Price muss größer als 0 sein.")]
         public double SalePrice { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Minimum Stock muss größer als 0 sein.")]
-        public int MinimumStock { get; set; }
+        public int MinimumStock { get; set; } = 10;
         [Required(ErrorMessage = "Startdatum ist erforderlich.")]
         [DateInFuture(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
-        public DateTime EXPDate { get; set; } = DateTime.Today;
+        public DateTime EXPDate { get; set; } = DateTime.Now.AddYears(2);
         [Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
         public int? ManufacturerId { get; set; }
         public Manufacturer? Manufacturer { get; set; }
