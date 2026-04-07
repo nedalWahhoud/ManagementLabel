@@ -1,10 +1,15 @@
-﻿.addFormBtn{
-    display:flex;
-    flex-direction:row;
-    gap:20px;
-    width:100%;
+﻿.topTable {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: #cccccc;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding:5px;
+    gap:10px;
 }
-
 .discountTable {
     font-size: 15px;
 }
@@ -77,6 +82,16 @@
         overflow-x: auto;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    .topTable .btn:not(.columnsB) {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .topTable i {
+        font-size: 0.7rem; 
+    }
+    
+   
     .discountTable {
         font-size: 12px;
     }

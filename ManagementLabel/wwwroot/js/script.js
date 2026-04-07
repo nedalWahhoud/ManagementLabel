@@ -1,4 +1,11 @@
-﻿// clear search box 
+﻿window.focusElement = (selector) => {
+    const el = document.querySelector(selector);
+    if (el) {
+        el.focus();
+    }
+};
+
+// clear search box 
 window.clearSearchBox = (id) => {
         const el = document.getElementById(id);
         if (el) {

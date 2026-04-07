@@ -46,11 +46,10 @@
 						{
 							customersToDisplay = FilteredCustomers;
 						}
-
-							<div class="tableResponsive">
+						<div class="tableResponsive">
 							    <div class="topTable">
 									@* add neu Product *@
-									<button class="btn addProductB"@onclick="NewCustomer"disabled="@(!isEdit)"title="Add neue Customer">+</button>
+								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!isEdit)" title="Add neue Customer">+</button>
 									@* choose the Columns *@
 									<div class="h-100 d-flex">
 										<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
@@ -154,7 +153,7 @@
 									}
 								 </tbody>
 							  </table>
-							</div>
+						</div>
 					}
 				</div>
 

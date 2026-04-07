@@ -72,7 +72,38 @@ namespace ManagementLabel.LogIn
                 return null!;
             }
         }
+        public async Task<ValidationResult> UpdateProfileAsync(UpdateProfile updateProfile)
+        {
+            try
+            {
+                var response = await _http!.PutAsJsonAsync("api/Users/update", updateProfile);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
+                }
 
+                // get result token
+                 var result1 = await response.Content.ReadFromJsonAsync<LoginModel>();
+
+                  if (result1 == null || string.IsNullOrEmpty(result1.Token))
+                      return new ValidationResult { Result = false, Message = "Token Error" };
+
+                  /*(_authStateProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(result1.Token);
+
+                  string localToken = await (_authStateProvider as CustomAuthStateProvider)?.LocalstorageGet("authToken")!;
+
+                  // update die Token in localStorage or sessionStorage
+                  if (!string.IsNullOrEmpty(localToken))
+                      (_authStateProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", result1.Token);
+                  else
+                      (_authStateProvider as CustomAuthStateProvider)?.SessionStorageSet("authToken", result1.Token);*/
+                return new ValidationResult { Result = true, Message = "erfolgreich Userdata geupdatet" };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+        }
         // google login
         public ValidationResult GoogleLogin(LoginModel loginModel)
         {

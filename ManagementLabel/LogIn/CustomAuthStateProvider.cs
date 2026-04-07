@@ -60,15 +60,15 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         _productService.Reset();
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))));
     }
-    public void LocalstorageSet(string key, string value)
+    public async Task LocalstorageSet(string key, string value)
     {
-        _ = _js.InvokeVoidAsync("localStorage.setItem", key, value);
+        await _js.InvokeVoidAsync("localStorage.setItem", key, value);
     }
     private async Task LocalstorageRemove(string key)
     {
         await _js.InvokeVoidAsync("localStorage.removeItem", key);
     }
-    private async Task<string> LocalstorageGet(string key)
+    public async Task<string> LocalstorageGet(string key)
     {
         string value = await _js.InvokeAsync<string>("localStorage.getItem", key);
         return value;
@@ -78,15 +78,15 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         await _js.InvokeVoidAsync("sessionStorage.setItem", key, value);
     }
 
-    private async Task<string> SessionStorageGet(string key)
+    public async Task<string> SessionStorageGet(string key)
     {
         return await _js.InvokeAsync<string>("sessionStorage.getItem", key);
     }
 
-    private async Task SessionStorageRemove(string key)
+    /*private async Task SessionStorageRemove(string key)
     {
         await _js.InvokeVoidAsync("sessionStorage.removeItem", key);
-    }
+    }*/
     public ClaimsIdentity GetIdentity(string token)
     {
         var handler = new JwtSecurityTokenHandler();

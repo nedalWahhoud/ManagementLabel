@@ -139,7 +139,6 @@
     [Parameter]
     public EventCallback<string> OnHandel { get; set; }
 
-    private bool IsProcessing = false;
     // category
     private List<Categories>? categories = null;
 
@@ -173,7 +172,6 @@
                 if (!isEdited)
                 {
                     await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
-                    IsProcessing = false;
                     return;
                 }
 
@@ -209,7 +207,6 @@
                 if (!isEdited)
                 {
                     await JS.InvokeVoidAsync("window.alert", "Nichts geändert");
-                    IsProcessing = false;
                     return;
                 }
 

@@ -1,4 +1,5 @@
 ﻿@page "/discountcode"
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <div class="p-2" @onclick="OnMainDiv">
     <AuthorizeView>
@@ -7,21 +8,44 @@
             {
                 @if (authContext.User.HasClaim("permission", "manageDiscounts") || authContext.User.HasClaim("permission", "fullAccess"))
                 {
-                    <div class="addFormBtn">
-                        <button class="btn btn-primary" @onclick="() => OpenAddForm(true,true)">Neuen Rabattcode hinzufügen</button>
-                        <button class="btn btn-success" @onclick="() => OpenAddForm(false,true)">Neuen Category Rabattcode hinzufügen</button>
-                    </div>
+                     <div class="topTable">
+                            <button class="btn btn-success" @onclick="() => OpenAddForm(true,true)">
+                                <i class="bi bi-plus-lg"></i> Rabattcode
+                            </button>
+                            <button class="btn btn-info text-white" @onclick="() => OpenAddForm(false,true)">
+                                <i class="bi bi-plus-lg"></i> Kategorie-Code
+                            </button>
+                            @* choose the Columns *@
+                            <div class="h-100 d-flex">
+                                <button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+                                <ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+                                    @foreach (var col in columnOptions)
+                                    {
+                                        <li>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
+                                                <label class="form-check-label" for="@col.Key">
+                                                    @col.Label
+                                                </label>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
 
                     @* table discount codes *@
+                @if (ShowColumn("RaTa"))
+                {
                     <div class="tableResponsive">
                         <table class="table discountTable">
                             <thead>
                                 <tr>
                                     <th>Code</th>
-                                    <th>Discount</th>
-                                    <th>Usage</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
+                                    <th>Rabatt</th>
+                                    <th>Verwendung</th>
+                                    <th>St-Datum</th>
+                                    <th>En-Datum</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -51,17 +75,20 @@
                             </tbody>
                         </table>
                     </div>
-                    @* table discount category *@
-                    <div class="table-responsive">
+                    }
+                    @if (ShowColumn("KaTa"))
+                  {
+                      @* table discount category *@
+                      <div class="table-responsive">
                         <table class="table discountTable">
                             <thead>
                                 <tr>
                                     <th>Kategore</th>
                                     <th>Code</th>
-                                    <th>Discount</th>
-                                    <th>Usage</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
+                                    <th>Rabatt</th>
+                                    <th>Verwendung</th>
+                                    <th>St-Datum</th>
+                                    <th>En-Datum</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -90,8 +117,8 @@
                                 }
                             </tbody>
                         </table>
-                    </div>
-
+                      </div>
+                    }
 
                     @* menu context *@
                     @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
@@ -147,6 +174,12 @@
 @code {
 
     private bool isLoading = false;
+    private List<ColumnOption> columnOptions = new()
+    {
+      new("RabattTable", "RaTa", true),
+      new("KatagoryTable","KaTa", true),
+    };
+    private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
     protected override async Task OnInitializedAsync()
     {
         var authState = await authProvider.GetAuthenticationStateAsync();
@@ -161,7 +194,18 @@
             // get Discount Categorys
             await discountService.GetAllDiscountCategory();
         }
+
+        // die Spaltenoptionen aus dem Local Storage laden
+        var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptionsDiscount");
+        if (saved is not null)
+            columnOptions = saved;
+
         isLoading = true;
+    }
+    private async Task OnColumnChanged()
+    {
+        // Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
+        await LocalStorage.SetItemAsync("columnOptionsDiscount", columnOptions);
     }
 
     private (bool ifdicountCode, bool ifAdd)? showDiscountFormAction;

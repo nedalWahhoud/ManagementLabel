@@ -34,11 +34,10 @@
 				<div tabindex="0" id="scrollContainer" class="tableContiner">
 					<div class="topTable">
 						@* add neu Product *@
-						<button class="btn addProductB" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)" title="Add neues Produkt">+</button>
+						<button class="btn addPlusB" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)" title="Add neues Produkt">+</button>
 						@* choose the Columns *@
 						<div class="h-100 d-flex">
 							<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
-
 							<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
 								@foreach (var col in columnOptions)
 								{

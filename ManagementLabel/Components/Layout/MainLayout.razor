@@ -82,15 +82,17 @@ else
                     if (claimsIdentity == null)
                         return;
 
-					if (!claimsIdentity.HasClaim(ClaimTypes.Role, "admin"))
+                    if (!claimsIdentity.HasClaim(ClaimTypes.Role, "admin"))
                     {
                         await authService.Logout();
                         return;
                     }
                     // Benachrichtige den Anbieter des Authentifizierungsstatus über den neuen Authentifizierungsstatus.
                     (authProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(loginModel.Token);
-                    // aktualisieren Sie den Token im Local Storage
-                    (authProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", loginModel.Token);
+                    // aktualisieren Sie den Token im Local Storage, wenn nicht sessionToken ist
+                    string sessionToken = await (authProvider as CustomAuthStateProvider)?.SessionStorageGet("authToken")!;
+                    if (sessionToken == null)
+                        (authProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", loginModel.Token);
                 }
             }
         }
