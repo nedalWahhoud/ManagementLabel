@@ -316,14 +316,24 @@
 										message = discountCategory.Message;
 									}
 
-									double DiscountPercentageText =
-									discountCode.DiscountPercentage != 0
-									? discountCode.DiscountPercentage
-									: discountCategory.DiscountPercentage != 0
-									? discountCategory.DiscountPercentage
-									: 0;
+									double DiscountPercentageText = 0;
+									char? valueSymbol = null;
+									if (discountCode.DiscountAmount != 0)
+									{
+										DiscountPercentageText = discountCode.DiscountAmount;
+										valueSymbol = discountCode.DiscountType == DiscountType.Percentage ? '%' : '€';
+									}
+									else if (discountCategory.DiscountAmount != 0)
+									{
+										DiscountPercentageText = discountCategory.DiscountAmount;
+										valueSymbol = discountCategory.DiscountType == DiscountType.Percentage ? '%' : '€';
+									}
+									else
+									{
+										DiscountPercentageText = 0;
+									}
 
-									<label class="mt-2 text-success">Rabattprozentsatz: @DiscountPercentageText %</label>
+									<label class="mt-2 text-success">Rabattprozentsatz: @DiscountPercentageText @valueSymbol</label>
 									<label class="mt-2 text-danger">@message</label>
 								}
 							</div>
@@ -1003,11 +1013,18 @@
 		{
 			return (0, cartService.GetTotalPrice());
 		}
-		double discountValue = (cartService.GetTotalPrice() * discountCode?.DiscountPercentage / 100.0 ?? 0);
-		double finalPrice = cartService.GetTotalPrice() - discountValue;
+		double discountValue = 0;
+		double totalPrice = cartService.GetTotalPrice();
+		if (discountCode.DiscountType == DiscountType.Percentage)
+			discountValue = (totalPrice * discountCode?.DiscountAmount / 100.0 ?? 0);
+		else
+			discountValue = discountCode?.DiscountAmount ?? 0;
+
+		discountValue = Math.Min(discountValue, totalPrice);
+
+		double finalPrice = totalPrice - discountValue;
 
 		order.DiscountCodeId = discountCode!.Id;
-		order.DiscountCode = discountCode;
 		order.TotalPrice = finalPrice;
 
 		return (discountValue, finalPrice);
@@ -1027,13 +1044,20 @@
 				categoryitemsPrice += item.Product.SalePrice * item.Quantity;
 			}
 		}
-		// get price with discount of category
-		double categoryDiscountValue = categoryitemsPrice * (discountCategory.DiscountPercentage / 100.0);
+
+		double categoryDiscountValue = 0;
+		double totalPrice = cartService.GetTotalPrice();
+		if (discountCategory.DiscountType == DiscountType.Percentage)
+			categoryDiscountValue = categoryitemsPrice * discountCategory.DiscountAmount / 100.0;
+		else
+			categoryDiscountValue = discountCategory.DiscountAmount;
+
+
+		categoryDiscountValue = Math.Min(categoryDiscountValue, categoryitemsPrice);
 		// final price with discount of category
-		double finalPrice = cartService.GetTotalPrice() - categoryDiscountValue;
+		double finalPrice = totalPrice - categoryDiscountValue;
 
 		order.DiscountCategoryId = discountCategory.Id;
-		order.DiscountCategory = discountCategory;
 		order.TotalPrice = finalPrice;
 
 		return (categoryDiscountValue, finalPrice);

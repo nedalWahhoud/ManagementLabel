@@ -6,7 +6,7 @@
         <Authorized Context="authContext">
             @if (isLoading)
             {
-                @if (authContext.User.HasClaim("permission", "manageDiscounts") || authContext.User.HasClaim("permission", "fullAccess"))
+                @if (canManage)
                 {
                      <div class="topTable">
                             <button class="btn btn-success" @onclick="() => OpenAddForm(true,true)">
@@ -43,9 +43,10 @@
                                 <tr>
                                     <th>Code</th>
                                     <th>Rabatt</th>
-                                    <th>Verwendung</th>
+                                        <th>Nutz.</th>
                                     <th>St-Datum</th>
                                     <th>En-Datum</th>
+                                    <th>DiTy</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -65,10 +66,11 @@
 
                                     class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
                                         <td>@item.Code</td>
-                                        <td>@item.DiscountPercentage %</td>
+                                            <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? "%" : "€")</td>
                                         <td>@item.TimesUsed / @item.UsageLimit</td>
                                         <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
                                         <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@item.DiscountType</td>
                                         <td>@item.IsActive</td>
                                     </tr>
                                 }
@@ -76,8 +78,8 @@
                         </table>
                     </div>
                     }
-                    @if (ShowColumn("KaTa"))
-                  {
+                @if (ShowColumn("KaTa"))
+                {
                       @* table discount category *@
                       <div class="table-responsive">
                         <table class="table discountTable">
@@ -86,9 +88,10 @@
                                     <th>Kategore</th>
                                     <th>Code</th>
                                     <th>Rabatt</th>
-                                    <th>Verwendung</th>
-                                    <th>St-Datum</th>
-                                    <th>En-Datum</th>
+                                    <th>Nutz.</th>
+                                    <th>St-Da</th>
+                                    <th>En-Da</th>
+                                    <th>DiTy</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -108,10 +111,11 @@
                                     class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
                                         <td>@(item.Category != null ? item.Category.Name_de : "Fehler")</td>
                                         <td>@item.Code</td>
-                                        <td>@item.DiscountPercentage %</td>
+                                            <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? '%' : '€')</td>
                                         <td>@item.TimesUsed / @item.UsageLimit</td>
                                         <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
                                         <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@item.DiscountType</td>
                                         <td>@item.IsActive</td>
                                     </tr>
                                 }
@@ -180,14 +184,15 @@
       new("KatagoryTable","KaTa", true),
     };
     private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
+	private bool canManage = false;
     protected override async Task OnInitializedAsync()
     {
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        var canViewCoupons = user.HasClaim("permission", "manageDiscounts") ||
+        canManage = user.HasClaim("permission", "manageDiscounts") ||
                              user.HasClaim("permission", "fullAccess");
-        if (canViewCoupons)
+        if (canManage)
         {
             // get Discount codes
             await discountService.GetAllDiscountCodes();
@@ -222,10 +227,11 @@
                 {
                     Id = discountCodes.Id,
                     Code = discountCodes.Code,
-                    DiscountPercentage = discountCodes.DiscountPercentage,
+                    DiscountAmount = discountCodes.DiscountAmount,
                     UsageLimit = discountCodes.UsageLimit,
                     StartDate = discountCodes.StartDate,
                     EndDate = discountCodes.EndDate,
+                    DiscountType = discountCodes.DiscountType,
                     IsActive = discountCodes.IsActive,
                 };
             OpenAddForm(true, false);
@@ -236,10 +242,11 @@
                 {
                     Id = discountCategory.Id,
                     Code = discountCategory.Code,
-                    DiscountPercentage = discountCategory.DiscountPercentage,
+                    DiscountAmount = discountCategory.DiscountAmount,
                     UsageLimit = discountCategory.UsageLimit,
                     StartDate = discountCategory.StartDate,
                     EndDate = discountCategory.EndDate,
+                    DiscountType = discountCategory.DiscountType,
                     IsActive = discountCategory.IsActive,
                     CategoriesId = discountCategory.CategoriesId,
                 };

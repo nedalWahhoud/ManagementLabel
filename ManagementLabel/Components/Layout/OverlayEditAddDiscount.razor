@@ -18,12 +18,21 @@
 
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">R %</span>
-                        <InputNumber class="form-control" @bind-Value="discountCode.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
+                        <span class="input-group-text">R </span>
+                        <InputNumber class="form-control" @bind-Value="discountCode.DiscountAmount" @onfocus="@(e => SelectAllContent())" />
                     </div>
-                    <ValidationMessage For="@(() => discountCode.DiscountPercentage)" />
+                    <ValidationMessage For="@(() => discountCode.DiscountAmount)" />
                 </div>
-
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Typ</span>
+                        <InputSelect @bind-Value="discountCode.DiscountType" class="form-select">
+                            <option value="@DiscountType.Percentage">Prozent (%)</option>
+                            <option value="@DiscountType.FixedAmount">Betrag (€)</option>
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => discountCode.DiscountType)" />
+                </div>
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">NuLi</span>
@@ -46,7 +55,7 @@
                     </div>
                     <ValidationMessage For="@(() => discountCode.EndDate)" />
                 </div>
-
+              
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">Ist aktiv</span>
@@ -87,10 +96,20 @@
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">R %</span>
-                        <InputNumber class="form-control" @bind-Value="discountCategory.DiscountPercentage" @onfocus="@(e => SelectAllContent())" />
+                        <span class="input-group-text">R </span>
+                        <InputNumber class="form-control" @bind-Value="discountCategory.DiscountAmount" @onfocus="@(e => SelectAllContent())" />
                     </div>
-                    <ValidationMessage For="@(() => discountCategory.DiscountPercentage)" />
+                    <ValidationMessage For="@(() => discountCategory.DiscountAmount)" />
+                </div>
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">Typ</span>
+                        <InputSelect @bind-Value="discountCategory.DiscountType" class="form-select">
+                            <option value="@DiscountType.Percentage">Prozent (%)</option>
+                            <option value="@DiscountType.FixedAmount">Betrag (€)</option>
+                        </InputSelect>
+                    </div>
+                    <ValidationMessage For="@(() => discountCategory.DiscountType)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
@@ -210,7 +229,7 @@
                     return;
                 }
 
-				var result = await discountService.updateDiscountCategory(discountCategory);
+                var result = await discountService.UpdateDiscountCategory(discountCategory);
 				if (result.Result)
 				{
 					// Code aktualisiert, keine weiteren Aktionen erforderlich

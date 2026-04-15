@@ -288,7 +288,7 @@ namespace ManagementLabel.Components.InvoiceF
                     invoice.order.ShippingProviders = _orderService.GetShippingProviderByIdLocal(invoice.order.ShippingProviderId ?? 0);
                 }
 
-                if (invoice.order.DiscountCode != null || invoice.order.DiscountCategory != null)
+                if (invoice.order!.DiscountCode != null || invoice.order.DiscountCategory != null)
                 {
                     orderItemsTable.AddCell(new PdfPCell(new Phrase("Preis nach Rabatt:", cellFont)) { Colspan = 5, HorizontalAlignment = Element.ALIGN_RIGHT, Padding = 5 });
                     orderItemsTable.AddCell(new PdfPCell(new Phrase(discountDetails.PriceAfterDiscount.ToString("C", culture), cellFont)) { Padding = 5 });
@@ -324,10 +324,14 @@ namespace ManagementLabel.Components.InvoiceF
         {
 
             (int DiscountPercentage, double DiscountValue) discountDetails = default!;
-            double originalTotal = order.TotalPrice / (1 - ((order.DiscountCode?.DiscountPercentage ?? 0) / 100.0));
+            double originalTotal = order.OrderItems.Sum(x => x.UnitPrice * x.Quantity);
+            double discountAmt = order.DiscountCode?. DiscountAmount ?? 0;
+
             double discountValue = originalTotal - order.TotalPrice;
 
-            discountDetails.DiscountPercentage = order.DiscountCode?.DiscountPercentage ?? 0;
+            discountValue = Math.Clamp(discountValue, 0, originalTotal);
+
+            discountDetails.DiscountPercentage = order.DiscountCode?.DiscountAmount ?? 0;
             discountDetails.DiscountValue = discountValue;
             return discountDetails;
         }
@@ -345,15 +349,20 @@ namespace ManagementLabel.Components.InvoiceF
                 }
             }
             // get discount category
-            double categoryDiscountValue = categoryitemsPrice * (order.DiscountCategory?.DiscountPercentage ?? 0) / 100.0;
+            double categoryDiscountValue = 0;
 
-            discountDetails.DiscountPercentage = order.DiscountCategory?.DiscountPercentage ?? 0;
+            if(order.DiscountCategory!.DiscountType == DiscountType.Percentage)
+                categoryDiscountValue = Math.Min(categoryitemsPrice * (order.DiscountCategory?.DiscountAmount ?? 0) / 100.0, categoryitemsPrice);
+            else
+                categoryDiscountValue = Math.Min((double)(order.DiscountCategory?.DiscountAmount ?? 0), categoryitemsPrice);
+
+            discountDetails.DiscountPercentage = order.DiscountCategory?.DiscountAmount ?? 0;
             discountDetails.DiscountValue = categoryDiscountValue;
 
-            discountDetails.categoryName = order.DiscountCategory?.Category?.Name_de ?? "Kein Kategorie";
+            // get category name
             var matchedItem = order.OrderItems
             .FirstOrDefault(o => o.CategoryId == order.DiscountCategory?.CategoriesId);
-            discountDetails.categoryName = matchedItem?.Product?.Category?.Name_de ?? "null";
+            discountDetails.categoryName = matchedItem?.Product?.Category?.Name_de ?? "Kein Kategorie\"";
 
             return discountDetails;
         }
@@ -362,7 +371,18 @@ namespace ManagementLabel.Components.InvoiceF
         {
             if (order.DiscountCode != null)
             {
-                return order.TotalPrice / (1 - ((order.DiscountCode?.DiscountPercentage ?? 0) / 100.0));
+                if (order.DiscountCode.DiscountType == DiscountType.FixedAmount)
+                    return Math.Min(order.TotalPrice + (order.DiscountCode?.DiscountAmount ?? 0), order.TotalPrice);
+                else
+                    {
+                    double discountPercent = order.DiscountCode?.DiscountAmount ?? 0;
+
+                    double originalTotal = (discountPercent >= 100)
+                        ? order.TotalPrice
+                        : order.TotalPrice / (1 - (discountPercent / 100.0));
+
+                    return originalTotal;
+                }
             }
             else if (order.DiscountCategory != null)
             {
@@ -374,7 +394,12 @@ namespace ManagementLabel.Components.InvoiceF
                         categoryitemsPrice += item.UnitPrice * item.Quantity;
                     }
                 }
-                double discountValue = categoryitemsPrice * (order.DiscountCategory?.DiscountPercentage ?? 0) / 100.0;
+                double discountValue;
+                if (order.DiscountCategory!.DiscountType == DiscountType.FixedAmount)
+                    discountValue = Math.Min((double)order.DiscountCategory.DiscountAmount, categoryitemsPrice);
+                else
+                    discountValue = Math.Min(categoryitemsPrice * (order.DiscountCategory?.DiscountAmount ?? 0) / 100.0, categoryitemsPrice);
+
                 return order.TotalPrice + discountValue;
 
             }
@@ -400,11 +425,33 @@ namespace ManagementLabel.Components.InvoiceF
                 {
                     if (order.DiscountCode != null)
                     {
-                        totalPrice += itemPreis - ((itemPreis / 100) * order.DiscountCode.DiscountPercentage);
+                        if (order.DiscountCode.DiscountType == DiscountType.Percentage)
+                        {
+                            double discountValue = (itemPreis / 100) * order.DiscountCode.DiscountAmount;
+                            double priceAfterDiscount = itemPreis - discountValue;
+                            totalPrice += Math.Max(0, priceAfterDiscount);
+                        }
+                        else
+                        {
+                            double priceAfterDiscount = itemPreis - order.DiscountCode.DiscountAmount;
+
+                            totalPrice += Math.Max(0, priceAfterDiscount);
+                        }
                     }
                     else if (order.DiscountCategory != null && order.DiscountCategory.CategoriesId == item.CategoryId)
                     {
-                        totalPrice += itemPreis - ((itemPreis / 100) * order.DiscountCategory.DiscountPercentage);
+                        if (order.DiscountCategory.DiscountType == DiscountType.Percentage)
+                        {
+                            double discountValue = (itemPreis / 100) * order.DiscountCategory.DiscountAmount;
+                            double priceAfterDiscount = itemPreis - discountValue;
+                            totalPrice += Math.Max(0, priceAfterDiscount);
+                        }
+                        else
+                        {
+                            double priceAfterDiscount = itemPreis - order.DiscountCategory.DiscountAmount;
+
+                            totalPrice += Math.Max(0, priceAfterDiscount);
+                        }
                     }
                     else
                     {

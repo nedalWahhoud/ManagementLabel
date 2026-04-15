@@ -12,7 +12,7 @@ namespace ManagementLabel.Model
         [StringLength(8, MinimumLength = 8, ErrorMessage = "Code muss genau 8 Zeichen lang sein.")]
         public string Code { get; set; } = string.Empty;
         [Range(1, int.MaxValue, ErrorMessage = "Wert muss größer als 0 sein.")]
-        public int DiscountPercentage { get; set; }
+        public int DiscountAmount { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Wert muss größer als 0 sein.")]
         public int UsageLimit { get; set; }
         public int TimesUsed { get; set; }
@@ -23,6 +23,8 @@ namespace ManagementLabel.Model
         [DateInFuture(ErrorMessage = "Enddatum muss in der Zukunft liegen.")]
         public DateTime EndDate { get; set; } = DateTime.Today.AddDays(30);
         public bool IsActive { get; set; } = true;
+        [Required(ErrorMessage = "Rabatttyp ist erforderlich.")]
+        public DiscountType DiscountType { get; set; } = DiscountType.Percentage;
         public string Message { get; set; } = string.Empty;
     }
 }

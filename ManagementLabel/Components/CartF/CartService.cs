@@ -5,17 +5,13 @@ using System.Text.Json;
 
 namespace ManagementLabel.Components.CartF
 {
-    public class CartService
+    public class CartService(IJSRuntime js, ProductService productService)
     {
         public List<CartItem> CartItems { get; private set; } = [];
         public event Action? OnChange;
-        private readonly IJSRuntime _js;
-        private readonly ProductService _productService;
-        public CartService(IJSRuntime js, ProductService productService)
-        {
-            _js = js;
-            _productService = productService;
-        }
+        private readonly IJSRuntime _js = js;
+        private readonly ProductService _productService = productService;
+
         // event to change the cart state
         private void NotifyStateChanged() => OnChange?.Invoke();
         public async Task InitializeAsync()
@@ -72,11 +68,11 @@ namespace ManagementLabel.Components.CartF
                     Product = _productService.GetProductByIdLocal(productId) ?? await _productService.GetProductByIdAsync(productId),
                 });
             }
-            SaveCart(); // Save the updated cart to local storage
+            await SaveCart(); // Save the updated cart to local storage
             NotifyStateChanged();
             return null!;
         }
-        public string DecreaseFromCart(int productId)
+        public async Task<string> DecreaseFromCart(int productId)
         {
             if (IsQuantityZero(productId))
             {
@@ -96,20 +92,20 @@ namespace ManagementLabel.Components.CartF
                         RemoveFromCart(productId);
                     }
 
-                    SaveCart();
+                    await SaveCart();
                     NotifyStateChanged();
                     return null!;
                 }
                 return "Nicht in einkaufswagen gefunden"; // Product not found in the cart
             }
         }
-        public void RemoveFromCart(int ProductId)
+        public async void RemoveFromCart(int ProductId)
         {
             var item = CartItems.FirstOrDefault(ci => ci.ProductId == ProductId);
             if (item != null)
             {
                 CartItems.Remove(item);
-                SaveCart();
+                await SaveCart();
                 NotifyStateChanged();
             }
         }
@@ -117,11 +113,11 @@ namespace ManagementLabel.Components.CartF
         {
             return minimumStock >= requestedQuantity;
         }
-        private void SaveCart()
+        private async Task SaveCart()
         {
-            // save the cart items to local storage or a database
-            _ = _js.InvokeVoidAsync("localStorage.setItem", "cart", JsonSerializer.Serialize(CartItems));
+            await _js.InvokeVoidAsync("localStorage.setItem", "cart", JsonSerializer.Serialize(CartItems));
         }
+
         //
         public int GetTotalQuantity()
         {
@@ -145,7 +141,7 @@ namespace ManagementLabel.Components.CartF
         }
         public async Task<ValidationResult> LoadCartProductsAsync()
         {
-            List<int> idsUnlocalProducts = new List<int>();
+            List<int> idsUnlocalProducts = [];
             for (int i = 0; i < CartItems.Count; ++i)
             {
                 if (CartItems[i].Product == null)
@@ -180,7 +176,7 @@ namespace ManagementLabel.Components.CartF
 
             return new ValidationResult() { Result = true };
         }
-        public void ClearCart(List<Products>? products = null)
+        public async void ClearCart(List<Products>? products = null)
         {
             if (products != null && products.Count > 0 && CartItems.Count > 0)
             {
@@ -197,7 +193,7 @@ namespace ManagementLabel.Components.CartF
             }
 
             CartItems.Clear();
-            SaveCart();
+            await SaveCart();
             NotifyStateChanged();
         }
 

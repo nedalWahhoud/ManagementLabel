@@ -117,7 +117,7 @@ namespace ManagementLabel.Components.DiscountF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-        public async Task<ValidationResult> updateDiscountCategory(DiscountCategory updatedDiscountCategory)
+        public async Task<ValidationResult> UpdateDiscountCategory(DiscountCategory updatedDiscountCategory)
         {
             try
             {
@@ -234,21 +234,23 @@ namespace ManagementLabel.Components.DiscountF
         public bool IsEditedDiscountCode(DiscountCodes original, DiscountCodes edited)
         {
             return original.Code != edited.Code ||
-                   original.DiscountPercentage != edited.DiscountPercentage ||
+                   original.DiscountAmount != edited.DiscountAmount ||
                    original.UsageLimit != edited.UsageLimit ||
                    original.StartDate != edited.StartDate ||
                    original.EndDate != edited.EndDate ||
-                   original.IsActive != edited.IsActive;
+                   original.IsActive != edited.IsActive || 
+                   original.DiscountType != edited.DiscountType;
         }
         public bool IsEditedDiscountCategory(DiscountCategory original, DiscountCategory edited)
         {
             return original.Code != edited.Code ||
-                   original.DiscountPercentage != edited.DiscountPercentage ||
+                   original.DiscountAmount != edited.DiscountAmount ||
                    original.UsageLimit != edited.UsageLimit ||
                    original.StartDate != edited.StartDate ||
                    original.EndDate != edited.EndDate ||
                    original.IsActive != edited.IsActive ||
-                   original.CategoriesId != edited.CategoriesId;
+                   original.CategoriesId != edited.CategoriesId ||
+                   original.DiscountType != edited.DiscountType;
         }
     }
 }

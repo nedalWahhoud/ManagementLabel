@@ -189,7 +189,9 @@
 											<tr>
 												<td>@t.Id</td>
 												<td>@t.CustomerId</td>
-												<td class="@(t.Type == TransactionType.Repay ? "text-success" : "text-danger")">@t.Type.ToString()</td>
+												<td class="@(t.Type == TransactionType.Repay ? "text-success" : "text-danger")">
+												    @(TransactionType.Repay == t.Type ? "Zurückzahlen" : "Ausleihen")
+												</td>
 												<td>@t.Amount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("de-DE"))</td>
 												<td>@t.TransactionDate.ToString("dd.MM.yyyy HH:mm 'Uhr'")</td>
 												<td>@t.Notes</td>
@@ -257,13 +259,13 @@
 	private bool IsLoading = false;
 	protected override async Task OnInitializedAsync()
 	{
+		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		var canViewCoupons = user.HasClaim("permission", "manageDebt") ||
 								user.HasClaim("permission", "fullAccess");
 		if (canViewCoupons)
 		{
-			IsLoading = true;
 			customer = customersService.GetCustomerByIdLocal(customerId) ?? await customersService.GetCustomerByIdAsync(customerId);
 
 			debtCustomers = await debtService.GetDebtCustomerByIdAsync(customerId);

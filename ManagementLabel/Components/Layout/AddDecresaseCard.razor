@@ -50,7 +50,7 @@
                 }
             }
         }
-        textMessage = cartService.DecreaseFromCart(productId);
+        textMessage = await cartService.DecreaseFromCart(productId);
 
         textMessage = textMessage != null ? textMessage : null!;
 

@@ -64,14 +64,20 @@
                                     @if (order.DiscountCode != null)
                                     {
                                         var discountDetails = invoiceService.GetDetailsDiscountCode(order);
+                                        var symbol = order.DiscountCode.DiscountType == DiscountType.Percentage ? "%" : "€";
 
-                                        @($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
+                                        <span>
+                                           @($"{discountDetails.DiscountPercentage}{symbol} ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
+                                        </span>
                                     }
                                     else if (order.DiscountCategory != null)
                                     {
-                                        var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
-
-                                        @($"K.: {discountDetails.categoryName} \n{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
+                                      var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
+                                        var symbol = order.DiscountCategory.DiscountType == DiscountType.Percentage ? "%" : "€";
+                                      <span>
+                                         K.: @discountDetails.categoryName <br />
+                                         @($"{discountDetails.DiscountPercentage}{symbol} ({discountDetails.DiscountValue.ToString("C", germanCulture)})")
+                                      </span>
                                     }
                                     else
                                     {
