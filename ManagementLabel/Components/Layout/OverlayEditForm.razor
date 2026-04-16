@@ -96,14 +96,14 @@
 				<ValidationMessage For="@(() => GetProducts.EXPDate)" />
 			</div>
 			<div class="formGroupAdd">
-				<InputSelect id="category" class="form-control" @bind-Value="GetProducts.ManufacturerId">
+				<InputSelect id="category" class="form-control" @bind-Value="GetProducts.SupplierId">
 					<option value="0">Select Manufacturer</option>
-					@foreach (var Manufacturer in productService.DownloadedManufacturers!)
+					@foreach (var Manufacturer in productService.DownloadedSuppliers!)
 					{
 						<option value="@Manufacturer.Id">@Manufacturer.Name</option>
 					}
 				</InputSelect>
-				<ValidationMessage For="@(() => GetProducts.ManufacturerId)" />
+				<ValidationMessage For="@(() => GetProducts.SupplierId)" />
 			</div>
 			<div class="formGroupAdd">
 				<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">

@@ -11,7 +11,7 @@ namespace ManagementLabel.ProductsF
         private GetItems<Products> GetItems { get; set; } = new();
         public List<Products> DownloadedProduct { get; set; } = [];
 
-        public List<Manufacturer> DownloadedManufacturers { get; set; } = [];
+        public List<Suppliers> DownloadedSuppliers { get; set; } = [];
         public List<TaxRate> DownloadedTaxRates { get; set; } = [];
         public async Task<List<Products>> GetProductByIdsAsync(List<int> productIds)
         {
@@ -61,21 +61,21 @@ namespace ManagementLabel.ProductsF
                 return new();
             }
         }
-        public async Task<List<Manufacturer>> GetAllManufacturers()
+        public async Task<List<Suppliers>> GetAllManufacturers()
         {
-            if(DownloadedManufacturers.Count > 0)
-                return DownloadedManufacturers;
+            if(DownloadedSuppliers.Count > 0)
+                return DownloadedSuppliers;
             try
             {
                 var response = await _http.GetAsync($"api/Products/getManufacturers");
                 if (!response.IsSuccessStatusCode)
                     return [];
 
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Manufacturer>>();
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Suppliers>>();
                 // add the manufacturers to the local list
-                DownloadedManufacturers.AddRange(getItems?.Items ?? []); 
+                DownloadedSuppliers.AddRange(getItems?.Items ?? []); 
 
-                return DownloadedManufacturers;
+                return DownloadedSuppliers;
             }
             catch
             {
@@ -305,7 +305,7 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.EXPDate != editProduct.EXPDate)
                 return true;
-            if (currentProduct.ManufacturerId != editProduct.ManufacturerId)
+            if (currentProduct.SupplierId != editProduct.SupplierId)
                 return true;
             if (currentProduct.TaxRateId != editProduct.TaxRateId)
                 return true;
@@ -378,7 +378,7 @@ namespace ManagementLabel.ProductsF
             {
                 return new ValidationResult() { Result = false, Message = "Der Mindestbestand muss größer als -1 sein." };
             }
-            if (newProduct.ManufacturerId <= 0)
+            if (newProduct.SupplierId <= 0)
             {
                 return new ValidationResult() { Result = false, Message = "Ein Hersteller ist erforderlich." };
             }

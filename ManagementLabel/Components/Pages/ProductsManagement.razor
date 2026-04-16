@@ -140,7 +140,7 @@
 										}
 										@if (ShowColumn("Manufacturer"))
 										{
-											<td>@product.Manufacturer!.Name</td>
+											<td>@product.Supplier!.Name</td>
 										}
 										@if (ShowColumn("TaxRate"))
 										{
@@ -692,7 +692,7 @@
 					SalePrice = SelectedProduct.SalePrice,
 					MinimumStock = SelectedProduct.MinimumStock,
 					EXPDate = SelectedProduct.EXPDate,
-					ManufacturerId = SelectedProduct.ManufacturerId,
+					SupplierId = SelectedProduct.SupplierId,
 					//Manufacturer = doubleSelectProduct.Manufacturer,
 					TaxRateId = SelectedProduct.TaxRateId,
 					ProductGroupID = SelectedProduct.ProductGroupID,

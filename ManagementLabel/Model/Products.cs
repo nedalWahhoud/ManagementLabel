@@ -25,8 +25,8 @@ namespace ManagementLabel.Model
         [DateInFuture(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
         public DateTime EXPDate { get; set; } = DateTime.Now.AddYears(2);
         [Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
-        public int? ManufacturerId { get; set; }
-        public Manufacturer? Manufacturer { get; set; }
+        public int? SupplierId { get; set; }
+        public Suppliers? Supplier { get; set; }
         public int UserId { get; set; }
         public Users? User { get; set; }
         public ICollection<ProductImages> ProductImages { get; set; } = [];
