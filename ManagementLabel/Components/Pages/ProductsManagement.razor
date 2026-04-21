@@ -84,13 +84,13 @@
 								@if (ShowColumn("DiscountedPrice")){<th>Im Angebot</th>}
 								@if (ShowColumn("Username")){<th>Benutzername</th>}
 								@if (ShowColumn("Img")){<th>Img</th>}
-								<th class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
+								<th class="@(IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
 							</tr>
 						</thead>
 						<tbody>
 							@* Loading message *@
-							<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "show")">
-								<td colspan="11" class="loadingMessage">
+							<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "showLoading")">
+								<td colspan="11" class="loadingTd">
 									Lädt...
 								</td>
 							</tr>
@@ -140,7 +140,7 @@
 										}
 										@if (ShowColumn("Manufacturer"))
 										{
-											<td>@product.Supplier!.Name</td>
+											<td>@string.Join(", ", product.Suppliers.Select(s => s.Name))</td>
 										}
 										@if (ShowColumn("TaxRate"))
 										{
@@ -172,8 +172,10 @@
 
 								@if (!IsLoadingMessage && dataSource.Count == 0)
 								{
-									<tr>
-										<td colspan="20" class="loadingMessage">Keine Produkte gefunden.</td>
+									<tr id="loadingMessage">
+										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+											<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
+										</td>
 									</tr>
 								}
 							}
@@ -186,8 +188,8 @@
 				@if (showContextMenu && selectedProduct != null)
 				{
 					<div class="contextMenu dropdown-menu-end dropdown-menu"
-					style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
-					@onclick:stopPropagation="true">
+					     style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
+					     @onclick:stopPropagation="true">
 						<ul>
 							<li @onclick="() => EditProduct(selectedProduct)">
 								<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
@@ -470,7 +472,7 @@
 
 			selectedCategoryId = await LocalStorage.GetItemAsync<int>("selectedCategoryId");
 
-			taskManufacturers = productService.GetAllManufacturers();
+			taskManufacturers = suppliersService.GetAllSuppliers();
 			taskProductGroups = productGroupService.GetAllGroupProductsAsync();
 			taskTaxRates = productService.GetAllTaxRates();
 
@@ -692,7 +694,8 @@
 					SalePrice = SelectedProduct.SalePrice,
 					MinimumStock = SelectedProduct.MinimumStock,
 					EXPDate = SelectedProduct.EXPDate,
-					SupplierId = SelectedProduct.SupplierId,
+					SelectedSupplierIds = SelectedProduct.SelectedSupplierIds ?? new(),
+					Suppliers = SelectedProduct.Suppliers,
 					//Manufacturer = doubleSelectProduct.Manufacturer,
 					TaxRateId = SelectedProduct.TaxRateId,
 					ProductGroupID = SelectedProduct.ProductGroupID,

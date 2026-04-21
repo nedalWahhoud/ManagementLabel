@@ -36,7 +36,6 @@
         }
 }
 
-/* حركة الدخول من الأسفل */
 @keyframes slideUp {
     from {
         transform: translateY(100%);

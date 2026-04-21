@@ -1,5 +1,5 @@
 ﻿<div class="overlay">
-	<div class="productOverlayForm">
+	<div class="productOverlayForm" @onclick:stopPropagation="true">
 		<EditForm Model="@GetProducts" OnValidSubmit="HandleSubmit">
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">
@@ -19,7 +19,7 @@
 					<button class="btn btn-outline-secondary" type="button" onclick="window.copyTextToClipboard('@GetProducts.Description_de')">
 						<i class="fas fa-copy"></i>
 					</button>
-				    <InputText id="productDescriptionDe" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
+					<InputText id="productDescriptionDe" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
 					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Description_de = val)">
 						<i class="fas fa-times"></i>
 					</button>
@@ -96,14 +96,21 @@
 				<ValidationMessage For="@(() => GetProducts.EXPDate)" />
 			</div>
 			<div class="formGroupAdd">
-				<InputSelect id="category" class="form-control" @bind-Value="GetProducts.SupplierId">
-					<option value="0">Select Manufacturer</option>
-					@foreach (var Manufacturer in productService.DownloadedSuppliers!)
+				<label>Lieferanten:</label>
+				<div class="supplier-list-container" style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;">
+					@foreach (var Supplier in suppliersService.DownloadedSuppliers!)
 					{
-						<option value="@Manufacturer.Id">@Manufacturer.Name</option>
+						<div class="form-check">
+							<input type="checkbox"
+							class="form-check-input"
+							id="sup-@Supplier.Id"
+							checked="@(GetProducts.SelectedSupplierIds?.Contains(Supplier.Id) ?? false)"
+							@onchange="(e) => ToggleSupplier(Supplier.Id, e.Value!)" />
+							<label class="form-check-label" for="sup-@Supplier.Id">@Supplier.Name</label>
+						</div>
 					}
-				</InputSelect>
-				<ValidationMessage For="@(() => GetProducts.SupplierId)" />
+				</div>
+				<ValidationMessage For="@(() => GetProducts.SelectedSupplierIds)" />
 			</div>
 			<div class="formGroupAdd">
 				<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">
@@ -226,6 +233,29 @@
 		{
 			GetProducts.ProductImages.Add(productImagesService.GetDefaultImage());
 		}
+		else
+		{
+			// Initialisiere die SelectedSupplierIds aus der Lieferantensammlung
+			GetProducts.SelectedSupplierIds = GetProducts.Suppliers
+											.Select(s => s.Id)
+											.ToList();
+		}
+	}
+
+	private void ToggleSupplier(int supplierId, object checkedValue)
+	{
+		if (GetProducts.SelectedSupplierIds == null)
+			GetProducts.SelectedSupplierIds = new List<int>();
+
+		if ((bool)checkedValue)
+		{
+			if (!GetProducts.SelectedSupplierIds.Contains(supplierId))
+				GetProducts.SelectedSupplierIds.Add(supplierId);
+		}
+		else
+		{
+			GetProducts.SelectedSupplierIds.Remove(supplierId);
+		}
 	}
 
 	private async Task HandleSubmit()
@@ -235,6 +265,8 @@
 		{
 			// wenn  nicht edited
 			Products? currentProduct = productService.DownloadedProduct.Find(p => p.Id == GetProducts.Id);
+
+
 			bool isEdited = productService.IsEditedProduct(currentProduct!, GetProducts);
 			if (!isEdited)
 			{

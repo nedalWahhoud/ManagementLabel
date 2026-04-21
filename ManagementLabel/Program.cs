@@ -19,6 +19,7 @@ using ManagementLabel.Components.CustomersF;
 using ManagementLabel.Components.Share;
 using ManagementLabel.Components.DebtF;
 using ManagementLabel.Components.TransactionsCustomersF;
+using ManagementLabel.Components.SupplierF;
 
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
@@ -80,6 +81,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddScoped<AuthService>();
 // products
 builder.Services.AddScoped<ProductService>();
+// Suppliers
+builder.Services.AddScoped<SuppliersService>();
 // order
 builder.Services.AddScoped<OrderService>();
 // cart

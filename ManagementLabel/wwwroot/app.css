@@ -13,6 +13,101 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* Table div */
+.showLoading {
+    display: table-row;
+}
+.TopContiner {
+    padding: 15px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    justify-content: center;
+    align-items: center;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: visible;
+}
+.tableContiner {
+    max-height: 550px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    width: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.topTable {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background-color: #cccccc;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.loadingTd {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* selected */
+.table tbody tr:nth-child(2n+1) {
+    background-color: #f0f0f0;
+}
+.table tbody tr:hover:not(.selected) {
+    background-color: #dee2e6;
+    cursor: pointer;
+}
+.table tbody tr.selected {
+    background-color: #cceeff;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
+/* menu */
+.contextMenu {
+    z-index: 9999;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    min-width: 150px;
+}
+
+    .contextMenu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .contextMenu li a {
+        display: block;
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .contextMenu a {
+        list-style: none;
+        display: block;
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .contextMenu li:hover {
+        background-color: #007bff;
+        color: white;
+    }
 /* overlay */
 .overlay {
     position: fixed;
@@ -130,4 +225,22 @@ html, body {
     .addPlusB {
         padding-bottom: 6px;
     }
+    .TopContiner {
+        gap: 10px;
+    }
+
+    .tableResponsive {
+        border-radius: 10px;
+        overflow: visible;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .table {
+        font-size: 12px;
+    }
+
+        .table td,
+        .table th {
+            padding: 6px;
+        }
 }

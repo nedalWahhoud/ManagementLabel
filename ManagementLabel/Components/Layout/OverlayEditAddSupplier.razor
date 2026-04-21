@@ -1,0 +1,101 @@
+﻿<div class="overlay">
+	<div class="standardOverlayForm" @onclick:stopPropagation="true">
+		<EditForm Model="@supplier" OnValidSubmit="Save">
+			<DataAnnotationsValidator />
+			<div class="formGroupAdd">
+				<InputText id="supplierName" class="form-control" @bind-Value="supplier.Name" placeholder="Name" />
+				<ValidationMessage For="@(() => supplier.Name)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.Street" placeholder="Straße" />
+				<ValidationMessage For="@(() => supplier.Street)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.HNumber" placeholder="Hausnummer" />
+				<ValidationMessage For="@(() => supplier.HNumber)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.PostalCode" placeholder="PLZ" />
+				<ValidationMessage For="@(() => supplier.PostalCode)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.City" placeholder="Stadt" />
+				<ValidationMessage For="@(() => supplier.City)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.Country" placeholder="Land" />
+				<ValidationMessage For="@(() => supplier.Country)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.Phone" placeholder="Tel." />
+				<ValidationMessage For="@(() => supplier.Phone)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.Email" placeholder="E-Mail" />
+				<ValidationMessage For="@(() => supplier.Email)" />
+			</div>
+			<div class="formGroupAdd">
+				<InputText class="form-control" @bind-Value="supplier.Website" placeholder="Webseite" />
+				<ValidationMessage For="@(() => supplier.Website)" />
+			</div>
+			<div class="mt-3">
+				<button type="submit" class="btn btn-primary me-2" disabled="@IsProcessing">
+					@if (IsProcessing)
+					{
+						<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+					}
+					else
+					{
+						@(action == "Add" ? "Lieferant hinzufügen" : "Lieferant updaten")
+					}
+				</button>
+				<button type="button" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+			</div>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public Suppliers supplier { get; set; } = new();
+	[Parameter]
+	public string action { get; set; } = string.Empty;
+	[Parameter]
+	public EventCallback<string> OnHandel { get; set; }
+	private bool IsProcessing = false;
+
+	private async void Save()
+	{
+		IsProcessing = true;
+		if (action == "Add")
+		{
+			var result = await suppliersService.AddSupplier(supplier);
+			if (result.Result)
+			{
+				await OnHandel.InvokeAsync(action);
+			}
+			else
+				await JS.InvokeVoidAsync("window.alert", result.Message);
+		}
+		else
+		{
+			// wenn category editiert wurde
+			var result = await suppliersService.UpdateSupplier(supplier);
+			if (result != null && result.Result)
+			{
+				supplier = null!;
+				await OnHandel.InvokeAsync(action);
+			}
+			else
+				await JS.InvokeVoidAsync("window.alert", result?.Message ?? "leere Message");
+		}
+
+		IsProcessing = false;
+		StateHasChanged();
+	}
+	private void Cancel()
+	{
+		supplier = new ();
+		OnHandel.InvokeAsync("Cancel");
+	}
+}

@@ -6,15 +6,6 @@
         overflow-x: auto;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
-    .customTable {
-        font-size: 12px;
-    }
-
-        .customTable td,
-        .customTable th {
-            padding: 6px;
-        }
     /* Button */
     .btnMobileSmall {
         padding: 5px 15px !important;

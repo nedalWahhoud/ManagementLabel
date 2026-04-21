@@ -1,5 +1,5 @@
 ﻿<div class="overlay">
-	<div class="standardOverlayForm">
+	<div class="standardOverlayForm" @onclick:stopPropagation="true">
 		<EditForm Model="@groupProduct" OnValidSubmit="SaveGroup">
 			<DataAnnotationsValidator />
 			<div class="formGroupAdd">

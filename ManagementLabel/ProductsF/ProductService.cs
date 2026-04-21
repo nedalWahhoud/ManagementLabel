@@ -11,7 +11,6 @@ namespace ManagementLabel.ProductsF
         private GetItems<Products> GetItems { get; set; } = new();
         public List<Products> DownloadedProduct { get; set; } = [];
 
-        public List<Suppliers> DownloadedSuppliers { get; set; } = [];
         public List<TaxRate> DownloadedTaxRates { get; set; } = [];
         public async Task<List<Products>> GetProductByIdsAsync(List<int> productIds)
         {
@@ -61,27 +60,7 @@ namespace ManagementLabel.ProductsF
                 return new();
             }
         }
-        public async Task<List<Suppliers>> GetAllManufacturers()
-        {
-            if(DownloadedSuppliers.Count > 0)
-                return DownloadedSuppliers;
-            try
-            {
-                var response = await _http.GetAsync($"api/Products/getManufacturers");
-                if (!response.IsSuccessStatusCode)
-                    return [];
-
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Suppliers>>();
-                // add the manufacturers to the local list
-                DownloadedSuppliers.AddRange(getItems?.Items ?? []); 
-
-                return DownloadedSuppliers;
-            }
-            catch
-            {
-                return [];
-            }
-        }
+        
         public async Task<List<TaxRate>> GetAllTaxRates()
         {
             if (DownloadedTaxRates.Count > 0)
@@ -282,7 +261,16 @@ namespace ManagementLabel.ProductsF
         }
         public bool IsEditedProduct(Products currentProduct, Products editProduct)
         {
-            if (editProduct == null || currentProduct == null) return false;
+            if (editProduct == null || currentProduct == null)
+            { 
+                return false; 
+            }
+            else
+            {
+                // Initialisiere die SelectedSupplierIds aus der Lieferantensammlung
+                currentProduct.SelectedSupplierIds = currentProduct.Suppliers.Select(s => s.Id).ToList();
+            }
+
             if (currentProduct.Name_de != editProduct.Name_de)
                 return true;
             if (currentProduct.Description_de != editProduct.Description_de)
@@ -305,7 +293,13 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.EXPDate != editProduct.EXPDate)
                 return true;
-            if (currentProduct.SupplierId != editProduct.SupplierId)
+            var currentIds = currentProduct.SelectedSupplierIds ?? [];
+            var editIds = editProduct.SelectedSupplierIds ?? [];
+
+            bool isSuppliersChanged = (currentIds.Count != editIds.Count) ||
+                                       editIds.Except(currentIds).Any() ||
+                                       currentIds.Except(editIds).Any();
+            if (isSuppliersChanged)
                 return true;
             if (currentProduct.TaxRateId != editProduct.TaxRateId)
                 return true;
@@ -378,7 +372,7 @@ namespace ManagementLabel.ProductsF
             {
                 return new ValidationResult() { Result = false, Message = "Der Mindestbestand muss größer als -1 sein." };
             }
-            if (newProduct.SupplierId <= 0)
+            if (newProduct.SelectedSupplierIds == null || newProduct.SelectedSupplierIds.Count == 0)
             {
                 return new ValidationResult() { Result = false, Message = "Ein Hersteller ist erforderlich." };
             }

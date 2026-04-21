@@ -60,11 +60,9 @@ namespace ManagementLabel.Components.DistributionLinesF
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if (result?.Result == true)
                 {
-                    var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-
-                    if (result.Result && int.TryParse(idStr, out int id))
+                    if (result != null && result.Result)
                     {
-                        newDistributionLine.Id = id;
+                        newDistributionLine.Id = result.NewId ?? 0;
                         AddToLocal(newDistributionLine);
                     }
                 }

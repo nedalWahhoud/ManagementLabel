@@ -47,12 +47,10 @@ namespace ManagementLabel.Components.CategoriesF
                 {
                     return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht erstellt werden." };
                 }
-                // get Id
-                var idStr = result.Message?.Split(':').LastOrDefault()?.Trim().Split([' ', '.'], StringSplitOptions.RemoveEmptyEntries).FirstOrDefault(); ;
-                if (result.Result && int.TryParse(idStr, out int id))
+                if (result != null && result.Result)
                 {
                     // Add to local list
-                    category.Id = id;
+                    category.Id = result.NewId ?? 0;
                     AddCategoriesToLocal(category);
                 }
                 else

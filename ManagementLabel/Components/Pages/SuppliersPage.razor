@@ -1,6 +1,230 @@
 ﻿@page "/suppliers"
 
-<h1 class="text-center">Supplier</h1>
-@code {
+<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
+	<AuthorizeView>
+		<Authorized Context="authContext">
+			@if (!canManage && !IsProcessing)
+			{
+				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+					<div class="alert alert-danger text-center">
+						Sie haben keine Berechtigung für diese Seite
+					</div>
+				</div>
+				return;
+			}
+			<div tabindex="0" id="scrollContainer" class="tableResponsive">
+				<div class="topTable">
+					@* add neu Product *@
+					<button class="btn addPlusB" @onclick="ShowAddFormAsync" disabled="@(IsProcessing)" title="Add neues Liefranten">+</button>
+				</div>
+				<table class="table table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Straße</th>
+							<th>Hausnummer</th>
+							<th>Postleitzahl</th>
+							<th>Stadt</th>
+							<th>Land</th>
+							<th>Tel.</th>
+							<th>Email</th>
+							<th>Webseite</th>
+						</tr>
+					</thead>
+					<tbody>
+						@* Loading message *@
+						<tr id="Loading" class="@(!IsProcessing ? "hidden" : "showLoading")">
+							<td colspan="11" class="loadingTd">
+								Lädt...
+							</td>
+						</tr>
+						@* table *@
+						@{
+							var dataSource = suppliersService.DownloadedSuppliers;
+							<Virtualize Items="dataSource" Context="supplier" OverscanCount="10">
+								<tr @key="supplier.Id" @oncontextmenu:preventDefault="true"
+								@oncontextmenu="@(e => OnSelectRow(supplier, e))"
+								@onclick="(e) => OnSelectRow(supplier, e)"
+								@ondblclick="(e) => OnDoubleTap(supplier, e)"
+								class="@(selectedSupplier?.Id == supplier.Id ? "selected" : "")">
+									<td>@supplier.Name</td>
+									<td>@supplier.Street</td>
+									<td>@supplier.HNumber</td>
+									<td>@supplier.PostalCode</td>
+									<td>@supplier.City</td>
+									<td>@supplier.Country</td>
+									<td>@supplier.Phone</td>
+									<td>@supplier.Email</td>
+									<td>@supplier.Website</td>
+								</tr>
+							</Virtualize>
+						}
+						@if (!IsProcessing && dataSource.Count == 0)
+						{
+							<tr id="loadingMessage">
+								<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+									<i class="bi bi-exclamation-circle mr-2"></i> Keine Lieferanten gefunden.
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			@* menu context *@
+			@if (showContextMenu && selectedSupplier != null)
+			{
+				<div class="contextMenu dropdown-menu-end dropdown-menu"
+				style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
+				@onclick:stopPropagation="true">
+					<ul>
+						<li @onclick="() => Edit(selectedSupplier)">
+							<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+						</li>
+						<li @onclick="() => Delete(selectedSupplier)">
+							<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+						</li>
+					</ul>
+				</div>
+			}
 
+			@if (IsAdding)
+			{
+				<ManagementLabel.Components.Layout.OverlayEditAddSupplier supplier="new Suppliers()" Action="Add" OnHandel="Handle" />
+			}
+			else if (IsEditing && EditingSupplier != null)
+			{
+				<ManagementLabel.Components.Layout.OverlayEditAddSupplier supplier="EditingSupplier" Action="Edit" OnHandel="Handle" />
+			}
+		</Authorized>
+		<NotAuthorized>
+			<ManagementLabel.Components.Pages.LogIn />
+		</NotAuthorized>
+	</AuthorizeView>
+</div>
+@code {
+	private bool IsProcessing = true;
+	private bool canManage = false;
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await authProvider.GetAuthenticationStateAsync();
+		var user = authState.User;
+
+		canManage = user.HasClaim("permission", "manageSuppliers") ||
+								user.HasClaim("permission", "fullAccess");
+		if (canManage)
+		{
+			// get Discount codes
+			await suppliersService.GetAllSuppliers();
+		}
+
+		IsProcessing = false;
+	}
+	private bool IsEditing = false;
+	private bool IsAdding = false;
+	private Suppliers EditingSupplier = null!;
+	private void ShowAddFormAsync()
+	{
+		IsAdding = true;
+	}
+	private void Handle(string action)
+	{
+		if (action == "Add")
+		{
+			IsAdding = false;
+		}
+		else if (action == "Edit")
+		{
+			IsEditing = false;
+			EditingSupplier = null!;
+		}
+		else
+		{
+			IsAdding = false;
+			IsEditing = false;
+			EditingSupplier = null!;
+		}
+	}
+	private Suppliers? selectedSupplier;
+	// Menu recht klicken
+	private bool showContextMenu = false;
+	private double menuX;
+	private double menuY;
+	private string menuXpx => $"{menuX}px";
+	private string menuYpx => $"{menuY}px";
+	private void OnDoubleTap(Suppliers supplier, MouseEventArgs e)
+	{
+		/*if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+			return;*/
+
+		//selectedProduct = supplier;
+		selectedSupplier = supplier;
+
+		menuX = e.ClientX;
+		menuY = e.ClientY;
+		showContextMenu = true;
+
+		StateHasChanged();
+	}
+	private void OnSelectRow(Suppliers supplier, MouseEventArgs e)
+	{
+		/*if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
+			return;*/
+
+		if (e.Button == 2)
+		{
+			//selectedProduct = supplier;
+			menuX = e.ClientX;
+			menuY = e.ClientY;
+			showContextMenu = true;
+		}
+
+		selectedSupplier = supplier;
+	}
+
+	private void Edit(Suppliers supplier)
+	{
+		showContextMenu = false;
+		EditingSupplier = new Suppliers()
+			{
+				Id = supplier.Id,
+				Name = supplier.Name,
+				Street = supplier.Street,
+				HNumber = supplier.HNumber,
+				PostalCode = supplier.PostalCode,
+				City = supplier.City,
+				Country = supplier.Country,
+				Phone = supplier.Phone,
+				Email = supplier.Email,
+				Website = supplier.Website
+			};
+		IsEditing = true;
+	}
+	private async Task Delete(Suppliers supplier)
+	{
+		showContextMenu = false;
+		if (supplier == null || supplier.Id <= 0)
+		{
+			await JS.InvokeVoidAsync("alert", "Ungültiger Lieferant.");
+			return;
+		}
+
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Sind Sie sicher, dass Sie den Lieferanten '{supplier.Name}' löschen möchten?");
+		if (!resultConfirm)
+		{
+			return;
+		}
+		//
+		IsProcessing = true;
+		var result = await suppliersService.DeleteSupplier(supplier.Id);
+		if (!result.Result)
+		{
+			await JS.InvokeVoidAsync("alert", result.Message); 
+		}
+		IsProcessing = false;
+	}
+	private void OnMainDiv()
+	{
+		// hide die Menu if sichtbar
+		showContextMenu = false;
+	}
 }

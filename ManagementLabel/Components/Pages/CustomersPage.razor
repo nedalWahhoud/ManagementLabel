@@ -46,7 +46,7 @@
 						{
 							customersToDisplay = FilteredCustomers;
 						}
-						<div class="tableResponsive">
+						<div tabindex="0" id="scrollContainer" class="tableResponsive">
 							    <div class="topTable">
 									@* add neu Product *@
 								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!isEdit)" title="Add neue Customer">+</button>
@@ -77,7 +77,7 @@
 										</div>
 									</div>
 								</div>
-								<table class="table table-bordered table-hover customTable">
+								<table class="table table-bordered table-hover">
 								 <tr>
 									@if (ShowColumn("Id")){<th>Id</th>}
 									@if (ShowColumn("Name_de")){<th>Na-De</th>}
@@ -182,8 +182,6 @@
 	</NotAuthorized>
 </AuthorizeView>
 @code {
-
-
 	// Column
 	private List<ColumnOption> columnOptions = new()
 	{

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace ManagementLabel.Model
@@ -24,9 +25,16 @@ namespace ManagementLabel.Model
         [Required(ErrorMessage = "Startdatum ist erforderlich.")]
         [DateInFuture(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
         public DateTime EXPDate { get; set; } = DateTime.Now.AddYears(2);
-        [Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
-        public int? SupplierId { get; set; }
-        public Suppliers? Supplier { get; set; }
+
+        public ICollection<Suppliers> Suppliers { get; set; } = [];
+        [NotMapped]
+        [Required(ErrorMessage = "Bitte wählen Sie mindestens einen Lieferanten aus.")] 
+        [MinLength(1, ErrorMessage = "Mindestens ein Lieferant ist erforderlich.")] 
+        public List<int>? SelectedSupplierIds { get; set; } = [];
+
+        //[Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
+        public int SupplierId { get; set; } = 3;
+        /*public Suppliers? Supplier { get; set; }*/
         public int UserId { get; set; }
         public Users? User { get; set; }
         public ICollection<ProductImages> ProductImages { get; set; } = [];

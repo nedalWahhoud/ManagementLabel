@@ -1,5 +1,5 @@
 ﻿	<div class="overlay">
-	<div class="standardOverlayForm">
+	    <div class="standardOverlayForm">
 			<EditForm Model="@carouselImage" OnValidSubmit="Save">
 				<DataAnnotationsValidator />
 				<div class="formGroupAdd">
@@ -7,7 +7,6 @@
 						<InputFile id="Image" class="form-control" OnChange="ImageUpload" />
 						@if (carouselImage != null)
 						{
-
 							string imgScr = string.Empty;
 							if (!string.IsNullOrEmpty(carouselImage.ImageUrlLocal))
 							{
@@ -88,11 +87,10 @@
 					await JS.InvokeVoidAsync("window.alert", result.Message);
 					return;
 				}
-				var idStr = result.Message?.Split(':').LastOrDefault();
-				if (result.Result && int.TryParse(idStr, out int id))
+				if (result != null && result.Result)
 				{
 					// get added Product
-					var addedCarousel = await carouselImageService.GetCarouselImageByIdAsync(id);
+					var addedCarousel = await carouselImageService.GetCarouselImageByIdAsync(result.NewId ?? 0);
 					if (addedCarousel == null)
 					{
 						await JS.InvokeVoidAsync("window.alert", "Fehler beim Laden des hinzugefügten Carousel Image");
@@ -106,7 +104,7 @@
 				}
 				else
 				{
-					await JS.InvokeVoidAsync("window.alert", result.Message);
+					await JS.InvokeVoidAsync("window.alert", result!.Message);
 				}
 			}
 			else
