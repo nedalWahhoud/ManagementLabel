@@ -1,5 +1,4 @@
-﻿using ManagementLabel.LogIn;
-using ManagementLabel.ProductsF;
+﻿using ManagementLabel.ProductsF;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.IdentityModel.Tokens.Jwt;

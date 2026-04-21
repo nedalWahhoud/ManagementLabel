@@ -1,5 +1,4 @@
 ﻿@page "/"
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @rendermode InteractiveAuto
 @implements IDisposable
 
@@ -470,7 +469,7 @@
 		{
 			taskCatyrories = categoryService.GetAllCategoriesAsync();
 
-			selectedCategoryId = await LocalStorage.GetItemAsync<int>("selectedCategoryId");
+			selectedCategoryId = await localStorage.GetItemAsync<int>("selectedCategoryId");
 
 			taskManufacturers = suppliersService.GetAllSuppliers();
 			taskProductGroups = productGroupService.GetAllGroupProductsAsync();
@@ -490,7 +489,7 @@
 				await loadInBackground();
 			}
 			// die Spaltenoptionen aus dem Local Storage laden
-			var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
+			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
 			if (saved is not null)
 				columnOptions = saved;
 		}
@@ -498,7 +497,7 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await LocalStorage.SetItemAsync("columnOptions", columnOptions);
+		await localStorage.SetItemAsync("columnOptions", columnOptions);
 	}
 	// OnAfterRenderAsync
 	private Users? user;
@@ -824,7 +823,7 @@
 		}
 
 		// save the selected category id in local storage
-		await LocalStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
+		await localStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
 		IsLoadingMessage = false;
 	}
 	// filter nach Lagerbestand

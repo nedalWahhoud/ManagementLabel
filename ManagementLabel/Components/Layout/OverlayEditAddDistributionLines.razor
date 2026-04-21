@@ -2,12 +2,12 @@
 	<div class="standardOverlayForm">
 		<EditForm Model="@DistributionLine" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Nameline</label>
 				<InputText class="form-control" @bind-Value="DistributionLine.LineName" />
 				<ValidationMessage For="@(() => DistributionLine.LineName)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>line Beschreibung</label>
 				<InputText class="form-control" @bind-Value="DistributionLine.Description" />
 				<ValidationMessage For="@(() => DistributionLine.Description)" />
@@ -22,7 +22,7 @@
 					}
 					else
 					{
-						@(action == "Add" ? "DistributionLine hinzufügen" : "DistributionLine updaten")
+						<span>Speichern</span>
 					}
 				</button>
 				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>

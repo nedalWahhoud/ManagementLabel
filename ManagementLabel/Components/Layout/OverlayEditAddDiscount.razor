@@ -2,10 +2,9 @@
 @if (action.ifdicountCode)
 {
     <div class="overlay">
-        <div class="AddCodeForm">
+        <div class="standardOverlayForm">
             <EditForm Model="@discountCode" OnValidSubmit="OnSave">
                 <DataAnnotationsValidator />
-
                 <div class="mb-3">
                     <div class="input-group">
                         <InputText class="form-control" @bind-Value="discountCode.Code" placeholder="Code" />
@@ -15,7 +14,6 @@
                     </div>
                     <ValidationMessage For="@(() => discountCode.Code)" />
                 </div>
-
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">R </span>
@@ -47,7 +45,6 @@
                     </div>
                     <ValidationMessage For="@(() => discountCode.StartDate)" />
                 </div>
-
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">EnDa</span>
@@ -55,14 +52,13 @@
                     </div>
                     <ValidationMessage For="@(() => discountCode.EndDate)" />
                 </div>
-              
                 <div class="mb-3">
                     <div class="input-group">
                         <span class="input-group-text">Ist aktiv</span>
                         <InputCheckbox class="form-check-input ms-4" @bind-Value="discountCode.IsActive" />
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Speichern</button>
                 <button type="button" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
             </EditForm>
         </div>
@@ -72,7 +68,7 @@
 @if (!action.ifdicountCode)
 {
     <div class="overlay">
-        <div class="AddCodeForm">
+        <div class="standardOverlayForm">
             <EditForm Model="@discountCategory" OnValidSubmit="OnSave">
                 <DataAnnotationsValidator />
                 <div class="mb-3">
@@ -141,7 +137,7 @@
                         <InputCheckbox class="form-check-input ms-4" @bind-Value="discountCategory.IsActive" />
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Speichern</button>
                 <button type="submit" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
             </EditForm>
         </div>

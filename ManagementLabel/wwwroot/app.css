@@ -109,6 +109,9 @@ html, body {
         color: white;
     }
 /* overlay */
+.overlayField {
+    margin-bottom: 12px;
+}
 .overlay {
     position: fixed;
     top: 0;
@@ -124,19 +127,6 @@ html, body {
     box-sizing: border-box;
 }
 .standardOverlayForm {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-.productOverlayForm {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -181,14 +171,12 @@ html, body {
     cursor: pointer;
     margin: 10px;
 }
-
-    .addPlusB:hover {
+.addPlusB:hover {
         background-color: #0b5ed7;
         color: #0d6efd;
         transform: scale(1.1);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
     }
-
 /*columns option*/
 .columnsB {
     width: 45px;
@@ -208,8 +196,7 @@ html, body {
     cursor: pointer;
     margin: 10px;
 }
-
-    .columnsB:hover {
+.columnsB:hover {
         color: #5DADE2;
         background-color: #3498DB;
         transform: scale(1.1);
@@ -217,8 +204,7 @@ html, body {
     }
 
 @media (max-width: 768px) {
-    .columnsB,
-    .addPlusB {
+    .columnsB, .addPlusB {
         width: 35px;
         height: 35px;
     }
@@ -228,19 +214,24 @@ html, body {
     .TopContiner {
         gap: 10px;
     }
-
     .tableResponsive {
         border-radius: 10px;
         overflow: visible;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
     .table {
         font-size: 12px;
     }
-
-        .table td,
-        .table th {
+        .table td, .table th {
             padding: 6px;
         }
+    .standardOverlayForm .mt-3 {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .standardOverlayForm .mt-3 button {
+        width: 100%;
+        padding: 12px;
+    }
 }

@@ -2,12 +2,12 @@
 	<div class="standardOverlayForm" @onclick:stopPropagation="true">
 		<EditForm Model="@groupProduct" OnValidSubmit="SaveGroup">
 			<DataAnnotationsValidator />
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Name de</label>
 				<InputText class="form-control" @bind-Value="groupProduct.GroupName_de" />
 				<ValidationMessage For="@(() => groupProduct.GroupName_de)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Name ar</label>
 				<InputText class="form-control" @bind-Value="groupProduct.GroupName_ar" />
 				<ValidationMessage For="@(() => groupProduct.GroupName_ar)" />
@@ -22,7 +22,7 @@
 					}
 					else
 					{
-						@(action == "Add" ? "Gruppe hinzufügen" : "Gruppe updaten")
+						<span>Speichern</span>
 					}
 				</button>
 				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>

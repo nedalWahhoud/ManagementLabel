@@ -1,5 +1,5 @@
 ﻿@page "/users"
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
 
 <div class="main" @onclick="OnMain">
 	<AuthorizeView>
@@ -214,7 +214,7 @@
 		}
 		
 		// die Spaltenoptionen aus dem Local Storage laden
-		var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptionsUser");
+		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsUser");
 		if (saved is not null)
 			columnOptions = saved;
 
@@ -234,7 +234,7 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await LocalStorage.SetItemAsync("columnOptionsUser", columnOptions);
+		await localStorage.SetItemAsync("columnOptionsUser", columnOptions);
 	}
 
 	// edit user

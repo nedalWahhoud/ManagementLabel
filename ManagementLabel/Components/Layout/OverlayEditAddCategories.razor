@@ -2,22 +2,22 @@
 	<div class="standardOverlayForm">
 		<EditForm Model="@category" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Name de</label>
 				<InputText class="form-control" @bind-Value="category.Name_de" />
 				<ValidationMessage For="@(() => category.Name_de)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Name ar</label>
 				<InputText class="form-control" @bind-Value="category.Name_ar" />
 				<ValidationMessage For="@(() => category.Name_ar)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Ab 18 Jahren</label>
 		    	<InputCheckbox @bind-Value="category.Requires18Plus" />
 				<ValidationMessage For="@(() => category.Requires18Plus)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<label>Is Aktiv</label>
 				<InputCheckbox @bind-Value="category.IsAktiv" />
 				<ValidationMessage For="@(() => category.IsAktiv)" />
@@ -32,7 +32,7 @@
 					}
 					else
 					{
-						@(action == "Add" ? "Category hinzufügen" : "Category updaten")
+						<span>Speichern</span>
 					}
 				</button>
 				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>

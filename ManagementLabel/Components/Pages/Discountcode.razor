@@ -1,5 +1,4 @@
 ﻿@page "/discountcode"
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <div class="p-2" @onclick="OnMainDiv">
     <AuthorizeView>
@@ -201,7 +200,7 @@
         }
 
         // die Spaltenoptionen aus dem Local Storage laden
-        var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptionsDiscount");
+        var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsDiscount");
         if (saved is not null)
             columnOptions = saved;
 
@@ -210,7 +209,7 @@
     private async Task OnColumnChanged()
     {
         // Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-        await LocalStorage.SetItemAsync("columnOptionsDiscount", columnOptions);
+        await localStorage.SetItemAsync("columnOptionsDiscount", columnOptions);
     }
 
     private (bool ifdicountCode, bool ifAdd)? showDiscountFormAction;

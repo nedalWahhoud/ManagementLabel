@@ -16,19 +16,67 @@
 				<div class="topTable">
 					@* add neu Product *@
 					<button class="btn addPlusB" @onclick="ShowAddFormAsync" disabled="@(IsProcessing)" title="Add neues Liefranten">+</button>
+					@* choose the Columns *@
+					<div class="h-100 d-flex">
+						<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+						<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+							@foreach (var col in columnOptions)
+							{
+								<li>
+									<div class="form-check form-switch">
+										<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
+										<label class="form-check-label" for="@col.Key">
+											@col.Label
+										</label>
+									</div>
+								</li>
+							}
+						</ul>
+					</div>
 				</div>
 				<table class="table table-bordered table-hover">
 					<thead>
 						<tr>
-							<th>Name</th>
-							<th>Straße</th>
-							<th>Hausnummer</th>
-							<th>Postleitzahl</th>
-							<th>Stadt</th>
-							<th>Land</th>
-							<th>Tel.</th>
-							<th>Email</th>
-							<th>Webseite</th>
+							@if (ShowColumn("Id"))
+							{
+								<th>Id</th>
+							}
+							@if (ShowColumn("Name"))
+							{
+								<th>Name</th>
+							}
+							@if (ShowColumn("Street"))
+							{
+								<th>Straße</th>
+							}
+							@if (ShowColumn("HNumber"))
+							{
+								<th>Hausnummer</th>
+							}
+							@if (ShowColumn("PostalCode"))
+							{
+								<th>Postleitzahl</th>
+							}
+							@if (ShowColumn("City"))
+							{
+								<th>Stadt</th>
+							}
+							@if (ShowColumn("Country"))
+							{
+								<th>Land</th>
+							}
+							@if (ShowColumn("Phone"))
+							{
+								<th>Tel.</th>
+							}
+							@if (ShowColumn("Email"))
+							{
+								<th>Email</th>
+							}
+							@if (ShowColumn("Website"))
+							{
+								<th>Webseite</th>
+							}
 						</tr>
 					</thead>
 					<tbody>
@@ -47,15 +95,46 @@
 								@onclick="(e) => OnSelectRow(supplier, e)"
 								@ondblclick="(e) => OnDoubleTap(supplier, e)"
 								class="@(selectedSupplier?.Id == supplier.Id ? "selected" : "")">
-									<td>@supplier.Name</td>
-									<td>@supplier.Street</td>
-									<td>@supplier.HNumber</td>
-									<td>@supplier.PostalCode</td>
-									<td>@supplier.City</td>
-									<td>@supplier.Country</td>
-									<td>@supplier.Phone</td>
-									<td>@supplier.Email</td>
-									<td>@supplier.Website</td>
+									@if (ShowColumn("Id"))
+									{
+									  <td>@supplier.Id</td>
+									}
+									@if (ShowColumn("Name"))
+									{
+									  <td>@supplier.Name</td>
+									}
+									@if (ShowColumn("Street"))
+									{
+									  <td>@supplier.Street</td>
+									}
+									@if (ShowColumn("HNumber"))
+									{
+									  <td>@supplier.HNumber</td>
+									}
+									@if (ShowColumn("PostalCode"))
+									{
+									  <td>@supplier.PostalCode</td>
+									}
+									@if (ShowColumn("City"))
+									{
+									  <td>@supplier.City</td>
+									}
+									@if (ShowColumn("Country"))
+									{
+									  <td>@supplier.Country</td>
+									}
+									@if (ShowColumn("Phone"))
+									{
+									  <td>@supplier.Phone</td>
+									}
+									@if (ShowColumn("Email"))
+									{
+									  <td>@supplier.Email</td>
+									}
+									@if (ShowColumn("Website"))
+									{
+									  <td>@supplier.Website</td>
+									}
 								</tr>
 							</Virtualize>
 						}
@@ -102,6 +181,27 @@
 	</AuthorizeView>
 </div>
 @code {
+	// Column
+	private List<ColumnOption> columnOptions = new()
+	{
+	  new("Id", "Id", false),
+	  new("Name","Name", true),
+	  new("Straße","Street", false),
+	  new("Hausnummer","HNumber",  true),
+	  new("PLZ","PostalCode", false),
+	  new("Stadt","City", true),
+	  new("Land","Country", true),
+	  new("Tel.","Phone", true),
+	  new("E-Mail","Email", true),
+	  new("Webseite","Website", true),
+	};
+	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
+	private async Task OnColumnChanged()
+	{
+		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
+		await localStorage.SetItemAsync("columnOptionsSuppliers", columnOptions);
+	}
+
 	private bool IsProcessing = true;
 	private bool canManage = false;
 	protected override async Task OnInitializedAsync()
@@ -116,6 +216,11 @@
 			// get Discount codes
 			await suppliersService.GetAllSuppliers();
 		}
+
+		// die Spaltenoptionen aus dem Local Storage laden
+		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsSuppliers");
+		if (saved is not null)
+			columnOptions = saved;
 
 		IsProcessing = false;
 	}

@@ -2,7 +2,7 @@
 	<div class="standardOverlayForm">
 		<EditForm Model="@customer" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputSelect class="form-control" @bind-Value="customer.DistributionLineId">
 					<option value="0">Select Verteilungslinie</option>
 					@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
@@ -12,61 +12,61 @@
 				</InputSelect>
 				<ValidationMessage For="@(() => customer.DistributionLineId)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.Name_de" placeholder="Name de" />
 				<ValidationMessage For="@(() => customer.Name_de)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.Name_ar" placeholder="Name ar" />
 				<ValidationMessage For="@(() => customer.Name_ar)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.Street" placeholder="Anschrift" />
 				<ValidationMessage For="@(() => customer.Street)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.BuildingNumber" placeholder="Hausnummer" />
 				<ValidationMessage For="@(() => customer.BuildingNumber)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.PostalCode" placeholder="PLZ" />
 				<ValidationMessage For="@(() => customer.PostalCode)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.City" placeholder="Stadt" />
 				<ValidationMessage For="@(() => customer.City)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<div class="input-group">
 					<span class="input-group-text customLatIcon">La</span>
 				    <InputNumber TValue="double" class="form-control" @bind-Value="customer.Latitude" @onfocus="@(e => SelectAllContent())" />
 				</div>
 				<ValidationMessage For="@(() => customer.Latitude)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<div class="input-group">
 					<span class="input-group-text customLatIcon">Lo</span>
 				    <InputNumber TValue="double" class="form-control" @bind-Value="customer.Longitude" @onfocus="@(e => SelectAllContent())" />
 				</div>
 				<ValidationMessage For="@(() => customer.Longitude)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.PhoneNumber" placeholder="Tel." />
 				<ValidationMessage For="@(() => customer.PhoneNumber)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.Email" placeholder="Email" />
 				<ValidationMessage For="@(() => customer.Email)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.Notes_de" placeholder="Notes de" />
 				<ValidationMessage For="@(() => customer.Notes_de)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="customer.Notes_ar" placeholder="Notes ar" />
 				<ValidationMessage For="@(() => customer.Notes_ar)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<div class="d-flex align-items-center gap-3">
 				  <div class="flex-grow-1">
 						<InputNumber TValue="int" min="1" class="form-control" @bind-Value="customer.StopNumber" @onfocus="@(e => SelectAllContent())" placeholder="Haltestellennummer" />
@@ -80,7 +80,7 @@
 			    </div>
 				<ValidationMessage For="@(() => customer.StopNumber)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText placeholder="PIN Wird Automatisch generiert oder eingeben" maxlength="4" pattern="\d{4}" title="PIN muss genau 4 Zahlen sein" class="form-control" @bind-Value="customer.PIN" />
 				<ValidationMessage For="@(() => customer.PIN)" />
 			</div>
@@ -94,7 +94,7 @@
 					}
 					else
 					{
-						@(action == "Add" ? "Customer hinzufügen" : "Customer updaten")
+						<span>Speichern</span>
 					}
 				</button>
 				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>

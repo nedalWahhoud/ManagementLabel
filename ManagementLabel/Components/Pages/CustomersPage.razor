@@ -1,5 +1,4 @@
 ﻿@page "/customers"
-@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <AuthorizeView>
 	<Authorized Context="authContext">
@@ -215,7 +214,7 @@
 			taskDistributionLines = distributionLinesService.GetAllDistributionLines();
 
 			// load the selected distributionLine id from local storage
-			selectedDistributionLineId = await LocalStorage.GetItemAsync<int>("selectedDistributionLineId");
+			selectedDistributionLineId = await localStorage.GetItemAsync<int>("selectedDistributionLineId");
 			if (selectedDistributionLineId > 0)
 			{
 				if (!taskDistributionLines.IsCompleted)
@@ -224,14 +223,14 @@
 				await AfterDistributionLineChanged();
 			}
 
-			selectedStopNumberId = await LocalStorage.GetItemAsync<int>("selectedStopNummerId");
+			selectedStopNumberId = await localStorage.GetItemAsync<int>("selectedStopNummerId");
 			if (selectedStopNumberId > 0)
 			{
 				await AfterStopNumberChanged();
 			}
 
 			// die Spaltenoptionen aus dem Local Storage laden
-			var saved = await LocalStorage.GetItemAsync<List<ColumnOption>>("columnOptionsCustomers");
+			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsCustomers");
 			if (saved is not null)
 				columnOptions = saved;
 		}
@@ -241,7 +240,7 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await LocalStorage.SetItemAsync("columnOptionsCustomers", columnOptions);
+		await localStorage.SetItemAsync("columnOptionsCustomers", columnOptions);
 	}
 	private void NewCustomer()
 	{
@@ -291,7 +290,7 @@
 		}
 
 		// save the selected category id in local storage
-		await LocalStorage.SetItemAsync("selectedDistributionLineId", selectedDistributionLineId);
+		await localStorage.SetItemAsync("selectedDistributionLineId", selectedDistributionLineId);
 	}
 	private async Task OnDistributionLineFocus()
 	{
@@ -315,7 +314,7 @@
 		}
 
 		// save the selected category id in local storage
-		await LocalStorage.SetItemAsync("selectedStopNummerId", selectedStopNumberId);
+		await localStorage.SetItemAsync("selectedStopNummerId", selectedStopNumberId);
 	}
 	private async Task OnTextChanged(ChangeEventArgs e)
 	{

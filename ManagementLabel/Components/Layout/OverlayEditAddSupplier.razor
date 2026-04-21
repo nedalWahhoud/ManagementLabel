@@ -2,39 +2,39 @@
 	<div class="standardOverlayForm" @onclick:stopPropagation="true">
 		<EditForm Model="@supplier" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText id="supplierName" class="form-control" @bind-Value="supplier.Name" placeholder="Name" />
 				<ValidationMessage For="@(() => supplier.Name)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.Street" placeholder="Straße" />
 				<ValidationMessage For="@(() => supplier.Street)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.HNumber" placeholder="Hausnummer" />
 				<ValidationMessage For="@(() => supplier.HNumber)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.PostalCode" placeholder="PLZ" />
 				<ValidationMessage For="@(() => supplier.PostalCode)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.City" placeholder="Stadt" />
 				<ValidationMessage For="@(() => supplier.City)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.Country" placeholder="Land" />
 				<ValidationMessage For="@(() => supplier.Country)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.Phone" placeholder="Tel." />
 				<ValidationMessage For="@(() => supplier.Phone)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.Email" placeholder="E-Mail" />
 				<ValidationMessage For="@(() => supplier.Email)" />
 			</div>
-			<div class="formGroupAdd">
+			<div class="overlayField">
 				<InputText class="form-control" @bind-Value="supplier.Website" placeholder="Webseite" />
 				<ValidationMessage For="@(() => supplier.Website)" />
 			</div>
@@ -46,7 +46,7 @@
 					}
 					else
 					{
-						@(action == "Add" ? "Lieferant hinzufügen" : "Lieferant updaten")
+						<span>Speichern</span>
 					}
 				</button>
 				<button type="button" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>

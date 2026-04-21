@@ -1,8 +1,4 @@
-﻿.formGroupAdd {
-    margin-bottom: 12px;
-}
-
-.imageUpload {
+﻿.imageUpload {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -13,49 +9,4 @@
     object-fit: cover;
     border-radius: 8px;
     border: 1px solid #cccccc;
-}
-
-@media (max-width: 768px) {
-    .overlay {
-        padding: 0;
-        align-items: flex-start;
-    }
-
-    .carouselForm {
-        padding: 1.5rem 1rem;
-        gap: 12px;
-        max-height: 85vh;
-        width: 100%;
-        border-radius: 20px 20px 0 0;
-        box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
-        animation: slideUp 0.3s ease-out;
-    }
-
-
-    .form-control {
-        font-size: 16px !important;
-        padding: 8px;
-    }
-
-    .mt-3 {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-        .mt-3 button {
-            width: 100%;
-            padding: 12px;
-        }
-}
-
-/* حركة الدخول من الأسفل */
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-    }
-
-    to {
-        transform: translateY(0);
-    }
 }
