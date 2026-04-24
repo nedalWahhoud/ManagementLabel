@@ -8,7 +8,7 @@ namespace ManagementLabel.ProductsF
     public class ProductService(HttpClient http)
     {
         private readonly HttpClient _http = http;
-        private GetItems<Products> GetItems { get; set; } = new();
+        public GetItems<Products> GetItems { get; set; } = new();
         public List<Products> DownloadedProduct { get; set; } = [];
 
         public List<TaxRate> DownloadedTaxRates { get; set; } = [];
@@ -40,7 +40,8 @@ namespace ManagementLabel.ProductsF
                 return new() { AllItemsLoaded = GetItems.AllItemsLoaded };
             try
             {
-                var response = await _http.GetAsync($"api/Products/getProducts?CurrentPage={GetItems.CurrentPage}&PageSize={GetItems.PageSize}&AllItemsLoaded={GetItems.AllItemsLoaded}");
+                var response = await _http.GetAsync($"api/Products/getProducts?CurrentPage={GetItems.CurrentPage}&PageSize={GetItems.PageSize}&AllItemsLoaded={GetItems.AllItemsLoaded}&Filter.Id={GetItems.Filter?.Id}"+
+                    $"&Filter.Type={(int)(GetItems.Filter?.Type ?? GetItemFilterType.None)}");
 
                 if (!response.IsSuccessStatusCode)
                     return new();
@@ -145,91 +146,6 @@ namespace ManagementLabel.ProductsF
             catch(Exception ex)
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
-            }
-        }
-        public async Task<GetItems<Products>> GetProductsLowStockAsync(GetItems<Products> _getItems, List<int>? excludeProductsIds = null)
-        {
-            try
-            {
-                if (_getItems.AllItemsLoaded)
-                    return _getItems;
-
-                var queryParams = new Dictionary<string, string>{
-                    { "CurrentPage", _getItems.CurrentPage.ToString() },
-                    { "PageSize", _getItems.PageSize.ToString() },
-                    { "AllItemsLoaded", _getItems.AllItemsLoaded.ToString() }};
-
-                var url = QueryHelpers.AddQueryString("api/Products/getProductsLowStock", queryParams!);
-
-                if (excludeProductsIds != null && excludeProductsIds.Count != 0)
-                {
-                    foreach (var id in excludeProductsIds)
-                    {
-                        url = QueryHelpers.AddQueryString(url, "excludeProductsIds", id.ToString());
-                    }
-                }
-
-                var response = await _http.GetAsync(url);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return null!;
-                }
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>() ?? null;
-
-                if (getItems != null)
-                {
-                    AddProductToLocal(getItems.Items);
-                }
-
-                return getItems!;
-            }
-            catch
-            {
-                return null!;
-            }
-        }
-        public async Task<GetItems<Products>> GetProductsOnOfferAsync(GetItems<Products> _getItems, List<int>? excludeProductsIds = null)
-        {
-            try
-            {
-                if (_getItems.AllItemsLoaded)
-                    return _getItems;
-
-                var queryParams = new Dictionary<string, string>{
-                    { "CurrentPage", _getItems.CurrentPage.ToString() },
-                    { "PageSize", _getItems.PageSize.ToString() },
-                    { "AllItemsLoaded", _getItems.AllItemsLoaded.ToString() }};
-
-
-                var url = QueryHelpers.AddQueryString("api/Products/getProductsOnOffer", queryParams!);
-
-                if (excludeProductsIds != null && excludeProductsIds.Count != 0)
-                {
-                    foreach (var id in excludeProductsIds)
-                    {
-                        url = QueryHelpers.AddQueryString(url, "excludeProductsIds", id.ToString());
-                    }
-                }
-
-                var response = await _http.GetAsync(url);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return null!;
-                }
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>() ?? null;
-
-                if (getItems != null)
-                {
-                    AddProductToLocal(getItems.Items);
-                }
-
-                return getItems!;
-            }
-            catch
-            {
-                return null!;
             }
         }
         public async Task<Products> GetProductByIdAsync(int productId)

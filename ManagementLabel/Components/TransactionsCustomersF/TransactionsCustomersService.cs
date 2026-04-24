@@ -65,7 +65,8 @@ namespace ManagementLabel.Components.TransactionsCustomersF
 
             try
             {
-                var response = await _http.GetAsync($"api/TransactionsCustomers/getTransactionsCustomers?CurrentPage={GetItems.CurrentPage}&PageSize={GetItems.PageSize}&AllItemsLoaded={GetItems.AllItemsLoaded}&Id={GetItems.Id}");
+                var response = await _http.GetAsync($"api/TransactionsCustomers/getTransactionsCustomers?CurrentPage={GetItems.CurrentPage}&PageSize={GetItems.PageSize}&AllItemsLoaded={GetItems.AllItemsLoaded}&Filter.Id={GetItems.Filter?.Id}" +
+                    $"&Filter.Type={(int)(GetItems.Filter?.Type ?? GetItemFilterType.None)}");
                 if (!response.IsSuccessStatusCode)
                 {
                     return new ValidationResult() { Result = false, Message = "" };

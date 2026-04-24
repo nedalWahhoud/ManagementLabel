@@ -5,14 +5,14 @@
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (authContext.User.HasClaim("permission", "manageProducts") || authContext.User.HasClaim("permission", "fullAccess"))
+			@if (hasPermission)
 			{
 				@* top continer *@
 				<div class="TopContiner">
 					@* filter *@
 					@* Lagerstand Filter  *@
 					<div class="d-flex flex-column">
-						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnStockFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
 							<option value="0">Alle</option>
 							<option value="1">Geringer Lagerbestand</option>
 							<option value="2">Im Angebot</option>
@@ -21,7 +21,7 @@
 					@* category filter *@
 					<div class="d-flex flex-column">
 						<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-							<option value="0">Alle</option>
+							<option value="0">Kategorie</option>
 							@foreach (var category in categoryService.DownloadedCategories)
 							{
 								<option value="@category.Id">@category.Name_de</option>
@@ -187,8 +187,8 @@
 				@if (showContextMenu && selectedProduct != null)
 				{
 					<div class="contextMenu dropdown-menu-end dropdown-menu"
-					     style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
-					     @onclick:stopPropagation="true">
+					style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
+					@onclick:stopPropagation="true">
 						<ul>
 							<li @onclick="() => EditProduct(selectedProduct)">
 								<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
@@ -433,7 +433,7 @@
 	Task taskManufacturers = Task.CompletedTask;
 	Task taskProductGroups = Task.CompletedTask;
 	Task taskTaxRates = Task.CompletedTask;
-
+	private bool hasPermission = false;
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
     {
@@ -463,9 +463,9 @@
 	{
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
-		var canViewCoupons = user.HasClaim("permission", "manageProducts") ||
-								user.HasClaim("permission", "fullAccess");
-		if (canViewCoupons)
+		hasPermission = user.HasClaim("permission", "manageProducts") ||
+										user.HasClaim("permission", "fullAccess");
+		if (hasPermission)
 		{
 			taskCatyrories = categoryService.GetAllCategoriesAsync();
 
@@ -479,15 +479,16 @@
 			// wenn die category filter gesetzt in latzt Sitzung wurde dann filtern nach lest gespeicherte category
 			if (selectedCategoryId > 0)
 			{
+				productService.GetItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category } };
 				if (!taskCatyrories.IsCompleted)
 					await taskCatyrories;
-				await OnCategoryChanged();
+				// await OnCategoryChanged();
+
 			}
-			else
-			{
-				// erste Produkte laden
-				await loadInBackground();
-			}
+
+			// erste Produkte laden
+			await loadInBackground();
+
 			// die Spaltenoptionen aus dem Local Storage laden
 			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
 			if (saved is not null)
@@ -570,10 +571,10 @@
 	// load products
 	private bool IsLoadingMessage = false;
 
-	private async Task<bool> loadInBackground()
+	private async Task<GetItems<Products>> loadInBackground()
 	{
-		if (IsLoadingMessage == true || selectedCategoryId != 0 || selectedValuesFilter != 0)
-			return false;
+		if (IsLoadingMessage == true)
+			return new(); 
 
 		IsLoadingMessage = true;
 
@@ -584,15 +585,30 @@
 		{
 			product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
 		}
+
+		if (selectedCategoryId > 0)
+		{
+			// wenn im Filtermodus, dann die neuen Produkte auch zum Filter hinzufügen
+			if (filterP != null)
+				filterP.AddRange(moreProducts.Items);
+			else
+				filterP = new List<Products>(moreProducts.Items);
+		}
+		else if (selectedValuesFilter > 0)
+		{
+			// wenn im Lagerstand Filtermodus, dann die neuen Produkte auch zum Filter hinzufügen
+			if (filterP != null)
+				filterP.AddRange(moreProducts.Items);
+			else
+				filterP = new List<Products>(moreProducts.Items);
+		}
+
 		// hide the loading message
 		IsLoadingMessage = false;
 
 		await InvokeAsync(StateHasChanged);
 
-
-
-		return moreProducts.AllItemsLoaded;
-
+		return moreProducts;
 	}
 	// Add Product
 	private bool IsShowAddProductForm = false;
@@ -783,8 +799,6 @@
 	private int selectedCategoryId = 0;
 	private async Task OnCategoryChanged()
 	{
-		// show loadingmessage while loading
-		IsLoadingMessage = true;
 		// reset values filter
 		selectedValuesFilter = 0;
 
@@ -792,133 +806,51 @@
 		{
 			// if selectedId is 0, clear the filter
 			filterP = null!;
+			// reset die Getitem 
+			productService.GetItems = new();
 		}
 		else
 		{
-			// get excludeProductsIds, from local products
-			List<int> excludeProductsIds = productService.DownloadedProduct.Where(f => f.CategoryId == selectedCategoryId)
-					.Select(f => f.Id)
-					.ToList();
+			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
+			productService.GetItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category } };
+			var moreProducts = await loadInBackground();
 
-			GetItems<Products> getItems = new();
-			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
-			filterP = new();
-			while (!getItems.AllItemsLoaded)
-			{
-
-				Task.Delay(100).Wait(); // wait for a short time before searching again
-				getItems = await categoryService.GetProductsByCategoryIdAsync(selectedCategoryId, 10, excludeProductsIds);
-				// get downloaded productsIds, to exclude them from the next search
-				excludeProductsIds.AddRange(getItems.Items
-					.Where(p => p.CategoryId == selectedCategoryId)
-					.Select(p => p.Id));
-				// initialize CartItem for each product
-				foreach (var product in getItems.Items)
-				{
-					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
-				}
-			}
 			// get the products by categoryId local, after downloading from server
-			filterP = productService.GetProductByCategoryIdLocal(selectedCategoryId);
+			filterP = moreProducts.Items;
 		}
 
 		// save the selected category id in local storage
 		await localStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
-		IsLoadingMessage = false;
 	}
 	// filter nach Lagerbestand
 	private int selectedValuesFilter = 0;
-	private async Task OnStockFilterChanged()
+	private async Task OnFilterChanged()
 	{
-		IsLoadingMessage = true;
-
 		// reset category filter
 		selectedCategoryId = 0;
 
 		if (selectedValuesFilter == 1)
 		{
-			// get excludeProductsIds nur ein mal, von local products, damit die produkte die schon in local sind, nicht nochmal in der nächsten suche kommen
-			List<int> excludeProductsIds = productService.DownloadedProduct
-					.Where(p => p.Quantity <= p.MinimumStock)
-					.Select(f => f.Id)
-					.ToList();
-			GetItems<Products> getItems = new();
-			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
-			filterP = new();
+			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
+			productService.GetItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.LowStock } };
+			var moreProducts = await loadInBackground();
 
-
-			while (!getItems.AllItemsLoaded)
-			{
-				await Task.Delay(100); // wait for a short time before searching again
-
-				// get locale products, nur ein mal wenn currentPage 0 ist dann ist sicher erstmal loop.
-				//  hier weil ist nach await um "lädt..." zeigen zulassen, damit nicht direkt die produkte die in local sind zeigen
-				if (getItems.CurrentPage == 0)
-					filterP.AddRange(productService.DownloadedProduct.Where(p => p.Quantity <= p.MinimumStock).ToList());
-
-				var result = await productService.GetProductsLowStockAsync(getItems, excludeProductsIds);
-
-				if (result == null || result.Items == null) break;
-
-
-
-				getItems = result;
-
-				// initialize CartItem for each product
-				foreach (var product in getItems.Items)
-				{
-					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
-					filterP.Add(product);
-				}
-			}
-			filterP = filterP.OrderBy(p => p.Name_de).ToList();
+			filterP = moreProducts.Items;
 		}
 		else if (selectedValuesFilter == 2)
 		{
-			// get excludeProductsIds nur ein mal, von local products, damit die produkte die schon in local sind, nicht nochmal in der nächsten suche kommen
-			List<int> excludeProductsIds = productService.DownloadedProduct
-					.Where(p => p.ProductDiscount?.DiscountedPrice > 0 &&
-		                        DateTime.Today >= p.ProductDiscount.StartDate.Date &&
-		                        DateTime.Today <= p.ProductDiscount.EndDate.Date)
-					.Select(f => f.Id)
-					.ToList();
-			GetItems<Products> getItems = new();
-			// do th filterP not null, to make the complete downloaded products disappear, and only isloadingMessage to show
-			filterP = new();
+			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
+			productService.GetItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.OnOffer } };
+			var moreProducts = await loadInBackground();
 
-
-			while (!getItems.AllItemsLoaded)
-			{
-				// get locale products, nur ein mal wenn currentPage 0 ist dann ist sicher erstmal loop.
-				//  hier weil ist nach await um "lädt..." zeigen zulassen, damit nicht direkt die produkte die in local sind zeigen
-				if (getItems.CurrentPage == 0)
-					filterP.AddRange(productService.DownloadedProduct.Where(p => p.ProductDiscount?.DiscountedPrice > 0 &&
-								DateTime.Today >= p.ProductDiscount.StartDate.Date &&
-								DateTime.Today <= p.ProductDiscount.EndDate.Date).ToList());
-
-				var result = await productService.GetProductsOnOfferAsync(getItems, excludeProductsIds);
-
-				if (result == null || result.Items == null) break;
-
-
-
-				getItems = result;
-
-				// initialize CartItem for each product
-				foreach (var product in getItems.Items)
-				{
-					product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
-					filterP.Add(product);
-				}
-			}
-			filterP = filterP.OrderBy(p => p.Name_de).ToList();
+			filterP = moreProducts.Items;
 		}
 		else
 		{
 			filterP = null!;
+			// reset die Getitem
+			productService.GetItems = new();
 		}
-
-		IsLoadingMessage = false;
 	}
 	// Invoice
 	private bool IsShowInvoice = false;
