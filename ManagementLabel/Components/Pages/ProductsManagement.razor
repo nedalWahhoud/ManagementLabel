@@ -2,17 +2,23 @@
 @rendermode InteractiveAuto
 @implements IDisposable
 
-<div class="mainDiv" @onclick="OnMainDiv">
+<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (hasPermission)
+			@{
+				hasPermission = authContext.User.HasClaim("permission", "manageProducts") ||
+				authContext.User.HasClaim("permission", "fullAccess");
+			}
+			@if (hasPermission && IsRended)
 			{
 				@* top continer *@
 				<div class="TopContiner">
 					@* filter *@
 					@* Lagerstand Filter  *@
 					<div class="d-flex flex-column">
-						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage 
+                            || productService.DownloadedProduct.Count == 0
+                            || categoryService.DownloadedCategories.Count == 0)">
 							<option value="0">Alle</option>
 							<option value="1">Geringer Lagerbestand</option>
 							<option value="2">Im Angebot</option>
@@ -76,7 +82,7 @@
 								@if (ShowColumn("SellePrice")){<th>Verkaufspreis</th>}
 								@if (ShowColumn("MinimumStock")){<th>Mindestbestand</th>}
 								@if (ShowColumn("ExpDate")){<th>Ablaufdatum</th>}
-								@if (ShowColumn("Manufacturer")){<th>Hersteller</th>}
+								@if (ShowColumn("Manufacturer")){<th>Lieferant</th>}
 								@if (ShowColumn("TaxRate")){<th>Steuersatz</th>}
 								@if (ShowColumn("Group")){<th>Gruppe</th>}
 								@if (ShowColumn("IsShippable")){<th>Versandfähig</th>}
@@ -178,7 +184,6 @@
 									</tr>
 								}
 							}
-
 						</tbody>
 					</table>
 				</div>
@@ -412,12 +417,18 @@
 					</div>
 				}
 			}
-			else
+			else if (!hasPermission && IsRended)
 			{
 				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 					<div class="alert alert-danger text-center">
 						Sie haben keine Berechtigung für diese Seite
 					</div>
+				</div>
+			}
+			else
+			{
+				<div class="w-100 card-body text-center text-info">
+					Lädt...
 				</div>
 			}
 		</Authorized>
@@ -434,6 +445,10 @@
 	Task taskProductGroups = Task.CompletedTask;
 	Task taskTaxRates = Task.CompletedTask;
 	private bool hasPermission = false;
+	private bool IsLoadingMessage = false;
+	private bool IsRended = false;
+	private Users? user;
+
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
     {
@@ -463,10 +478,19 @@
 	{
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
-		hasPermission = user.HasClaim("permission", "manageProducts") ||
-										user.HasClaim("permission", "fullAccess");
+
 		if (hasPermission)
 		{
+			if (user.Identity?.IsAuthenticated == true)
+			{
+				this.user = new();
+				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
+				if (int.TryParse(userIdStr, out int userIdInt))
+				{
+					this.user.Id = userIdInt;
+				}
+			}
+			//
 			taskCatyrories = categoryService.GetAllCategoriesAsync();
 
 			selectedCategoryId = await localStorage.GetItemAsync<int>("selectedCategoryId");
@@ -482,10 +506,12 @@
 				productService.GetItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category } };
 				if (!taskCatyrories.IsCompleted)
 					await taskCatyrories;
-				// await OnCategoryChanged();
-
 			}
+			else
+				productService.GetItems = new();
 
+			// initialzieren die Filtereinstellung für die Produkte und die Produkte leeren, damit die neuen Produkte geladen werden können
+			productService.DownloadedProduct.Clear();
 			// erste Produkte laden
 			await loadInBackground();
 
@@ -494,6 +520,7 @@
 			if (saved is not null)
 				columnOptions = saved;
 		}
+		IsRended = true;
 	}
 	private async Task OnColumnChanged()
 	{
@@ -501,32 +528,69 @@
 		await localStorage.SetItemAsync("columnOptions", columnOptions);
 	}
 	// OnAfterRenderAsync
-	private Users? user;
 	private DotNetObjectReference<ProductsManagement>? objRef;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			var authState = await authProvider.GetAuthenticationStateAsync();
-			var user = authState.User;
-			if (user.Identity?.IsAuthenticated == true)
-			{
-				this.user = new();
-				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-				if (int.TryParse(userIdStr, out int userIdInt))
-				{
-					this.user.Id = userIdInt;
-				}
-
-				// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
-				objRef = DotNetObjectReference.Create(this);
-				await Task.Delay(100);
-				// Setzen Sie das Objekt von donNet in JavaScript und die ID:checkScrollEnd und rufen Sie die Funktion checkScrollEnd aus JavaScript ab.
-				_ = JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
-			}
+			// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
+			objRef = DotNetObjectReference.Create(this);
+		}
+		try
+		{
+			await JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error initializing scroll event: {ex.Message}");
 		}
 	}
+	// load products
+	private async Task<GetItems<Products>> loadInBackground()
+	{
+		if (IsLoadingMessage == true)
+			return new();
 
+		IsLoadingMessage = true;
+
+		var moreProducts = await productService.LoadMoreProducts();
+
+		// initialize CartItem for each product
+		foreach (var product in moreProducts.Items)
+		{
+			product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
+		}
+
+		if (selectedCategoryId > 0)
+		{
+			// wenn im Filtermodus, dann die neuen Produkte auch zum Filter hinzufügen
+			if (filterP != null)
+				filterP.AddRange(moreProducts.Items);
+			else
+				filterP = new List<Products>(moreProducts.Items);
+		}
+		else if (selectedValuesFilter > 0)
+		{
+			// wenn im Lagerstand Filtermodus, dann die neuen Produkte auch zum Filter hinzufügen
+			if (filterP != null)
+				filterP.AddRange(moreProducts.Items);
+			else
+				filterP = new List<Products>(moreProducts.Items);
+		}
+
+		// hide the loading message
+		IsLoadingMessage = false;
+
+		await InvokeAsync(StateHasChanged);
+
+		return moreProducts;
+	}
+	// Scroll
+	[JSInvokable]
+	public async Task OnScrollEnd()
+	{
+		await loadInBackground();
+	}
 	// Menu recht klicken
 	private bool showContextMenu = false;
 	private double menuX;
@@ -568,48 +632,6 @@
 		selectedRow = product;
 	}
 
-	// load products
-	private bool IsLoadingMessage = false;
-
-	private async Task<GetItems<Products>> loadInBackground()
-	{
-		if (IsLoadingMessage == true)
-			return new(); 
-
-		IsLoadingMessage = true;
-
-		var moreProducts = await productService.LoadMoreProducts();
-
-		// initialize CartItem for each product
-		foreach (var product in moreProducts.Items)
-		{
-			product.InitializeCartItem(cartService.GetQuantityOfProduct(product.Id));
-		}
-
-		if (selectedCategoryId > 0)
-		{
-			// wenn im Filtermodus, dann die neuen Produkte auch zum Filter hinzufügen
-			if (filterP != null)
-				filterP.AddRange(moreProducts.Items);
-			else
-				filterP = new List<Products>(moreProducts.Items);
-		}
-		else if (selectedValuesFilter > 0)
-		{
-			// wenn im Lagerstand Filtermodus, dann die neuen Produkte auch zum Filter hinzufügen
-			if (filterP != null)
-				filterP.AddRange(moreProducts.Items);
-			else
-				filterP = new List<Products>(moreProducts.Items);
-		}
-
-		// hide the loading message
-		IsLoadingMessage = false;
-
-		await InvokeAsync(StateHasChanged);
-
-		return moreProducts;
-	}
 	// Add Product
 	private bool IsShowAddProductForm = false;
 	private async void ShowAddProductFormAsync()
@@ -801,7 +823,7 @@
 	{
 		// reset values filter
 		selectedValuesFilter = 0;
-
+		filterP = null!;
 		if (selectedCategoryId == 0)
 		{
 			// if selectedId is 0, clear the filter
@@ -828,6 +850,7 @@
 	{
 		// reset category filter
 		selectedCategoryId = 0;
+		filterP = null!;
 
 		if (selectedValuesFilter == 1)
 		{
@@ -1138,12 +1161,7 @@
 		// hide die Menu if sichtbar
 		showContextMenu = false;
 	}
-	// Scroll
-	[JSInvokable]
-	public async Task OnScrollEnd()
-	{
-		await loadInBackground();
-	}
+	
 	// barcode scanning
 	private bool ShowScanner = false;
 	private async Task OpenScanner()

@@ -1,23 +1,25 @@
 ﻿@page "/distributionlines"
+
+<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
 <AuthorizeView>
 	<Authorized Context="authContext">
 		@if (authContext.User.HasClaim("permission", "manageDistribution_lines") || authContext.User.HasClaim("permission", "fullAccess"))
 		{
-			<div class="main" @onclick="OnMainDiv">
-				<button class="btn btn-success mb-3" @onclick="NewDistributionLine">
-					➕ Add neue DistributionLine
-				</button>
-				@if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
-				{
+				<div class="tableResponsive">
+				  <div class="topTable">
+					<button class="btn addPlusB" @onclick="NewDistributionLine" title="Add neue Vertriebslinie">+</button>
+				  </div>
+				  @if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
+				  {
 					<div class="d-flex justify-content-center align-items-center"
 					style="min-height: 60vh;">
 						<p class="text-muted fs-5">
 							Keine Verteilungslinien gefunden.
 						</p>
 					</div>
-				}
-				else
-				{
+				  }
+				  else
+				  {
 					<table class="table table-bordered table-hover">
 						<tr>
 							<th>Id</th>
@@ -70,8 +72,8 @@
 							}
 						</tbody>
 					</table>
-				}
-			</div>
+				  }
+				</div>
 			@if (IsAdding)
 			{
 				<ManagementLabel.Components.Layout.OverlayEditAddDistributionLines DistributionLine="new DistributionLines()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
@@ -94,6 +96,8 @@
 		<ManagementLabel.Components.Pages.LogIn />
 	</NotAuthorized>
 </AuthorizeView>
+</div>
+
 @code {
 
 	private bool IsAdding = false;

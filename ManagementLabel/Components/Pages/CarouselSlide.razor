@@ -1,24 +1,25 @@
 ﻿@page "/carousel"
 
+<div class="p-2 min-vh-100 w-100">
 <AuthorizeView>
 	<Authorized Context="authContext">
 		@if (authContext.User.HasClaim("permission", "manageCarousel") || authContext.User.HasClaim("permission", "fullAccess"))
 		{
-			<button class="btn btn-success mb-3" @onclick="NewCarouselImage">
-				➕ Add neue Carousel Image
-			</button>
-
-			@if (carouselImageService.DownloadedCarouselImage == null || !carouselImageService.DownloadedCarouselImage.Any())
-			{
+			<div class="tableResponsive">
+			  <div class="topTable">
+						<button class="btn addPlusB" @onclick="NewCarouselImage" title="Add neues Karussellbild">+</button>
+			  </div>
+			  @if (carouselImageService.DownloadedCarouselImage == null || carouselImageService.DownloadedCarouselImage.Count == 0)
+		  	  {
 				<div class="d-flex justify-content-center align-items-center"
 				style="min-height: 60vh;">
 					<p class="text-muted fs-5">
 						Keine Carousel Images gefunden.
 					</p>
 				</div>
-			}
-			else
-			{
+			  }
+			  else
+			  {
 				<div class="row">
 					@foreach (var carouselImage in carouselImageService.DownloadedCarouselImage)
 					{
@@ -57,9 +58,8 @@
 						</div>
 					}
 				</div>
-			}
-
-
+			  }
+			</div>
 			@if (IsAdding)
 			{
 				<ManagementLabel.Components.Layout.OverlayEditAddCarouselImage carouselImage="new CarouselImage()" Action="Add" OnHandel="HandleEditAddCarouselImage" />
@@ -82,6 +82,8 @@
 		<ManagementLabel.Components.Pages.LogIn />
 	</NotAuthorized>
 </AuthorizeView>
+</div>
+
 @code {
 
 	private CarouselImage EditingCarouselImage = new CarouselImage();

@@ -97,43 +97,43 @@
 								class="@(selectedSupplier?.Id == supplier.Id ? "selected" : "")">
 									@if (ShowColumn("Id"))
 									{
-									  <td>@supplier.Id</td>
+										<td>@supplier.Id</td>
 									}
 									@if (ShowColumn("Name"))
 									{
-									  <td>@supplier.Name</td>
+										<td>@supplier.Name</td>
 									}
 									@if (ShowColumn("Street"))
 									{
-									  <td>@supplier.Street</td>
+										<td>@supplier.Street</td>
 									}
 									@if (ShowColumn("HNumber"))
 									{
-									  <td>@supplier.HNumber</td>
+										<td>@supplier.HNumber</td>
 									}
 									@if (ShowColumn("PostalCode"))
 									{
-									  <td>@supplier.PostalCode</td>
+										<td>@supplier.PostalCode</td>
 									}
 									@if (ShowColumn("City"))
 									{
-									  <td>@supplier.City</td>
+										<td>@supplier.City</td>
 									}
 									@if (ShowColumn("Country"))
 									{
-									  <td>@supplier.Country</td>
+										<td>@supplier.Country</td>
 									}
 									@if (ShowColumn("Phone"))
 									{
-									  <td>@supplier.Phone</td>
+										<td>@supplier.Phone</td>
 									}
 									@if (ShowColumn("Email"))
 									{
-									  <td>@supplier.Email</td>
+										<td>@supplier.Email</td>
 									}
 									@if (ShowColumn("Website"))
 									{
-									  <td>@supplier.Website</td>
+										<td>@supplier.Website</td>
 									}
 								</tr>
 							</Virtualize>
@@ -156,6 +156,9 @@
 				style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
 				@onclick:stopPropagation="true">
 					<ul>
+						<li @onclick="() => PlaceOrder(selectedSupplier)">
+							<a><i class="fa-solid fa-cart-plus"></i> Bestellung aufgeben</a>
+						</li>
 						<li @onclick="() => Edit(selectedSupplier)">
 							<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
 						</li>
@@ -215,12 +218,13 @@
 		{
 			// get Discount codes
 			await suppliersService.GetAllSuppliers();
+			// die Spaltenoptionen aus dem Local Storage laden
+			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsSuppliers");
+			if (saved is not null)
+				columnOptions = saved;
 		}
 
-		// die Spaltenoptionen aus dem Local Storage laden
-		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsSuppliers");
-		if (saved is not null)
-			columnOptions = saved;
+		
 
 		IsProcessing = false;
 	}
@@ -326,6 +330,17 @@
 			await JS.InvokeVoidAsync("alert", result.Message); 
 		}
 		IsProcessing = false;
+	}
+	private void PlaceOrder(Suppliers supplier)
+	{
+
+		if (supplier == null || supplier.Id <= 0)
+		{
+			JS.InvokeVoidAsync("alert", "Ungültiger Lieferant.");
+			return;
+		}
+
+		NavigationManager.NavigateTo($"/supplierorder/{supplier.Id}");
 	}
 	private void OnMainDiv()
 	{

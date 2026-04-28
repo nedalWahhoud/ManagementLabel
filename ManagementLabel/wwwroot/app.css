@@ -26,6 +26,10 @@ html, body {
     justify-content: center;
     align-items: center;
 }
+.tableResponsive {
+    height: calc(100vh - 150px); 
+    overflow-y: auto;
+}
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -44,13 +48,13 @@ html, body {
 }
 .topTable {
     position: sticky;
-    top: 0;
-    z-index: 3;
-    background-color: #cccccc;
+    top:0;
+    left: 0;
     width: 100%;
+    z-index: 10;
+    background: #cccccc;
     display: flex;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 8px;
 }
 .loadingTd {
     text-align: center;
@@ -215,9 +219,11 @@ html, body {
         gap: 10px;
     }
     .tableResponsive {
+        height: calc(100vh - 220px);
         border-radius: 10px;
         overflow: visible;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        overflow-x: auto;
     }
     .table {
         font-size: 12px;

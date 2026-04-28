@@ -28,7 +28,7 @@
 }
     .table thead th {
         position: sticky;
-        top: 65px;
+        top: 79px;
         background-color: #ffffff;
         z-index: 2;
         border-bottom: 2px solid #cccccc;
@@ -240,6 +240,9 @@
         font-size: 13px;
         table-layout: auto; 
      }
+        .table thead th{
+            top:70px;
+        }
         .table tbody tr td {
             font-size: 13px;
             height: auto;

@@ -13,6 +13,7 @@
         None,
         Category,
         Custom,
+        Supplier,
         LowStock,
         OnOffer
     }

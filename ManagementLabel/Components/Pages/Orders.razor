@@ -1,6 +1,7 @@
 ﻿@page "/order"
 @using ManagementLabel.Model
 
+<div class="p-2 min-vh-100 w-100">
 <AuthorizeView>
     <Authorized Context="authContext">
         @if (authContext.User.HasClaim("permission", "manageOrders") || authContext.User.HasClaim("permission", "fullAccess"))
@@ -274,7 +275,7 @@
         <ManagementLabel.Components.Pages.LogIn />
     </NotAuthorized>
 </AuthorizeView>
-
+</div>
 @code {
     private bool Isloading = true;
     private List<Order> orders = new List<Order>();

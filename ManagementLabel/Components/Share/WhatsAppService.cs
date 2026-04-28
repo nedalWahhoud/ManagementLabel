@@ -1,16 +1,19 @@
 ﻿using ManagementLabel.Model;
+using ManagementLabel.ProductsF;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using System.Globalization;
 using System.Net;
+using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Web;
 namespace ManagementLabel.Components.Share
 {
-    public class WhatsAppService(IJSRuntime JS, IOptions<AppConfig> appConfig)
+    public class WhatsAppService(IJSRuntime JS, IOptions<AppConfig> appConfig, ProductService productService)
     {
         private readonly IJSRuntime _JS = JS;
         private readonly IOptions<AppConfig> _appConfig = appConfig;
+        private readonly ProductService _productService = productService;
 
         public async Task<ValidationResult> SendCustomerInfo(Customers customer)
         {
@@ -171,6 +174,79 @@ namespace ManagementLabel.Components.Share
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
+        }
+        public async Task<ValidationResult> SendSupplierOrder(Suppliers supplier, Dictionary<int, int> selectedQuantities, string selectedLanguage)
+        {
+            try
+            {
+                if (supplier == null)
+                    return new ValidationResult { Result = false, Message = "Lieferantendaten sind null." };
+                if (selectedQuantities == null || selectedQuantities.Count == 0)
+                    return new ValidationResult { Result = false, Message = "Keine ausgewählten Artikel für die Bestellung." };
+                var sb = new StringBuilder();
+                string rlm = "\u200F"; // Rechts-nach-links-Textrichtungszeichen
+                string nbsp = "\u00A0"; // Ein Leerzeichen, das Zeilenumbrüche verhindert
+
+                if (selectedLanguage == "ar")
+                {
+                    sb.AppendLine($"مرحباً {supplier.Name} 👋");
+                    sb.AppendLine("هذه هي طلبيتي:");
+                    sb.AppendLine($"{rlm}--------------------------");
+                }
+                else
+                {
+                    sb.AppendLine($"Hallo {supplier.Name} 👋");
+                    sb.AppendLine("Hier ist meine Bestellung:");
+                    sb.AppendLine($"--------------------------");
+                }
+
+                int index = 0;
+
+
+                foreach (var item in selectedQuantities)
+                {
+                    index++;
+
+                    Products product = _productService.GetProductByIdLocal(item.Key) ?? await _productService.GetProductByIdAsync(item.Key);
+                    if (product == null)
+                    {
+                        sb = new();
+                        break;
+                    }
+
+                    if (selectedLanguage == "ar")
+                    {
+                        sb.AppendLine($"{nbsp}{rlm}{index.ToString()}-{product.Name_ar} | الكمية: {item.Value}");
+                    }
+                    else
+                    {
+                        sb.AppendLine($"{index}- {product.Name_de}, Menge: {item.Value}");
+                    }
+                }
+                if (sb.Length > 0)
+                {
+                    //  Footer
+                    if (selectedLanguage == "ar")
+                    {
+                        sb.AppendLine($"{rlm}--------------------------");
+                        sb.AppendLine($"{rlm}شكراً لك!");
+                    }
+                    else
+                    {
+                        sb.AppendLine("--------------------------");
+                        sb.AppendLine("Vielen Dank!");
+                    }
+                    await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", supplier.Phone, sb.ToString());
+                    return new ValidationResult { Result = true, Message = "WhatsApp-Nachricht wurde erfolgreich geöffnet." };
+                }
+                else
+                    return new ValidationResult { Result = false, Message = "Ein oder mehrere Produkte konnten nicht gefunden werden." };
+            }
+            catch (Exception ex)
+            {
+                return new ValidationResult { Result = false, Message = ex.Message };
+            }
+
         }
         public async Task<ValidationResult> SendMassage(Customers customer)
         {

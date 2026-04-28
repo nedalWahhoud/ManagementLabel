@@ -1,13 +1,15 @@
 ﻿@page "/categories"
+
+<div class="p-2 min-vh-100 w-100">
 <AuthorizeView>
 	<Authorized Context="authContext">
-		<div class="main">
 			@if (authContext.User.HasClaim("permission", "manageCategories") || authContext.User.HasClaim("permission", "fullAccess"))
 			{
-				<button class="btn btn-success mb-3" @onclick="NewCategory">
-					➕ Add neue Category
-				</button>
-				<table class="table table-bordered table-hover">
+				<div class="tableResponsive">
+					<div class="topTable">
+						<button class="btn addPlusB" @onclick="NewCategory" title="Add neue Kategorie">+</button>
+					</div>
+				  <table class="table table-bordered table-hover">
 					<tr>
 						<th>Id</th>
 						<th>Name de</th>
@@ -46,7 +48,8 @@
 							</tr>
 						}
 					</tbody>
-				</table>
+				  </table>
+				</div>
 			}
 			else
 			{
@@ -56,7 +59,6 @@
 					</div>
 				</div>
 			}
-		</div>
 		@if (IsAdding)
 		{
 			<ManagementLabel.Components.Layout.OverlayEditAddCategories category="new Categories()" Action="Add" OnHandel="HandleEditCategory" />
@@ -70,6 +72,7 @@
 		<ManagementLabel.Components.Pages.LogIn />
 	</NotAuthorized>
 </AuthorizeView>
+</div>
 
 
 @code {

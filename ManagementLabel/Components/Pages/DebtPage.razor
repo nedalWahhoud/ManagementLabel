@@ -1,5 +1,6 @@
 ﻿@page "/debt/{customerId:int}"
 
+<div class="p-2 min-vh-100 w-100">
 <AuthorizeView>
 	<Authorized Context="authContext">
 		@{
@@ -19,11 +20,9 @@
 
 				<div class="container-fluid px-2">
 					<div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-
 						<button class="btn btn-sm btn-outline-danger ps-3" @onclick="GoBack" title="Zurück zur Liste">
 							<i class="bi bi-arrow-return-left fs-5"></i>
 						</button>
-
 						<div class="d-flex align-items-center flex-grow-1 justify-content-center gap-3">
 							<button class="btn btn-outline-secondary btn-sm" @onclick="PreviousDebtCustomer">
 								<i class="bi bi-chevron-left"></i>
@@ -42,7 +41,6 @@
 								<i class="bi bi-chevron-right"></i>
 							</button>
 						</div>
-
 						<div class="dropdown">
 							<button disabled="@IsProcessing"
 							class="btn btn-light btn-sm rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
@@ -247,6 +245,7 @@
 		<ManagementLabel.Components.Pages.LogIn />
 	</NotAuthorized>
 </AuthorizeView>
+</div>
 @code {
 
 	/* debtCustomers funktion werden in trigger gemacht */

@@ -1,13 +1,13 @@
 ﻿@page "/discountcode"
 
-<div class="p-2" @onclick="OnMainDiv">
+<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
             @if (isLoading)
             {
                 @if (canManage)
                 {
-                     <div class="topTable">
+                        <div class="topTable">
                             <button class="btn btn-success" @onclick="() => OpenAddForm(true,true)">
                                 <i class="bi bi-plus-lg"></i> Rabattcode
                             </button>
@@ -32,13 +32,12 @@
                                 </ul>
                             </div>
                         </div>
-
-                    @* table discount codes *@
-                @if (ShowColumn("RaTa"))
-                {
-                    <div class="tableResponsive">
-                        <table class="table discountTable">
-                            <thead>
+                        @* table discount codes *@
+                        @if (ShowColumn("RaTa"))
+                        {
+                        <div class="table-full-height">
+                            <table class="table discountTable">
+                              <thead>
                                 <tr>
                                     <th>Code</th>
                                     <th>Rabatt</th>
@@ -48,8 +47,8 @@
                                     <th>DiTy</th>
                                     <th>Status</th>
                                 </tr>
-                            </thead>
-                            <tbody>
+                              </thead>
+                              <tbody>
                                 @foreach (var item in discountService.DownloadedDiscountCodes)
                                 {
                                     DateTime now = DateTime.Now;
@@ -73,16 +72,16 @@
                                         <td>@item.IsActive</td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                    }
-                @if (ShowColumn("KaTa"))
-                {
-                      @* table discount category *@
-                      <div class="table-responsive">
-                        <table class="table discountTable">
-                            <thead>
+                              </tbody>
+                            </table>
+                          </div>
+                        }
+                        @if (ShowColumn("KaTa"))
+                        {
+                          @* table discount category *@
+                          <div class="table-full-height">
+                             <table class="table discountTable">
+                              <thead>
                                 <tr>
                                     <th>Kategore</th>
                                     <th>Code</th>
@@ -93,8 +92,8 @@
                                     <th>DiTy</th>
                                     <th>Status</th>
                                 </tr>
-                            </thead>
-                            <tbody>
+                              </thead>
+                              <tbody>
                                 @foreach (var item in discountService.DownloadedDiscountCategory)
                                 {
                                     DateTime now = DateTime.Now;
@@ -118,13 +117,13 @@
                                         <td>@item.IsActive</td>
                                     </tr>
                                 }
-                            </tbody>
-                        </table>
-                      </div>
-                    }
+                               </tbody>
+                             </table>
+                           </div>
+                        }
 
-                    @* menu context *@
-                    @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
+                        @* menu context *@
+                        @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
                     {
                         <div class="contextMenu dropdown-menu-end dropdown-menu"
                         style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"

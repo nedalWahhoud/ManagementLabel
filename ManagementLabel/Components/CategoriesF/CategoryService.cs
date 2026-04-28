@@ -146,53 +146,7 @@ namespace ManagementLabel.Components.CategoriesF
                 return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht gelöscht werden." };
             }
         }
-        public async Task<GetItems<Products>> GetProductsByCategoryIdAsync(int categoryId, int? pageSize = null, List<int>? excludeProductsIds = null)
-        {
-            GetItems<Products> getItems = new();
-
-            // define the page size
-            if (pageSize.HasValue && pageSize.Value > 0)
-            {
-                getItems.PageSize = pageSize.Value;
-            }
-            try
-            {
-
-                String queryString = string.Empty;
-                if (excludeProductsIds != null && excludeProductsIds.Count != 0)
-                {
-                    queryString = "&";
-                    queryString += string.Join("&", excludeProductsIds.Select(id => $"excludeProductsIds={id}"));
-
-                }
-                queryString = $"?PageSize={getItems.PageSize}&IsAdmin={true}" + queryString;
-
-                var response = await _http.GetAsync($"api/Categories/getProductsByCategoryId/{categoryId}{queryString}");
-
-
-                if (!response.IsSuccessStatusCode)
-                    return getItems;
-
-                getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>() ?? new GetItems<Products>();
-
-                // add to local list
-                _productService.AddProductToLocal(getItems.Items);
-
-                if (getItems.AllItemsLoaded == true)
-                {
-                    return getItems;
-                }
-                else
-                {
-                    getItems.CurrentPage++;
-                    return getItems;
-                }
-            }
-            catch
-            {
-                return getItems;
-            }
-        }
+     
         // Local
         public void AddCategoriesToLocal(List<Categories> categories)
         {

@@ -24,7 +24,7 @@ namespace ManagementLabel.ProductsF
                 if (products != null)
                 {
                         // add the product to the local list
-                        AddProductToLocal(products);
+                    AddProductToLocal(products);
                     return products;
                 }
                 return null!;

@@ -18,14 +18,33 @@ namespace ManagementLabel.Components.SupplierF
                     return [];
 
                 var getItems = await response.Content.ReadFromJsonAsync<GetItems<Suppliers>>();
+
                 // add the manufacturers to the local list
-                DownloadedSuppliers.AddRange(getItems?.Items ?? []);
+                AddProductToLocal(getItems?.Items ?? []);
 
                 return DownloadedSuppliers;
             }
             catch
             {
                 return [];
+            }
+        }
+        public async Task <Suppliers> GetSupplierByIdAsync(int id)
+        {
+            try
+            {
+                var response = await _http.GetAsync($"api/Suppliers/getSupplierById/{id}");
+                if (!response.IsSuccessStatusCode)
+                    return null!;
+                var supplier = await response.Content.ReadFromJsonAsync<Suppliers>();
+                if(supplier == null)
+                    return null!;
+
+                return supplier;
+            }
+            catch
+            {
+                return null!;
             }
         }
         public async Task<ValidationResult> AddSupplier(Suppliers supplier)
@@ -40,7 +59,7 @@ namespace ManagementLabel.Components.SupplierF
                 {
                     supplier.Id = result.NewId ?? 0; // Setze die ID des neuen Lieferanten basierend auf der Antwort des Servers
                     // neuen Lieferanten zur lokalen Liste hinzufügen.
-                    DownloadedSuppliers.Add(supplier);
+                    AddProductToLocal(supplier);
                 }
                 return result ?? new ValidationResult { Result = false, Message = "Es ist ein unerwarteter Fehler aufgetreten." };
             }
@@ -103,6 +122,32 @@ namespace ManagementLabel.Components.SupplierF
             }
         }
         // local
+        public void AddProductToLocal(List<Suppliers> suppliers)
+        {
+            if (suppliers.Count > 0 && DownloadedSuppliers.Count == 0)
+            {
+                DownloadedSuppliers.AddRange(suppliers);
+                return;
+            }
+            foreach (var supplier in suppliers)
+            {
+                if (!DownloadedSuppliers.Any(p => p.Id == supplier.Id))
+                {
+                    DownloadedSuppliers.Add(supplier);
+                }
+            }
+        }
+        public void AddProductToLocal(Suppliers supplier)
+        {
+            if (!DownloadedSuppliers.Any(p => p.Id == supplier.Id))
+            {
+                DownloadedSuppliers.Add(supplier);
+            }
+        }
+        public Suppliers GetSupplierByIdLocal(int id)
+        {
+            return DownloadedSuppliers.FirstOrDefault(s => s.Id == id) ?? null!;
+        }
         private bool IsEdited(Suppliers currentSupplier, Suppliers editSupplier)
         {
             return currentSupplier.Name != editSupplier.Name ||
@@ -115,5 +160,6 @@ namespace ManagementLabel.Components.SupplierF
                    currentSupplier.Email != editSupplier.Email ||
                    currentSupplier.Website != editSupplier.Website;
         }
+
     }
 }
