@@ -31,10 +31,6 @@ namespace ManagementLabel.Model
         [Required(ErrorMessage = "Bitte wählen Sie mindestens einen Lieferanten aus.")] 
         [MinLength(1, ErrorMessage = "Mindestens ein Lieferant ist erforderlich.")] 
         public List<int>? SelectedSupplierIds { get; set; } = [];
-
-        //[Required(ErrorMessage = "Bitte wählen Sie eine Hersteller aus.")]
-        public int SupplierId { get; set; } = 3;
-        /*public Suppliers? Supplier { get; set; }*/
         public int UserId { get; set; }
         public Users? User { get; set; }
         public ICollection<ProductImages> ProductImages { get; set; } = [];
