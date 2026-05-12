@@ -62,7 +62,7 @@ namespace ManagementLabel.Components.OrderF
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new ValidationResult { Result = false, Message = "Failed to retrieve Orders ." };
+                    return new ValidationResult { Result = false, Message = "Bestellungen konnten nicht abgerufen werden." };
                 }
 
                 getItems = await response.Content.ReadFromJsonAsync<GetItems<Order>>() ?? new GetItems<Order>();
