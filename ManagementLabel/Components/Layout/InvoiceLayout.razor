@@ -15,7 +15,9 @@
 			</div>
 			<div id="InvoiceBox" class="InvoiceBox">
 				<div class="InvoiceContent">
-					<h2>@invoice.projectInfo.Value.Name</h2>
+					<div class="InvoiceLogo">
+						<img src="@invoice.projectInfo.Value.LogoUrl" alt="@invoice.projectInfo.Value.Name" style="max-width: 140px; height: 140px;" />
+					</div>
 					<div class="InvoiceFirstPart">
 						<div class="InvoiceAddress">
 							<span class="SenderAddress">@invoice.projectInfo.Value.Name @invoice.projectInfo.Value.Address</span>
@@ -24,6 +26,7 @@
 							<span>@invoice.order.Address?.ZipCode @invoice.order.Address?.City</span>
 						</div>
 						<div class="InvoiceContact">
+							<span>Website: @projectInfo.Value.Website</span>
 							<span>E-mail: @projectInfo.Value.Email</span>
 							<span>Tel.: @projectInfo.Value.Phone</span>
 						</div>
@@ -33,7 +36,6 @@
 						<p class="InvoiceDetails">
 							<span><label>Rechnungsnummer</label>@invoice.InvoceeNumber</span>
 							<span><label>Rechnungsdatum</label>@DateTime.Today.ToString("dd.MM.yyyy")</span>
-							<span><label>Order Id</label>@invoice.order.Id</span>
 							<span><label>Ordersdatum</label>@invoice.order.OrderDate.ToString("dd.MM.yyyy HH:mm")</span>
 						</p>
 					</div>
@@ -79,14 +81,14 @@
 									{
 										<tr style="border-top: 1px solid #cccccc;">
 											<td colspan="5" style="padding-top:20px;" class="text-end"><strong>Rabatt-@discountDetails.CategoryName:</strong></td>
-											<td colspan="1" style="padding-top:20px;">@($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", culture)})")</td>
+											<td colspan="1" style="padding-top:20px;">@($"{discountDetails.DiscountPercentage}{(discountDetails.DiscountType == DiscountType.Percentage ? "%" : "€")} ({discountDetails.DiscountValue.ToString("C", culture)})")</td>
 										</tr>
 									}
 									else if (invoice.order.DiscountCategory != null)
 									{
 										<tr style="border-top: 1px solid #cccccc;">
 											<td colspan="5" style="padding-top:20px; padding-bottom:10px;" class="text-end"><strong>Rabatt-@discountDetails.CategoryName:</strong></td>
-											<td colspan="1" style="padding-top:20px; padding-bottom:10px;">@($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", culture)})")</td>
+											<td colspan="1" style="padding-top:20px; padding-bottom:10px;">@($"{discountDetails.DiscountPercentage}{(discountDetails.DiscountType == DiscountType.Percentage ? "%" : "€")}({discountDetails.DiscountValue.ToString("C", culture)})")</td>
 										</tr>
 									}
 									else
@@ -117,11 +119,11 @@
 									</tr>
 									@* Steuer *@
 									<tr>
-										<td colspan="5" class="text-end"><strong>MwSt. 19% von @((Tax19.BaseAmount).ToString("C", culture)) + @Tax19.ShippingPart.ToString("C", culture)</strong></td>
+										<td colspan="5" class="text-end"><strong>MwSt. 19% von @((Tax19.BaseAmount).ToString("C", culture))  @(Tax19.ShippingPart > 0 ? "+" + Tax19.ShippingPart.ToString("C", culture) : string.Empty)</strong></td>
 										<td colspan="1">@((Tax19.TaxAmount + Tax19.TaxShippingAmount).ToString("C", culture))</td>
 									</tr>
 									<tr>
-										<td colspan="5" class="text-end"><strong>MwSt. 7% von @Tax7.BaseAmount.ToString("C", culture) + @Tax7.ShippingPart.ToString("C", culture)</strong></td>
+										<td colspan="5" class="text-end"><strong>MwSt. 7% von @Tax7.BaseAmount.ToString("C", culture)  @(Tax7.ShippingPart > 0 ? "+" + Tax7.ShippingPart.ToString("C", culture) : string.Empty)</strong></td>
 										<td colspan="1">@((Tax7.TaxAmount + Tax7.TaxShippingAmount).ToString("C", culture))</td >
 									</tr>
 									@* Netto *@
@@ -156,12 +158,11 @@
 	</div>
 }
 
-
 @code {
 	[Parameter]
 	public Invoice invoice { get; set; } = null!;
 	[Parameter]
-	public EventCallback OnClose { get; set; }
+	public EventCallback<string> OnHandel { get; set; }
 
 	private TaxDetail Tax19 { get; set; } = new();
 	private TaxDetail Tax7 { get; set; } = new();
@@ -183,6 +184,7 @@
 					discountDetails.CategoryName = "Auf alle";
 					discountDetails.DiscountPercentage = details.DiscountPercentage;
 					discountDetails.DiscountValue = details.DiscountValue;
+					discountDetails.DiscountType = details.DiscountType;
 				}
 				else if (invoice.order.DiscountCategory != null)
 				{
@@ -190,6 +192,7 @@
 					discountDetails.CategoryName = details.categoryName;
 					discountDetails.DiscountPercentage = details.DiscountPercentage;
 					discountDetails.DiscountValue = details.DiscountValue; 
+					discountDetails.DiscountType = details.DiscountType;
 				}
 			}
 
@@ -209,7 +212,7 @@
 				Tax19.ShippingPart = TaxShipping.shippingPart19;
 				Tax7.ShippingPart = TaxShipping.shippingPart7;
 			}
-			
+
 			// Netto
 			priceSummary.TotalNet = priceSummary.TotalGross - ((Tax19.TaxAmount + Tax19.TaxShippingAmount) + (Tax7.TaxAmount + Tax7.TaxShippingAmount));
 		}
@@ -218,8 +221,8 @@
 	private async Task CloseInvoice()
 	{
 		invoice = null!;
-		// remove die invoice von dem vater seite auch
-		await OnClose.InvokeAsync();
+		
+		await OnHandel.InvokeAsync("close");
 	}
 	private async Task OnSaveInvoice(Invoice invoice)
 	{
@@ -241,8 +244,7 @@
                  const blobUrl = URL.createObjectURL(blob);
                  window.open(blobUrl, '_blank');");
 
-			/* string FileName = $"Rechnung_{invoice.InvoceeNumber}_{invoice.order.Address?.LastName}";
-					_ = JS.InvokeVoidAsync("downloadInvoice", "InvoiceBox", FileName);*/
+			await OnHandel.InvokeAsync("save");
 		}
 		catch (Exception ex)
 		{

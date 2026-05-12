@@ -111,6 +111,14 @@
 	[Parameter]
 	public EventCallback<string> OnHandel { get; set; }
 	private bool IsProcessing = false;
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// scroll spreen
+			await JS.InvokeVoidAsync("openFullscreen");
+		}
+	}
 	private async void Save()
 	{
 		IsProcessing = true;

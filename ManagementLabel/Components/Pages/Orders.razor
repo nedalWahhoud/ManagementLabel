@@ -207,7 +207,7 @@
                 @if (IsOverlayVisible &&  overlayItems != null)
                 {
                     <div class="overlay" @onclick="CloseAddress">
-                        <div class="formGroupAdd">
+                            <div class="overlayForm">
                             @if (string.IsNullOrEmpty(overlayItems.NoData))
                             {
                                 <h4>@overlayItems.Title</h4>
@@ -259,7 +259,7 @@
             @* Rechnung *@
             @if (IsInvoiceVisible)
             {
-                <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnClose="HandleInvoiceClose" />
+                <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnHandel="HandleInvoiceClose" />
             }
         }
         else

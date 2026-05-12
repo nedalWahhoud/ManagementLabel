@@ -62,7 +62,7 @@ namespace ManagementLabel.Components.InvoiceF
             try
             {
                 using var memoryStream = new MemoryStream();
-                // إعداد المستند وحجم الصفحة وهوامش
+                // Dokumenteinstellungen, Seitengröße und Ränder
                 Document document = new(PageSize.A4, 50, 50, 50, 50);
                 PdfWriter writer = PdfWriter.GetInstance(document, memoryStream);
                 writer.PageEvent = new PdfEvent(DownloadedBankTransferDetails, _projectInfo);
@@ -78,7 +78,6 @@ namespace ManagementLabel.Components.InvoiceF
                 Paragraph spaceP2 = new("  ", FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
                 var spaceCell = new PdfPCell
                 {
-
                     Border = Rectangle.NO_BORDER,
                     VerticalAlignment = Element.ALIGN_MIDDLE
                 };
@@ -116,7 +115,7 @@ namespace ManagementLabel.Components.InvoiceF
                     string recipientAddressName = $"{invoice.order.Address.FirstName} {invoice.order.Address.LastName}";
                     Paragraph p1 = new(recipientAddressName, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
                     {
-                        SpacingAfter = 1f // مسافة بعد الفقرة
+                        SpacingAfter = 1f // Leerzeichen nach dem Absatz
                     };
                     addressCell.AddElement(p1);
                     string recipientAddress = $"{invoice.order.Address.Street}";
@@ -140,15 +139,21 @@ namespace ManagementLabel.Components.InvoiceF
                     Border = Rectangle.NO_BORDER,
                     VerticalAlignment = Element.ALIGN_MIDDLE
                 };
-                string Email = $"E-Mail: {invoice.projectInfo.Value.Email}";
-                Paragraph ContactP1 = new(Email, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
+                string website = $"Webseite: {invoice.projectInfo.Value.Website}";
+                Paragraph ContactP1 = new(website, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
                 {
                     SpacingAfter = 1f // Leerzeichen nach dem Absatz
                 };
                 contectCell.AddElement(ContactP1);
-                string Tel = $"Tel.: {invoice.projectInfo.Value.Phone}";
-                Paragraph ContactP2 = new(Tel, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
+                string Email = $"E-Mail: {invoice.projectInfo.Value.Email}";
+                Paragraph ContactP2 = new(Email, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK))
+                {
+                    SpacingAfter = 1f // Leerzeichen nach dem Absatz
+                };
                 contectCell.AddElement(ContactP2);
+                string Tel = $"Tel.: {invoice.projectInfo.Value.Phone}";
+                Paragraph ContactP3 = new(Tel, FontFactory.GetFont(FontFactory.HELVETICA, 10, BaseColor.BLACK));
+                contectCell.AddElement(ContactP3);
 
 
                 // add cell to table
@@ -201,13 +206,7 @@ namespace ManagementLabel.Components.InvoiceF
                     PaddingBottom = 5f
                 };
 
-                PdfPCell cell3 = new(new Phrase($"Order Id\n{invoice.order.Id}", font1))
-                {
-                    Border = Rectangle.NO_BORDER,
-                    PaddingBottom = 5f
-                };
-
-                PdfPCell cell4 = new(new Phrase($"Ordersdatum\n{invoice.order.OrderDate:dd.MM.yyyy HH:mm}", font1))
+                PdfPCell cell3 = new(new Phrase($"Ordersdatum\n{invoice.order.OrderDate:dd.MM.yyyy HH:mm}", font1))
                 {
                     Border = Rectangle.NO_BORDER,
                     PaddingBottom = 5f
@@ -217,7 +216,6 @@ namespace ManagementLabel.Components.InvoiceF
                 InvoiceInfoTable.AddCell(cell1);
                 InvoiceInfoTable.AddCell(cell2);
                 InvoiceInfoTable.AddCell(cell3);
-                InvoiceInfoTable.AddCell(cell4);
                 // add ti table
                 InvoiceInfoTable.AddCell(InvoiceInfoCell);
                 document.Add(InvoiceInfoTable);
@@ -261,24 +259,26 @@ namespace ManagementLabel.Components.InvoiceF
                 // Preis vor Rabbat 
                 if (invoice.order.DiscountCode != null || invoice.order.DiscountCategory != null)
                 {
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase("Preis vor Rabatt:", cellFont)) { Colspan = 5, HorizontalAlignment = Element.ALIGN_RIGHT, Padding = 5 });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase("Preis vor Rabatt", cellFont)) { Colspan = 5, HorizontalAlignment = Element.ALIGN_RIGHT, Padding = 5 });
                     orderItemsTable.AddCell(new PdfPCell(new Phrase(discountDetails.PriceBeforeDiscount.ToString("C", culture), cellFont)) { Padding = 5 });
                 }
                 if (invoice.order.DiscountCode != null)
                 {
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"Rabbat-{discountDetails.CategoryName} : ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", culture)})", cellFont)) { Colspan = 4, Padding = 5 });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"Rabbat-{discountDetails.CategoryName}", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"{discountDetails.DiscountPercentage}{(discountDetails.DiscountType == DiscountType.Percentage ? "%":"€")}" +
+                        $"({discountDetails.DiscountValue.ToString("C", culture)})", cellFont)) { Colspan = 4, Padding = 5 });
                 }
                 else if (invoice.order.DiscountCategory != null)
                 {
                     // Rabattwertzeile
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"Rabbat-{discountDetails.CategoryName}: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"{discountDetails.DiscountPercentage}% ({discountDetails.DiscountValue.ToString("C", culture)})", cellFont)) { Colspan = 4, Padding = 5 });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"Rabbat-{discountDetails.CategoryName}", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase($"{discountDetails.DiscountPercentage} {(discountDetails.DiscountType == DiscountType.Percentage ? "%" : "€")} " +
+                        $"({discountDetails.DiscountValue.ToString("C", culture)})", cellFont)) { Colspan = 4, Padding = 5 });
 
                 }
                 else
                 {
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase("Rabbat: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase("Rabbat", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                     orderItemsTable.AddCell(new PdfPCell(new Phrase("0 €", cellFont)) { Colspan = 4, Padding = 5 });
                 }
                 // Versandkosten
@@ -290,26 +290,25 @@ namespace ManagementLabel.Components.InvoiceF
 
                 if (invoice.order!.DiscountCode != null || invoice.order.DiscountCategory != null)
                 {
-                    orderItemsTable.AddCell(new PdfPCell(new Phrase("Preis nach Rabatt:", cellFont)) { Colspan = 5, HorizontalAlignment = Element.ALIGN_RIGHT, Padding = 5 });
+                    orderItemsTable.AddCell(new PdfPCell(new Phrase("Preis nach Rabatt", cellFont)) { Colspan = 5, HorizontalAlignment = Element.ALIGN_RIGHT, Padding = 5 });
                     orderItemsTable.AddCell(new PdfPCell(new Phrase(discountDetails.PriceAfterDiscount.ToString("C", culture), cellFont)) { Padding = 5 });
                 }
-                orderItemsTable.AddCell(new PdfPCell(new Phrase("Versandskosten: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase("Versandskosten", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                 orderItemsTable.AddCell(new PdfPCell(new Phrase(priceSummary.ShippingCost.ToString("C", culture), cellFont)) { Colspan = 4, Padding = 5 });
                 // Gesamtbrutto
-                orderItemsTable.AddCell(new PdfPCell(new Phrase("Gesamtbrutto: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase("Gesamtbrutto", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                 orderItemsTable.AddCell(new PdfPCell(new Phrase(priceSummary.TotalGross.ToString("C", culture), cellFont)) { Colspan = 4, Padding = 5 });
                 // Steuer 
                 // 19%
-                orderItemsTable.AddCell(new PdfPCell(new Phrase($"MwSt. 19% von {Tax19.BaseAmount.ToString("C", culture) + Tax19.ShippingPart.ToString("C", culture)} :", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase($"MwSt. 19% von {Tax19.BaseAmount.ToString("C", culture) + (Tax19.ShippingPart > 0 ? "+" + Tax19.ShippingPart.ToString("C", culture) : string.Empty)}", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                 orderItemsTable.AddCell(new PdfPCell(new Phrase((Tax19.TaxAmount + Tax19.TaxShippingAmount).ToString("C", culture), cellFont)) { Colspan = 4, Padding = 5 });
                 // 7%
-                orderItemsTable.AddCell(new PdfPCell(new Phrase($"MwSt. 7% von {Tax7.BaseAmount.ToString("C", culture) + Tax7.ShippingPart.ToString("C", culture)} :", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase($"MwSt. 7% von {Tax7.BaseAmount.ToString("C", culture) + (Tax7.ShippingPart > 0 ? "+" + Tax7.ShippingPart.ToString("C", culture) : string.Empty)}", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                 orderItemsTable.AddCell(new PdfPCell(new Phrase((Tax7.TaxAmount + Tax7.TaxShippingAmount).ToString("C", culture), cellFont)) { Colspan = 4, Padding = 5 });
                 // Netto
-                orderItemsTable.AddCell(new PdfPCell(new Phrase("Gesamtnetto: ", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
+                orderItemsTable.AddCell(new PdfPCell(new Phrase("Gesamtnetto", cellFont)) { Colspan = 5, Padding = 5, HorizontalAlignment = Element.ALIGN_RIGHT });
                 orderItemsTable.AddCell(new PdfPCell(new Phrase(priceSummary.TotalNet.ToString("C", culture), cellFont)) { Colspan = 4, Padding = 5 });
                 document.Add(orderItemsTable);
-
 
                 document.Close();
 
@@ -320,10 +319,10 @@ namespace ManagementLabel.Components.InvoiceF
                 throw new Exception("Fehler bei der PDF-Erstellung: " + ex.Message);
             }
         }
-        public (int DiscountPercentage, double DiscountValue) GetDetailsDiscountCode(Order order)
+        public (int DiscountPercentage, double DiscountValue, DiscountType DiscountType) GetDetailsDiscountCode(Order order)
         {
 
-            (int DiscountPercentage, double DiscountValue) discountDetails = default!;
+            (int DiscountPercentage, double DiscountValue, DiscountType DiscountType) discountDetails = default!;
             double originalTotal = order.OrderItems.Sum(x => x.UnitPrice * x.Quantity);
             double discountAmt = order.DiscountCode?. DiscountAmount ?? 0;
 
@@ -333,11 +332,12 @@ namespace ManagementLabel.Components.InvoiceF
 
             discountDetails.DiscountPercentage = order.DiscountCode?.DiscountAmount ?? 0;
             discountDetails.DiscountValue = discountValue;
+            discountDetails.DiscountType = order.DiscountCode?.DiscountType ?? DiscountType.None;
             return discountDetails;
         }
-        public (int DiscountPercentage, double DiscountValue, string categoryName) GetDetailsDiscountCategory(Order order)
+        public (int DiscountPercentage, double DiscountValue, string categoryName, DiscountType DiscountType) GetDetailsDiscountCategory(Order order)
         {
-            (int DiscountPercentage, double DiscountValue, string categoryName) discountDetails = default!;
+            (int DiscountPercentage, double DiscountValue, string categoryName, DiscountType DiscountType) discountDetails = default!;
 
             // get discount details for the order by category
             double categoryitemsPrice = 0;
@@ -363,7 +363,7 @@ namespace ManagementLabel.Components.InvoiceF
             var matchedItem = order.OrderItems
             .FirstOrDefault(o => o.CategoryId == order.DiscountCategory?.CategoriesId);
             discountDetails.categoryName = matchedItem?.Product?.Category?.Name_de ?? "Kein Kategorie\"";
-
+            discountDetails.DiscountType = order.DiscountCategory?.DiscountType ?? DiscountType.None;
             return discountDetails;
         }
 
@@ -489,17 +489,38 @@ namespace ManagementLabel.Components.InvoiceF
             {
                 TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin
             };
-
-            var cell = new PdfPCell(new Phrase("Syriana", FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 25, BaseColor.BLACK)))
+            PdfPCell cell;
+            try
             {
-                Border = Rectangle.NO_BORDER,
-                HorizontalAlignment = Element.ALIGN_LEFT,
-                PaddingBottom = 10
-            };
 
+
+                string wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                string logoUrlFromConfig = _projectInfo.Value.LogoUrl.TrimStart('/');
+                string fullPath = Path.Combine(wwwrootPath, logoUrlFromConfig);
+                Image logo = Image.GetInstance(fullPath);
+
+                // Verstellen die Größe
+                logo.ScaleToFit(110f, 110f);
+
+                cell = new PdfPCell(logo)
+                {
+                    Border = Rectangle.NO_BORDER,
+                    HorizontalAlignment = Element.ALIGN_LEFT,
+                    PaddingLeft = 3
+                };
+            }
+            catch (Exception)
+            {
+                // Falls das Bild nicht geladen werden kann, wird alternativ der Name in Fettdruck angezeigt (Fallback).
+                cell = new PdfPCell(new Phrase(_projectInfo.Value.Name, FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 25, BaseColor.BLACK)))
+                {
+                    Border = Rectangle.NO_BORDER,
+                    HorizontalAlignment = Element.ALIGN_LEFT,
+                    PaddingBottom = 10
+                };
+            }
             headerTable.AddCell(cell);
-
-            // نرسم الجدول في رأس الصفحة (على اليسار والمسافة من أعلى الصفحة)
+            // Wir zeichnen die Tabelle oben auf die Seite (links und in einem gewissen Abstand vom oberen Seitenrand).
             headerTable.WriteSelectedRows(0, -5, document.LeftMargin - 20, document.PageSize.Height - 10, writer.DirectContent);
         }
 
@@ -517,8 +538,8 @@ namespace ManagementLabel.Components.InvoiceF
 
                 string projectInfo1 = $"{_projectInfo.Value.Name}\n" +
                     $"{_projectInfo.Value.Address}\n" +
-                    $"{_projectInfo.Value.Steuernummer}\n" +
-                    $"{_projectInfo.Value.UStIdNr}";
+                    $"Steuernummer: {_projectInfo.Value.Steuernummer}\n" +
+                    $"USt-IdNr.:{_projectInfo.Value.UStIdNr}";
 
                 PdfPTable footerTable = new(2)
                 {
@@ -578,5 +599,6 @@ namespace ManagementLabel.Components.InvoiceF
         public double DiscountValue { get; set; }
         public double PriceBeforeDiscount { get; set; }
         public double  PriceAfterDiscount { get; set; }
+        public DiscountType DiscountType { get; set; }
     }
 }

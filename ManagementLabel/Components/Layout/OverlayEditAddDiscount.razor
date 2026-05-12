@@ -165,7 +165,14 @@
             categories ??= await categoryService.GetAllCategoriesAsync();
         }
     }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // scroll spreen
+            await JS.InvokeVoidAsync("openFullscreen");
+        }
+    }
     private async Task OnSave()
     {
         if (action.ifdicountCode)

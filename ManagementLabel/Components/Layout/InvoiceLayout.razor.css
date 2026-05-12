@@ -27,21 +27,14 @@
         flex-shrink: 0;
         background: #f5f5f5;
         padding: 10px;
+        /**/
+        position: sticky;
+        top: 0; 
+        z-index: 1000;
     }
 .overlayFormInvoice-inner {
     padding: 2rem;
     box-sizing: border-box; 
-}
-
-.overlayFormInvoice .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-shrink: 0; 
-    background: #f5f5f5; 
-    padding: 10px;
 }
 /* نسخة CSS الأصلية مع تعديلات PDF-friendly */
 .InvoiceBox {
@@ -58,7 +51,9 @@
     box-shadow: none; 
     page-break-inside: avoid;
 }
-
+.InvoiceLogo {
+    text-align: left;
+}
 .InvoiceContent {
     flex: 1 0 auto;
     display: flex;

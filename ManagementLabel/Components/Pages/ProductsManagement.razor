@@ -223,78 +223,43 @@
 						<div class="overlayAddForm">
 							@* address *@
 							<h3>Lieferadresse: </h3>
-							@if (selectedAddress == false)
-							{
-								<EditForm Model="@newAddress" OnValidSubmit="HandleAddressSubmit">
-									<DataAnnotationsValidator />
-									<div class="form-group">
-										<label>Vorname</label>
-										<InputText class="form-control" @bind-Value="newAddress.FirstName" />
-										<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
-									</div>
-									<div class="form-group">
-										<label>Nachname</label>
-										<InputText class="form-control" @bind-Value="newAddress.LastName" />
-										<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
-									</div>
-									<div class="form-group">
-										<label>Tel.</label>
-										<InputText class="form-control" @bind-Value="newAddress.Phone" />
-										<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
-									</div>
-									<div class="form-group">
-										<label>Straße</label>
-										<InputText class="form-control" @bind-Value="newAddress.Street" />
-										<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
-									</div>
-									<div class="form-group">
-										<label>Postleitzahl</label>
-										<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
-										<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
-									</div>
-									<div class="form-group">
-										<label>Stadt</label>
-										<InputText class="form-control" @bind-Value="newAddress.City" />
-										<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
-									</div>
-									<div class="form-group">
-										<label>Land</label>
-										<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
-									</div>
-									<div class="addAddressClassB">
-										<button type="submit" class="btn addAddressB">Adresse Hinzufügen</button>
-									</div>
-								</EditForm>
-							}
-							@if (selectedAddress == true)
-							{
-								<InputRadioGroup @bind-Value="selectedAddressId" class="addressRadio">
-									<div class="addressOption">
-										<label>
-											<InputRadio Value="@newAddress.Id" />
-											@newAddress.FirstName @newAddress.LastName - @newAddress.Street, @newAddress.ZipCode @newAddress.City
-										</label>
-									</div>
-								</InputRadioGroup>
-							}
-							@* Zahlung Methode *@
-							<div class="paymentMethodOption">
-								<InputRadioGroup Value="@selectedPaymentId" ValueChanged="@((int val) => OnPaymentChanged(val))" ValueExpression="() => selectedPaymentId">
-									@for (int i = 0; i < orderService.DownloadedPaymentMethods.Count; i++)
-									{
-										if (orderService.DownloadedPaymentMethods[i].Id == 1 || orderService.DownloadedPaymentMethods[i].Id == 2 ||
-							orderService.DownloadedPaymentMethods[i].Id == 5)
-										{
-											var paymentMethod = orderService.DownloadedPaymentMethods[i];
-											<label>
-												<InputRadio Value="@paymentMethod.Id" />
-												@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? paymentMethod.Description_ar : paymentMethod.Description_de)
-											</label>
-										}
-									}
-								</InputRadioGroup>
-
-							</div>
+							<EditForm Model="@newAddress">
+								<DataAnnotationsValidator />
+								<div class="form-group">
+									<label>Vorname</label>
+									<InputText class="form-control" @bind-Value="newAddress.FirstName" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
+								</div>
+								<div class="form-group">
+									<label>Nachname</label>
+									<InputText class="form-control" @bind-Value="newAddress.LastName" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
+								</div>
+								<div class="form-group">
+									<label>Tel.</label>
+									<InputText class="form-control" @bind-Value="newAddress.Phone" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
+								</div>
+								<div class="form-group">
+									<label>Straße</label>
+									<InputText class="form-control" @bind-Value="newAddress.Street" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
+								</div>
+								<div class="form-group">
+									<label>Postleitzahl</label>
+									<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
+								</div>
+								<div class="form-group">
+									<label>Stadt</label>
+									<InputText class="form-control" @bind-Value="newAddress.City" />
+									<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
+								</div>
+								<div class="form-group">
+									<label>Land</label>
+									<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
+								</div>
+							</EditForm>
 							@* Discount Code *@
 							<div class="discountClass">
 								<label>Hast du Rabatt Code?</label>
@@ -343,28 +308,6 @@
 									<label class="mt-2 text-danger">@message</label>
 								}
 							</div>
-							@* shipping *@
-							@if (selectedPaymentId == 5)
-							{
-								<div class="shipping">
-									<h4>Versandmethode:</h4>
-									<div class="shippingProvider">
-										<InputRadioGroup @bind-Value="@order.ShippingProviderId">
-											@foreach (ShippingProvider item in orderService.DownloadedShippingProviders)
-											{
-												if(item.Id == 1)
-												{
-													<label>
-														<InputRadio Value="@item.Id" />
-														@(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? item.Name_ar : item.Name_de)
-													</label>
-												}
-											}
-										</InputRadioGroup>
-									</div>
-									<label>Versandkosten:<span style="font-weight:bold;">&nbsp;@((order.ShippingProviders?.PublicShippingCost ?? 0).ToString("C", new System.Globalization.CultureInfo("de-DE")))</span></label>
-								</div>
-							}
 							<div class="placeOrder">
 								Artikel: @cartService.GetTotalQuantity()
 								<span>
@@ -397,8 +340,7 @@
 								<span>Die Preise beinhalten MwSt.</span>
 							</div>
 							<div class="OrderClassB">
-								<button type="button" class="btn InvoiceGenerateB" @onclick="OnInvoiceGenerate"
-								disabled="@((selectedAddress && selectedPaymentId > 0) ? false : true)">Rechnung erstellen</button>
+								<button type="button" class="btn InvoiceGenerateB" @onclick="OnInvoiceGenerate">Rechnung erstellen</button>
 								<button type="button" class="btn InvoiceGeneratCancelB" @onclick="OnOrderCancel">Abbrechnen</button>
 							</div>
 						</div>
@@ -407,7 +349,7 @@
 				@* Rechnung *@
 				@if (IsInvoiceVisible)
 				{
-					<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnClose="HandleInvoiceClose" />
+					<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnHandel="HandleInvoice" />
 				}
 				@if (ShowScanner)
 				{
@@ -615,7 +557,6 @@
 
 		StateHasChanged();
 	}
-
 	private void OnSelectRow(Products product, MouseEventArgs e)
 	{
 		if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
@@ -631,7 +572,6 @@
 
 		selectedRow = product;
 	}
-
 	// Add Product
 	private bool IsShowAddProductForm = false;
 	private async void ShowAddProductFormAsync()
@@ -811,7 +751,6 @@
 	}
 	// Search
 	private List<Products> filterP = null!;
-
 	// filter nach category
 	private async Task OnCategoryOpened()
 	{
@@ -881,15 +820,13 @@
 	private Invoice invoice = null!;
 	private bool IsInvoiceVisible = false;
 	private Address newAddress = new();
-	private bool selectedAddress = false;
-	private int selectedAddressId = 0;
 	private Order order = new();
-	private int selectedPaymentId = 0;
 	private DiscountCodes discountCode = new();
 	private DiscountCategory discountCategory = new();
 	private bool IsDiscountCodeLoading = false;
 	private void ShowOrderForm()
 	{
+		OrderClear();
 		// then show the invoice form
 		IsShowInvoice = true;
 		// close other form
@@ -898,13 +835,8 @@
 	}
 	private void CancelOrderForm()
 	{
-		//  clear the cart
-		cartService.ClearCart();
+		OrderClear();
 		IsShowInvoice = false;
-	}
-	private void HandleAddressSubmit()
-	{
-		selectedAddress = true;
 	}
 	private async Task OnOrderGenerate()
 	{
@@ -913,10 +845,7 @@
 			await JS.InvokeVoidAsync("alert", "Bitte legen Sie Produkte in den Warenkorb, bevor Sie eine Bestellung aufgeben.");
 			return;
 		}
-		// get payment methods
-		await orderService.GetPaymentMethodsAsync();
-		// get the payment methods if not already loaded
-		await orderService.GetShippingProvidersAsync();
+
 		// show the invoice form
 		IsShowOrder = true;
 	}
@@ -948,7 +877,10 @@
 				if (hasCategoryItems)
 					discountCategory.Message = null!;
 				else
+				{
+					discountCategory = new();
 					discountCategory.Message = "Die Bestellung enthält keinen Artikel, dessen Kategorie mit der Rabattcode-Kategorie übereinstimmt.";
+				}
 				// discountcode message empty if has content
 				discountCode.Message = null!;
 			}
@@ -1023,63 +955,23 @@
 	{
 		order.TotalPrice = cartService.GetTotalPrice();
 	}
-	private async Task OnPaymentChanged(int newPaymentId)
-	{
-		// 5 ist die payment überweisung dass bedeuetet die versandkosten soll verlangt werden
-		if (newPaymentId == 5)
-		{
-			// get ShippingProvider if not loaded
-			if (orderService.DownloadedShippingProviders == null || orderService.DownloadedShippingProviders.Count == 0)
-				await orderService.GetShippingProvidersAsync();
-
-			// set default value
-			if (order.ShippingProviderId == null)
-			{
-				// 1 ist die Standard-ID des Versandanbieters
-				order.ShippingProviderId = 1;
-				order.ShippingProviders = orderService.DownloadedShippingProviders?.FirstOrDefault(o => order.ShippingProviderId == order.ShippingProviderId) ?? null;
-				// add die versandkosten to cart
-			}
-		}
-		else
-		{
-			// Versandanbieter zurücksetzen, wenn keine Versandzahlungsmethode verwendet wird
-			order.ShippingProviderId = null;
-		}
-
-		selectedPaymentId = newPaymentId;
-		StateHasChanged();
-	}
 	private void OnOrderCancel()
 	{
-		// clearn the newaddress
-		newAddress = new()!;
-		selectedAddress = false;
 		// hide the order form
 		IsShowOrder = false;
 	}
+	private void OrderClear( )
+	{
+		cartService.ClearCart();
+		newAddress = new();
+		discountCategory = new();
+		discountCode = new();
+	}
 	private async Task OnInvoiceGenerate()
 	{
-		// address
-		// add user id, if gust than set it to null
-		if (user?.Id > 0)
-			newAddress.UserId = user.Id;
-
-		var result = await addressService.AddAddressAsync(newAddress);
-		if (result.Result)
-		{
-			newAddress = addressService.DownloadedAddresses[0]; // Set the selected address  to the new added address
-		}
-		else
-		{
-			_ = JS.InvokeVoidAsync("alert", result.Message);
-			return;
-		}
 		// oder
 		Order createOrder = new Order()
 			{
-				DeliveryAddressId = newAddress.Id,
-				PaymentMethodId = selectedPaymentId,
 				StatusId = 1, // in database 1 = Order Pending
 				OrderItems = cartService.CartItems.Select(item => new OrderItems
 				{
@@ -1090,70 +982,55 @@
 				}).ToList(),
 				TotalPrice = order.TotalPrice,
 				OrderDate = DateTime.Now,
-				Notes = order.Notes,
 				UserId = user?.Id ?? 0,
 				DiscountCodeId = order.DiscountCodeId ?? null,
+				DiscountCode = discountCode.Id > 0 ? discountCode : null,
 				DiscountCategoryId = order.DiscountCategoryId ?? null,
+				DiscountCategory = discountCategory.Id > 0 ? discountCategory : null,
 				ShippingProviderId = order.ShippingProviderId ?? null,
+				Address = newAddress,
 				IsUserCreated = false
 			};
-		var result1 = await orderService.AddOrderAsync(createOrder);
-		if (result1.Result)
-		{
-			// get added order
-			order = orderService.DownloadedOrders[orderService.DownloadedOrders.Count - 1];
-			// get the products for the order items
-			foreach (var item in order.OrderItems)
-			{
-				item.Product = productService.GetProductByIdLocal(item.ProductId) ?? await productService.GetProductByIdAsync(item.ProductId);
-			}
-			// set the address of the order
-			order.Address = newAddress;
-			// add the discount code to the order
-			if (order.DiscountCodeId != null && order.DiscountCodeId > 0)
-			{
-				order.DiscountCode = discountCode;
-			}
-			else if(order.DiscountCategoryId != null && order.DiscountCategoryId > 0)
-			{
-				order.DiscountCategory = discountCategory;
-			}
 
-			// Rechnung
-			order.ShippingProviders = orderService.GetShippingProviderByIdLocal(order.ShippingProviderId ?? 0);
-			order.PaymentMethod = orderService.GetPaymentMethodByIdLocal(order.PaymentMethodId);
-			invoice = new Invoice
-				{
-					projectInfo = projectInfo,
-					InvoceeNumber = order.OrderDate.Year.ToString() +
-												   order.OrderDate.Month.ToString("D2") +
-												   order.OrderDate.Day.ToString("D2") +
-												   order.Id.ToString("D6"),
-					order = order,
-				};
-
-			IsInvoiceVisible = true;
-			IsShowOrder = false;
-			// clear cart
-			cartService.ClearCart();
-			// clear the newaddress
-			newAddress = new()!;
-			selectedAddress = false;;
-			order = new();
-			// default payment id
-			selectedPaymentId = 0;
-		}
-		else
+		// get the products for the order items
+		foreach (var item in createOrder.OrderItems)
 		{
-			_ = JS.InvokeVoidAsync("alert", result1.Message);
-			return ;
+			item.Product = productService.GetProductByIdLocal(item.ProductId) ?? await productService.GetProductByIdAsync(item.ProductId);
 		}
+
+		// add the discount code to the order
+		if (order.DiscountCodeId != null && order.DiscountCodeId > 0)
+		{
+			order.DiscountCode = discountCode;
+		}
+		else if (order.DiscountCategoryId != null && order.DiscountCategoryId > 0)
+		{
+			order.DiscountCategory = discountCategory;
+		}
+
+		invoice = new Invoice
+			{
+				projectInfo = projectInfo,
+				InvoceeNumber = $"RE-{DateTime.Now:yyyyMMdd}{Random.Shared.Next(1000, 9999)}",
+				order = createOrder,
+			};
+
+		IsInvoiceVisible = true;
+		IsShowOrder = false;
 	}
-	private async Task HandleInvoiceClose()
+	private void HandleInvoice(string action)
 	{
-		IsInvoiceVisible = false;
 		invoice = null!;
-		await InvokeAsync(StateHasChanged);
+		if (action == "close")
+		{
+			
+		}
+		else if(action == "save")
+		{
+			IsInvoiceVisible = false;
+		    IsShowInvoice = false;
+			cartService.ClearCart();
+		}
 	}
 
 	private void OnMainDiv()
@@ -1170,7 +1047,6 @@
 		StateHasChanged(); // Wir bitten Blizzard, zuerst das "Reder"-Div zu zeichnen.
 
 		await Task.Delay(100); // Eine kurze Verzögerung, um sicherzustellen, dass der Browser das Element gezeichnet hat.
-
 		try
 		{
 			// JavaScript aufrufen und Kamera starten

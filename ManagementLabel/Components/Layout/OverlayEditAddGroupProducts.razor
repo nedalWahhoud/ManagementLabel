@@ -39,7 +39,14 @@
 	public string action { get; set; } = string.Empty;
 	[Parameter]
 	public EventCallback<string> OnHandel { get; set; }
-
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// scroll spreen
+			await JS.InvokeVoidAsync("openFullscreen");
+		}
+	}
 	private bool IsProcessing = false;
 	private async void SaveGroup()
 	{

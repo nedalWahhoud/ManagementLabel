@@ -240,6 +240,15 @@
 		}
 	}
 
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// scroll spreen
+			await JS.InvokeVoidAsync("openFullscreen");
+		}
+	}
+
 	private void ToggleSupplier(int supplierId, object checkedValue)
 	{
 		if (GetProducts.SelectedSupplierIds == null)

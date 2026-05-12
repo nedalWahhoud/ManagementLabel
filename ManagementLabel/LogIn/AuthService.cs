@@ -88,15 +88,6 @@ namespace ManagementLabel.LogIn
                   if (result1 == null || string.IsNullOrEmpty(result1.Token))
                       return new ValidationResult { Result = false, Message = "Token Error" };
 
-                  /*(_authStateProvider as CustomAuthStateProvider)?.NotifyUserAuthentication(result1.Token);
-
-                  string localToken = await (_authStateProvider as CustomAuthStateProvider)?.LocalstorageGet("authToken")!;
-
-                  // update die Token in localStorage or sessionStorage
-                  if (!string.IsNullOrEmpty(localToken))
-                      (_authStateProvider as CustomAuthStateProvider)?.LocalstorageSet("authToken", result1.Token);
-                  else
-                      (_authStateProvider as CustomAuthStateProvider)?.SessionStorageSet("authToken", result1.Token);*/
                 return new ValidationResult { Result = true, Message = "erfolgreich Userdata geupdatet" };
             }
             catch (Exception ex)

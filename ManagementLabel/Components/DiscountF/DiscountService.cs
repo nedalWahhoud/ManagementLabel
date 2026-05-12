@@ -191,7 +191,7 @@ namespace ManagementLabel.Components.DiscountF
             }
             try
             {
-                var response = await _http.GetAsync($"api/Discounts/checkDiscountCategory/{code}");
+                var response = await _http.GetAsync($"api/Discounts/checkDiscountCategory/{code}/{-1}");
                 if (!response.IsSuccessStatusCode)
                 {
                     var result1 = await response.Content.ReadFromJsonAsync<ValidationResult>();
@@ -214,7 +214,7 @@ namespace ManagementLabel.Components.DiscountF
             }
             try
             {
-                var response = await _http.GetAsync($"api/Discounts/checkDiscountCode/{code}");
+                var response = await _http.GetAsync($"api/Discounts/checkDiscountCode/{code}/{-1}");
                 if (!response.IsSuccessStatusCode)
                 {
                     var result1 = await response.Content.ReadFromJsonAsync<ValidationResult>();
