@@ -36,13 +36,13 @@ else
 
     private bool isRended = false;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             try
             {
-                await CheckAdminStatusAsync();
+                _ = CheckAdminStatusAsync();
                 // Initialize the orderService to start count funktion of openOrders
                 orderService.InitializeAsync();
 

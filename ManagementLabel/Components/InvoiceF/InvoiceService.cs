@@ -319,10 +319,10 @@ namespace ManagementLabel.Components.InvoiceF
                 throw new Exception("Fehler bei der PDF-Erstellung: " + ex.Message);
             }
         }
-        public (int DiscountPercentage, double DiscountValue, DiscountType DiscountType) GetDetailsDiscountCode(Order order)
+        public (string Code, int DiscountPercentage, double DiscountValue, DiscountType DiscountType) GetDetailsDiscountCode(Order order)
         {
 
-            (int DiscountPercentage, double DiscountValue, DiscountType DiscountType) discountDetails = default!;
+            (string Code,int DiscountPercentage, double DiscountValue, DiscountType DiscountType) discountDetails = default!;
             double originalTotal = order.OrderItems.Sum(x => x.UnitPrice * x.Quantity);
             double discountAmt = order.DiscountCode?. DiscountAmount ?? 0;
 
@@ -330,14 +330,15 @@ namespace ManagementLabel.Components.InvoiceF
 
             discountValue = Math.Clamp(discountValue, 0, originalTotal);
 
+            discountDetails.Code = order.DiscountCode?.Code ?? string.Empty;
             discountDetails.DiscountPercentage = order.DiscountCode?.DiscountAmount ?? 0;
             discountDetails.DiscountValue = discountValue;
             discountDetails.DiscountType = order.DiscountCode?.DiscountType ?? DiscountType.None;
             return discountDetails;
         }
-        public (int DiscountPercentage, double DiscountValue, string categoryName, DiscountType DiscountType) GetDetailsDiscountCategory(Order order)
+        public (string Code, int DiscountPercentage, double DiscountValue, string categoryName, DiscountType DiscountType) GetDetailsDiscountCategory(Order order)
         {
-            (int DiscountPercentage, double DiscountValue, string categoryName, DiscountType DiscountType) discountDetails = default!;
+            (string Code,int DiscountPercentage, double DiscountValue, string categoryName, DiscountType DiscountType) discountDetails = default!;
 
             // get discount details for the order by category
             double categoryitemsPrice = 0;
@@ -356,6 +357,7 @@ namespace ManagementLabel.Components.InvoiceF
             else
                 categoryDiscountValue = Math.Min((double)(order.DiscountCategory?.DiscountAmount ?? 0), categoryitemsPrice);
 
+            discountDetails.Code = order.DiscountCategory?.Code ?? string.Empty;
             discountDetails.DiscountPercentage = order.DiscountCategory?.DiscountAmount ?? 0;
             discountDetails.DiscountValue = categoryDiscountValue;
 

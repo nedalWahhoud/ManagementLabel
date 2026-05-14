@@ -154,34 +154,11 @@ html, body {
         transform: scale(1.05);
     }
 @media (max-width: 768px) {
-    .table {
-        width: 100%; 
-        font-size: 13px;
-        table-layout: auto; 
-     }
-        .table thead th{
-            top:70px;
-        }
-        .table tbody tr td {
-            font-size: 13px;
-            height: auto;
-            padding: 8px;
-        }
     .InvoiceB {
         font-size: 1rem;
         width: 35px;
         height: 35px;
     }
-  
-    /* Suchen */
-    .filterContainer {
-        max-width: 90%;
-    }
-
-    .clearButton {
-        font-size: 20px;
-    }
-
     /* product Image  */
     .productImg {
         width: 60px;
