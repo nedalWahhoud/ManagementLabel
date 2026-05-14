@@ -25,10 +25,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
 /*builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5105); 
-});*/
-/*builder.WebHost.ConfigureKestrel(options =>
-{
     options.ListenAnyIP(7122, listenOptions =>
     {
         listenOptions.UseHttps();

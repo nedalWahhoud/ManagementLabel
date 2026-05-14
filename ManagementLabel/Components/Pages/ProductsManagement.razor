@@ -2,7 +2,7 @@
 @rendermode InteractiveAuto
 @implements IDisposable
 
-<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
+<div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
 			@{
@@ -11,30 +11,6 @@
 			}
 			@if (hasPermission && IsRended)
 			{
-				@* top continer *@
-				<div class="TopContiner">
-					@* filter *@
-					@* Lagerstand Filter  *@
-					<div class="d-flex flex-column">
-						<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage 
-                            || productService.DownloadedProduct.Count == 0
-                            || categoryService.DownloadedCategories.Count == 0)">
-							<option value="0">Alle</option>
-							<option value="1">Geringer Lagerbestand</option>
-							<option value="2">Im Angebot</option>
-						</select>
-					</div>
-					@* category filter *@
-					<div class="d-flex flex-column">
-						<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-							<option value="0">Kategorie</option>
-							@foreach (var category in categoryService.DownloadedCategories)
-							{
-								<option value="@category.Id">@category.Name_de</option>
-							}
-						</select>
-					</div>
-				</div>
 				@* table *@
 				<div tabindex="0" id="scrollContainer" class="tableContiner">
 					<div class="topTable">
@@ -65,6 +41,25 @@
 						<button class="btn @(IsShowInvoice ? "btn-secondary" : "btn-success") InvoiceB" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
 							@(!IsShowInvoice ? "R" : "A")
 						</button>
+						@* filter *@
+						<div class="d-flex flex-column gap-1 ms-auto">
+							@* Lagerstand Filter  *@
+							<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage
+                            || productService.DownloadedProduct.Count == 0
+                            || categoryService.DownloadedCategories.Count == 0)">
+								<option value="0">Alle</option>
+								<option value="1">Geringer Lagerbestand</option>
+								<option value="2">Im Angebot</option>
+							</select>
+							@* category filter *@
+							<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+								<option value="0">Kategorie</option>
+								@foreach (var category in categoryService.DownloadedCategories)
+								{
+									<option value="@category.Id">@category.Name_de</option>
+								}
+							</select>
+						</div>
 					</div>
 					<table class="table text-center align-middle">
 						<thead>
@@ -782,6 +777,7 @@
 
 		// save the selected category id in local storage
 		await localStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
+		StateHasChanged();
 	}
 	// filter nach Lagerbestand
 	private int selectedValuesFilter = 0;
@@ -813,6 +809,7 @@
 			// reset die Getitem
 			productService.GetItems = new();
 		}
+		StateHasChanged();
 	}
 	// Invoice
 	private bool IsShowInvoice = false;
@@ -1032,13 +1029,6 @@
 			cartService.ClearCart();
 		}
 	}
-
-	private void OnMainDiv()
-	{
-		// hide die Menu if sichtbar
-		showContextMenu = false;
-	}
-	
 	// barcode scanning
 	private bool ShowScanner = false;
 	private async Task OpenScanner()
@@ -1083,7 +1073,6 @@
 		else
 			await JS.InvokeVoidAsync("alert", "code oder selectedProduct ist null");
 	}
-
 	private async Task CloseScanner()
 	{
 		try
@@ -1097,10 +1086,14 @@
 		ShowScanner = false;
 		showContextMenu = false;
 	}
-
 	public void Dispose()
 	{
 		objRef?.Dispose();
+	}
+	private void OnMainDiv()
+	{
+		// hide die Menu if sichtbar
+		showContextMenu = false;
 	}
 }
 

@@ -1,5 +1,15 @@
-﻿
-/* top continer */
+﻿/* 1.Scrollen auf der gesamten Seite und im Fenster deaktivieren */
+html, body {
+    overflow: hidden !important;
+    height: 100% !important;
+    position: fixed !important;
+    width: 100% !important;
+    touch-action: none;
+    -webkit-overflow-scrolling: none;
+    touch-action: none; /* Berührungsinteraktion für Bewegungen deaktiviert */
+    overscroll-behavior: none; /* Verhindert Rückprall an den Kanten */
+}
+
 #reader {
     width: 100%;
     max-width: 400px;
@@ -20,28 +30,13 @@
         border-color: #007bff;
         box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
     }
-/* table */
-.table {
-    width: 100%;
-    height: 90vh;
-    border-collapse: collapse;
+.table thead th {
+    position: sticky;
+    top: 95px;
+    background-color: #ffffff;
+    z-index: 2;
+    border-bottom: 2px solid #cccccc;
 }
-    .table thead th {
-        position: sticky;
-        top: 79px;
-        background-color: #ffffff;
-        z-index: 2;
-        border-bottom: 2px solid #cccccc;
-    }
-    .table tbody tr td {
-        font-size: 15px;
-        vertical-align: middle;
-        text-align: center;
-        height: 120px;
-        max-width: 200px;
-        word-wrap: break-word;
-        white-space: normal;
-    }
 .InvoiceB {
     width: 45px;
     height: 45px;
@@ -159,11 +154,6 @@
         transform: scale(1.05);
     }
 @media (max-width: 768px) {
-    .TopContiner {
-                gap: 5px;
-                height: auto;
-                align-items: center;
-            }
     .table {
         width: 100%; 
         font-size: 13px;

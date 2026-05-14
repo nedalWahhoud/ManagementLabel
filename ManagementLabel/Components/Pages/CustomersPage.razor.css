@@ -1,13 +1,44 @@
-﻿.DropdownList {
+﻿html, body {
+    overflow: hidden !important;
+    height: 100% !important;
+    position: fixed !important;
+    width: 100% !important;
+    touch-action: none;
+    -webkit-overflow-scrolling: none;
+    touch-action: none; /* Berührungsinteraktion für Bewegungen deaktiviert */
+    overscroll-behavior: none; /* Verhindert Rückprall an den Kanten */
+}
+.topTable {
+    justify-content: space-between;
+}
+.buttonsDiv {
+    display: flex;
+    flex-direction: row;
+}
+.dropdownListsDiv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+}
+.DropdownList {
     border-radius: 6px;
-    border: 1px solid #ccc;
+    border: 1px solid #cccccc;
     font-size: 14px;
-    outline: none;
     cursor: pointer;
-    min-width:100px;
-    min-height:40px;
+    height: 5vh;
+    min-width: 70px;
 }
     .DropdownList:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+    }
+.searchDiv {
+    display: flex;
+    max-width: 200px;
+    align-items:center;
+}
+    .searchDiv input {
+        border: none;
+        font-size: 14px;
     }
