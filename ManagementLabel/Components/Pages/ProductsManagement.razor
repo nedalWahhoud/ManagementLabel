@@ -476,6 +476,8 @@
 		try
 		{
 			await JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
+			// aktivieren die Funktion, die die Höhe von topTable zu aktualisieren, damit die thead th immer sichtbar bleibt bei Scroll
+			await JS.InvokeVoidAsync("updateTopTableHeight");
 		}
 		catch (Exception ex)
 		{

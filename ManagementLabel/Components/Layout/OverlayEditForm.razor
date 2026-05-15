@@ -8,7 +8,7 @@
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productNameDe" class="form-control" @bind-Value="GetProducts!.Name_de" placeholder="Name de" />
-					<button class="btn btn-outline-danger" type="button"@onclick="() => ClearInput(val => GetProducts.Name_de = val)">
+					<button class="btn btn-outline-danger" type="button" @onclick='() => ClearInput(val => GetProducts.Name_de = val, "productNameDe")'>
 						<i class="fas fa-times"></i>
 					</button>
 				</div>
@@ -20,7 +20,7 @@
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productDescriptionDe" class="form-control" @bind-Value="GetProducts.Description_de" placeholder="Description de" />
-					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Description_de = val)">
+					<button class="btn btn-outline-danger" type="button" @onclick='() => ClearInput(val => GetProducts.Description_de = val,"productDescriptionDe")'>
 						<i class="fas fa-times"></i>
 					</button>
 				</div>
@@ -32,7 +32,7 @@
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productNameAr" class="form-control" @bind-Value="GetProducts.Name_ar" placeholder="اسم المنتج بل عربية" />
-					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Name_ar = val)">
+					<button class="btn btn-outline-danger" type="button" @onclick='() => ClearInput(val => GetProducts.Name_ar = val,"productNameAr")'>
 						<i class="fas fa-times"></i>
 					</button>
 				</div>
@@ -44,7 +44,7 @@
 						<i class="fas fa-copy"></i>
 					</button>
 					<InputText id="productDescriptionAr" class="form-control" @bind-Value="GetProducts.Description_ar" placeholder="وصف المنتج بل عربية" />
-					<button class="btn btn-outline-danger" type="button" @onclick="() => ClearInput(val => GetProducts.Description_ar = val)">
+					<button class="btn btn-outline-danger" type="button" @onclick='() => ClearInput(val => GetProducts.Description_ar = val,"productDescriptionAr")'>
 						<i class="fas fa-times"></i>
 					</button>
 				</div>
@@ -420,7 +420,7 @@
 	{
 		try
 		{
-			await Task.Delay(50);
+			await Task.Delay(10);
 			await JS.InvokeVoidAsync("selectTextById", id);
 		}
 		catch (Exception ex)
@@ -429,8 +429,10 @@
 		}
 	}
 	// löschen funktion
-	private void ClearInput(Action<string> setter)
+	private async Task ClearInput(Action<string> setter, string elementId)
 	{
 		setter(string.Empty);
+		// nutzen die selectTextById funktion um den Focus an input zu setzen, da die normale focus funktion nicht funktioniert nach dem löschen
+		await SelectAllContent(elementId);
 	}
 }

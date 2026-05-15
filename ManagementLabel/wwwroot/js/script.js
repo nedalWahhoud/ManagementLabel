@@ -1,18 +1,21 @@
-﻿window.focusElement = (selector) => {
-    const el = document.querySelector(selector);
-    if (el) {
-        el.focus();
+﻿// Aktualisiere die CSS-Variable topTable mit der tatsächlichen Höhe von topTable, um die thead th mit position: sticky korrekt zu machen, und immer sichtbar bei Scrollen zu halten.
+window.updateTopTableHeight = () => {
+    const topTable = document.querySelector('.topTable');
+    if (topTable) {
+        const height = topTable.offsetHeight;
+        // Wir speichern die tatsächliche Höhe in einer CSS-Variablen.
+        document.documentElement.style.setProperty('--top-height', height + 'px');
     }
 };
 
-// clear search box 
-window.clearSearchBox = (id) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.value = '';
-            el.dispatchEvent(new Event('input', { bubbles: true }));
-
-        }
+//Aktivieren Sie die Funktion beim Ändern der Größe
+window.addEventListener('resize', window.updateHeaderHeight);
+// cope text from input
+window.copyTextToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+    }).catch(err => {
+        console.error("Copying Failed", err);
+    });
 };
 // select text in input
 window.selectTextById = (id) => {
