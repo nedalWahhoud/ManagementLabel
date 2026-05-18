@@ -10,13 +10,6 @@ window.updateTopTableHeight = () => {
 
 //Aktivieren Sie die Funktion beim Ändern der Größe
 window.addEventListener('resize', window.updateHeaderHeight);
-// cope text from input
-window.copyTextToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-    }).catch(err => {
-        console.error("Copying Failed", err);
-    });
-};
 // select text in input
 window.selectTextById = (id) => {
     const el = document.getElementById(id);
@@ -65,58 +58,11 @@ openWhatsApp: function(phone, message) {
         }
     }
 };
-// Funktion zur Statusprüfung bei der Rückkehr zum Browser
-function checkAndReloadIfDead() {
-    // Wenn der Benutzer zum Browser zurückkehrt und die Meldung „Verbindung wiederherstellen“ sieht, bedeutet dies, dass die Sitzung unterbrochen ist.
 
-    // Wir laden die Seite sofort neu, um die korrekte Funktion der Schaltflächen zu gewährleisten.
-    const reconnectModal = document.querySelector('.components-reconnect-show');
-    if (reconnectModal) {
-        console.log("Mobile browser resumed with dead session. Reloading...");
-        location.reload();
-    }
-}
-// Überwachung der Rückkehr des Nutzers zum Browser (nur mobil)
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        checkAndReloadIfDead();
-    }
-});
 // Scroll sperren
 window.openFullscreen = function () {
     document.body.style.overflow = 'hidden';
 };
-//  Verbindung wiederherstellen
-Blazor.start({
-    circuit: {
-        reconnectionHandler: {
-            onConnectionDown: (options, error) => {
-                return new Promise((resolve, reject) => {
-                    const maxRetries = 5; // Anzahl der Versuche
-                    let count = 0;
-
-                    const attempt = () => {
-                        count++;
-                        if (navigator.onLine) {
-                            resolve(); // Versuch, die Verbindung wiederherzustellen
-                        } else {
-                            if (count > maxRetries) {
-                                location.reload(); // Wenn es 5 Mal fehlschlägt, führe eine vollständige Aktualisierung durch
-                            } else {
-                                setTimeout(attempt, 2000); // Warten Sie zwei Sekunden und versuchen Sie es erneut.
-                            }
-                        }
-                    };
-                    attempt();
-                });
-            },
-            // Wenn der Server die alte Sitzung nicht erkennt (der Hauptgrund für den weißen Bildschirm)
-            onConnectionUp: () => {
-                // Stellen Sie sicher, dass das System funktioniert, andernfalls aktualisieren Sie es.
-            }
-        }
-    }
-});
 // Code zum Wiederverbinden nach der Rückkehr von WhatsApp oder aus dem Hintergrund
 window.addEventListener('focus', async () => {
     try {
@@ -124,6 +70,18 @@ window.addEventListener('focus', async () => {
         await Blazor.reconnect();
     } catch (e) {
         console.log("Reconnection attempt failed, but Blazor will keep trying...");
+    }
+});
+// Wenn der Benutzer zur Seite zurückkehrt und der Verbindungsstatus „getrennt“ lautet
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+        // Prüfen, ob die Standard-Fehlermeldung von Blazor auf dem Bildschirm erscheint (was bedeutet, dass die Verbindung unterbrochen ist)
+        const blazorDisconnectUi = document.getElementById("components-reconnect-modal");
+
+        if (blazorDisconnectUi && (blazorDisconnectUi.classList.contains("components-reconnect-show") || blazorDisconnectUi.classList.contains("components-reconnect-failed"))) {
+            console.log("Die Seite wurde aufgrund einer Verbindungsunterbrechung weitergeleitet. Die Seite wird neu geladen…");
+            window.location.reload();
+        }
     }
 });
 // OnMap
@@ -137,8 +95,8 @@ window.mapRedirect = {
         const query = address ? encodeURIComponent(address) : `${latitude},${longitude}`;
 
         // Links basierend auf Namen oder Koordinaten
-        const appleUrl = `maps://?ll=${latitude},${longitude}`;
-        const googleAppUrl = `comgooglemaps://?q=${query}`;
+        const appleUrl = `https://maps.apple.com/?q=${query}&ll=${latitude},${longitude}`;
+        const googleUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
         const webUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
         const androidUrl = `geo:${latitude},${longitude}?q=${query}`;
 
@@ -149,28 +107,29 @@ window.mapRedirect = {
         const openWebFallback = () => window.open(webUrl, '_blank');
 
         if (isIOS) {
-            // iOS: Versuchen Sie es zuerst mit Apple Maps.
-            window.location = appleUrl;
+            document.getElementById('appleMapsBtn').onclick = () => {
+                window.open(appleUrl, '_blank');
+                window.mapRedirect.closeModal();
+            };
 
-            // Gleich: Probieren Sie die Google Maps App aus.
-            setTimeout(() => {
-                window.location = googleAppUrl;
+            document.getElementById('googleMapsBtn').onclick = () => {
+                window.open(googleUrl, '_blank');
+                window.mapRedirect.closeModal();
+            };
 
-                // Nach einer Sekunde: Öffnen Sie das Web als letzte Option.
-                setTimeout(() => openWebFallback(), 1000);
-            }, 1000);
+            // إظهار نافذة الخيارات للمستخدم
+            document.getElementById('customMapModal').style.display = 'flex';
 
         } else if (isAndroid) {
-            // Android: nutzen geo URI
-            window.location = androidUrl;
-
-            // Web-Fallback nach einer Sekunde
-            setTimeout(() => openWebFallback(), 1000);
-
+            const googleUniversalUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+            window.open(googleUniversalUrl, '_blank');
         } else {
             //Jedes andere Gerät → Web direkt öffnen
             openWebFallback();
         }
+    },
+    closeModal: function () {
+        document.getElementById('customMapModal').style.display = 'none';
     }
 };
 // OnPhone

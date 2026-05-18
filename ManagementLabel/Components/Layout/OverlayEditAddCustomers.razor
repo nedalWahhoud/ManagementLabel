@@ -39,14 +39,14 @@
 			<div class="overlayField">
 				<div class="input-group">
 					<span class="input-group-text customLatIcon">La</span>
-				    <InputNumber TValue="double" class="form-control" @bind-Value="customer.Latitude" @onfocus="@(e => SelectAllContent())" />
+					<InputNumber TValue="double" class="form-control" @bind-Value="customer.Latitude" @onfocus="@(e => SelectAllContent())" />
 				</div>
 				<ValidationMessage For="@(() => customer.Latitude)" />
 			</div>
 			<div class="overlayField">
 				<div class="input-group">
 					<span class="input-group-text customLatIcon">Lo</span>
-				    <InputNumber TValue="double" class="form-control" @bind-Value="customer.Longitude" @onfocus="@(e => SelectAllContent())" />
+					<InputNumber TValue="double" class="form-control" @bind-Value="customer.Longitude" @onfocus="@(e => SelectAllContent())" />
 				</div>
 				<ValidationMessage For="@(() => customer.Longitude)" />
 			</div>
@@ -68,16 +68,16 @@
 			</div>
 			<div class="overlayField">
 				<div class="d-flex align-items-center gap-3">
-				  <div class="flex-grow-1">
+					<div class="flex-grow-1">
 						<InputNumber TValue="int" min="1" class="form-control" @bind-Value="customer.StopNumber" @onfocus="@(e => SelectAllContent())" placeholder="Haltestellennummer" />
-				  </div>
-				  <div class="form-check">
-					<InputCheckbox class="form-check-input" @bind-Value="customer.shouldStopnummerShift" id="shiftCheck" />
-					<label class="form-check-label" for="shiftCheck">
-					   Sollte verschieben
-					</label>
-				  </div>
-			    </div>
+					</div>
+					<div class="form-check">
+						<InputCheckbox class="form-check-input" @bind-Value="customer.shouldStopnummerShift" id="shiftCheck" />
+						<label class="form-check-label" for="shiftCheck">
+							Sollte verschieben
+						</label>
+					</div>
+				</div>
 				<ValidationMessage For="@(() => customer.StopNumber)" />
 			</div>
 			<div class="overlayField">
@@ -85,8 +85,8 @@
 				<ValidationMessage For="@(() => customer.PIN)" />
 			</div>
 			<div class="mt-3">
-				<button class="btn btn-primary me-2" disabled="@IsProcessing">
-					@if (IsProcessing)
+				<button class="btn btn-primary me-2" disabled="@customerProcess.IsProcessing">
+					@if (customerProcess.IsProcessing)
 					{
 						<span class="spinner-border spinner-border-sm"
 						role="status"
@@ -109,8 +109,8 @@
 	[Parameter]
 	public string action { get; set; } = string.Empty;
 	[Parameter]
-	public EventCallback<string> OnHandel { get; set; }
-	private bool IsProcessing = false;
+	public EventCallback<(string action,CustomerProcess customerProcess)> OnHandel { get; set; }
+	private CustomerProcess customerProcess = new();
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -121,10 +121,15 @@
 	}
 	private async void Save()
 	{
-		IsProcessing = true;
+		 customerProcess = new CustomerProcess
+			{
+				IsProcessing = true
+			};
+
 		if (action == "Add")
 		{
 			var result = await customersService.AddCustomer(customer);
+			customerProcess.Result = result;
 			if (result.Result)
 			{
 				// Verteilungslinie zuweisen
@@ -133,10 +138,13 @@
 					?? await distributionLinesService.GetDistributionLineById(customer.DistributionLineId);
 
 				customer = null!;
-				await OnHandel.InvokeAsync(action);
 			}
 			else
 				await JS.InvokeVoidAsync("window.alert", result.Message);
+
+			customerProcess.IsProcessing = false;
+			await OnHandel.InvokeAsync((action, customerProcess));
+
 		}
 		else
 		{
@@ -148,10 +156,12 @@
 				if (isEdited)
 				{
 					var result = await customersService.UpdateCustomer(customer);
+					customerProcess.Result = result;
 					if (result.Result)
 					{
 						customer = null!;
-						await OnHandel.InvokeAsync(action);
+						customerProcess.IsProcessing = false;
+						await OnHandel.InvokeAsync((action,customerProcess));
 					}
 					else
 						await JS.InvokeVoidAsync("window.alert", result.Message);
@@ -163,13 +173,13 @@
 				await JS.InvokeVoidAsync("window.alert", "keine currentCategory gefunden");
 		}
 
-		IsProcessing = false;
+		customerProcess.IsProcessing = false;
 		StateHasChanged();
 	}
 	private void Cancel()
 	{
 		customer = new Customers();
-		OnHandel.InvokeAsync("Cancel");
+		OnHandel.InvokeAsync(("Cancel", null!));
 	}
 
 	private async Task SelectAllContent()

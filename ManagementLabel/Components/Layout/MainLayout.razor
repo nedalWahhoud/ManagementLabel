@@ -21,31 +21,48 @@ else
         </AuthorizeView>
         <main>
             <article>
-                @Body
+				<ErrorBoundary @ref="errorBoundary">
+                    <ChildContent>
+                       @Body
+                    </ChildContent>
+                    <ErrorContent>
+                        @* Automatischer Reload nach Fehler, um Einfrieren zu verhindern*@
+                        @{
+                            TriggerAutomaticReload();
+                        }
+						<div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 100vh;">
+							<div class="spinner-border text-danger" role="status" style="width: 3rem; height: 3rem;">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+							<h5 class="mt-3 text-muted fw-light">Ein Fehler ist aufgetreten. Versuche es erneut...</h5>
+						</div>
+                    </ErrorContent>
+                </ErrorBoundary>
             </article>
         </main>
     </div>
 
-    <div id="blazor-error-ui">
+    /*<div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
-    </div>
+    </div>*/
 }
 @code {
 
     private bool isRended = false;
-
+    private ErrorBoundary? errorBoundary;
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
+
             try
             {
                 _ = CheckAdminStatusAsync();
                 // Initialize the orderService to start count funktion of openOrders
                 orderService.InitializeAsync();
-
+                
                 isRended = true;
             }
             catch (Exception ex)
@@ -96,5 +113,11 @@ else
                 }
             }
         }
+    }
+    // error 
+    private void TriggerAutomaticReload()
+    {
+        // forceLoad: true zwingt den Browser zu einer vollständigen Aktualisierung, um ein Einfrieren des Inhalts zu verhindern.
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 }

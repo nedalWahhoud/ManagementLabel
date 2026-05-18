@@ -40,4 +40,12 @@ namespace ManagementLabel.Model
         public int DistributionLineId { get; set; }
         public DistributionLines? DistributionLine { get; set; }
     }
+    public class CustomerProcess
+    {
+        public int CustomerId { get; set; }
+        public bool IsProcessing { get; set; } = false;
+        public ValidationResult Result { get; set; } = null!;
+        public Customers EditingCustomer { get; set; } = null!; 
+        public bool IsMapOpen { get; set; } = false;
+    }
 }

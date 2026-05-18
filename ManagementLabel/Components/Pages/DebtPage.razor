@@ -228,9 +228,12 @@
 
 				if (IsEditing)
 				{
-					<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
+					<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAdd" />
 				}
 			}
+
+				@* map select *@
+				<ManagementLabel.Components.Layout.MapSelect />
 		}
 		else
 		{
@@ -384,7 +387,7 @@
 	{
 		// wenn die Kundenliste noch nicht geladen ist, lade alle Kunden
 		if (customersService.DownloadedCustomers == null || customersService.DownloadedCustomers.Count == 0)
-			await customersService.GetAllCustomers();
+			await customersService.GetAllCustomersByLineId(customer.DistributionLineId);
 
 		// sortiere die Kunden nach StopNumber innerhalb der gleichen DistributionLineId
 		var sortedCustomers = customersService.DownloadedCustomers!
@@ -408,7 +411,7 @@
 	private async Task PreviousDebtCustomer()
 	{
 		if (customersService.DownloadedCustomers == null || customersService.DownloadedCustomers.Count == 0)
-			await customersService.GetAllCustomers();
+			await customersService.GetAllCustomersByLineId(customer.DistributionLineId);
 
 		var sortedCustomers = customersService.DownloadedCustomers!
 			.Where(c => c.DistributionLineId == customer.DistributionLineId)
@@ -428,35 +431,35 @@
 		}
 	}
 
-	private void HandleEditAddDistributionLine(string action)
+	private void HandleEditAdd((string action, CustomerProcess customerProcess) args)
 	{
-		 if (action == "Edit")
+		 if (args.action == "Edit")
 		{
 			IsEditing = false;
 			EditingCustomer = null!;
 		}
-		else if (action == "Cancel")
+		else if (args.action == "Cancel")
 		{
 			IsEditing = false;
 			EditingCustomer = null!;
 		}
 		// nach dem Hinzufügen oder Bearbeiten einer Verteilungslinie die Liste der Verteilungslinien aktualisieren
-		if (action == "Add" || action == "Edit")
+		if (args.action == "Add" || args.action == "Edit")
 			StateHasChanged();
 
 	}
 	// Handle Custom Dropdown Actions
 	private bool IsEditing = false;
 	private Customers EditingCustomer = null!;
-	private void HandleCustomDropdown((string action, (bool, int) IsProcessing, Customers EditingCustomer, bool IsEditing) args)
+	private void HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing) args)
 	{
 		if (args.action == "Delete")
 		{
-			this.IsProcessing = args.IsProcessing.Item1;
+			this.IsProcessing = args.customerProcess.IsProcessing;
 		}
 		else if (args.action == "Edit")
 		{
-			this.EditingCustomer = args.EditingCustomer;
+			this.EditingCustomer = args.customerProcess.EditingCustomer;
 			this.IsEditing = args.IsEditing!;
 		}
 	}

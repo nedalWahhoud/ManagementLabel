@@ -232,7 +232,7 @@
 	private async Task viaWhatasappShre(DistributionLines selectedDistributionLine)
 	{
 		// get all customers
-		await customersService.GetAllCustomers();
+		await customersService.GetAllCustomersByLineId(selectedDistributionLine.Id);
 		// get customers von der distribution line 
 		List<Customers> customers = customersService.DownloadedCustomers.Where(c => c.DistributionLineId == selectedDistributionLine.Id).ToList();
 		customers = customers.OrderBy(c => c.StopNumber).ToList();

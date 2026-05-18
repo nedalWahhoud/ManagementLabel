@@ -57,9 +57,10 @@
 	[Parameter]
 	public bool isEdit { get; set; } = false;
 	[Parameter]
-	public EventCallback<(string action,(bool, int) IsProcessing, Customers EditingCustomer, bool IsEditing)> OnHandel { get; set; }
+	public EventCallback<(string action,CustomerProcess customerProcess, bool IsEditing)> OnHandel { get; set; }
 
 	private bool IsDebt = false;
+	private CustomerProcess customerProcess = new CustomerProcess();
 	protected override void OnInitialized()
 	{
 		var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
@@ -68,6 +69,9 @@
 		{
 			IsDebt = true;
 		}
+
+		// Setze die CustomerId im CustomerProcess-Objekt
+		customerProcess.CustomerId = customer.Id;
 	}
 
 	private async Task viaWhatasappShare(Customers customer)
@@ -140,7 +144,7 @@
 	}
 	private async Task Delete(int id)
 	{
-		(bool, int) IsProcessing = (false, 0);
+		
 		try
 		{
 			if (id <= 0)
@@ -148,12 +152,17 @@
 				await JS.InvokeVoidAsync("alert", "Please select a DistributionLine");
 				return;
 			}
-			IsProcessing = (true, id);
-			await OnHandel.InvokeAsync(("Delete", IsProcessing, null!, false));
+			customerProcess = new CustomerProcess
+				{
+					IsProcessing = true,
+					CustomerId = id
+				};
+			await OnHandel.InvokeAsync(("Delete", customerProcess, false));
 			var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
 			if (resultConfirm)
 			{
 				var result = await customersService.DeleteCustomer(id);
+				customerProcess.Result = result;
 				if (!result.Result)
 				{
 					await JS.InvokeVoidAsync("alert", result.Message);
@@ -169,19 +178,21 @@
 				}
 
 			}
-			IsProcessing = (false, id);
+			customerProcess.IsProcessing = false;
+			customerProcess.CustomerId = id;
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Error deleting customer: {ex.Message}");
-			IsProcessing = (false, id);
+			customerProcess.IsProcessing = false;
+			customerProcess.CustomerId = id;
 		}
 
-		await OnHandel.InvokeAsync(("Delete", IsProcessing, null!, false));
+		await OnHandel.InvokeAsync(("Delete", customerProcess, false));
 	}
 	private async Task Edit(Customers customers)
 	{
-		var EditingCustomer = new Customers
+		var editingCustomer = new Customers
 			{
 				Id = customers.Id,
 				Name_de = customers.Name_de,
@@ -202,6 +213,6 @@
 				PIN = customers.PIN
 			};
 
-		await OnHandel.InvokeAsync(("Edit", (false, 0), EditingCustomer, true));
+		await OnHandel.InvokeAsync(("Edit", new CustomerProcess(){EditingCustomer = editingCustomer}, true));
 	}
 }

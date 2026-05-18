@@ -19,31 +19,31 @@
 				{
 					List<Customers> customersToDisplay = customersService.DownloadedCustomers;
 					if (FilteredCustomers != null)
-						{
-							customersToDisplay = FilteredCustomers;
-						}
+					{
+						customersToDisplay = FilteredCustomers;
+					}
 					<div tabindex="0" id="scrollContainer" class="tableContiner">
 						<div class="topTable">
 							<div class="buttonsDiv">
-							@* add neu Product *@
-							<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!isEdit)" title="Add neue Customer">+</button>
-							@* choose the Columns *@
-							<div class="h-100 d-flex">
-								<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
-								<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-									@foreach (var col in columnOptions)
-									{
-										<li>
-											<div class="form-check form-switch">
-												<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
-												<label class="form-check-label" for="@col.Key">
-													@col.Label
-												</label>
-											</div>
-										</li>
-									}
-								</ul>
-							</div>
+								@* add neu Product *@
+								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!isEdit)" title="Add neue Customer">+</button>
+								@* choose the Columns *@
+								<div class="h-100 d-flex">
+									<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+									<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+										@foreach (var col in columnOptions)
+										{
+											<li>
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
+													<label class="form-check-label" for="@col.Key">
+														@col.Label
+													</label>
+												</div>
+											</li>
+										}
+									</ul>
+								</div>
 							</div>
 							<div class="dropdownListsDiv">
 								<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged" @onfocus="OnDistributionLineFocus">
@@ -71,36 +71,36 @@
 								</div>
 							</div>
 						</div>
-								<table class="table table-bordered table-hover">
-								 <tr>
-									@if (ShowColumn("Id")){<th>Id</th>}
-									@if (ShowColumn("Name_de")){<th>Na-De</th>}
-									@if (ShowColumn("Name_ar")){<th>Na-Ar</th>}
-									@if (ShowColumn("Address")){<th>Anschrift</th>}
-									@if (ShowColumn("Coordinates")){<th>Koordinaten</th>}
-									@if (ShowColumn("PhoneNumber")){<th>Tel.</th>}
-									@if (ShowColumn("EMail")){<th>E-Mail</th>}
-									@if (ShowColumn("NoteDe")){<th>No-De</th>}
-									@if (ShowColumn("NoteAr")){<th>No-Ar</th>}
-									@if (ShowColumn("Direction")){<th>Richtung</th>}
-									@if (ShowColumn("StopNumber")){<th>Ha-Nr</th>}
-									@if (ShowColumn("PIN")){<th>PIN</th>}
-									<th style="min-width:40px;">⋮</th>
-								</tr>
-								 <tbody>
-									@if (customersToDisplay == null || customersToDisplay.Count == 0)
+						<table class="table table-bordered table-hover">
+							<tr>
+								@if (ShowColumn("Id")){<th>Id</th>}
+								@if (ShowColumn("Name_de")){<th>Na-De</th>}
+								@if (ShowColumn("Name_ar")){<th>Na-Ar</th>}
+								@if (ShowColumn("Address")){<th>Anschrift</th>}
+								@if (ShowColumn("Coordinates")){<th>Koordinaten</th>}
+								@if (ShowColumn("PhoneNumber")){<th>Tel.</th>}
+								@if (ShowColumn("EMail")){<th>E-Mail</th>}
+								@if (ShowColumn("NoteDe")){<th>No-De</th>}
+								@if (ShowColumn("NoteAr")){<th>No-Ar</th>}
+								@if (ShowColumn("Direction")){<th>Richtung</th>}
+								@if (ShowColumn("StopNumber")){<th>Ha-Nr</th>}
+								@if (ShowColumn("PIN")){<th>PIN</th>}
+								<th style="min-width:40px;">⋮</th>
+							</tr>
+							<tbody>
+								@if (customersToDisplay == null || customersToDisplay.Count == 0)
+								{
+									<tr id="loadingMessage">
+										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+											<i class="bi bi-exclamation-circle mr-2"></i> Keine Customer gefunden.
+										</td>
+									</tr>
+								}
+								else
+								{
+									@foreach (var customer in customersToDisplay)
 									{
-										<tr id="loadingMessage">
-											<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-												<i class="bi bi-exclamation-circle mr-2"></i> Keine Customer gefunden.
-											</td>
-										</tr>
-									}
-									else
-									{
-									   @foreach (var customer in customersToDisplay)
-									   {
-										 <tr>
+										<tr>
 											@if (ShowColumn("Id")){<td>@customer.Id</td>}
 											@if (ShowColumn("Name_de")){<td>@customer.Name_de</td>}
 											@if (ShowColumn("Name_ar")){<td>@customer.Name_ar</td>}
@@ -127,8 +127,8 @@
 											@if (ShowColumn("PIN")){<td>@customer.PIN</td>}
 											<td>
 												<div class="dropdown">
-														<button disabled="@IsProcessing.Item1" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-container="body">
-														@if (IsProcessing.Item1 && IsProcessing.Item2 == customer.Id)
+													<button disabled="@thisCustomerProcess.IsProcessing" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-container="body">
+														@if (thisCustomerProcess.IsProcessing && thisCustomerProcess.CustomerId == customer.Id)
 														{
 															<span class="spinner-border spinner-border-sm"
 															role="status"
@@ -142,36 +142,40 @@
 													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" isEdit="isEdit" OnHandel="HandleCustomDropdown" />
 												</div>
 											</td>
-										 </tr>
-									   }
+										</tr>
 									}
-								 </tbody>
-							  </table>
-						</div>
-				@* Add und Edit *@
-				@if (IsAdding)
-				{
-					<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAddDistributionLine" />
+								}
+							</tbody>
+						</table>
+					</div>
+					@* Add und Edit *@
+					@if (IsAdding)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAdd" />
+					}
+					else if (IsEditing)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAdd" />
+					}
 				}
-				else if (IsEditing)
-				{
-					<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAddDistributionLine" />
-				}
+
+				@* map select *@
+				<ManagementLabel.Components.Layout.MapSelect />
 			}
-		}
-		else
-		{
-			<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-				<div class="alert alert-danger text-center">
-					Sie haben keine Berechtigung für diese Seite
+			else
+			{
+				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+					<div class="alert alert-danger text-center">
+						Sie haben keine Berechtigung für diese Seite
+					</div>
 				</div>
-			</div>
-		}
-	</Authorized>
-	<NotAuthorized>
-		<ManagementLabel.Components.Pages.LogIn />
-	</NotAuthorized>
-</AuthorizeView>
+			}
+		
+		</Authorized>
+		<NotAuthorized>
+			<ManagementLabel.Components.Pages.LogIn />
+		</NotAuthorized>
+	</AuthorizeView>
 </div>
 @code {
 	// Column
@@ -203,7 +207,6 @@
 								user.HasClaim("permission", "fullAccess");
 		if (canViewCoupons)
 		{
-			await customersService.GetAllCustomers();
 			taskDistributionLines = distributionLinesService.GetAllDistributionLines();
 
 			// load the selected distributionLine id from local storage
@@ -215,6 +218,9 @@
 
 				await AfterDistributionLineChanged();
 			}
+		    // get cutomer durch line id 
+			await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+
 
 			selectedStopNumberId = await localStorage.GetItemAsync<int>("selectedStopNummerId");
 			if (selectedStopNumberId > 0)
@@ -240,25 +246,35 @@
 		IsAdding = true;
 	}
 
-	private async Task HandleEditAddDistributionLine(string action)
+	private async Task HandleEditAdd((string action, CustomerProcess customerProcess) args)
 	{
-		if (action == "Add")
+		if (args.action == "Add")
 		{
+			if (args.customerProcess.Result != null && args.customerProcess.Result.Result)
+			{
+				await UpdateLocalCustomsdata();
+			}
+
 			IsAdding = false;
 		}
-		else if (action == "Edit")
+		else if (args.action == "Edit")
 		{
+			if (args.customerProcess.Result != null && args.customerProcess.Result.Result)
+			{
+				await UpdateLocalCustomsdata();
+			}
+
 			IsEditing = false;
 			EditingCustomer = null!;
 		}
-		else if (action == "Cancel")
+		else if (args.action == "Cancel")
 		{
 			IsAdding = false;
 			IsEditing = false;
 			EditingCustomer = null!;
 		}
 		// nach dem Hinzufügen oder Bearbeiten einer Verteilungslinie die Liste der Verteilungslinien aktualisieren
-		if (action == "Add" || action == "Edit")
+		if (args.action == "Add" || args.action == "Edit")
 			StateHasChanged();
 
 		if (selectedDistributionLineId > 0)
@@ -271,6 +287,8 @@
 	private int selectedDistributionLineId = 0;
 	private async Task AfterDistributionLineChanged()
 	{
+		await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+
 		if (customersService.DownloadedCustomers.Count > 0)
 		{
 			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.DistributionLineId == selectedDistributionLineId || selectedDistributionLineId == 0)
@@ -335,19 +353,38 @@
 	}
 
 	private Customers EditingCustomer = null!;
-	private (bool, int) IsProcessing = (false, 0);
+	private CustomerProcess thisCustomerProcess = new();
 	private bool IsEditing = false;
-	private void HandleCustomDropdown((string action, (bool, int) IsProcessing, Customers EditingCustomer, bool IsEditing) args)
+	private async Task HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing) args)
 	{
 		if (args.action == "Delete")
 		{
-			this.IsProcessing = args.IsProcessing;
+			if (args.customerProcess.Result != null && args.customerProcess.Result.Result)
+			{
+				await UpdateLocalCustomsdata();
+			}
+			thisCustomerProcess = args.customerProcess;
+
 		}
 		else if (args.action == "Edit")
 		{
-			this.EditingCustomer = args.EditingCustomer;
+			
+			this.EditingCustomer = args.customerProcess.EditingCustomer;
 			this.IsEditing = args.IsEditing!;
 		}
+		StateHasChanged();
+	}
+
+	public async Task UpdateLocalCustomsdata()
+	{
+		customersService.DownloadedCustomers.Clear();
+		await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+
+		// update auch die filtered list
+		if (selectedDistributionLineId > 0)
+			await AfterDistributionLineChanged();
+		if (selectedStopNumberId > 0)
+			await AfterStopNumberChanged();
 	}
 	// select all kontekt
 	private async Task SelectAllContent()

@@ -6,22 +6,30 @@ namespace ManagementLabel.Components.CustomersF
     {
         private readonly HttpClient _http = http;
         public List<Customers> DownloadedCustomers{ get; private set; } = [];
-
-        public async Task<ValidationResult> GetAllCustomers()
+        private List<CustomerDownloadProcess> DownloadProcesses { get; set; } = [];
+        public async Task<ValidationResult> GetAllCustomersByLineId(int id = 0)
         {
-            if (DownloadedCustomers.Count > 0)
+            if (DownloadProcesses.Any(d => d.Id == id))
             {
                 return new ValidationResult { Result = true, Message = "Bereits abgerufen." };
             }
             try
             {
-                var response = await _http.GetAsync("api/Customers/getAllCustomers");
+                var response = await _http.GetAsync($"api/Customers/getAllCustomersByLineId/{id}");
                 if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Fehler beim Abrufen." };
+                {
+                    if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        DownloadProcesses.Add(new CustomerDownloadProcess { Id = id });
+                    }
+
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Fehler beim Abrufen." };
+                }
                 var customers = await response.Content.ReadFromJsonAsync<List<Customers>>();
                 if (customers != null)
                 {
-                    DownloadedCustomers = customers;
+                    AddToLocal(customers);
+                    DownloadProcesses.Add(new CustomerDownloadProcess { Id = id });
                     return new ValidationResult { Result = true, Message = "erfolgreich abgerufen." };
                 }
                 return new ValidationResult { Result = false, Message = "Keine Items gefunden." };
@@ -193,6 +201,10 @@ namespace ManagementLabel.Components.CustomersF
                    currentCustomer.Notes_ar != editCustomer.Notes_ar ||
                    currentCustomer.StopNumber != editCustomer.StopNumber ||
                    currentCustomer.PIN != editCustomer.PIN;
+        }
+        public class CustomerDownloadProcess
+        {
+           public int Id { get; set; }
         }
     }
 }
