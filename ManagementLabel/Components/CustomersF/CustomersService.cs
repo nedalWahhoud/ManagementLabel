@@ -6,7 +6,7 @@ namespace ManagementLabel.Components.CustomersF
     {
         private readonly HttpClient _http = http;
         public List<Customers> DownloadedCustomers{ get; private set; } = [];
-        private List<CustomerDownloadProcess> DownloadProcesses { get; set; } = [];
+        public List<CustomerDownloadProcess> DownloadProcesses { get; private set; } = [];
         public async Task<ValidationResult> GetAllCustomersByLineId(int id = 0)
         {
             if (DownloadProcesses.Any(d => d.Id == id))

@@ -170,7 +170,7 @@
 					</div>
 				</div>
 			}
-		
+
 		</Authorized>
 		<NotAuthorized>
 			<ManagementLabel.Components.Pages.LogIn />
@@ -218,7 +218,7 @@
 
 				await AfterDistributionLineChanged();
 			}
-		    // get cutomer durch line id 
+			// get cutomer durch line id 
 			await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
 
 
@@ -368,7 +368,7 @@
 		}
 		else if (args.action == "Edit")
 		{
-			
+
 			this.EditingCustomer = args.customerProcess.EditingCustomer;
 			this.IsEditing = args.IsEditing!;
 		}
@@ -377,6 +377,7 @@
 
 	public async Task UpdateLocalCustomsdata()
 	{
+		customersService.DownloadProcesses.Clear();
 		customersService.DownloadedCustomers.Clear();
 		await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
 
