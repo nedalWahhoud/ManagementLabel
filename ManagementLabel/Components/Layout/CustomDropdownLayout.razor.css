@@ -20,7 +20,7 @@
                 color: white;
             }
 /* dropdown */
-            .disabledItem {
+.disabledItem {
     pointer-events: none;
     opacity: 0.5;
     cursor: not-allowed;

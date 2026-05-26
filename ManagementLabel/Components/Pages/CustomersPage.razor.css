@@ -8,9 +8,6 @@
     touch-action: none; /* Berührungsinteraktion für Bewegungen deaktiviert */
     overscroll-behavior: none; /* Verhindert Rückprall an den Kanten */
 }
-.topTable {
-    justify-content: space-between;
-}
 .buttonsDiv {
     display: flex;
     flex-direction: row;

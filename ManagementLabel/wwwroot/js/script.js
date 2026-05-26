@@ -58,7 +58,6 @@ openWhatsApp: function(phone, message) {
         }
     }
 };
-
 // Scroll sperren
 window.openFullscreen = function () {
     document.body.style.overflow = 'hidden';

@@ -1,10 +1,10 @@
 ﻿@page "/groupproduct"
-<div class="p-2 min-vh-100 w-100">
+<div class="mainDiv">
 <AuthorizeView>
 	<Authorized Context="authContext">
 			@if (authContext.User.HasClaim("permission", "manageProduct_groups") || authContext.User.HasClaim("permission", "fullAccess"))
 			{
-				<div class="tableResponsive">
+				<div class="tableContiner">
 				 <div class="topTable">
 					<button class="btn addPlusB" @onclick="NewGroup" title="Add neue Vertriebslinie">+</button>
 				 </div>

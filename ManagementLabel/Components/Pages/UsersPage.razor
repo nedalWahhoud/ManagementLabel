@@ -1,7 +1,7 @@
 ﻿@page "/users"
 
 
-<div class="p-2 min-vh-100 w-100" @onclick="OnMain">
+<div class="mainDiv" @onclick="OnMain">
 	<AuthorizeView>
 		<Authorized Context="authContext">
 			@if (authContext.User.HasClaim("permission", "manageUsers") || authContext.User.HasClaim("permission", "fullAccess"))
@@ -14,7 +14,7 @@
 				}
 				else
 				{
-					<div class="tableResponsive">
+					<div class="tableContiner">
 						<div class="topTable">
 							@* choose the Columns *@
 							<div class="h-100 d-flex">

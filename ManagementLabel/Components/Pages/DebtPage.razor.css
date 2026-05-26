@@ -1,6 +1,4 @@
-﻿
-
-@media (max-width: 768px) {
+﻿@media (max-width: 768px) {
     .tableResponsive {
         border-radius: 10px;
         overflow-x: auto;

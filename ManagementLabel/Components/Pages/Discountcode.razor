@@ -1,21 +1,22 @@
 ﻿@page "/discountcode"
 
-<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
+<div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
             @if (isLoading)
             {
                 @if (canManage)
                 {
-                        <div class="topTable">
-                            <button class="btn btn-success" @onclick="() => OpenAddForm(true,true)">
-                                <i class="bi bi-plus-lg"></i> Rabattcode
-                            </button>
-                            <button class="btn btn-info text-white" @onclick="() => OpenAddForm(false,true)">
-                                <i class="bi bi-plus-lg"></i> Kategorie-Code
-                            </button>
-                            @* choose the Columns *@
-                            <div class="h-100 d-flex">
+                    <div class="tableContiner">
+                    <div class="topTable">
+                        <button class="btn btn-success" @onclick="() => OpenAddForm(true,true)">
+                            <i class="bi bi-plus-lg"></i> Rabattcode
+                        </button>
+                        <button class="btn btn-info text-white" @onclick="() => OpenAddForm(false,true)">
+                            <i class="bi bi-plus-lg"></i> Kategorie-Code
+                        </button>
+                        @* choose the Columns *@
+                        <div class="h-100 d-flex align-items-center">
                                 <button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
                                 <ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
                                     @foreach (var col in columnOptions)
@@ -30,18 +31,17 @@
                                         </li>
                                     }
                                 </ul>
-                            </div>
                         </div>
-                        @* table discount codes *@
-                        @if (ShowColumn("RaTa"))
+                    </div>
+                    @* table discount codes *@
+                    @if (ShowColumn("RaTa"))
                         {
-                        <div class="table-full-height">
-                            <table class="table discountTable">
+                            <table class="table text-center align-middle">
                               <thead>
                                 <tr>
                                     <th>Code</th>
                                     <th>Rabatt</th>
-                                        <th>Nutz.</th>
+                                    <th>Nutz.</th>
                                     <th>St-Datum</th>
                                     <th>En-Datum</th>
                                     <th>DiTy</th>
@@ -64,23 +64,21 @@
 
                                     class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
                                         <td>@item.Code</td>
-                                            <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? "%" : "€")</td>
+                                        <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? "%" : "€")</td>
                                         <td>@item.TimesUsed / @item.UsageLimit</td>
                                         <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
                                         <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
-                                            <td>@item.DiscountType</td>
+                                        <td>@item.DiscountType</td>
                                         <td>@item.IsActive</td>
                                     </tr>
                                 }
                               </tbody>
                             </table>
-                          </div>
                         }
-                        @if (ShowColumn("KaTa"))
+                    @if (ShowColumn("KaTa"))
                         {
                           @* table discount category *@
-                          <div class="table-full-height">
-                             <table class="table discountTable">
+                            <table class="table text-center align-middle">
                               <thead>
                                 <tr>
                                     <th>Kategore</th>
@@ -119,11 +117,10 @@
                                 }
                                </tbody>
                              </table>
-                           </div>
                         }
-
-                        @* menu context *@
-                        @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
+                    </div>
+                    @* menu context *@
+                    @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
                     {
                         <div class="contextMenu dropdown-menu-end dropdown-menu"
                         style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"

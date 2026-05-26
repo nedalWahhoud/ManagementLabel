@@ -1,11 +1,11 @@
 ﻿@page "/categories"
 
-<div class="p-2 min-vh-100 w-100">
+<div class="mainDiv">
 <AuthorizeView>
 	<Authorized Context="authContext">
 			@if (authContext.User.HasClaim("permission", "manageCategories") || authContext.User.HasClaim("permission", "fullAccess"))
 			{
-				<div class="tableResponsive">
+				<div class="tableContiner">
 					<div class="topTable">
 						<button class="btn addPlusB" @onclick="NewCategory" title="Add neue Kategorie">+</button>
 					</div>

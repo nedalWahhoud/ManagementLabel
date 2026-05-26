@@ -1,11 +1,11 @@
 ﻿@page "/distributionlines"
 
-<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
+<div class="mainDiv" @onclick="OnMainDiv">
 <AuthorizeView>
 	<Authorized Context="authContext">
 		@if (authContext.User.HasClaim("permission", "manageDistribution_lines") || authContext.User.HasClaim("permission", "fullAccess"))
 		{
-				<div class="tableResponsive">
+				<div class="tableContiner">
 				  <div class="topTable">
 					<button class="btn addPlusB" @onclick="NewDistributionLine" title="Add neue Vertriebslinie">+</button>
 				  </div>

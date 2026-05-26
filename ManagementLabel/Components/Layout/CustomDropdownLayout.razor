@@ -71,7 +71,8 @@
 		}
 
 		// Setze die CustomerId im CustomerProcess-Objekt
-		customerProcess.CustomerId = customer.Id;
+		if (customer != null)
+			customerProcess.CustomerId = customer.Id;
 	}
 
 	private async Task viaWhatasappShare(Customers customer)
@@ -144,7 +145,6 @@
 	}
 	private async Task Delete(int id)
 	{
-		
 		try
 		{
 			if (id <= 0)

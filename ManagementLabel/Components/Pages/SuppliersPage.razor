@@ -1,6 +1,6 @@
 ﻿@page "/suppliers"
 
-<div class="p-2 min-vh-100 w-100" @onclick="OnMainDiv">
+<div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
 			@if (!canManage && !IsProcessing)
@@ -12,7 +12,7 @@
 				</div>
 				return;
 			}
-			<div tabindex="0" id="scrollContainer" class="tableResponsive">
+			<div tabindex="0" id="scrollContainer" class="tableContiner">
 				<div class="topTable">
 					@* add neu Product *@
 					<button class="btn addPlusB" @onclick="ShowAddFormAsync" disabled="@(IsProcessing)" title="Add neues Liefranten">+</button>
