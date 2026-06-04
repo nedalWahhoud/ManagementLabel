@@ -4,7 +4,17 @@
         <Authorized Context="authContext">
 
             @{
-                var isCreateCustomerOneTimePayment = authContext.User.HasClaim("permission", "createCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
+                var isManageCustomerOneTimePayment = authContext.User.HasClaim("permission", "manageCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
+                var isViewAndMangeStatus = authContext.User.HasClaim("permission", "viewPageAndManageStatusCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
+            }
+            @if (!isViewAndMangeStatus)
+            {
+                <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+                    <div class="alert alert-danger text-center">
+                        Sie haben keine Berechtigung für diese Seite
+                    </div>
+                </div>
+                return;
             }
 
             @if (IsLoading)
@@ -25,12 +35,12 @@
                     style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
                     @onclick:stopPropagation="true">
                         <ul>
-                            <li class="@(!isCreateCustomerOneTimePayment ? "disabled text-muted pe-none opacity-50" : "")"
-                                @onclick="() => Delete(selectedPayment)">
+                            <li class="@(!isManageCustomerOneTimePayment ? "disabled text-muted pe-none opacity-50" : "")"
+                            @onclick="() => Delete(selectedPayment)">
                                 <a><i class="fa-solid fa-trash-can"></i> Löschen</a>
                             </li>
-                            <li class="@((isEditableDisabled || !isCreateCustomerOneTimePayment) ? "disabled text-muted pe-none opacity-50" : "")"
-                                @onclick="() => EditTotalAmount(selectedPayment)">
+                            <li class="@((isEditableDisabled || !isManageCustomerOneTimePayment) ? "disabled text-muted pe-none opacity-50" : "")"
+                            @onclick="() => EditTotalAmount(selectedPayment)">
                                 <a><i class="fa-solid fa-pen-to-square"></i> Gesamtbetrag aktualisieren</a>
                             </li>
                         </ul>
@@ -38,7 +48,12 @@
                 }
                 <div class="container-fluid mt-4">
                     <h3 class="mb-4 text-secondary"><i class="bi bi-cash-coin me-2"></i> Einmalzahlung Verwaltung</h3>
-
+                    <div class="topTable">
+                        <div class="buttonsDiv">
+                            @* add neu Product *@
+                            <button class="btn btn-success h-100 d-flex" @onclick="newUnexpectedPayment">Unerwartete Zahlung / دفعة غير متوقعة</button>
+                        </div>
+                    </div>
                     <div class="card shadow-sm">
                         <div class="card-header bg-primary text-white fw-bold fs-5">
                             <i class="bi bi-geo-alt-fill me-2"></i> Lines (الخطوط)
@@ -213,9 +228,9 @@
                 </div>
 
 
-                if (IsOneTimePaymentProcessing)
+                if (IsOneTimePaymentProcessing.Item1)
                 {
-                    <ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="updateStatus" OneTimePayment="editOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
+                    <ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="@IsOneTimePaymentProcessing.Item2" OneTimePayment="editOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
                 }
             }
         </Authorized>
@@ -272,7 +287,7 @@
         SelectedDate = group;
     }
 
-  
+
 
     private async Task UpdateStatus(int paymentId, OneTimePaymentStatus newStatus, OneTimePayment currentPayment)
     {
@@ -308,7 +323,7 @@
             editOneTimePayment.Customer = customer;
             editOneTimePayment.DistributionLine = distributionLine;
 
-            IsOneTimePaymentProcessing = true;
+            IsOneTimePaymentProcessing = (true, "updateStatus");
             return;
         }
         else if (newStatus == OneTimePaymentStatus.VollstaendigInkassiert)
@@ -334,8 +349,8 @@
         currentPayment.IsProcessing = false;
     }
 
-    private bool IsOneTimePaymentProcessing = false;
-    public void HandleOneTimePayment((string action , OneTimePayment? oneTimePayment) args)
+    private (bool , string) IsOneTimePaymentProcessing = (false,null!);
+    public void HandleOneTimePayment((string action, OneTimePayment? oneTimePayment) args)
     {
         if (args.action == "updateStatus")
         {
@@ -344,7 +359,16 @@
                 UpdateSelectedDate(args.oneTimePayment);
             }
         }
-        this.IsOneTimePaymentProcessing = false;
+        else if (args.action == "UnexpectedPayment")
+        {
+			// wir klappen alle line und date zu, um der Benutzer nochmal auf eine Date zu klicken, und die data von server aktualisieren, damit die neue unerwartete Zahlung angezeigt wird, und die Daten immer aktuell sind
+            SelectedLine = null!;
+            SelectedDate = null!;
+            selectedPayment = null!;
+
+            oneTimePaymentsGroup.Clear();
+        }
+        this.IsOneTimePaymentProcessing = (false, null!);
         this.editOneTimePayment = null!;
     }
 
@@ -398,26 +422,13 @@
     }
     private void CancelEditTotalAmount(OneTimePayment oneTimePayment)
     {
-		editOneTimePayment.Customer = oneTimePayment.Customer;
+        editOneTimePayment.Customer = oneTimePayment.Customer;
         UpdateSelectedDate(editOneTimePayment);
         editOneTimePayment = null!;
         oneTimePayment.EditingTotalAmount = false;
     }
 
-  
-    private async Task SelectAllContent()
-    {
-        try
-        {
-            // um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
-            await Task.Delay(10);
-            await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
-        }
-    }
+
     // Menu recht klicken
     private bool showContextMenu = false;
     private double menuX;
@@ -446,21 +457,21 @@
         var isConfirmed = await JS.InvokeAsync<bool>("confirm", $"Sind Sie sicher, dass Sie die Einmalzahlung von {payment.Customer?.Name_de} / {payment.Customer?.Name_ar} löschen möchten?");
         if (isConfirmed)
         {
-			var result = await oneTimePaymentsService.DeleteAsync(payment.Id);
-			if (result.Result)
-			{
+            var result = await oneTimePaymentsService.DeleteAsync(payment.Id);
+            if (result.Result)
+            {
                 // die UI sofort aktualisieren
-				SelectedDate?.Payments.Remove(payment);
-				if (SelectedDate != null && SelectedDate.Payments.Count == 0)
-				{
-					oneTimePaymentsGroup.Remove(SelectedDate);
-					SelectedDate = null!;
-				}
-			}
-			else
-			{
-				await JS.InvokeVoidAsync("alert", result.Message);
-			}
+                SelectedDate?.Payments.Remove(payment);
+                if (SelectedDate != null && SelectedDate.Payments.Count == 0)
+                {
+                    oneTimePaymentsGroup.Remove(SelectedDate);
+                    SelectedDate = null!;
+                }
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", result.Message);
+            }
         }
 
         selectedPayment = null!;
@@ -494,7 +505,28 @@
 
         showContextMenu = false;
     }
-   
+    // UnexpectedPayment
+    private void newUnexpectedPayment()
+    {
+		selectedPayment = null!;
+		editOneTimePayment = null!;
+        IsOneTimePaymentProcessing = (true, "UnexpectedPayment");
+    }
+
+
+    private async Task SelectAllContent()
+    {
+        try
+        {
+            // um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
+            await Task.Delay(10);
+            await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
+        }
+    }
     private void OnMainDiv()
     {
         // hide die Menu if sichtbar

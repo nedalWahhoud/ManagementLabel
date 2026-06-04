@@ -2,69 +2,128 @@
 	<div class="standardOverlayForm">
 		@if (!isAddedSuccess)
 		{
-			<EditForm Model="@oneTimePayment" OnValidSubmit="Save">
-				<DataAnnotationsValidator />
-				<div class="overlayField">
-					<InputSelect class="form-control" @bind-Value="oneTimePayment.CustomerId" disabled>
-						<option value="@oneTimePayment.CustomerId">@(oneTimePayment.Customer != null ? oneTimePayment.Customer.Name_de + " / " + oneTimePayment.Customer.Name_ar : "Fehler")</option>
-					</InputSelect>
-					<ValidationMessage For="@(() => oneTimePayment.CustomerId)" />
-				</div>
-				<div class="overlayField">
-					<InputSelect class="form-control" @bind-Value="oneTimePayment.DistributionLineId" disabled>
-						<option value="@oneTimePayment.DistributionLineId">@(oneTimePayment.DistributionLine != null ? oneTimePayment.DistributionLine.LineName : "Fehler")</option>
-					</InputSelect>
-					<ValidationMessage For="@(() => oneTimePayment.DistributionLineId)" />
-				</div>
-				<div class="overlayField">
-					<div class="input-group">
-						<span class="input-group-text customLatIcon">G-Betrag</span>
-						<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.TotalAmount" @onfocus="@(e => SelectAllContent())" disabled="@(!(Action == "add"))" />
-						<span class="input-group-text customLatIcon">€</span>
-					</div>
-					<ValidationMessage For="@(() => oneTimePayment.TotalAmount)" />
-				</div>
-				@if (Action == "updateStatus")
+			@if (Action != "UnexpectedPayment" || UnexpectedPaymentToAdd)
+			{
+				if (UnexpectedPaymentToAdd && UnexpectedPaymentoneTimePayment != null)
 				{
+					oneTimePayment = UnexpectedPaymentoneTimePayment;
+					Action = "add";
+				}
+				<EditForm Model="@oneTimePayment" OnValidSubmit="Save">
+					<DataAnnotationsValidator />
 					<div class="overlayField">
-						<InputSelect class="form-control" @bind-Value="oneTimePayment.Status" disabled>
-							<option value="@oneTimePayment.Status">@oneTimePaymentsService.GetEnumDisplayName(oneTimePayment.Status)</option>
+						<InputSelect class="form-control" @bind-Value="oneTimePayment.CustomerId" disabled>
+							<option value="@oneTimePayment.CustomerId">@(oneTimePayment.Customer != null ? oneTimePayment.Customer.Name_de + " / " + oneTimePayment.Customer.Name_ar : "Fehler")</option>
 						</InputSelect>
-						<ValidationMessage For="@(() => oneTimePayment.Status)" />
+						<ValidationMessage For="@(() => oneTimePayment.CustomerId)" />
 					</div>
-					@if (oneTimePayment.Status != OneTimePaymentStatus.Verschoben)
+					<div class="overlayField">
+						<InputSelect class="form-control" @bind-Value="oneTimePayment.DistributionLineId" disabled>
+							<option value="@oneTimePayment.DistributionLineId">@(oneTimePayment.DistributionLine != null ? oneTimePayment.DistributionLine.LineName : "Fehler")</option>
+						</InputSelect>
+						<ValidationMessage For="@(() => oneTimePayment.DistributionLineId)" />
+					</div>
+					<div class="overlayField">
+						<div class="input-group">
+							<span class="input-group-text customLatIcon">G-Betrag</span>
+							<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.TotalAmount" @onfocus="@(e => SelectAllContent())" disabled="@(!(Action == "add"))" />
+							<span class="input-group-text customLatIcon">€</span>
+						</div>
+						<ValidationMessage For="@(() => oneTimePayment.TotalAmount)" />
+					</div>
+					@if (Action == "updateStatus")
 					{
 						<div class="overlayField">
-							<div class="input-group">
-								<span class="input-group-text customLatIcon">T-Betrag</span>
-								<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.AmountCollected" @onfocus="@(e => SelectAllContent())" />
-								<span class="input-group-text customLatIcon">€</span>
-							</div>
-							<ValidationMessage For="@(() => oneTimePayment.AmountCollected)" />
+							<InputSelect class="form-control" @bind-Value="oneTimePayment.Status" disabled>
+								<option value="@oneTimePayment.Status">@oneTimePaymentsService.GetEnumDisplayName(oneTimePayment.Status)</option>
+							</InputSelect>
+							<ValidationMessage For="@(() => oneTimePayment.Status)" />
 						</div>
-					}
-				}
-
-				<div class="overlayField">
-					<InputText class="form-control" @bind-Value="oneTimePayment.Notes" placeholder="Anmerkungen / ملاحطة" />
-					<ValidationMessage For="@(() => oneTimePayment.Notes)" />
-				</div>
-				<div class="mt-3">
-					<button class="btn btn-primary me-2" disabled="@IsProcessing">
-						@if (IsProcessing)
+						@if (oneTimePayment.Status != OneTimePaymentStatus.Verschoben)
 						{
-							<span class="spinner-border spinner-border-sm"
-							role="status"
-							aria-hidden="true"></span>
+							<div class="overlayField">
+								<div class="input-group">
+									<span class="input-group-text customLatIcon">T-Betrag</span>
+									<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.AmountCollected" @onfocus="@(e => SelectAllContent())" />
+									<span class="input-group-text customLatIcon">€</span>
+								</div>
+								<ValidationMessage For="@(() => oneTimePayment.AmountCollected)" />
+							</div>
+						}
+					}
+
+					<div class="overlayField">
+						<InputText class="form-control" @bind-Value="oneTimePayment.Notes" placeholder="Anmerkungen / ملاحطة" />
+						<ValidationMessage For="@(() => oneTimePayment.Notes)" />
+					</div>
+					<div class="mt-3">
+						<button class="btn btn-primary me-2" disabled="@IsProcessing">
+							@if (IsProcessing)
+							{
+								<span class="spinner-border spinner-border-sm"
+								role="status"
+								aria-hidden="true"></span>
+							}
+							else
+							{
+								<span>Speichern</span>
+							}
+						</button>
+						<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+					</div>
+				</EditForm>
+			}
+			else
+			{
+				<div class="UnexpectedPaymentDiv">
+					<div class="dropdownListsDiv">
+						<select id="distributionLineSelect"
+						class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						@bind="selectedDistributionLineId"
+						@bind:after="AfterDistributionLineChanged">
+							<option value="0" disabled selected class="text-gray-400">Linie wählen...</option>
+							@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
+							{
+								<option value="@distributionLine.Id">@distributionLine.LineName</option>
+							}
+						</select>
+						@if (selectedDistributionLineId == 0)
+						{
+							<div class="text-sm text-red-500 mt-1">Bitte wählen Sie eine Linie aus.</div>
 						}
 						else
 						{
-							<span>Speichern</span>
+							if (IsProcessingUnexpectedPayment)
+							{
+								<div class="text-sm text-blue-500 mt-1 text-primary">
+									Lade Kunden...
+									<span class="spinner-border spinner-border-sm"
+									role="status"
+									aria-hidden="true"></span>
+								</div>
+							}
+							else if (customersOfSelectedLine == null)
+							{
+								<div class="text-sm text-yellow-500 mt-1">Keine Kunden für die ausgewählte Linie gefunden.</div>
+							}
+							else 
+							{
+								<select id="stopNumberSelect" class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+								@bind="selectedCustomerId"
+								@bind:after="AfterCustomerhanged">
+									<option value="0">Kunde ausgewählen/ اختر زبون</option>
+									@foreach (var customer in customersOfSelectedLine.DistinctBy(c => c.StopNumber).OrderBy(c => c.StopNumber))
+									{
+										<option value="@customer.Id">@customer.Name_de / @customer.Name_ar</option>
+									}
+								</select>
+							}
 						}
-					</button>
+					</div>
+
 					<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
 				</div>
-			</EditForm>
+			}
 		}
 		else
 		{
@@ -134,6 +193,17 @@
 
 	private bool IsProcessing = false;
 	private bool isAddedSuccess = false;	
+
+	protected async override Task OnInitializedAsync()
+	{
+		if (Action == "UnexpectedPayment")
+		{
+			if (distributionLinesService.DownloadedDistributionLines == null || distributionLinesService.DownloadedDistributionLines.Count == 0)
+			{
+				await distributionLinesService.GetAllDistributionLinesAsync();
+			}
+		}
+	}
 	private async Task Save()
 	{
 		IsProcessing = true;
@@ -193,6 +263,9 @@
 	{
 		isAddedSuccess = false;
 
+		if (Action == "add" || UnexpectedPaymentToAdd)
+			Action = "UnexpectedPayment";
+
 		await OnHandel.InvokeAsync((Action, oneTimePayment));
 	}
 	private async Task SelectAllContent()
@@ -207,5 +280,42 @@
 		{
 			Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
 		}
+	}
+
+	// UnexpectedPayment
+	private int selectedDistributionLineId = 0;
+	private List<Customers>? customersOfSelectedLine;
+	private bool IsProcessingUnexpectedPayment = false;
+	private async Task AfterDistributionLineChanged()
+	{
+		IsProcessingUnexpectedPayment = true;
+		var result = await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+		if (result != null && result.Result)
+		{
+			customersOfSelectedLine = customersService.DownloadedCustomers.Where(c => c.DistributionLineId == selectedDistributionLineId).ToList();
+			StateHasChanged();
+		}
+		else
+		{
+			customersOfSelectedLine = null!;
+		}
+		IsProcessingUnexpectedPayment = false;
+	}
+	private int selectedCustomerId = 0;
+	private bool UnexpectedPaymentToAdd = false;
+	private OneTimePayment UnexpectedPaymentoneTimePayment = null!;
+	private async Task AfterCustomerhanged()
+	{
+		UnexpectedPaymentoneTimePayment = new OneTimePayment
+			{
+				CustomerId = selectedCustomerId,
+				Customer = customersService.GetCustomerByIdLocal(selectedCustomerId) 
+					?? await customersService.GetCustomerByIdAsync(selectedCustomerId),
+				DistributionLineId = selectedDistributionLineId,
+				DistributionLine = distributionLinesService.DownloadedDistributionLines.FirstOrDefault(dl => dl.Id == selectedDistributionLineId)
+					?? await distributionLinesService.GetDistributionLineById(selectedDistributionLineId)
+			};
+		UnexpectedPaymentToAdd = true;
+		StateHasChanged();
 	}
 }

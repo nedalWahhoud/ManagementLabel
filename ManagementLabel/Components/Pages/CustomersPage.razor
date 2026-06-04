@@ -7,7 +7,7 @@
 				var isManage = authContext.User.HasClaim("permission", "manageCustomers") || authContext.User.HasClaim("permission", "fullAccess");
 				var isDebtManage = authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess");
 				var isEdit = authContext.User.HasClaim("permission", "editCustomers") || authContext.User.HasClaim("permission", "fullAccess");
-				var isCreateCustomerOneTimePayment = authContext.User.HasClaim("permission", "createCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
+				var isManageCustomerOneTimePayment = authContext.User.HasClaim("permission", "manageCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
 			}
 			@if (isManage)
 			{
@@ -141,7 +141,7 @@
 															<span>⋮</span>
 														}
 													</button>
-													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" Permissions="new (isEdit,isDebtManage,isCreateCustomerOneTimePayment)" OnHandel="HandleCustomDropdown" />
+													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" Permissions="new (isEdit,isDebtManage,isManageCustomerOneTimePayment)" OnHandel="HandleCustomDropdown" />
 												</div>
 											</td>
 										</tr>

@@ -33,7 +33,7 @@
 		</a>
 	</li>
 	<li>
-		<a class="@(Permissions.IsRecordOneTimePayment  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsRecordOneTimePayment ? EventCallback.Factory.Create<MouseEventArgs>(this, () => RecordOneTimePayment(customer))  : default!)">
+		<a class="@(Permissions.IsRecordOneTimePayment  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsRecordOneTimePayment ? EventCallback.Factory.Create<MouseEventArgs>(this, () => newOneTimePayment(customer))  : default!)">
 			<i class="bi bi-currency-exchange me-1"></i>
 			Einmalige Zahlung erfassen
 		</a>
@@ -148,7 +148,7 @@
 			await JS.InvokeVoidAsync("alert", result.Message);
 		}
 	}
-	public async Task RecordOneTimePayment(Customers customer)
+	public async Task newOneTimePayment(Customers customer)
 	{
 		var oneTimePayment = new OneTimePayment
 			{
