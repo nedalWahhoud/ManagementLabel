@@ -9,29 +9,31 @@
                 {
                     <div class="tableContiner">
                     <div class="topTable">
-                        <button class="btn btn-success" @onclick="() => OpenAddForm(true,true)">
-                            <i class="bi bi-plus-lg"></i> Rabattcode
-                        </button>
-                        <button class="btn btn-info text-white" @onclick="() => OpenAddForm(false,true)">
-                            <i class="bi bi-plus-lg"></i> Kategorie-Code
-                        </button>
-                        @* choose the Columns *@
-                        <div class="h-100 d-flex align-items-center">
-                                <button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
-                                <ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-                                    @foreach (var col in columnOptions)
-                                    {
-                                        <li>
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
-                                                <label class="form-check-label" for="@col.Key">
-                                                    @col.Label
-                                                </label>
-                                            </div>
-                                        </li>
-                                    }
-                                </ul>
-                        </div>
+                            <div class="buttonsDiv">
+                                <button class="btn btn-success h-100 d-flex " @onclick="() => OpenAddForm(true,true)">
+                                    <i class="bi bi-plus-lg"></i> Rabattcode
+                                </button>
+                                <button class="btn btn-info text-white h-100 d-flex" @onclick="() => OpenAddForm(false,true)">
+                                    <i class="bi bi-plus-lg"></i> Kategorie-Code
+                                </button>
+                                @* choose the Columns *@
+                                <div class="h-100 d-flex align-items-center">
+                                    <button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+                                    <ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+                                        @foreach (var col in columnOptions)
+                                        {
+                                            <li>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
+                                                    <label class="form-check-label" for="@col.Key">
+                                                        @col.Label
+                                                    </label>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
                     </div>
                     @* table discount codes *@
                     @if (ShowColumn("RaTa"))
@@ -331,6 +333,4 @@
 		// hide die Menu if sichtbar
 		showContextMenu = false;
 	}
-
-    
 }

@@ -38,11 +38,12 @@ namespace ManagementLabel.Components.CategoriesF
             try
             {
                 var response = await _http.PostAsJsonAsync("api/Categories/createCategory", category);
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht erstellt werden." };
+                    return result ?? new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht erstellt werden." };
                 }
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if (result == null || !result.Result)
                 {
                     return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht erstellt werden." };

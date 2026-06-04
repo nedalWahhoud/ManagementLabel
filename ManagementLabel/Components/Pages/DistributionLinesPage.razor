@@ -7,7 +7,9 @@
 		{
 				<div class="tableContiner">
 				  <div class="topTable">
-					<button class="btn addPlusB" @onclick="NewDistributionLine" title="Add neue Vertriebslinie">+</button>
+						<div class="buttonsDiv">
+							<button class="btn addPlusB" @onclick="NewDistributionLine" title="Add neue Vertriebslinie">+</button>
+						</div>
 				  </div>
 				  @if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
 				  {
@@ -112,7 +114,7 @@
 								user.HasClaim("permission", "fullAccess");
 		if (canViewCoupons)
 		{
-			await distributionLinesService.GetAllDistributionLines();
+			await distributionLinesService.GetAllDistributionLinesAsync();
 		}
 	}
 

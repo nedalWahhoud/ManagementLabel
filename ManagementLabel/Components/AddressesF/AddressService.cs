@@ -11,11 +11,12 @@ namespace ManagementLabel.Components.AddressesF
             try
             {
                 var response = await _http.PostAsJsonAsync("api/Addresses/addAddress", newAddress);
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
+                    return result ?? await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
                 }
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
 
                 var getId = result!.Message?.Split(':').LastOrDefault();
                 if (result.Result && int.TryParse(getId, out int id))
@@ -28,7 +29,7 @@ namespace ManagementLabel.Components.AddressesF
             }
             catch (Exception ex)
             {
-                return new ValidationResult { Result = false, Message = ex.Message };
+                return new ValidationResult { Result = false, Message = ex.InnerException?.Message ?? ex.Message };
             }
         }
         public async Task<List<Address>> GetAddressesByUserIdAsync(int UserId)

@@ -118,6 +118,6 @@ else
     private void TriggerAutomaticReload()
     {
         // forceLoad: true zwingt den Browser zu einer vollständigen Aktualisierung, um ein Einfrieren des Inhalts zu verhindern.
-        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        navigationManager.NavigateTo(navigationManager.Uri, forceLoad: true);
     }
 }

@@ -27,6 +27,7 @@
 @using ManagementLabel.Components.CustomersF
 @using ManagementLabel.Components.DebtF
 @using ManagementLabel.Components.TransactionsCustomersF
+@using ManagementLabel.Components.OneTimePaymentsF
 @using ManagementLabel.Components.Share
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
@@ -36,7 +37,7 @@
 @inject IOptions<ProjectInfo> projectInfo
 @inject IOptions<AppConfig> appConfig
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
-@inject NavigationManager NavigationManager
+@inject NavigationManager navigationManager
 @inject AuthService authService
 @inject ProductService productService
 @inject SuppliersService suppliersService
@@ -56,3 +57,4 @@
 @inject WhatsAppService whatsAppService
 @inject DebtService debtService
 @inject TransactionsCustomersService transactionsCustomersService
+@inject OneTimePaymentsService oneTimePaymentsService

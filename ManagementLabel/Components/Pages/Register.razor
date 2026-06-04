@@ -11,7 +11,7 @@
 	[Parameter] public EventCallback OnBackToLogin { get; set; }
 	private  void OnBack()
 	{
-		NavigationManager!.NavigateTo("/login", false);
+		navigationManager!.NavigateTo("/login", false);
 	}
 	protected override void OnAfterRender(bool firstRender)
 	{

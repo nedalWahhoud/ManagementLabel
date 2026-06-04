@@ -13,9 +13,10 @@ namespace ManagementLabel.Components.DiscountF
             try
             {
                 var response = await _http.PostAsJsonAsync("api/Discounts/addDiscountCode", newDiscountCode);
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
                 if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Failed to add discount code." };
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error occurred." };
+                    return result ?? new ValidationResult { Result = false, Message = "Failed to add discount code." };
 
                 if (result.Result == true)
                 {

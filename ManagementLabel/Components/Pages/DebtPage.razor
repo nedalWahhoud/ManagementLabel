@@ -5,7 +5,9 @@
 	<Authorized Context="authContext">
 		@{
 			var isManage = authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess");
+			var isDebtManage = authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess");
 			var isEdit = authContext.User.HasClaim("permission", "editCustomers") || authContext.User.HasClaim("permission", "fullAccess");
+				var isCrateCustomerOneTimePayment = authContext.User.HasClaim("permission", "crateCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
 		}
 		@if (isManage)
 		{
@@ -59,7 +61,7 @@
 									<span>⋮</span>
 								}
 							</button>
-							<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="null" isEdit="isEdit" OnHandel="HandleCustomDropdown" />
+								<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="null" Permissions="new (isEdit,isDebtManage,isCrateCustomerOneTimePayment)" OnHandel="HandleCustomDropdown" />
 						</div>
 					</div>
 				</div>
@@ -380,7 +382,7 @@
 	}
 	private void GoBack()
 	{
-		NavigationManager.NavigateTo("/customers");
+		navigationManager.NavigateTo("/customers");
 	}
 
 	private async Task NextDebtCustomer()
@@ -401,7 +403,7 @@
 		{
 			var nextCustomer = sortedCustomers[currentIndex + 1];
 
-			NavigationManager.NavigateTo($"/debt/{nextCustomer.Id}");
+			navigationManager.NavigateTo($"/debt/{nextCustomer.Id}");
 
 		}
 		else
@@ -424,7 +426,7 @@
 		{
 			var previousCustomer = sortedCustomers[currentIndex - 1];
 
-			NavigationManager.NavigateTo($"/debt/{previousCustomer.Id}");
+			navigationManager.NavigateTo($"/debt/{previousCustomer.Id}");
 		}
 		else
 		{
@@ -452,7 +454,7 @@
 	// Handle Custom Dropdown Actions
 	private bool IsEditing = false;
 	private Customers EditingCustomer = null!;
-	private void HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing) args)
+	private void HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing, OneTimePayment oneTimePayment, bool IsOneTimePaymentProcessing) args)
 	{
 		if (args.action == "Delete")
 		{

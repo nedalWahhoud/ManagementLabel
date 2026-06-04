@@ -61,7 +61,7 @@
         ValidationResult result = await authService.LoginAsync(loginModel);
         if (result.Result)
         {
-            NavigationManager!.NavigateTo("/", true);
+            navigationManager!.NavigateTo("/", true);
         }
         else
             _ = JS.InvokeVoidAsync("alert", result.Message);
@@ -85,7 +85,7 @@
     // register
     private void OnRegisterClicked1()
     {
-        NavigationManager!.NavigateTo("/register", true);
+        navigationManager!.NavigateTo("/register", true);
     }
     // google
     private bool isSingInLoading = false;

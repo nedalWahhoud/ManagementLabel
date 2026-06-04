@@ -15,14 +15,16 @@
 			{
 				<div tabindex="0" id="SOPContainer" class="tableResponsive">
 					<div class="topTable">
-						@* add neu Product *@
-						<button class="btn addPlusB" @onclick="PlaceOrder" title="Bestellung aufgeben"><i class="bi bi-cart-check-fill fs-5"></i></button>
-						<div class="d-flex flex-column align-items-center gap-2">
-							<span class="small fw-bold text-muted">Sprache / اللغة:</span>
-							<select class="form-select form-select-sm" style="width: auto;" @bind="selectedLanguage">
-								<option value="ar">Arabisch (العربية)</option>
-								<option value="de">Deutsch (الألمانية)</option>
-							</select>
+						<div class="buttonsDiv">
+							@* add neu Product *@
+							<button class="btn addPlusB" @onclick="PlaceOrder" title="Bestellung aufgeben"><i class="bi bi-cart-check-fill fs-5"></i></button>
+							<div class="d-flex flex-column align-items-center gap-2">
+								<span class="small fw-bold text-muted">Sprache / اللغة:</span>
+								<select class="form-select form-select-sm" style="width: auto;" @bind="selectedLanguage">
+									<option value="ar">Arabisch (العربية)</option>
+									<option value="de">Deutsch (الألمانية)</option>
+								</select>
+							</div>
 						</div>
 					</div>
 					<table class="table text-center align-middle">
@@ -178,7 +180,7 @@
 
 	private void GoBack()
 	{
-		NavigationManager.NavigateTo("/suppliers");
+		navigationManager.NavigateTo("/suppliers");
 	}
 	public void Dispose()
 	{

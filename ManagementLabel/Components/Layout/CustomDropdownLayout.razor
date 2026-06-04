@@ -1,8 +1,8 @@
 ﻿<ul class="dropdown-menu customDropdown dropdown-menu-end">
-	@if (!IsDebt)
+	@if (!IsDebtPage)
 	{
 		<li>
-			<a class="dropdown-item" @onclick="() => OnDebts(customer.Id)">
+			<a class="@(Permissions.IsDebtManage  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsDebtManage ? EventCallback.Factory.Create<MouseEventArgs>(this, () => OnDebts(customer.Id))  : default!)">
 				<i class="bi bi-cash-stack me-1"></i>
 				Schulden
 			</a>
@@ -32,16 +32,22 @@
 			Teilen über WhatsApp
 		</a>
 	</li>
-	@if (!IsDebt)
+	<li>
+		<a class="@(Permissions.IsRecordOneTimePayment  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsRecordOneTimePayment ? EventCallback.Factory.Create<MouseEventArgs>(this, () => RecordOneTimePayment(customer))  : default!)">
+			<i class="bi bi-currency-exchange me-1"></i>
+			Einmalige Zahlung erfassen
+		</a>
+	</li>
+	@if (!IsDebtPage)
 	{
 		<li>
-			<a class="@(isEdit  ? "dropdown-item" : "disabledItem")" @onclick="@(isEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Edit(customer))  : default!)">
+			<a class="@(Permissions.IsEdit  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Edit(customer))  : default!)">
 				<i class="bi bi-pencil-square me-1"></i>
 				Bearbeiten
 			</a>
 		</li>
 		<li>
-			<a class="@(isEdit  ? "dropdown-item" : "disabledItem")" @onclick="@(isEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Delete(customer.Id))  : default!)">
+			<a class="@(Permissions.IsEdit  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Delete(customer.Id))  : default!)">
 				<i class="bi bi-trash3 me-1"></i>
 				Löschen
 			</a>
@@ -55,26 +61,25 @@
 	[Parameter]
 	public List<Customers> FilteredCustomers { get; set; } = null!;
 	[Parameter]
-	public bool isEdit { get; set; } = false;
+	public (bool IsEdit, bool IsDebtManage, bool IsRecordOneTimePayment) Permissions { get; set; } = (false, false, false);
 	[Parameter]
-	public EventCallback<(string action,CustomerProcess customerProcess, bool IsEditing)> OnHandel { get; set; }
+	public EventCallback<(string action, CustomerProcess customerProcess, bool IsEditing,OneTimePayment oneTimePayment ,bool IsOneTimePaymentProcessing)> OnHandel { get; set; }
 
-	private bool IsDebt = false;
+	private bool IsDebtPage = false;
 	private CustomerProcess customerProcess = new CustomerProcess();
 	protected override void OnInitialized()
 	{
-		var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+		var relativePath = navigationManager.ToBaseRelativePath(navigationManager.Uri);
 
 		if (relativePath.StartsWith("debt", StringComparison.OrdinalIgnoreCase))
 		{
-			IsDebt = true;
+			IsDebtPage = true;
 		}
 
 		// Setze die CustomerId im CustomerProcess-Objekt
 		if (customer != null)
 			customerProcess.CustomerId = customer.Id;
 	}
-
 	private async Task viaWhatasappShare(Customers customer)
 	{
 		var result = await whatsAppService.SendCustomerInfo(customer);
@@ -85,7 +90,7 @@
 	}
 	private void OnDebts(int customerId)
 	{
-		NavigationManager.NavigateTo($"/debt/{customerId}");
+		navigationManager.NavigateTo($"/debt/{customerId}");
 	}
 	private async Task OnMap(Customers customer)
 	{
@@ -143,6 +148,18 @@
 			await JS.InvokeVoidAsync("alert", result.Message);
 		}
 	}
+	public async Task RecordOneTimePayment(Customers customer)
+	{
+		var oneTimePayment = new OneTimePayment
+			{
+				CustomerId = customer.Id,
+				Customer = customer,
+				DistributionLineId = customer.DistributionLineId,
+				DistributionLine = customer?.DistributionLine ??
+					(distributionLinesService.DownloadedDistributionLines.FirstOrDefault(dl => dl.Id == customer?.DistributionLineId) ?? await distributionLinesService.GetDistributionLineById(customer?.DistributionLineId ?? 0))
+			};
+		await OnHandel.InvokeAsync(("oneTimePayment", new(), false, oneTimePayment, true));
+	}
 	private async Task Delete(int id)
 	{
 		try
@@ -157,7 +174,7 @@
 					IsProcessing = true,
 					CustomerId = id
 				};
-			await OnHandel.InvokeAsync(("Delete", customerProcess, false));
+			await OnHandel.InvokeAsync(("Delete", customerProcess, false,new(), false));
 			var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
 			if (resultConfirm)
 			{
@@ -176,7 +193,6 @@
 						FilteredCustomers.Remove(customerToRemove);
 					}
 				}
-
 			}
 			customerProcess.IsProcessing = false;
 			customerProcess.CustomerId = id;
@@ -188,7 +204,7 @@
 			customerProcess.CustomerId = id;
 		}
 
-		await OnHandel.InvokeAsync(("Delete", customerProcess, false));
+		await OnHandel.InvokeAsync(("Delete", customerProcess, false,new(), false));
 	}
 	private async Task Edit(Customers customers)
 	{
@@ -213,6 +229,6 @@
 				PIN = customers.PIN
 			};
 
-		await OnHandel.InvokeAsync(("Edit", new CustomerProcess(){EditingCustomer = editingCustomer}, true));
+		await OnHandel.InvokeAsync(("Edit", new CustomerProcess(){EditingCustomer = editingCustomer}, true,new (),false));
 	}
 }

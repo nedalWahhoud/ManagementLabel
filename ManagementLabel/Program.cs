@@ -20,6 +20,7 @@ using ManagementLabel.Components.Share;
 using ManagementLabel.Components.DebtF;
 using ManagementLabel.Components.TransactionsCustomersF;
 using ManagementLabel.Components.SupplierF;
+using ManagementLabel.Components.OneTimePaymentsF;
 
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
@@ -110,6 +111,8 @@ builder.Services.AddScoped<DebtService>();
 builder.Services.AddScoped<WhatsAppService>();
 //  TransactionsCustomersService Service 
 builder.Services.AddScoped<TransactionsCustomersService>();
+//  oneTimepayment Service 
+builder.Services.AddScoped<OneTimePaymentsService>();
 //
 builder.Services.AddBlazoredLocalStorage();
 var app = builder.Build();

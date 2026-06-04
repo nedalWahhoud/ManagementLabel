@@ -1,12 +1,11 @@
-﻿using ManagementLabel.Components.Pages;
-using ManagementLabel.Model;
+﻿using ManagementLabel.Model;
 namespace ManagementLabel.Components.DistributionLinesF
 {
     public class DistributionLinesService(HttpClient http)
     {
         private readonly HttpClient _http = http;
         public List<DistributionLines> DownloadedDistributionLines { get; private set; } = [];
-        public async Task<ValidationResult> GetAllDistributionLines()
+        public async Task<ValidationResult> GetAllDistributionLinesAsync()
         {
             if(DownloadedDistributionLines.Count > 0)
             {
@@ -56,7 +55,7 @@ namespace ManagementLabel.Components.DistributionLinesF
             {
                 var response = await _http.PostAsJsonAsync("api/DistributionLines/addDistributionLine", newDistributionLine);
                 if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Fehler beim Hinzufügen der Verteilerzeile." };
+                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Fehler beim Hinzufügen der Verteilerzeile." };
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if (result?.Result == true)
                 {
@@ -130,6 +129,15 @@ namespace ManagementLabel.Components.DistributionLinesF
             }
         }
         // local
+        public DistributionLines GetDistributionLineByIdLocal(int id)
+        {
+            var distributionLine = DownloadedDistributionLines.FirstOrDefault(p => p.Id == id);
+            if (distributionLine != null)
+            {
+                return distributionLine;
+            }
+            return null!;
+        }
         public void AddToLocal(DistributionLines distributionLine)
         {
             if (!DownloadedDistributionLines.Any(p => p.Id == distributionLine.Id))

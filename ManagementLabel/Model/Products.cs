@@ -8,8 +8,10 @@ namespace ManagementLabel.Model
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "Name ist erforderlich.")]
+        [StringLength(100)]
         public string? Name_de { get; set; }
         [Required(ErrorMessage = "Description ist erforderlich.")]
+        [StringLength(255)]
         public string? Description_de { get; set; }
         [Required(ErrorMessage = "Bitte wählen Sie eine Kategorie aus.")]
         public int CategoryId { get; set; }
@@ -35,8 +37,10 @@ namespace ManagementLabel.Model
         public Users? User { get; set; }
         public ICollection<ProductImages> ProductImages { get; set; } = [];
         [Required(ErrorMessage = "يجب ادخال اسم المنتج ايضا بل عربية")]
+        [StringLength(100)]
         public string? Name_ar { get; set; }
         [Required(ErrorMessage = "يجب ادخال وصف المنتج ايضا بل عربية")]
+        [StringLength(255)]
         public string? Description_ar { get; set; }
         [Required(ErrorMessage = "Bitte geben Sie die Steuersatz ein")]
         public int? TaxRateId { get; set; }

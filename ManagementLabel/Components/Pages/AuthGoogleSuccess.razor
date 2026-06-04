@@ -5,7 +5,7 @@
 @code {
     protected override void OnInitialized()
     {
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var uri = navigationManager.ToAbsoluteUri(navigationManager.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
         LoginModel loginModel = new();
         if (query.TryGetValue("token", out var tokenValues) && !StringValues.IsNullOrEmpty(tokenValues))
@@ -22,16 +22,16 @@
             loginModel.Token = token;
             var result = authService!.GoogleLogin(loginModel);
             if (result.Result == true)
-                NavigationManager!.NavigateTo("/", true);
+                navigationManager!.NavigateTo("/", true);
             else
             {
                 _ = JS.InvokeVoidAsync("showAlert", result.Message);
-                NavigationManager.NavigateTo("/login");
+                navigationManager.NavigateTo("/login");
             }
         }
         else
         {
-            NavigationManager.NavigateTo("/login");
+            navigationManager.NavigateTo("/login");
         }
     }
 }

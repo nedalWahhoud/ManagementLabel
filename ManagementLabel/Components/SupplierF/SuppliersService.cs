@@ -52,9 +52,10 @@ namespace ManagementLabel.Components.SupplierF
             try
             {
                 var response = await _http.PostAsJsonAsync($"api/Suppliers/addSupplier", supplier);
-                if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Lieferanten konnten nicht hinzugefügt werden." };
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if (!response.IsSuccessStatusCode)
+                    return result ?? new ValidationResult { Result = false, Message = "Lieferanten konnten nicht hinzugefügt werden." };
                 if (result != null && result.Result)
                 {
                     supplier.Id = result.NewId ?? 0; // Setze die ID des neuen Lieferanten basierend auf der Antwort des Servers

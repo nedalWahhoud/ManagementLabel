@@ -150,12 +150,14 @@ namespace ManagementLabel.Components.ImagesF
             try
             {
                 var response = await _http.PostAsJsonAsync("api/Carousel/addCarouselImage", carouselImage);
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
+                    return result ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if(result == null || !result.Result)
                 {
                     return new ValidationResult { Result = false, Message = "Unknown error." };

@@ -12,6 +12,13 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+/* validation-message */
+.validation-message {
+    color: #dc3545; 
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    font-weight: bold;
+}
 
 /* Table div */
 .showLoading {
@@ -44,7 +51,14 @@ html, body {
     display: flex;
     align-items: center;
     padding: 8px;
-    gap:8px;
+    gap: 8px;
+    justify-content: space-between;
+}
+.buttonsDiv {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
 }
 .loadingTd {
     text-align: center;

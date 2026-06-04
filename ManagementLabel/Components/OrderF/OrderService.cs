@@ -22,12 +22,14 @@ namespace ManagementLabel.Components.OrderF
             try
             {
                 var response = await _http.PostAsJsonAsync("api/Orders/addOrder", order);
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." };
+                    return result ?? new ValidationResult { Result = false, Message = "Unknown error." };
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if(result != null && result.Result)
                 {
                     var getId = result.Message?.Split(':').LastOrDefault();

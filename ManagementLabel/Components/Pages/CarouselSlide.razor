@@ -1,13 +1,14 @@
 ﻿@page "/carousel"
 
-<div class="p-2 min-vh-100 w-100">
 <AuthorizeView>
 	<Authorized Context="authContext">
 		@if (authContext.User.HasClaim("permission", "manageCarousel") || authContext.User.HasClaim("permission", "fullAccess"))
 		{
-			<div class="tableResponsive">
+			<div class="tableContiner">
 			  <div class="topTable">
+					<div class="buttonsDiv">
 						<button class="btn addPlusB" @onclick="NewCarouselImage" title="Add neues Karussellbild">+</button>
+					</div>
 			  </div>
 			  @if (carouselImageService.DownloadedCarouselImage == null || carouselImageService.DownloadedCarouselImage.Count == 0)
 		  	  {
@@ -82,7 +83,6 @@
 		<ManagementLabel.Components.Pages.LogIn />
 	</NotAuthorized>
 </AuthorizeView>
-</div>
 
 @code {
 

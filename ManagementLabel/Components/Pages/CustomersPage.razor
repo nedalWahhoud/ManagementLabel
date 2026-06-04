@@ -5,7 +5,9 @@
 		<Authorized Context="authContext">
 			@{
 				var isManage = authContext.User.HasClaim("permission", "manageCustomers") || authContext.User.HasClaim("permission", "fullAccess");
+				var isDebtManage = authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess");
 				var isEdit = authContext.User.HasClaim("permission", "editCustomers") || authContext.User.HasClaim("permission", "fullAccess");
+				var isCreateCustomerOneTimePayment = authContext.User.HasClaim("permission", "createCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
 			}
 			@if (isManage)
 			{
@@ -47,7 +49,7 @@
 							</div>
 							<div class="dropdownListsDiv">
 								<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged" @onfocus="OnDistributionLineFocus">
-									<option value="0">Linie</option>
+									<option value="0">Linien</option>
 									@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 									{
 										<option value="@distributionLine.Id">@distributionLine.LineName</option>
@@ -139,7 +141,7 @@
 															<span>⋮</span>
 														}
 													</button>
-													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" isEdit="isEdit" OnHandel="HandleCustomDropdown" />
+													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" Permissions="new (isEdit,isDebtManage,isCreateCustomerOneTimePayment)" OnHandel="HandleCustomDropdown" />
 												</div>
 											</td>
 										</tr>
@@ -149,7 +151,7 @@
 						</table>
 					</div>
 					@* Add und Edit *@
-					@if (IsAdding)
+					if (IsAdding)
 					{
 						<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="new Customers()" Action="Add" OnHandel="HandleEditAdd" />
 					}
@@ -157,8 +159,11 @@
 					{
 						<ManagementLabel.Components.Layout.OverlayEditAddCustomers customer="EditingCustomer" Action="Edit" OnHandel="HandleEditAdd" />
 					}
+					else if (IsOneTimePaymentProcessing)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="add" OneTimePayment="newOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
+					}
 				}
-
 				@* map select *@
 				<ManagementLabel.Components.Layout.MapSelect />
 			}
@@ -207,7 +212,7 @@
 								user.HasClaim("permission", "fullAccess");
 		if (canViewCoupons)
 		{
-			taskDistributionLines = distributionLinesService.GetAllDistributionLines();
+			taskDistributionLines = distributionLinesService.GetAllDistributionLinesAsync();
 
 			// load the selected distributionLine id from local storage
 			selectedDistributionLineId = await localStorage.GetItemAsync<int>("selectedDistributionLineId");
@@ -241,11 +246,11 @@
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
 		await localStorage.SetItemAsync("columnOptionsCustomers", columnOptions);
 	}
+	// add
 	private void NewCustomer()
 	{
 		IsAdding = true;
 	}
-
 	private async Task HandleEditAdd((string action, CustomerProcess customerProcess) args)
 	{
 		if (args.action == "Add")
@@ -351,11 +356,11 @@
 		await AfterDistributionLineChanged();
 		await AfterStopNumberChanged();
 	}
-
+	// Dropdown 
 	private Customers EditingCustomer = null!;
 	private CustomerProcess thisCustomerProcess = new();
 	private bool IsEditing = false;
-	private async Task HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing) args)
+	private async Task HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing,OneTimePayment oneTimePayment, bool IsOneTimePaymentProcessing) args)
 	{
 		if (args.action == "Delete")
 		{
@@ -372,9 +377,14 @@
 			this.EditingCustomer = args.customerProcess.EditingCustomer;
 			this.IsEditing = args.IsEditing!;
 		}
+		else if (args.action == "oneTimePayment")
+		{
+			this.IsOneTimePaymentProcessing = args.IsOneTimePaymentProcessing;
+			this.newOneTimePayment = args.oneTimePayment;
+		}
+
 		StateHasChanged();
 	}
-
 	public async Task UpdateLocalCustomsdata()
 	{
 		customersService.DownloadProcesses.Clear();
@@ -386,6 +396,22 @@
 			await AfterDistributionLineChanged();
 		if (selectedStopNumberId > 0)
 			await AfterStopNumberChanged();
+	}
+	// oneTimePayment
+	public bool IsOneTimePaymentProcessing = false;
+	private OneTimePayment newOneTimePayment = null!;	
+	public void HandleOneTimePayment((string action, OneTimePayment oneTimePayment) args)
+	{
+		if (args.action == "add")
+		{
+			IsOneTimePaymentProcessing = false;
+			newOneTimePayment = null!;
+		}
+		else if (args.action == "cancel")
+		{
+			this.IsOneTimePaymentProcessing = false;
+			this.newOneTimePayment = null!;
+		}
 	}
 	// select all kontekt
 	private async Task SelectAllContent()

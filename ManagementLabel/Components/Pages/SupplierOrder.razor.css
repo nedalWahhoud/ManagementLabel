@@ -34,6 +34,9 @@
     .table tbody tr.selected td {
         background-color: transparent;
     }
+
+
+
 @media (max-width: 768px) {
     .table {
         width: 100%;

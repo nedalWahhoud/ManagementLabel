@@ -47,13 +47,13 @@ namespace ManagementLabel.Components.CustomersF
              
                 //
                 var response = await _http.PostAsJsonAsync("api/Customers/addCustomer", newCustomer);
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    var error = await response.Content.ReadFromJsonAsync<ValidationResult>();
-                    return error ?? new ValidationResult { Result = false, Message = "Fehler beim PostAsJsonAsync." };
+                    return result ?? new ValidationResult { Result = false, Message = "Fehler beim PostAsJsonAsync." };
                 }
                   
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 if (result?.Result == true)
                 {
                     if (result.NewId.HasValue)
