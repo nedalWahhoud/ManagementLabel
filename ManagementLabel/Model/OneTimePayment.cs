@@ -20,6 +20,9 @@ namespace ManagementLabel.Model
         [StringLength(500)]
         public string? Notes { get; set; }
         public DateTime? CreatedAt { get; set; }
+        [Required(ErrorMessage = "Bitte geben Sie ein Abholdatum an.")]
+        [DateInFuture(ErrorMessage = "Startdatum darf nicht in der Vergangenheit liegen.")]
+        public DateTime PickupDate { get; set; } = DateTime.Now.AddDays(1);
 
         [ForeignKey("CustomerId")]
         public virtual Customers? Customer { get; set; }
@@ -30,13 +33,11 @@ namespace ManagementLabel.Model
         [JsonIgnore]
         public bool IsProcessing { get; set; } = false; // Hilfsfeld, um anzuzeigen, ob die Zahlung gerade verarbeitet wird
         [JsonIgnore]
-        public bool EditingTotalAmount { get; set; } = false;
-        [JsonIgnore]
         public bool IsProcessingEditingAmount { get; set; } = false;
     }
     public class OneTimePaymentsGroupDto
     {
-        public DateTime GroupStartDate { get; set; } // Datum des ersten Tages in der Gruppe
+        public DateTime GroupPickupDate { get; set; } // Datum des ersten Tages in der Gruppe
         public List<OneTimePayment> Payments { get; set; } = [];
     }
     public enum OneTimePaymentStatus

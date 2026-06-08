@@ -33,12 +33,14 @@ namespace ManagementLabel.Model
         public int StopNumber { get; set; } = 1;
         public bool shouldStopnummerShift { get; set; } = false;
         [RegularExpression(@"^\d{4}$", ErrorMessage = "PIN muss nur aus 4 Zahlen bestehen.")]
-        public string? PIN { get; set; } 
-
+        public string? PIN { get; set; }
+        public bool HasOneTimePaymentToday { get; set; } = false;
         // 🔗 FK
         [Range(1, int.MaxValue, ErrorMessage = "DistributionLineId muss angegeben werden.")]
         public int DistributionLineId { get; set; }
         public DistributionLines? DistributionLine { get; set; }
+
+        public virtual ICollection<OneTimePayment> OneTimePayments { get; set; } = [];
     }
     public class CustomerProcess
     {

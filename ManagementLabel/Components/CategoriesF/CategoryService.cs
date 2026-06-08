@@ -7,32 +7,6 @@ namespace ManagementLabel.Components.CategoriesF
     public class CategoryService(HttpClient http,ProductService productService)
     {
         private readonly HttpClient _http = http;
-        private readonly ProductService _productService = productService;
-        public List<Categories> DownloadedCategories { get; set; } = [];
-        public async Task<List<Categories>> GetAllCategoriesAsync()
-        {
-            // if DownloadedCategories already has items, return them
-            if (DownloadedCategories.Count > 0)
-            {
-                return DownloadedCategories;
-            }
-            try
-            {
-                var response = await _http.GetAsync($"api/Categories/getCategories");
-                if (!response.IsSuccessStatusCode)
-                    return [];
-
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Categories>>();
-                // add the categories to the local list
-                AddCategoriesToLocal(getItems?.Items ?? []);
-
-                return getItems?.Items ?? [];
-            }
-            catch
-            {
-                return [];
-            }
-        }
         public async Task<ValidationResult> CreateCategory(Categories category)
         {
             try
@@ -63,6 +37,32 @@ namespace ManagementLabel.Components.CategoriesF
             catch
             {
                 return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht erstellt werden." };
+            }
+        }
+
+        public List<Categories> DownloadedCategories { get; set; } = [];
+        public async Task<List<Categories>> GetAllCategoriesAsync()
+        {
+            // if DownloadedCategories already has items, return them
+            if (DownloadedCategories.Count > 0)
+            {
+                return DownloadedCategories;
+            }
+            try
+            {
+                var response = await _http.GetAsync($"api/Categories/getCategories");
+                if (!response.IsSuccessStatusCode)
+                    return [];
+
+                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Categories>>();
+                // add the categories to the local list
+                AddCategoriesToLocal(getItems?.Items ?? []);
+
+                return getItems?.Items ?? [];
+            }
+            catch
+            {
+                return [];
             }
         }
         public async Task<Categories> GetCategoryById(int categoryId)

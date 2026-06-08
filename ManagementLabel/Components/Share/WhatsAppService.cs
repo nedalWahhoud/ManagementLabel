@@ -248,7 +248,7 @@ namespace ManagementLabel.Components.Share
             }
 
         }
-        public async Task<ValidationResult> SendMassage(Customers customer)
+        public async Task<ValidationResult> SendMassage(Customers customer,string? message = null)
         {
             try
             {
@@ -256,7 +256,8 @@ namespace ManagementLabel.Components.Share
                     return new ValidationResult { Result = false, Message = "Kundendaten sind null." };
                 if (string.IsNullOrEmpty(customer.PhoneNumber))
                     return new ValidationResult { Result = false, Message = "Keine Telefonnummer für diesen Kunden vorhanden." };
-                await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber, string.Empty);
+
+                await _JS.InvokeVoidAsync("whatsappRedirect.openWhatsApp", customer.PhoneNumber, message);
                 return new ValidationResult { Result = true, Message = "WhatsApp-Nachricht wurde erfolgreich geöffnet." };
             }
             catch (Exception ex)

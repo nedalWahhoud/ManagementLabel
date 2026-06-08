@@ -19,7 +19,13 @@ html, body {
     margin-top: 0.25rem;
     font-weight: bold;
 }
-
+/*  */
+.topPage {
+    top: 0;
+    z-index: 1020;
+    background-color: #cceeff;
+    width: 100%;
+}
 /* Table div */
 .showLoading {
     display: table-row;
@@ -146,6 +152,7 @@ html, body {
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    min-height:40vh;
 }
 /* Buchstabe Icon */
 .customLatIcon {
@@ -229,7 +236,8 @@ html, body {
             padding: 6px;
         }
     .standardOverlayForm {
-        height: 80vh; 
+        min-height:40vh;
+        max-height: 80vh; 
         margin-bottom: 80px;
         overflow-y: auto; 
     }

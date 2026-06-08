@@ -26,10 +26,17 @@
 					<div class="overlayField">
 						<div class="input-group">
 							<span class="input-group-text customLatIcon">G-Betrag</span>
-							<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.TotalAmount" @onfocus="@(e => SelectAllContent())" disabled="@(!(Action == "add"))" />
+							<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.TotalAmount" @onfocus="@(e => SelectAllContent())" disabled="@(!(Action == "editTotalAmount" || Action == "add"))" />
 							<span class="input-group-text customLatIcon">€</span>
 						</div>
 						<ValidationMessage For="@(() => oneTimePayment.TotalAmount)" />
+					</div>
+					<div class="overlayField">
+						<div class="input-group">
+							<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i> AbDa</span>
+							<InputDate id="PickupDate" class="form-control" @bind-Value="oneTimePayment.PickupDate" disabled="@(!(Action == "add"))" />
+						</div>
+						<ValidationMessage For="@(() => oneTimePayment.PickupDate)" />
 					</div>
 					@if (Action == "updateStatus")
 					{
@@ -108,15 +115,34 @@
 							}
 							else 
 							{
-								<select id="stopNumberSelect" class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-								@bind="selectedCustomerId"
-								@bind:after="AfterCustomerhanged">
-									<option value="0">Kunde ausgewählen/ اختر زبون</option>
-									@foreach (var customer in customersOfSelectedLine.DistinctBy(c => c.StopNumber).OrderBy(c => c.StopNumber))
-									{
-										<option value="@customer.Id">@customer.Name_de / @customer.Name_ar</option>
-									}
-								</select>
+								<div class="searchBox">
+
+									<input type="text" 
+									class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+									placeholder="Suchen nach Kunde... / ابحث عن زبون..."
+									@oninput="OnSearchCustomer" />
+
+									<ul class="searchDropdown">
+										@foreach (var customer in filteredCustomers)
+										{
+											if (customer != null)
+											{
+												<li @onclick="() => { selectedCustomerId = customer.Id;  AfterCustomerhanged(); }" class="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded">
+													@customer.Name_de / @customer.Name_ar
+												</li>
+											}
+										}
+									</ul>
+									@*<select id="stopNumberSelect" class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+											@bind="selectedCustomerId"
+											@bind:after="AfterCustomerhanged">
+										<option value="0">Kunde ausgewählen/ اختر زبون</option>
+										@foreach (var customer in customersOfSelectedLine.DistinctBy(c => c.StopNumber).OrderBy(c => c.StopNumber))
+										{
+											<option value="@customer.Id">@customer.Name_de / @customer.Name_ar</option>
+										}
+									</select>*@
+								</div>
 							}
 						}
 					</div>
@@ -175,9 +201,14 @@
 					</div>
 				</div>
 
-				<div class="mt-4">
+				<div class="mt-4 d-flex flex-column gap-2">
 					<button class="btn btn-success px-5" @onclick="CloseOverlayAfterSuccess">OK</button>
+					@if (!UnexpectedPaymentToAdd)
+					{
+						<NavLink class="btn btn-secondary px-5" href="/oneTimePayments">Zu Einmalzahlung Seite</NavLink>
+					}
 				</div>
+
 			</div>
 		}
 	</div>
@@ -213,6 +244,7 @@
 			if (result != null && result.Result)
 			{
 				isAddedSuccess = true;
+				oneTimePayment.Id = result?.NewId ?? 0; // die Id der neu erstellten Einmalzahlung zuweisen
 			}
 			else if (result != null && !result.Result)
 				await JS.InvokeVoidAsync("alert", result.Message);
@@ -242,7 +274,9 @@
 				IsProcessing = false;
 				return;
 			}
-
+		}
+		if (Action == "updateStatus" || Action == "editTotalAmount")
+		{
 			var result = await oneTimePaymentsService.UpdateOneTimePaymentAsync(oneTimePayment);
 			if (result.Result)
 			{
@@ -263,7 +297,7 @@
 	{
 		isAddedSuccess = false;
 
-		if (Action == "add" || UnexpectedPaymentToAdd)
+		if (Action == "add" && UnexpectedPaymentToAdd)
 			Action = "UnexpectedPayment";
 
 		await OnHandel.InvokeAsync((Action, oneTimePayment));
@@ -317,5 +351,25 @@
 			};
 		UnexpectedPaymentToAdd = true;
 		StateHasChanged();
+	}
+	private List<Customers> filteredCustomers = new();
+	private void OnSearchCustomer(ChangeEventArgs e)
+	{
+		string searchTerm = e.Value?.ToString()?.Trim().ToLower() ?? string.Empty;
+		if (customersOfSelectedLine != null)
+		{
+			if (string.IsNullOrEmpty(searchTerm))
+			{
+				filteredCustomers = new();
+			}
+			else
+			{
+				filteredCustomers = customersOfSelectedLine
+					.Where(c => c.DistributionLineId == selectedDistributionLineId &&
+								(c.Name_de.ToLower().Contains(searchTerm) || c.Name_ar.ToLower().Contains(searchTerm)))
+					.ToList();
+			}
+			StateHasChanged();
+		}
 	}
 }

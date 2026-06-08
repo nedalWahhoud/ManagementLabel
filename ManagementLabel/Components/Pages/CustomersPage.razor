@@ -48,8 +48,7 @@
 								</div>
 							</div>
 							<div class="dropdownListsDiv">
-								<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged" @onfocus="OnDistributionLineFocus">
-									<option value="0">Linien</option>
+								<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged">
 									@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 									{
 										<option value="@distributionLine.Id">@distributionLine.LineName</option>
@@ -57,7 +56,10 @@
 								</select>
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
 									<option value="0">Ha-Nr</option>
-									@foreach (var customer in customersService.DownloadedCustomers.DistinctBy(c => c.StopNumber).OrderBy(c => c.StopNumber))
+									@foreach (var customer in customersService.DownloadedCustomers
+									.Where(c => c.DistributionLineId == selectedDistributionLineId)
+									.DistinctBy(c => c.StopNumber)
+									.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -102,7 +104,7 @@
 								{
 									@foreach (var customer in customersToDisplay)
 									{
-										<tr>
+										<tr class="@(customer.HasOneTimePaymentToday ? "table-info fw-bold" : "")">
 											@if (ShowColumn("Id")){<td>@customer.Id</td>}
 											@if (ShowColumn("Name_de")){<td>@customer.Name_de</td>}
 											@if (ShowColumn("Name_ar")){<td>@customer.Name_ar</td>}
@@ -202,34 +204,49 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 
 	private bool IsAdding = false;
-	Task taskDistributionLines = Task.CompletedTask;
 	private bool IsLoading = true;
+	private int selectedDistributionLineId = 0;
+	private List<(Task<ValidationResult> task, int lineId)> customersTask = new();
+
 	protected async override Task OnInitializedAsync()
 	{
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
-		var canViewCoupons = user.HasClaim("permission", "manageCustomers") ||
+		var canMangeCustomers = user.HasClaim("permission", "manageCustomers") ||
 								user.HasClaim("permission", "fullAccess");
-		if (canViewCoupons)
+		if (canMangeCustomers)
 		{
-			taskDistributionLines = distributionLinesService.GetAllDistributionLinesAsync();
+			await distributionLinesService.GetAllDistributionLinesAsync();
 
+			// start holen der Kunden für jede line in Taks
+			foreach (var line in distributionLinesService.DownloadedDistributionLines)
+			{
+				var task = customersService.GetAllCustomersByLineId(line.Id);
+				customersTask.Add((task, line.Id));
+			}
 			// load the selected distributionLine id from local storage
 			selectedDistributionLineId = await localStorage.GetItemAsync<int>("selectedDistributionLineId");
 			if (selectedDistributionLineId > 0)
 			{
-				if (!taskDistributionLines.IsCompleted)
-					await taskDistributionLines;
-
 				await AfterDistributionLineChanged();
 			}
-			// get cutomer durch line id 
-			await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+			else
+			{
+				if (distributionLinesService.DownloadedDistributionLines != null && distributionLinesService.DownloadedDistributionLines.Count > 0)
+				{
+					// wenn keine line id in local storage, dann nehmen wir die erste line id von der heruntergeladenen Liste, damit die Kunden sofort angezeigt werden
+					selectedDistributionLineId = distributionLinesService.DownloadedDistributionLines.FirstOrDefault()?.Id ?? 0;
 
+					// wenn keine line gefunden wurde, dann holen wir erste kunden
+					await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+				}
+			}
 
 			selectedStopNumberId = await localStorage.GetItemAsync<int>("selectedStopNummerId");
 			if (selectedStopNumberId > 0)
 			{
+				await customersTask.Where(t => t.lineId == selectedDistributionLineId).Select(t => t.task).FirstOrDefault()!;
+
 				await AfterStopNumberChanged();
 			}
 
@@ -289,16 +306,27 @@
 	}
 	// filter 
 	private List<Customers> FilteredCustomers = null!;
-	private int selectedDistributionLineId = 0;
 	private async Task AfterDistributionLineChanged()
 	{
-		await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+		var task = customersTask.Where(t => t.lineId == selectedDistributionLineId).Select(t => t.task).FirstOrDefault();
+		if (task != null)
+		{
+			if (!task.IsCompleted)
+				await task;
+		}
+		else
+			await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+
 
 		if (customersService.DownloadedCustomers.Count > 0)
 		{
+			// wenn die aktuelle ausgewählte StopNumberId nicht in der neuen gefilterten Liste vorhanden ist, dann setzen wir die StopNumberId auf 0, damit alle Kunden angezeigt werden
+			selectedStopNumberId = 0;
+			// dann filtern
 			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.DistributionLineId == selectedDistributionLineId || selectedDistributionLineId == 0)
 			&& (c.StopNumber == selectedStopNumberId || selectedStopNumberId == 0)
 			).ToList();
+			
 		}
 		else
 		{
@@ -307,13 +335,6 @@
 
 		// save the selected category id in local storage
 		await localStorage.SetItemAsync("selectedDistributionLineId", selectedDistributionLineId);
-	}
-	private async Task OnDistributionLineFocus()
-	{
-		if (!taskDistributionLines.IsCompleted)
-		{
-			await taskDistributionLines;
-		}
 	}
 	private int selectedStopNumberId = 0;
 	private async Task AfterStopNumberChanged()
@@ -360,6 +381,7 @@
 	private Customers EditingCustomer = null!;
 	private CustomerProcess thisCustomerProcess = new();
 	private bool IsEditing = false;
+
 	private async Task HandleCustomDropdown((string action, CustomerProcess customerProcess, bool IsEditing,OneTimePayment oneTimePayment, bool IsOneTimePaymentProcessing) args)
 	{
 		if (args.action == "Delete")

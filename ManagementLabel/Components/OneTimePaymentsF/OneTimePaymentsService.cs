@@ -1,14 +1,11 @@
 ﻿using ManagementLabel.Model;
-using System.Data;
-using System.Net;
-using static System.Net.WebRequestMethods;
 
 namespace ManagementLabel.Components.OneTimePaymentsF
 {
     public class OneTimePaymentsService(HttpClient http)
     {
         private readonly HttpClient _http = http;
-        public List<List<OneTimePaymentsGroupDto>> DownloadedGroups { get; private set; } = [];
+        public List<(List<OneTimePaymentsGroupDto> Group, int lineId)> DownloadedGroups { get; private set; } = [];
         public async Task<ValidationResult> Add(OneTimePayment newOneTimePayment)
         {
             try
@@ -20,6 +17,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                     CustomerId = newOneTimePayment.CustomerId,
                     DistributionLineId = newOneTimePayment.DistributionLineId,
                     TotalAmount = newOneTimePayment.TotalAmount,
+                    PickupDate = newOneTimePayment.PickupDate,
                     AmountCollected = newOneTimePayment.AmountCollected,
                     Status = newOneTimePayment.Status,
                     Notes = newOneTimePayment.Notes,
@@ -43,10 +41,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 paymentToSend.Customer = newOneTimePayment.Customer;
                 paymentToSend.DistributionLine = newOneTimePayment.DistributionLine;
 
-                DownloadedGroups.Add([new OneTimePaymentsGroupDto {
-                                    GroupStartDate = paymentToSend.CreatedAt ?? DateTime.Now,
-                                    Payments = [paymentToSend] 
-                }]);
+                AddOneTimePaymentToLocal(newOneTimePayment.DistributionLineId,null, paymentToSend);
 
 
 
@@ -60,11 +55,13 @@ namespace ManagementLabel.Components.OneTimePaymentsF
 
         public async Task<ValidationResult> GetGroupedPaymentsByLineId(int lineId)
         {
-            // bevor neue Daten geladen werden, werden die alten Daten gelöscht, damit keine veralteten Daten angezeigt werden
-            DownloadedGroups.Clear();
-
             try
             {
+                if(DownloadedGroups.Any(g => g.lineId == lineId))
+                {
+                    return new ValidationResult { Result = true, Message = "Einmalzahlungen bereits lokal vorhanden." };
+                }
+
                 var response = await _http.GetAsync($"api/OneTimePayments/getGroupedPaymentsByLineId/{lineId}");
                 if (!response.IsSuccessStatusCode)
                 {
@@ -76,7 +73,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                     return new ValidationResult { Result = false, Message = "Keine Einmalzahlungen für diese Linie." };
                 }
                 // add to Local
-                DownloadedGroups.Add(groupedPayment);
+                AddOneTimePaymentToLocal(lineId,groupedPayment);
 
                 return new ValidationResult { Result = true, Message = "Einmalzahlungen erfolgreich abgerufen." };
             }
@@ -102,14 +99,14 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 OneTimePaymentsGroupDto targetGroup = null!;
                 OneTimePayment oldPayment = null!;
 
-                foreach (var lineList in DownloadedGroups)
+                foreach (var (Group, lineId) in DownloadedGroups)
                 {
-                    foreach (var group in lineList)
+                    foreach (var group in Group)
                     {
                         var payment = group.Payments.FirstOrDefault(p => p.Id == editOneTimePayment.Id);
                         if (payment != null)
                         {
-                            targetLineList = lineList;
+                            targetLineList = Group;
                             targetGroup = group;
                             oldPayment = payment;
                             break;
@@ -155,14 +152,14 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                     OneTimePaymentsGroupDto targetGroup = null!;
                     OneTimePayment paymentToRemove = null!;
 
-                    foreach (var lineList in DownloadedGroups)
+                    foreach (var (Group, lineId) in DownloadedGroups)
                     {
-                        foreach (var group in lineList)
+                        foreach (var group in Group)
                         {
                             var payment = group.Payments.FirstOrDefault(p => p.Id == id);
                             if (payment != null)
                             {
-                                targetLineList = lineList;
+                                targetLineList = Group;
                                 targetGroup = group;
                                 paymentToRemove = payment;
                                 break;
@@ -182,12 +179,6 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                         {
                             targetLineList.Remove(targetGroup);
                         }
-
-                        //Wenn die Schriftartenliste keine Gruppen mehr enthält, löschen Sie die gesamte Schriftart aus dem Cache.
-                        if (targetLineList.Count == 0)
-                        {
-                            DownloadedGroups.Remove(targetLineList);
-                        }
                     }
                 }
 
@@ -199,12 +190,59 @@ namespace ManagementLabel.Components.OneTimePaymentsF
             }
         }
         // loacl
+        public void AddOneTimePaymentToLocal(int lineId,List<OneTimePaymentsGroupDto>? groupedPayment = null, OneTimePayment? payment = null)
+        {
+            // add group
+            if (groupedPayment != null)
+            {
+                var existingLine = DownloadedGroups.FirstOrDefault(g => g.lineId == lineId);
+                if (existingLine != default)
+                {
+                    existingLine.Group.AddRange(groupedPayment);
+                }
+                else
+                {
+                    DownloadedGroups.Add((groupedPayment, lineId));
+                }
+            }
+            // add payment
+            else if (payment != null)
+            {
+                var existingLine = DownloadedGroups.FirstOrDefault(g => g.lineId == payment.DistributionLineId);
+                if (existingLine != default)
+                {
+                    var existingGroup = existingLine.Group.FirstOrDefault(g => g.GroupPickupDate.Date == payment.PickupDate.Date);
+                    if (existingGroup != default)
+                    {
+                        existingGroup.Payments.Add(payment);
+                    }
+                    else
+                    {
+                        existingLine.Group.Add(new OneTimePaymentsGroupDto
+                        {
+                            GroupPickupDate = payment.PickupDate.Date,
+                            Payments = [payment]
+                        });
+                    }
+                }
+                else
+                {
+                    DownloadedGroups.Add((new List<OneTimePaymentsGroupDto>
+                    {
+                        new() {
+                            GroupPickupDate = payment.PickupDate.Date,
+                            Payments = [payment]
+                        }
+                    }, payment.DistributionLineId));
+                }
+            }
+        }
         public OneTimePayment? GetOneTimePaymentByIdLocal(int id)
         {
             return DownloadedGroups
-                .SelectMany(lineList => lineList)
-                .SelectMany(group => group.Payments) 
-                .FirstOrDefault(p => p.Id == id); 
+                .SelectMany(lineList => lineList.Group)
+                .SelectMany(group => group.Payments)
+                .FirstOrDefault(p => p.Id == id);
         }
         public string GetEnumDisplayName(OneTimePaymentStatus status)
         {

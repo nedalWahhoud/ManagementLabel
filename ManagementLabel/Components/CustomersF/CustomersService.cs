@@ -202,6 +202,37 @@ namespace ManagementLabel.Components.CustomersF
                    currentCustomer.StopNumber != editCustomer.StopNumber ||
                    currentCustomer.PIN != editCustomer.PIN;
         }
+        public (bool hasAddress, string fullAddress) AddressInitialisierenMap(Customers customer)
+        {
+            if (customer == null)
+                return new();
+
+            // Address aufbauen
+            var addressParts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(customer.Street))
+                addressParts.Add(customer.Street);
+
+            if (!string.IsNullOrWhiteSpace(customer.BuildingNumber))
+                addressParts.Add(customer.BuildingNumber);
+
+            if (!string.IsNullOrWhiteSpace(customer.PostalCode) ||
+                !string.IsNullOrWhiteSpace(customer.City))
+                addressParts.Add($"{customer.PostalCode} {customer.City}");
+
+            var fullAddress = string.Join(" ", addressParts).Trim();
+
+            bool hasAddress = !string.IsNullOrWhiteSpace(fullAddress);
+            bool hasCoordinates = customer.Latitude != 0 && customer.Longitude != 0;
+
+            if (!hasAddress && !hasCoordinates)
+            {
+                Console.WriteLine("Keine Adresse oder Koordinaten vorhanden.");
+                return new();
+            }
+
+            return (hasAddress, fullAddress);
+        }
         public class CustomerDownloadProcess
         {
            public int Id { get; set; }
