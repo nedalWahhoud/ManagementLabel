@@ -152,7 +152,7 @@
 						</div>
 					}
 
-					@if (IsAdding)
+					@if (IsAddingGroup)
 					{
 						<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="new GroupProducts()" Action="Add" OnHandel="HandleEditAddGroupProduct" />
 					}
@@ -274,8 +274,8 @@
 	}
 	// producktGrouppe 
 	private GroupProducts EditingGroupProduct = null!;
-	private bool IsEditingGroup = false;
 	private bool IsAddingGroup = false;
+	private bool IsEditingGroup = false;
 
 	private void NewGroup()
 	{

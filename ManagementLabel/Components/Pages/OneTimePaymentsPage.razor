@@ -2,7 +2,6 @@
 <div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
-
             @{
                 var isManageCustomerOneTimePayment = authContext.User.HasClaim("permission", "manageCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
                 var isViewAndMangeStatus = authContext.User.HasClaim("permission", "viewPageAndManageStatusCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
@@ -128,8 +127,8 @@
                                             @if (SelectedDate != null)
                                             {
                                                 <div class="col-md-8">
-                                                    <h6 class="text-dark fw-bold mb-3">
-                                                        <i class="bi bi-receipt me-2"></i>
+                                                    <h6 class="text-dark fw-bold mt-1">
+                                                        <i class="bi bi-receipt me-2 mt-1"></i>
                                                         Zahlungen @(SelectedDate != null ? $"am {SelectedDate?.GroupPickupDate.ToString("dd.MM.yyyy")}" : "")
                                                     </h6>
 

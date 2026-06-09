@@ -1,10 +1,12 @@
-﻿using ManagementLabel.Model;
+﻿using ManagementLabel.Components.CustomersF;
+using ManagementLabel.Model;
 
 namespace ManagementLabel.Components.OneTimePaymentsF
 {
-    public class OneTimePaymentsService(HttpClient http)
+    public class OneTimePaymentsService(HttpClient http,CustomersService customersService)
     {
         private readonly HttpClient _http = http;
+        private readonly CustomersService _customersService = customersService;
         public List<(List<OneTimePaymentsGroupDto> Group, int lineId)> DownloadedGroups { get; private set; } = [];
         public async Task<ValidationResult> Add(OneTimePayment newOneTimePayment)
         {
@@ -41,9 +43,27 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 paymentToSend.Customer = newOneTimePayment.Customer;
                 paymentToSend.DistributionLine = newOneTimePayment.DistributionLine;
 
-                AddOneTimePaymentToLocal(newOneTimePayment.DistributionLineId,null, paymentToSend);
+                // wenn die line noch nicht von server abgerufen wurde, dann muss nicht in lokale hinzufügen sonst wird die line blockiert, damit wemm der Benutzer zu seite Einamalzahlung geht wird die data von server abgerufen.
+                if (DownloadedGroups.Any(g => g.lineId == newOneTimePayment.DistributionLineId))
+                {
+                    AddOneTimePaymentToLocal(newOneTimePayment.DistributionLineId, null, paymentToSend);
+                }
 
-
+                // prüfen wenn die gelöschte Einmalzahlung heute ist, dann muss die Flag "HasOneTimePaymentToday" in Kundenservice aktualisiert werden, damit die Anzeige in Kundenliste korrekt funktioniert
+                if (_customersService.DownloadedCustomers != null && _customersService.DownloadedCustomers.Count > 0)
+                {
+                    var customer = _customersService.DownloadedCustomers.FirstOrDefault(c => c.Id == paymentToSend?.CustomerId);
+                    if (customer != null)
+                    {
+                        if (!customer.HasOneTimePaymentToday)
+                        {
+                            if (paymentToSend?.PickupDate.Date == DateTime.Now.Date)
+                            {
+                                customer.HasOneTimePaymentToday = true;
+                            }
+                        }
+                    }
+                }
 
                 return result;
             }
@@ -57,7 +77,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
         {
             try
             {
-                if(DownloadedGroups.Any(g => g.lineId == lineId))
+                if (DownloadedGroups.Any(g => g.lineId == lineId))
                 {
                     return new ValidationResult { Result = true, Message = "Einmalzahlungen bereits lokal vorhanden." };
                 }
@@ -72,8 +92,9 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 {
                     return new ValidationResult { Result = false, Message = "Keine Einmalzahlungen für diese Linie." };
                 }
+
                 // add to Local
-                AddOneTimePaymentToLocal(lineId,groupedPayment);
+                    AddOneTimePaymentToLocal(lineId, groupedPayment);
 
                 return new ValidationResult { Result = true, Message = "Einmalzahlungen erfolgreich abgerufen." };
             }
@@ -180,6 +201,21 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                             targetLineList.Remove(targetGroup);
                         }
                     }
+                    // prüfen wenn die gelöschte Einmalzahlung heute ist, dann muss die Flag "HasOneTimePaymentToday" in Kundenservice aktualisiert werden, damit die Anzeige in Kundenliste korrekt funktioniert
+                    if (_customersService.DownloadedCustomers != null && _customersService.DownloadedCustomers.Count > 0)
+                    {
+                        var customer = _customersService.DownloadedCustomers.FirstOrDefault(c => c.Id == paymentToRemove?.CustomerId);
+                        if (customer != null)
+                        {
+                            if (customer.HasOneTimePaymentToday)
+                            {
+                                if(paymentToRemove?.PickupDate.Date == DateTime.Now.Date)
+                                {
+                                    customer.HasOneTimePaymentToday = false;
+                                }
+                            }
+                        }
+                    }
                 }
 
                 return result;
@@ -215,6 +251,8 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                     if (existingGroup != default)
                     {
                         existingGroup.Payments.Add(payment);
+                        // order 
+                        existingGroup.Payments = [.. existingGroup.Payments.OrderBy(o => o.Customer?.StopNumber)];
                     }
                     else
                     {

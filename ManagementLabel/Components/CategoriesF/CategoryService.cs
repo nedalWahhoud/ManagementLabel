@@ -4,7 +4,7 @@ using static System.Net.WebRequestMethods;
 
 namespace ManagementLabel.Components.CategoriesF
 {
-    public class CategoryService(HttpClient http,ProductService productService)
+    public class CategoryService(HttpClient http)
     {
         private readonly HttpClient _http = http;
         public async Task<ValidationResult> CreateCategory(Categories category)
