@@ -55,8 +55,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     public async Task NotifyUserLogout()
     {
         await LocalstorageRemove("authToken");
-        // Reset the product service state
-        _productService.Reset();
+       
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))));
     }
     public async Task LocalstorageSet(string key, string value)

@@ -47,7 +47,7 @@
 											Bearbeiten
 										</button>
 										<button class="btn btn-sm btn-danger"
-										@onclick="() => DeleteDistributionLine(distributionLine.Id)" disabled="@IsDeletingProcessing.Item1">
+										@onclick="() => DeleteDistributionLine(distributionLine)" disabled="@IsDeletingProcessing.Item1">
 											@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == distributionLine.Id)
 											{
 												<span class="spinner-border spinner-border-sm"
@@ -134,25 +134,25 @@
 	}
 	private (bool, int) IsDeletingProcessing = (false, 0);
 
-	private async Task DeleteDistributionLine(int id)
+	private async Task DeleteDistributionLine(DistributionLines line)
 	{
-		if (id <= 0)
+		if (line == null || line.Id <= 0)
 		{
-			await JS.InvokeVoidAsync("alert", "Please select a DistributionLine");
+			await JS.InvokeVoidAsync("alert", "Bitte wählen Sie eine Line aus.");
 			return;
 		}
-		IsDeletingProcessing = (true, id);
-		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {id} wirklich löschen?");
+		IsDeletingProcessing = (true, line.Id);
+		var resultConfirm = await JS.InvokeAsync<bool>("confirm", $"Möchten Sie das DistributionLine mit der ID {line.Id} wirklich löschen?");
 		if (resultConfirm)
 		{
-			var result = await distributionLinesService.DeleteDistributionLineAsync(id);
+			var result = await distributionLinesService.DeleteDistributionLineAsync(line.Id);
 			if (!result.Result)
 			{
 				await JS.InvokeVoidAsync("alert", result.Message);
 			}
 
 		}
-		IsDeletingProcessing = (false, id);
+		IsDeletingProcessing = (false, line.Id);
 	}
 	private void HandleEditAddDistributionLine(string action)
 	{

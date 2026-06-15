@@ -116,7 +116,7 @@ window.mapRedirect = {
                 window.mapRedirect.closeModal();
             };
 
-            // إظهار نافذة الخيارات للمستخدم
+          
             document.getElementById('customMapModal').style.display = 'flex';
 
         } else if (isAndroid) {

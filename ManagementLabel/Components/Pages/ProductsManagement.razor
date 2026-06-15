@@ -385,7 +385,7 @@
 	private bool IsLoadingMessage = false;
 	private bool IsRended = false;
 	private Users? user;
-
+	private GetItems<Products> getItems = new();
 	// show Colmuns
 	private List<ColumnOption> columnOptions = new()
     {
@@ -440,12 +440,12 @@
 			// wenn die category filter gesetzt in latzt Sitzung wurde dann filtern nach lest gespeicherte category
 			if (selectedCategoryId > 0)
 			{
-				productService.GetItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category } };
+				getItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category },Includes = ProductIncludes.Category | ProductIncludes.ProductImages };
 				if (!taskCatyrories.IsCompleted)
 					await taskCatyrories;
 			}
 			else
-				productService.GetItems = new();
+				getItems = new();
 
 			// initialzieren die Filtereinstellung für die Produkte und die Produkte leeren, damit die neuen Produkte geladen werden können
 			productService.DownloadedProduct.Clear();
@@ -492,7 +492,7 @@
 
 		IsLoadingMessage = true;
 
-		var moreProducts = await productService.LoadMoreProducts();
+		var moreProducts = await productService.GetProducts(getItems);
 
 		// initialize CartItem for each product
 		foreach (var product in moreProducts.Items)
@@ -516,7 +516,9 @@
 			else
 				filterP = new List<Products>(moreProducts.Items);
 		}
-
+		// die items reinigen, damit nicht mit rquset nach server geschickt werden
+		getItems.AllItemsLoaded = moreProducts.AllItemsLoaded;
+		getItems.CurrentPage = moreProducts.CurrentPage;
 		// hide the loading message
 		IsLoadingMessage = false;
 
@@ -765,12 +767,12 @@
 			// if selectedId is 0, clear the filter
 			filterP = null!;
 			// reset die Getitem 
-			productService.GetItems = new();
+			getItems = new();
 		}
 		else
 		{
 			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
-			productService.GetItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category } };
+			getItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages };
 			var moreProducts = await loadInBackground();
 
 			// get the products by categoryId local, after downloading from server
@@ -792,7 +794,7 @@
 		if (selectedValuesFilter == 1)
 		{
 			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
-			productService.GetItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.LowStock } };
+			getItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.LowStock }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages  };
 			var moreProducts = await loadInBackground();
 
 			filterP = moreProducts.Items;
@@ -800,7 +802,7 @@
 		else if (selectedValuesFilter == 2)
 		{
 			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
-			productService.GetItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.OnOffer } };
+			getItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.OnOffer }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages };
 			var moreProducts = await loadInBackground();
 
 			filterP = moreProducts.Items;
@@ -809,7 +811,7 @@
 		{
 			filterP = null!;
 			// reset die Getitem
-			productService.GetItems = new();
+			getItems = new();
 		}
 		StateHasChanged();
 	}

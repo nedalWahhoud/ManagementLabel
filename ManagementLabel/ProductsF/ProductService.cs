@@ -8,7 +8,6 @@ namespace ManagementLabel.ProductsF
     public class ProductService(HttpClient http)
     {
         private readonly HttpClient _http = http;
-        public GetItems<Products> GetItems { get; set; } = new();
         public List<Products> DownloadedProduct { get; set; } = [];
 
         public List<TaxRate> DownloadedTaxRates { get; set; } = [];
@@ -34,27 +33,32 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-        public async Task<GetItems<Products>> LoadMoreProducts()
+        public async Task<GetItems<Products>> GetProducts(GetItems<Products> getItem)
         {
-            if (GetItems.AllItemsLoaded)
-                return new() { AllItemsLoaded = GetItems.AllItemsLoaded };
+            if (getItem.AllItemsLoaded)
+                return new() { AllItemsLoaded = getItem.AllItemsLoaded };
             try
             {
-                var response = await _http.GetAsync($"api/Products/getProducts?CurrentPage={GetItems.CurrentPage}&PageSize={GetItems.PageSize}&AllItemsLoaded={GetItems.AllItemsLoaded}&Filter.Id={GetItems.Filter?.Id}"+
-                    $"&Filter.Type={(int)(GetItems.Filter?.Type ?? GetItemFilterType.None)}");
+                var response = await _http.PostAsJsonAsync($"api/Products/getProducts", getItem);
 
                 if (!response.IsSuccessStatusCode)
                     return new();
 
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Products>>();
-
-                GetItems.AllItemsLoaded = getItems!.AllItemsLoaded;
-                GetItems.CurrentPage = getItems!.CurrentPage;
+                getItem = await response.Content.ReadFromJsonAsync<GetItems<Products>>() ?? new();
 
                 // add to local list
-                AddProductToLocal(getItems.Items);
+                AddProductToLocal(getItem.Items);
 
-                return getItems ?? new();
+                if (getItem.AllItemsLoaded == true)
+                {
+                    return getItem;
+                }
+                else
+                {
+                    getItem.CurrentPage++;
+                    return getItem;
+                }
+
             }
             catch
             {
@@ -168,13 +172,7 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-        public void Reset()
-        {
-            GetItems.Items.Clear();
-            GetItems.AllItemsLoaded = false;
-            GetItems.CurrentPage = 0;
-            GetItems.PageSize = 11;
-        }
+      
         public bool IsEditedProduct(Products currentProduct, Products editProduct)
         {
             if (editProduct == null || currentProduct == null)
@@ -230,7 +228,7 @@ namespace ManagementLabel.ProductsF
 
             return false;
         }
-        private bool HasDiscountChanged(ProductDiscounts? oldDiscount, ProductDiscounts? newDiscount)
+        private static bool HasDiscountChanged(ProductDiscounts? oldDiscount, ProductDiscounts? newDiscount)
         {
             var effectiveOld = (oldDiscount == null || oldDiscount.DiscountedPrice <= 0) ? null : oldDiscount;
             var effectiveNew = (newDiscount == null || newDiscount.DiscountedPrice <= 0) ? null : newDiscount;

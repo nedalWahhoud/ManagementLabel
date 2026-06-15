@@ -11,9 +11,9 @@
 				</div>
 			</div>
 			@if (authContext.User.HasClaim("permission", "orderFromSupplier") ||
-									authContext.User.HasClaim("permission", "fullAccess"))
+																					authContext.User.HasClaim("permission", "fullAccess"))
 			{
-				<div tabindex="0" id="SOPContainer" class="tableResponsive">
+				<div tabindex="0" id="SOPContainer" class="tableContiner">
 					<div class="topTable">
 						<div class="buttonsDiv">
 							@* add neu Product *@
@@ -58,7 +58,7 @@
 									</td>
 								</tr>
 							</Virtualize>
-							@if (!IsProcessing && dataSource.Count == 0)
+							@if (!IsLoading && dataSource.Count == 0)
 							{
 								<tr id="loadingMessage">
 									<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
@@ -90,28 +90,28 @@
 	private Suppliers supplier = new Suppliers();
 	private bool hasPermission = false;
 	private bool IsProcessing { get; set; } = false;
+	private bool IsLoading { get; set; } = false;
 	private Products? selectedRow;
 	private string selectedLanguage = "ar";
 	private Dictionary<int, int> selectedQuantities = new Dictionary<int, int>();
-
+	private GetItems<Products> getItem = new();
 	protected override async Task OnInitializedAsync()
 	{
+		IsLoading = true;
+
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		hasPermission = user.HasClaim("permission", "orderFromSupplier") ||
 				user.HasClaim("permission", "fullAccess");
 		if (!hasPermission)
 			return;
-
-		IsProcessing = true;
-
 		supplier =  suppliersService.GetSupplierByIdLocal(SupplierId) ?? await suppliersService.GetSupplierByIdAsync(SupplierId);
-		productService.GetItems = new() { Filter = new() { Id = SupplierId, Type = GetItemFilterType.Supplier } };
+		getItem = new() { Filter = new() { Id = SupplierId, Type = GetItemFilterType.Supplier }, Includes = ProductIncludes.Suppliers | ProductIncludes.ProductImages };
 		productService.DownloadedProduct.Clear();
 		// erste Produkte laden
-		await loadInBackground();
+		await OnScrollEnd();
 
-		IsProcessing = false;
+		IsLoading = false;
 	}
 	private DotNetObjectReference<SupplierOrder>? objRef;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -124,20 +124,15 @@
 		try
 		{
 			await JS.InvokeVoidAsync("checkScrollEnd", objRef, "SOPContainer");
+			// aktivieren die Funktion, die die Höhe von topTable zu aktualisieren, damit die thead th immer sichtbar bleibt bei Scroll
+			await JS.InvokeVoidAsync("updateTopTableHeight");
 		}
 		catch (Exception ex)
 		{
 			Console.WriteLine($"Error initializing scroll event: {ex.Message}");
 		}
 	}
-	private async Task<GetItems<Products>> loadInBackground()
-	{
-		var moreProducts = await productService.LoadMoreProducts();
-
-		await InvokeAsync(StateHasChanged);
-
-		return moreProducts;
-	}
+	
 	private async Task PlaceOrder()
 	{
 		if (selectedQuantities.Count == 0)
@@ -163,7 +158,14 @@
 		if (IsProcessing)
 			return;
 		IsProcessing = true;
-		await loadInBackground();
+
+		var moreProducts = await productService.GetProducts(getItem);
+
+		getItem.AllItemsLoaded = moreProducts.AllItemsLoaded;
+		getItem.CurrentPage = moreProducts.CurrentPage;
+
+		await InvokeAsync(StateHasChanged);
+
 		IsProcessing = false;
 	}
 	private void UpdateQuantity(int productId,Products product, int quantity)

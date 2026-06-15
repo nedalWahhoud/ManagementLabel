@@ -133,15 +133,6 @@
 											}
 										}
 									</ul>
-									@*<select id="stopNumberSelect" class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-											@bind="selectedCustomerId"
-											@bind:after="AfterCustomerhanged">
-										<option value="0">Kunde ausgewählen/ اختر زبون</option>
-										@foreach (var customer in customersOfSelectedLine.DistinctBy(c => c.StopNumber).OrderBy(c => c.StopNumber))
-										{
-											<option value="@customer.Id">@customer.Name_de / @customer.Name_ar</option>
-										}
-									</select>*@
 								</div>
 							}
 						}
@@ -347,7 +338,8 @@
 					?? await customersService.GetCustomerByIdAsync(selectedCustomerId),
 				DistributionLineId = selectedDistributionLineId,
 				DistributionLine = distributionLinesService.DownloadedDistributionLines.FirstOrDefault(dl => dl.Id == selectedDistributionLineId)
-					?? await distributionLinesService.GetDistributionLineById(selectedDistributionLineId)
+					?? await distributionLinesService.GetDistributionLineById(selectedDistributionLineId),
+					PickupDate = DateTime.Now
 			};
 		UnexpectedPaymentToAdd = true;
 		StateHasChanged();

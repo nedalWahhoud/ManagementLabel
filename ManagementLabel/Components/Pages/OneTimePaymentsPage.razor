@@ -221,6 +221,9 @@
                     <ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="@IsOneTimePaymentProcessing.Item2" OneTimePayment="editOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
                 }
             }
+
+            @* map select *@
+            <ManagementLabel.Components.Layout.MapSelect />
         </Authorized>
         <NotAuthorized>
             <ManagementLabel.Components.Pages.LogIn />
@@ -326,7 +329,9 @@
                 AmountCollected = currentPayment.AmountCollected,
                 Status = newStatus,
                 Notes = currentPayment.Notes,
-                CreatedAt = currentPayment.CreatedAt
+                CreatedAt = currentPayment.CreatedAt,
+                PickupDate = currentPayment.PickupDate
+
             };
         if (newStatus == OneTimePaymentStatus.TeilweiseInkassiert || newStatus == OneTimePaymentStatus.Ueberzahlt || newStatus == OneTimePaymentStatus.Verschoben)
         {
@@ -544,10 +549,17 @@
     }
     private async Task OnMap(Customers customer)
     {
-		var address = customersService.AddressInitialisierenMap(customer);
+        try
+        {
+            var address = customersService.AddressInitialisierenMap(customer);
 
-        await JS.InvokeVoidAsync("mapRedirect.openMap", customer.Latitude, customer.Longitude, address.hasAddress ? address.fullAddress : "");
-		showContextMenu = false;
+            await JS.InvokeVoidAsync("mapRedirect.openMap", customer.Latitude, customer.Longitude, address.hasAddress ? address.fullAddress : "");
+            showContextMenu = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"OnMap Fehler OneTimePaymentPage: {ex.InnerException?.Message ?? ex.Message}");
+        }
     }
     private async Task OnPhone(string phoneNumber)
     {
