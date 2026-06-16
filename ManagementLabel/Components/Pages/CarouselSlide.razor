@@ -1,8 +1,8 @@
 ﻿@page "/carousel"
-
+@inherits ProjectComponentBase
 <AuthorizeView>
 	<Authorized Context="authContext">
-		@if (IsLoading)
+		@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 		{
 			<ManagementLabel.Components.Layout.Loading />
 		}
@@ -98,10 +98,8 @@
 	private bool IsEditing = false;
 	private (bool,int) IsProcessing = (false,0);
 	private bool HasManageCarouselPermission = false;
-	private bool IsLoading = false;
 	protected override async Task OnInitializedAsync()
 	{
-		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		HasManageCarouselPermission = user.HasClaim("permission", "manageCarousel") ||
@@ -110,7 +108,9 @@
 		{
 			await carouselImageService.GetAllCarouselAsync();
 		}
-		IsLoading = false;
+		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
+		IsRendered.AfterRender = IsRendered.ParametersSet = true;
+		IsRendered.Initialized = true;
 	}
 
 	private void NewCarouselImage()

@@ -1,9 +1,9 @@
 ﻿@page "/suppliers"
-
+@inherits ProjectComponentBase
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -216,11 +216,9 @@
 		await localStorage.SetItemAsync("columnOptionsSuppliers", columnOptions);
 	}
 	private bool IsProcessing = false;
-	private bool IsLoading = false;
 	private bool isHasManageSuppliersPermission = false;
 	protected override async Task OnInitializedAsync()
 	{
-		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 
@@ -235,7 +233,10 @@
 			if (saved is not null)
 				columnOptions = saved;
 		}
-		IsLoading = false;
+
+		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
+		IsRendered.AfterRender = IsRendered.ParametersSet = true;
+		IsRendered.Initialized = true;
 	}
 	private bool IsEditing = false;
 	private bool IsAdding = false;
@@ -271,9 +272,6 @@
 	private string menuYpx => $"{menuY}px";
 	private void OnDoubleTap(Suppliers supplier, MouseEventArgs e)
 	{
-		/*if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
-			return;*/
-
 		//selectedProduct = supplier;
 		selectedSupplier = supplier;
 
@@ -285,9 +283,6 @@
 	}
 	private void OnSelectRow(Suppliers supplier, MouseEventArgs e)
 	{
-		/*if (_editProduct != null || IsShowAddProductForm || IsDeleting || IsShowInvoice || IsShowOrder)
-			return;*/
-
 		if (e.Button == 2)
 		{
 			//selectedProduct = supplier;
@@ -342,7 +337,6 @@
 	}
 	private void PlaceOrder(Suppliers supplier)
 	{
-
 		if (supplier == null || supplier.Id <= 0)
 		{
 			JS.InvokeVoidAsync("alert", "Ungültiger Lieferant.");

@@ -1,9 +1,9 @@
 ﻿@page "/discountcode"
-
+@inherits ProjectComponentBase
 <div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
-            @if (IsLoading)
+            @if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
             {
                 <ManagementLabel.Components.Layout.Loading />
             }
@@ -63,11 +63,11 @@
                                         && item.StartDate <= now
                                         && item.EndDate >= now;
                                         <tr @key="item.Id"
-                                            @oncontextmenu:preventDefault="true"
-                                            @oncontextmenu="@(e => OnSelectRow(item,null!, e))"
-                                            @onclick="(e) => OnSelectRow(item,null!, e)"
-                                            @ondblclick="(e) => OnDoubleTap(item,null!, e)"
-                                            class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
+                                        @oncontextmenu:preventDefault="true"
+                                        @oncontextmenu="@(e => OnSelectRow(item,null!, e))"
+                                        @onclick="(e) => OnSelectRow(item,null!, e)"
+                                        @ondblclick="(e) => OnDoubleTap(item,null!, e)"
+                                        class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
                                             <td>@item.Code</td>
                                             <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? "%" : "€")</td>
                                             <td>@item.TimesUsed / @item.UsageLimit</td>
@@ -105,11 +105,11 @@
                                         && item.StartDate <= now
                                         && item.EndDate >= now;
                                         <tr @key="item.Id"
-                                            @oncontextmenu:preventDefault="true"
-                                            @oncontextmenu="@(e => OnSelectRow(null!,item, e))"
-                                            @onclick="(e) => OnSelectRow(null!,item, e)"
-                                            @ondblclick="(e) => OnDoubleTap(null!,item, e)"
-                                            class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
+                                        @oncontextmenu:preventDefault="true"
+                                        @oncontextmenu="@(e => OnSelectRow(null!,item, e))"
+                                        @onclick="(e) => OnSelectRow(null!,item, e)"
+                                        @ondblclick="(e) => OnDoubleTap(null!,item, e)"
+                                        class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
                                             <td>@(item.Category != null ? item.Category.Name_de : "Fehler")</td>
                                             <td>@item.Code</td>
                                             <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? '%' : '€')</td>
@@ -128,8 +128,8 @@
                     @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
                     {
                         <div class="contextMenu dropdown-menu-end dropdown-menu"
-                             style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"
-                             @onclick:stopPropagation="true">
+                        style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"
+                        @onclick:stopPropagation="true">
                             <ul>
                                 <li @onclick="() => Edit(selectedRowDiscountCodes!,selectedRowDiscountCategory!)">
                                     <a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
@@ -170,7 +170,6 @@
 </div>
 @code {
 
-    private bool IsLoading = false;
     private List<ColumnOption> columnOptions = new()
     {
       new("RabattTable", "RaTa", true),
@@ -180,7 +179,6 @@
     private bool HasManageDiscountsPermision = false;
     protected override async Task OnInitializedAsync()
     {
-        IsLoading = true;
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -199,7 +197,9 @@
         if (saved is not null)
             columnOptions = saved;
 
-        IsLoading = false;
+        // afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
+        IsRendered.AfterRender = IsRendered.ParametersSet = true;
+        IsRendered.Initialized = true;
     }
     private async Task OnColumnChanged()
     {

@@ -1,11 +1,12 @@
 ﻿@page "/"
 @rendermode InteractiveAuto
 @implements IDisposable
+@inherits ProjectComponentBase 
 
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -477,7 +478,6 @@
 	Task taskTaxRates = Task.CompletedTask;
 	private bool IsHasManageProductsPermission = false;
 	private bool IsLoadingMessage = false;
-	private bool IsLoading = false;
 	private Users? user;
 	private GetItems<Products> getItems = new();
 	// show Colmuns
@@ -507,7 +507,7 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	protected override async Task OnInitializedAsync()
 	{
-		IsLoading = true;
+
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user1 = authState.User;
 		IsHasManageProductsPermission = user1.HasClaim("permission", "manageProducts") || user1.HasClaim("permission", "fullAccess");
@@ -524,12 +524,12 @@
 			columnOptions = saved;
 		// get gespeicherte CategoryId
 		selectedCategoryId = await localStorage.GetItemAsync<int>("selectedCategoryId");
-		IsLoading = false;
+
+		IsRendered.Initialized = true;
 	}
 
 	protected override async Task OnParametersSetAsync()
 	{
-		IsLoading = true;
 		if (IsHasManageProductsPermission)
 		{
 			// wenn die category filter gesetzt in latzt Sitzung wurde dann filtern nach lest gespeicherte category
@@ -547,7 +547,7 @@
 			// erste Produkte laden
 			await loadInBackground();
 		}
-		IsLoading = false;
+		IsRendered.ParametersSet = true;
 	}
 
 	private async Task OnColumnChanged()
@@ -562,10 +562,9 @@
 	{
 		if (firstRender)
 		{
-			IsLoading = true;
 			// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 			objRef = DotNetObjectReference.Create(this);
-			IsLoading = false;
+			IsRendered.AfterRender = true;
 		}
 		try
 		{

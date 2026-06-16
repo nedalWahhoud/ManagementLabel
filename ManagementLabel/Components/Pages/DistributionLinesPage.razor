@@ -1,9 +1,9 @@
 ﻿@page "/distributionlines"
-
+@inherits ProjectComponentBase
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -113,10 +113,8 @@
 	private bool IsEditing = false;
 	private DistributionLines EditingDistributionLine = null!;
 	private bool HasManageDistribution_linesPermission = false;
-	private bool IsLoading = false;
 	protected async override Task OnInitializedAsync()
 	{
-		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		HasManageDistribution_linesPermission = user.HasClaim("permission", "manageDistribution_lines") ||
@@ -125,7 +123,9 @@
 		{
 			await distributionLinesService.GetAllDistributionLinesAsync();
 		}
-		IsLoading = false;
+		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
+		IsRendered.AfterRender = IsRendered.ParametersSet = true;
+		IsRendered.Initialized = true;
 	}
 
 	private void NewDistributionLine()

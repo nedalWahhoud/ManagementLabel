@@ -1,9 +1,9 @@
 ﻿@page "/customers"
-
+@inherits ProjectComponentBase
 <div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -49,9 +49,9 @@
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
 									<option value="0">Ha-Nr</option>
 									@foreach (var customer in customersService.DownloadedCustomers
-														.Where(c => c.DistributionLineId == selectedDistributionLineId)
-														.DistinctBy(c => c.StopNumber)
-														.OrderBy(c => c.StopNumber))
+																						.Where(c => c.DistributionLineId == selectedDistributionLineId)
+																						.DistinctBy(c => c.StopNumber)
+																						.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -193,8 +193,8 @@
 														@if (thisCustomerProcess.IsProcessing && thisCustomerProcess.CustomerId == customer.Id)
 														{
 															<span class="spinner-border spinner-border-sm"
-																  role="status"
-																  aria-hidden="true"></span>
+															role="status"
+															aria-hidden="true"></span>
 														}
 														else
 														{
@@ -261,7 +261,6 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 
 	private bool IsAdding = false;
-	private bool IsLoading = false;
 	private int selectedDistributionLineId = 0;
 	private List<(Task<ValidationResult> task, int lineId)> customersTask = new();
 	private bool IsHasManageCustomersPermission = false;
@@ -270,7 +269,6 @@
 	private bool IsHasManageDebtPermission = false;
 	protected async override Task OnInitializedAsync()
 	{
-		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		IsHasManageCustomersPermission = user.HasClaim("permission", "manageCustomers") ||
@@ -279,11 +277,12 @@
 		IsHasEditCustomersPermission = user.HasClaim("permission", "editCustomers") || user.HasClaim("permission", "fullAccess");
 		IsHasCrateCustomerOneTimePaymentPermission = user.HasClaim("permission", "manageCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
 
-		IsLoading = false;
+		// afterRender true, weil wir nutzen die funktion hier nicht
+		IsRendered.AfterRender = true;
+		IsRendered.Initialized = true;
 	}
 	protected override async Task OnParametersSetAsync()
 	{
-		IsLoading = true;
 		if (IsHasManageCustomersPermission)
 		{
 			await distributionLinesService.GetAllDistributionLinesAsync();
@@ -324,7 +323,7 @@
 			if (saved is not null)
 				columnOptions = saved;
 		}
-		IsLoading = false;
+		IsRendered.ParametersSet = true;
 	}
 	private async Task OnColumnChanged()
 	{

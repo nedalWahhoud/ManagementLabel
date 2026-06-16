@@ -1,9 +1,10 @@
 ﻿@page "/supplierorder/{SupplierId:int}"
+@inherits ProjectComponentBase
 @implements IDisposable
-<div class="p-2 min-vh-100 w-100">
+<div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -63,7 +64,7 @@
 										</td>
 									</tr>
 								</Virtualize>
-								@if (!IsLoading && dataSource.Count == 0)
+								@if (dataSource.Count == 0)
 								{
 									<tr id="loadingMessage">
 										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
@@ -96,7 +97,6 @@
 	private Suppliers supplier = new Suppliers();
 	private bool IsHasOrderFromSupplierPermission = false;
 	private bool IsProcessing { get; set; } = false;
-	private bool IsLoading { get; set; } = false;
 	private Products? selectedRow;
 	private string selectedLanguage = "ar";
 	private Dictionary<int, int> selectedQuantities = new Dictionary<int, int>();
@@ -107,12 +107,11 @@
 		var user = authState.User;
 		IsHasOrderFromSupplierPermission = user.HasClaim("permission", "orderFromSupplier") ||
 				user.HasClaim("permission", "fullAccess");
-		
-		IsLoading = false;
+
+		IsRendered.Initialized = true;
 	}
 	protected override async Task OnParametersSetAsync()
 	{
-		IsLoading = true;
 		if (IsHasOrderFromSupplierPermission)
 		{
 			supplier = suppliersService.GetSupplierByIdLocal(SupplierId) ?? await suppliersService.GetSupplierByIdAsync(SupplierId);
@@ -121,16 +120,17 @@
 			// erste Produkte laden
 			await OnScrollEnd();
 		}
-		IsLoading = false;
+
+		IsRendered.ParametersSet = true;
 	}
 	private DotNetObjectReference<SupplierOrder>? objRef;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
-		IsLoading = true;
 		if (firstRender)
 		{
 			// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 			objRef = DotNetObjectReference.Create(this);
+			IsRendered.AfterRender = true;
 		}
 		try
 		{
@@ -142,7 +142,6 @@
 		{
 			Console.WriteLine($"Error initializing scroll event: {ex.Message}");
 		}
-		IsLoading = false;
 	}
 	
 	private async Task PlaceOrder()

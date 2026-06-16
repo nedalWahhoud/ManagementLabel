@@ -1,10 +1,11 @@
 ﻿@page "/order"
+@inherits ProjectComponentBase
 @using ManagementLabel.Model
 
 <div class="mainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
-            @if (IsLoading)
+            @if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
             {
                 <ManagementLabel.Components.Layout.Loading />
             }
@@ -240,12 +241,10 @@
 </div>
 @code {
     private System.Globalization.CultureInfo germanCulture = new System.Globalization.CultureInfo("de-DE");
-    private bool IsLoading = false;
     private List<Order> orders = new List<Order>();
     private bool IsHasManageOrdersPermission = false;
     protected override async Task OnInitializedAsync()
     {
-        IsLoading = true;
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         IsHasManageOrdersPermission = user.HasClaim("permission", "manageOrders") ||
@@ -261,7 +260,9 @@
             await OnMoreLoad();
         }
 
-        IsLoading = false;
+        // afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
+        IsRendered.AfterRender = IsRendered.ParametersSet = true;
+        IsRendered.Initialized = true;
     }
     // more load
     private bool AllItemsLoaded { get; set; } = false;

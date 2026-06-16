@@ -1,8 +1,9 @@
 ﻿@page "/pGroupCat"
+@inherits ProjectComponentBase
 <div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -63,16 +64,16 @@
 											</td>
 											<td>
 												<button class="btn btn-sm btn-warning me-1"
-														@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
+												@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
 													Bearbeiten
 												</button>
 												<button class="btn btn-sm btn-danger"
-														@onclick="() => DeleteCategory(category.Id)" disabled="@IsDeletingProcessing.Item1">
+												@onclick="() => DeleteCategory(category.Id)" disabled="@IsDeletingProcessing.Item1">
 													@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == category.Id)
 													{
 														<span class="spinner-border spinner-border-sm"
-															  role="status"
-															  aria-hidden="true"></span>
+														role="status"
+														aria-hidden="true"></span>
 													}
 													else
 													{
@@ -127,16 +128,16 @@
 											<td>@group.GroupName_ar</td>
 											<td>
 												<button class="btn btn-sm btn-warning me-1"
-														@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessingGroup.Item1">
+												@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessingGroup.Item1">
 													Bearbeiten
 												</button>
 												<button class="btn btn-sm btn-danger"
-														@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessingGroup.Item1">
+												@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessingGroup.Item1">
 													@if (IsDeletingProcessingGroup.Item1 && IsDeletingProcessingGroup.Item2 == group.Id)
 													{
 														<span class="spinner-border spinner-border-sm"
-															  role="status"
-															  aria-hidden="true"></span>
+														role="status"
+														aria-hidden="true"></span>
 													}
 													else
 													{
@@ -186,23 +187,31 @@
 	private bool ShowColumn(string key) => tableOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	private bool IsHasMangeCategories = false;
 	private bool IsHasMangeProduct_groups = false;
-	private bool IsLoading = false;
 	protected async override Task OnInitializedAsync()
 	{
-		IsLoading = true;
 		// kategories
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		IsHasMangeCategories = user.HasClaim("permission", "manageCategories") ||
 								user.HasClaim("permission", "fullAccess");
+
+		// group products
+		IsHasMangeProduct_groups = user.HasClaim("permission", "manageProduct_groups") ||
+								user.HasClaim("permission", "fullAccess");
+
+		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
+		IsRendered.AfterRender = true;
+		IsRendered.Initialized = true;
+	}
+	protected override async Task OnParametersSetAsync()
+	{
+
 		if (IsHasMangeCategories)
 		{
 			// get all categories
 			TasksArray[0] = categoryService.GetAllCategoriesAsync();
 		}
-		// group products
-		IsHasMangeProduct_groups = user.HasClaim("permission", "manageProduct_groups") ||
-								user.HasClaim("permission", "fullAccess");
+
 		if (IsHasMangeProduct_groups)
 		{
 			//
@@ -214,20 +223,28 @@
 		if (saved is not null)
 			tableOptions = saved;
 
-		IsLoading = false;
+		// wemm doe categories saved angezeigt muss, dann muss die abholung sofort erledigen
+		if(tableOptions[0].IsVisible)
+		{
+			await TasksArray[0];
+		}
+		if (tableOptions[1].IsVisible)
+		{
+			await TasksArray[1];
+		}
+
+		IsRendered.ParametersSet = true;
 	}
 	// table options
 	private async Task OnTableChanged(ColumnOption col)
 	{
 		if (col.Key == "CaTa")
 		{
-			if (!TasksArray[0].IsCompleted)
-				await TasksArray[0];
+			await TasksArray[0];
 		}
 		else if (col.Key == "PGrTa")
 		{
-			if (!TasksArray[1].IsCompleted)
-				await TasksArray[1];
+			await TasksArray[1];
 		}
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
 		await localStorage.SetItemAsync("tableOptionsPGroupCat.", tableOptions);

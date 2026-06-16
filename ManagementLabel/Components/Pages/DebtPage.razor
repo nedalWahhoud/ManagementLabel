@@ -1,9 +1,9 @@
 ﻿@page "/debt/{customerId:int}"
-
+@inherits ProjectComponentBase
 <div class="p-2 min-vh-100 w-100">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (IsLoading)
+			@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
 			{
 				<ManagementLabel.Components.Layout.Loading />
 			}
@@ -36,16 +36,16 @@
 							</div>
 							<div class="dropdown">
 								<button disabled="@IsProcessing"
-										class="btn btn-light btn-sm rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
-										style="width: 35px; height: 35px;"
-										type="button"
-										data-bs-toggle="dropdown"
-										data-bs-container="body">
+								class="btn btn-light btn-sm rounded-circle shadow-sm border d-flex align-items-center justify-content-center"
+								style="width: 35px; height: 35px;"
+								type="button"
+								data-bs-toggle="dropdown"
+								data-bs-container="body">
 									@if (IsProcessing)
 									{
 										<span class="spinner-border spinner-border-sm"
-											  role="status"
-											  aria-hidden="true"></span>
+										role="status"
+										aria-hidden="true"></span>
 									}
 									else
 									{
@@ -104,17 +104,17 @@
 
 									<div class="col-md-6 d-flex justify-content-center gap-2">
 										<button class="btn btn-danger d-flex align-items-center justify-content-center px-5 text-white fs-5"
-												@onclick="() => PreviewTransaction(TransactionType.Repay)" disabled="@IsProcessing">
+										@onclick="() => PreviewTransaction(TransactionType.Repay)" disabled="@IsProcessing">
 											＋
 										</button>
 
 										<button class="btn btn-success d-flex align-items-center justify-content-center px-5 text-white fs-5"
-												@onclick="() => PreviewTransaction(TransactionType.Borrow)" disabled="@IsProcessing">
+										@onclick="() => PreviewTransaction(TransactionType.Borrow)" disabled="@IsProcessing">
 											－
 										</button>
 										<button class="btn btn-secondary d-flex align-items-center justify-content-center px-3 text-white fs-5"
-												title="Default"
-												@onclick="ResetToDefault" disabled="@IsProcessing">
+										title="Default"
+										@onclick="ResetToDefault" disabled="@IsProcessing">
 											<i class="bi bi-arrow-counterclockwise"></i>
 										</button>
 
@@ -128,9 +128,9 @@
 
 								<div class="col-12 col-md-auto d-flex justify-content-center mb-3 mb-md-0">
 									<button class="btn btn-primary px-5 shadow-sm py-2"
-											style="min-width: 200px; width: inherit;"
-											@onclick="SaveTransactionAsync"
-											disabled="@IsProcessing">
+									style="min-width: 200px; width: inherit;"
+									@onclick="SaveTransactionAsync"
+									disabled="@IsProcessing">
 										@if (IsProcessing)
 										{
 											<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -144,9 +144,9 @@
 
 								<div class="col-12 col-md-auto d-flex justify-content-center">
 									<button class="btn btn-outline-success px-5 shadow-sm py-2"
-											style="min-width: 200px; width: inherit;"
-											@onclick="OnNotifyCustomer"
-											disabled="@IsProcessing">
+									style="min-width: 200px; width: inherit;"
+									@onclick="OnNotifyCustomer"
+									disabled="@IsProcessing">
 										@if (IsProcessing)
 										{
 											<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -199,12 +199,12 @@
 							</table>
 							<div class="d-flex justify-content-center mt-3">
 								<button @onclick="OnMoreLoadTransactionsCustomers" class="btn btn-success btnMobileSmall"
-										disabled="@(transactionsCustomersService.GetItems.AllItemsLoaded || IsProcessing)">
+								disabled="@(transactionsCustomersService.GetItems.AllItemsLoaded || IsProcessing)">
 									@if (IsProcessing)
 									{
 										<span class="spinner-border spinner-border-sm"
-											  role="status"
-											  aria-hidden="true"></span>
+										role="status"
+										aria-hidden="true"></span>
 									}
 									else if (transactionsCustomersService.GetItems.AllItemsLoaded)
 									{
@@ -251,13 +251,11 @@
 	private Customers customer = null!;
 	private DebtCustomers debtCustomers = null!;
 	private TransactionsCustomers transactionsCustomers = new TransactionsCustomers();
-	private bool IsLoading = false;
 	private bool IsHasManageDebtPermission = false;
 	private bool IsHasCrateCustomerOneTimePaymentPermission = false;
 	private bool IsHasEditCustomersPermission = false;
 	protected override async Task OnInitializedAsync()
 	{
-		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 		IsHasManageDebtPermission = user.HasClaim("permission", "manageDebt") ||
@@ -266,12 +264,12 @@
 		IsHasEditCustomersPermission = user.HasClaim("permission", "editCustomers") || user.HasClaim("permission", "fullAccess");
 		IsHasCrateCustomerOneTimePaymentPermission = user.HasClaim("permission", "crateCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
 
-		IsLoading = false;
+		// afterRender  true, weil wir nutzen die funktion hier nicht
+		IsRendered.AfterRender = true;
+		IsRendered.Initialized = true;
 	}
 	protected override async Task OnParametersSetAsync()
 	{
-		IsLoading = true;
-		
 		if (IsHasManageDebtPermission)
 		{
 			customer = customersService.GetCustomerByIdLocal(customerId) ?? await customersService.GetCustomerByIdAsync(customerId);
@@ -293,7 +291,7 @@
 			// get first transactions
 			await OnMoreLoadTransactionsCustomers();
 		}
-		IsLoading = false;
+		IsRendered.ParametersSet = true;
 	}
 
 	private void PreviewTransaction(TransactionType transactionType)
