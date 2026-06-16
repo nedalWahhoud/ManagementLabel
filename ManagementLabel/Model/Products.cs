@@ -32,7 +32,7 @@ namespace ManagementLabel.Model
         [NotMapped]
         [Required(ErrorMessage = "Bitte wählen Sie mindestens einen Lieferanten aus.")] 
         [MinLength(1, ErrorMessage = "Mindestens ein Lieferant ist erforderlich.")] 
-        public List<int>? SelectedSupplierIds { get; set; } = [];
+        public List<int> SelectedSupplierIds { get; set; } = [];
         public int UserId { get; set; }
         public Users? User { get; set; }
         public ICollection<ProductImages> ProductImages { get; set; } = [];

@@ -3,9 +3,13 @@
 <div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
-            @if (isLoading)
+            @if (IsLoading)
             {
-                @if (canManage)
+                <ManagementLabel.Components.Layout.Loading />
+            }
+            else
+            {
+                @if (HasManageDiscountsPermision)
                 {
                     <div class="tableContiner">
                         <div class="topTable">
@@ -35,98 +39,97 @@
                                 </div>
                             </div>
                         </div>
-                    @* table discount codes *@
-                    @if (ShowColumn("RaTa"))
+                        @* table discount codes *@
+                        @if (ShowColumn("RaTa"))
                         {
                             <table class="table text-center align-middle">
-                              <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Rabatt</th>
-                                    <th>Nutz.</th>
-                                    <th>St-Datum</th>
-                                    <th>En-Datum</th>
-                                    <th>DiTy</th>
-                                    <th>Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                @foreach (var item in discountService.DownloadedDiscountCodes)
-                                {
-                                    DateTime now = DateTime.Now;
-
-                                    var isActiveNow = item.IsActive
-                                    && item.StartDate <= now
-                                    && item.EndDate >= now;
-                                    <tr @key="item.Id"
-                                    @oncontextmenu:preventDefault="true"
-                                    @oncontextmenu="@(e => OnSelectRow(item,null!, e))"
-                                    @onclick="(e) => OnSelectRow(item,null!, e)"
-                                    @ondblclick="(e) => OnDoubleTap(item,null!, e)"
-
-                                    class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
-                                        <td>@item.Code</td>
-                                        <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? "%" : "€")</td>
-                                        <td>@item.TimesUsed / @item.UsageLimit</td>
-                                        <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
-                                        <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
-                                        <td>@item.DiscountType</td>
-                                        <td>@item.IsActive</td>
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Rabatt</th>
+                                        <th>Nutz.</th>
+                                        <th>St-Datum</th>
+                                        <th>En-Datum</th>
+                                        <th>DiTy</th>
+                                        <th>Status</th>
                                     </tr>
-                                }
-                              </tbody>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in discountService.DownloadedDiscountCodes)
+                                    {
+                                        DateTime now = DateTime.Now;
+
+                                        var isActiveNow = item.IsActive
+                                        && item.StartDate <= now
+                                        && item.EndDate >= now;
+                                        <tr @key="item.Id"
+                                            @oncontextmenu:preventDefault="true"
+                                            @oncontextmenu="@(e => OnSelectRow(item,null!, e))"
+                                            @onclick="(e) => OnSelectRow(item,null!, e)"
+                                            @ondblclick="(e) => OnDoubleTap(item,null!, e)"
+                                            class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
+                                            <td>@item.Code</td>
+                                            <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? "%" : "€")</td>
+                                            <td>@item.TimesUsed / @item.UsageLimit</td>
+                                            <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@item.DiscountType</td>
+                                            <td>@item.IsActive</td>
+                                        </tr>
+                                    }
+                                </tbody>
                             </table>
                         }
-                    @if (ShowColumn("KaTa"))
+                        @if (ShowColumn("KaTa"))
                         {
-                          @* table discount category *@
+                            @* table discount category *@
                             <table class="table text-center align-middle">
-                              <thead>
-                                <tr>
-                                    <th>Kategore</th>
-                                    <th>Code</th>
-                                    <th>Rabatt</th>
-                                    <th>Nutz.</th>
-                                    <th>St-Da</th>
-                                    <th>En-Da</th>
-                                    <th>DiTy</th>
-                                    <th>Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                @foreach (var item in discountService.DownloadedDiscountCategory)
-                                {
-                                    DateTime now = DateTime.Now;
-
-                                    var isActiveNow = item.IsActive
-                                    && item.StartDate <= now
-                                    && item.EndDate >= now;
-                                    <tr @key="item.Id"
-                                    @oncontextmenu:preventDefault="true"
-                                    @oncontextmenu="@(e => OnSelectRow(null!,item, e))"
-                                    @onclick="(e) => OnSelectRow(null!,item, e)"
-                                    @ondblclick="(e) => OnDoubleTap(null!,item, e)"
-                                    class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
-                                        <td>@(item.Category != null ? item.Category.Name_de : "Fehler")</td>
-                                        <td>@item.Code</td>
-                                            <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? '%' : '€')</td>
-                                        <td>@item.TimesUsed / @item.UsageLimit</td>
-                                        <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
-                                        <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
-                                            <td>@item.DiscountType</td>
-                                        <td>@item.IsActive</td>
+                                <thead>
+                                    <tr>
+                                        <th>Kategore</th>
+                                        <th>Code</th>
+                                        <th>Rabatt</th>
+                                        <th>Nutz.</th>
+                                        <th>St-Da</th>
+                                        <th>En-Da</th>
+                                        <th>DiTy</th>
+                                        <th>Status</th>
                                     </tr>
-                                }
-                               </tbody>
-                             </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in discountService.DownloadedDiscountCategory)
+                                    {
+                                        DateTime now = DateTime.Now;
+
+                                        var isActiveNow = item.IsActive
+                                        && item.StartDate <= now
+                                        && item.EndDate >= now;
+                                        <tr @key="item.Id"
+                                            @oncontextmenu:preventDefault="true"
+                                            @oncontextmenu="@(e => OnSelectRow(null!,item, e))"
+                                            @onclick="(e) => OnSelectRow(null!,item, e)"
+                                            @ondblclick="(e) => OnDoubleTap(null!,item, e)"
+                                            class="@(isActiveNow ? "bg-success text-white" : "bg-danger text-white")">
+                                            <td>@(item.Category != null ? item.Category.Name_de : "Fehler")</td>
+                                            <td>@item.Code</td>
+                                            <td>@item.DiscountAmount @(item.DiscountType == DiscountType.Percentage ? '%' : '€')</td>
+                                            <td>@item.TimesUsed / @item.UsageLimit</td>
+                                            <td>@item.StartDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@item.EndDate.ToString("yyyy-MM-dd")</td>
+                                            <td>@item.DiscountType</td>
+                                            <td>@item.IsActive</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
                         }
                     </div>
                     @* menu context *@
                     @if (showContextMenu && (selectedRowDiscountCodes != null || selectedRowDiscountCategory != null))
                     {
                         <div class="contextMenu dropdown-menu-end dropdown-menu"
-                        style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"
-                        @onclick:stopPropagation="true">
+                             style="position: fixed; top: @(menuY!)px; left: @(menuX!)px; display: block;"
+                             @onclick:stopPropagation="true">
                             <ul>
                                 <li @onclick="() => Edit(selectedRowDiscountCodes!,selectedRowDiscountCategory!)">
                                     <a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
@@ -137,6 +140,18 @@
                             </ul>
                         </div>
                     }
+
+                    @if (showDiscountFormAction != null)
+                    {
+                        if (showDiscountFormAction.Value.ifAdd)
+                        {
+                            <ManagementLabel.Components.Layout.OverlayEditAddDiscount discountCode="newDiscountCode" discountCategory="newDiscountCategory" action="showDiscountFormAction.Value" OnHandel="HandleAddEditDiscount" />
+                        }
+                        else
+                        {
+                            <ManagementLabel.Components.Layout.OverlayEditAddDiscount discountCode="editDiscountCode" discountCategory="editDiscountCategory" action="showDiscountFormAction.Value" OnHandel="HandleAddEditDiscount" />
+                        }
+                    }
                 }
                 else
                 {
@@ -146,25 +161,6 @@
                         </div>
                     </div>
                 }
-                @if (showDiscountFormAction != null)
-                {
-                    if (showDiscountFormAction.Value.ifAdd)
-                    {
-                        <ManagementLabel.Components.Layout.OverlayEditAddDiscount discountCode="newDiscountCode" discountCategory="newDiscountCategory" action="showDiscountFormAction.Value" OnHandel="HandleAddEditDiscount" />
-                    }
-                    else
-                    {
-                        <ManagementLabel.Components.Layout.OverlayEditAddDiscount discountCode="editDiscountCode" discountCategory="editDiscountCategory" action="showDiscountFormAction.Value" OnHandel="HandleAddEditDiscount" />
-                    }
-                }
-            }
-            else
-            {
-                <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
             }
         </Authorized>
         <NotAuthorized>
@@ -174,22 +170,23 @@
 </div>
 @code {
 
-    private bool isLoading = false;
+    private bool IsLoading = false;
     private List<ColumnOption> columnOptions = new()
     {
       new("RabattTable", "RaTa", true),
       new("KatagoryTable","KaTa", true),
     };
     private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
-	private bool canManage = false;
+    private bool HasManageDiscountsPermision = false;
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        canManage = user.HasClaim("permission", "manageDiscounts") ||
+        HasManageDiscountsPermision = user.HasClaim("permission", "manageDiscounts") ||
                              user.HasClaim("permission", "fullAccess");
-        if (canManage)
+        if (HasManageDiscountsPermision)
         {
             // get Discount codes
             await discountService.GetAllDiscountCodes();
@@ -202,7 +199,7 @@
         if (saved is not null)
             columnOptions = saved;
 
-        isLoading = true;
+        IsLoading = false;
     }
     private async Task OnColumnChanged()
     {

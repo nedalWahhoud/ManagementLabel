@@ -2,165 +2,173 @@
 <div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			<div class="tableContiner">
-				<div class="topPage">
-					<div class="buttonsDiv">
-						@* choose the Columns *@
-						<div class="h-100 d-flex align-items-center">
-							<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
-							<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-								@foreach (var col in tableOptions)
-								{
-									<li>
-										<div class="form-check form-switch">
-											<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after=" ()=> OnTableChanged(col)" />
-											<label class="form-check-label" for="@col.Key">
-												@col.Label
-											</label>
-										</div>
-									</li>
-								}
-							</ul>
+			@if (IsLoading)
+			{
+				<ManagementLabel.Components.Layout.Loading />
+			}
+			else
+			{
+				<div class="tableContiner">
+					<div class="topPage">
+						<div class="buttonsDiv">
+							@* choose the Columns *@
+							<div class="h-100 d-flex align-items-center">
+								<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+								<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+									@foreach (var col in tableOptions)
+									{
+										<li>
+											<div class="form-check form-switch">
+												<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after=" ()=> OnTableChanged(col)" />
+												<label class="form-check-label" for="@col.Key">
+													@col.Label
+												</label>
+											</div>
+										</li>
+									}
+								</ul>
+							</div>
 						</div>
 					</div>
-				</div>
-				@* Kategories *@
-				@if (ShowColumn("CaTa"))
-				{
-					@if (authContext.User.HasClaim("permission", "manageCategories") || authContext.User.HasClaim("permission", "fullAccess"))
+					@* Kategories *@
+					@if (ShowColumn("CaTa"))
 					{
-						<div class="topTable">
-							<div class="buttonsDiv">
-								<button class="btn addPlusB" @onclick="NewCategory" title="Add neue Kategorie">+</button>
+						@if (IsHasMangeCategories)
+						{
+							<div class="topTable">
+								<div class="buttonsDiv">
+									<button class="btn addPlusB" @onclick="NewCategory" title="Add neue Kategorie">+</button>
+								</div>
 							</div>
-						</div>
-						<table class="table table-bordered table-hover">
-							<tr>
-								<th>Id</th>
-								<th>Name de</th>
-								<th>Name ar</th>
-								<th>Ab 18 Jahren</th>
-								<th>Ist Aktiv</th>
-							</tr>
-							<tbody>
-								@foreach (var category in categoryService.DownloadedCategories)
-								{
-									<tr>
-										<td>@category.Id</td>
-										<td>@category.Name_de</td>
-										<td>@category.Name_ar</td>
-										<td><div style="pointer-events: none; opacity: 1;"><InputCheckbox @bind-Value="category.Requires18Plus" /></div></td>
-										<td>
-											<div style="pointer-events: none; opacity: 1;">
-												<InputCheckbox @bind-Value="category.IsAktiv" />
-											</div>
-										</td>
-										<td>
-											<button class="btn btn-sm btn-warning me-1"
-											@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
-												Bearbeiten
-											</button>
-											<button class="btn btn-sm btn-danger"
-											@onclick="() => DeleteCategory(category.Id)" disabled="@IsDeletingProcessing.Item1">
-												@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == category.Id)
-												{
-													<span class="spinner-border spinner-border-sm"
-													role="status"
-													aria-hidden="true"></span>
-												}
-												else
-												{
-													<span>Löschen</span>
-												}
-											</button>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-							<div class="alert alert-danger text-center">
-								Sie haben keine Berechtigung für diese Seite
+							<table class="table table-bordered table-hover">
+								<tr>
+									<th>Id</th>
+									<th>Name de</th>
+									<th>Name ar</th>
+									<th>Ab 18 Jahren</th>
+									<th>Ist Aktiv</th>
+								</tr>
+								<tbody>
+									@foreach (var category in categoryService.DownloadedCategories)
+									{
+										<tr>
+											<td>@category.Id</td>
+											<td>@category.Name_de</td>
+											<td>@category.Name_ar</td>
+											<td><div style="pointer-events: none; opacity: 1;"><InputCheckbox @bind-Value="category.Requires18Plus" /></div></td>
+											<td>
+												<div style="pointer-events: none; opacity: 1;">
+													<InputCheckbox @bind-Value="category.IsAktiv" />
+												</div>
+											</td>
+											<td>
+												<button class="btn btn-sm btn-warning me-1"
+														@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
+													Bearbeiten
+												</button>
+												<button class="btn btn-sm btn-danger"
+														@onclick="() => DeleteCategory(category.Id)" disabled="@IsDeletingProcessing.Item1">
+													@if (IsDeletingProcessing.Item1 && IsDeletingProcessing.Item2 == category.Id)
+													{
+														<span class="spinner-border spinner-border-sm"
+															  role="status"
+															  aria-hidden="true"></span>
+													}
+													else
+													{
+														<span>Löschen</span>
+													}
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+						else
+						{
+							<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+								<div class="alert alert-danger text-center">
+									Sie haben keine Berechtigung für diese Seite
+								</div>
 							</div>
-						</div>
+						}
+						@if (IsAdding)
+						{
+							<ManagementLabel.Components.Layout.OverlayEditAddCategories category="new Categories()" Action="Add" OnHandel="HandleEditCategory" />
+						}
+						@if (IsEditing)
+						{
+							<ManagementLabel.Components.Layout.OverlayEditAddCategories category="EditingCategory" Action="Edit" OnHandel="HandleEditCategory" />
+						}
 					}
-					@if (IsAdding)
+					@*produckt grouppe*@
+					@if (ShowColumn("PGrTa"))
 					{
-						<ManagementLabel.Components.Layout.OverlayEditAddCategories category="new Categories()" Action="Add" OnHandel="HandleEditCategory" />
-					}
-					@if (IsEditing)
-					{
-						<ManagementLabel.Components.Layout.OverlayEditAddCategories category="EditingCategory" Action="Edit" OnHandel="HandleEditCategory" />
-					}
-				}
-				@*produckt grouppe*@
-				@if (ShowColumn("PGrTa"))
-				{
-					@if (authContext.User.HasClaim("permission", "manageProduct_groups") || authContext.User.HasClaim("permission", "fullAccess"))
-					{
-						<div class="topTable">
-							<div class="buttonsDiv">
-								<button class="btn addPlusB" @onclick="NewGroup" title="Add neue Vertriebslinie">+</button>
+						@if (IsHasMangeProduct_groups)
+						{
+							<div class="topTable">
+								<div class="buttonsDiv">
+									<button class="btn addPlusB" @onclick="NewGroup" title="Add neue Vertriebslinie">+</button>
+								</div>
 							</div>
-						</div>
-						<table class="table table-bordered table-hover">
-							<tr>
-								<th>Id</th>
-								<th>Name de</th>
-								<th>Name ar</th>
-							</tr>
-							<tbody>
-								@foreach (var group in productGroupService.DownloadedproductGroups)
-								{
-									<tr>
-										<td>@group.Id</td>
-										<td>@group.GroupName_de</td>
-										<td>@group.GroupName_ar</td>
-										<td>
-											<button class="btn btn-sm btn-warning me-1"
-											@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessingGroup.Item1">
-												Bearbeiten
-											</button>
-											<button class="btn btn-sm btn-danger"
-											@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessingGroup.Item1">
-												@if (IsDeletingProcessingGroup.Item1 && IsDeletingProcessingGroup.Item2 == group.Id)
-												{
-													<span class="spinner-border spinner-border-sm"
-													role="status"
-													aria-hidden="true"></span>
-												}
-												else
-												{
-													<span>Löschen</span>
-												}
-											</button>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					}
-					else
-					{
-						<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-							<div class="alert alert-danger text-center">
-								Sie haben keine Berechtigung für diese Seite
+							<table class="table table-bordered table-hover">
+								<tr>
+									<th>Id</th>
+									<th>Name de</th>
+									<th>Name ar</th>
+								</tr>
+								<tbody>
+									@foreach (var group in productGroupService.DownloadedproductGroups)
+									{
+										<tr>
+											<td>@group.Id</td>
+											<td>@group.GroupName_de</td>
+											<td>@group.GroupName_ar</td>
+											<td>
+												<button class="btn btn-sm btn-warning me-1"
+														@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessingGroup.Item1">
+													Bearbeiten
+												</button>
+												<button class="btn btn-sm btn-danger"
+														@onclick="() => DeleteGroup(group.Id)" disabled="@IsDeletingProcessingGroup.Item1">
+													@if (IsDeletingProcessingGroup.Item1 && IsDeletingProcessingGroup.Item2 == group.Id)
+													{
+														<span class="spinner-border spinner-border-sm"
+															  role="status"
+															  aria-hidden="true"></span>
+													}
+													else
+													{
+														<span>Löschen</span>
+													}
+												</button>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						}
+						else
+						{
+							<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+								<div class="alert alert-danger text-center">
+									Sie haben keine Berechtigung für diese Seite
+								</div>
 							</div>
-						</div>
-					}
+						}
 
-					@if (IsAddingGroup)
-					{
-						<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="new GroupProducts()" Action="Add" OnHandel="HandleEditAddGroupProduct" />
+						@if (IsAddingGroup)
+						{
+							<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="new GroupProducts()" Action="Add" OnHandel="HandleEditAddGroupProduct" />
+						}
+						@if (IsEditingGroup)
+						{
+							<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="EditingGroupProduct" Action="Edit" OnHandel="HandleEditAddGroupProduct" />
+						}
 					}
-					@if (IsEditingGroup)
-					{
-						<ManagementLabel.Components.Layout.OverlayEditAddGroupProducts groupProduct="EditingGroupProduct" Action="Edit" OnHandel="HandleEditAddGroupProduct" />
-					}			}
-			</div>
+				</div>
+			}
 		</Authorized>
 		<NotAuthorized>
 			<ManagementLabel.Components.Pages.LogIn />
@@ -176,22 +184,26 @@
 	  new("ProductsGroupTable","PGrTa", false),
 	};
 	private bool ShowColumn(string key) => tableOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
+	private bool IsHasMangeCategories = false;
+	private bool IsHasMangeProduct_groups = false;
+	private bool IsLoading = false;
 	protected async override Task OnInitializedAsync()
 	{
+		IsLoading = true;
 		// kategories
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
-		var canMangeCatgories = user.HasClaim("permission", "manageCategories") ||
+		IsHasMangeCategories = user.HasClaim("permission", "manageCategories") ||
 								user.HasClaim("permission", "fullAccess");
-		if (canMangeCatgories)
+		if (IsHasMangeCategories)
 		{
 			// get all categories
 			TasksArray[0] = categoryService.GetAllCategoriesAsync();
 		}
 		// group products
-		var canMangeProductsGroup = user.HasClaim("permission", "manageProduct_groups") ||
+		IsHasMangeProduct_groups = user.HasClaim("permission", "manageProduct_groups") ||
 								user.HasClaim("permission", "fullAccess");
-		if (canMangeProductsGroup)
+		if (IsHasMangeProduct_groups)
 		{
 			//
 			TasksArray[1] = productGroupService.GetAllGroupProductsAsync();
@@ -201,6 +213,8 @@
 		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("tableOptionsPGroupCat.");
 		if (saved is not null)
 			tableOptions = saved;
+
+		IsLoading = false;
 	}
 	// table options
 	private async Task OnTableChanged(ColumnOption col)
@@ -279,7 +293,7 @@
 
 	private void NewGroup()
 	{
-		IsAdding = true;
+		IsAddingGroup = true;
 	}
 	private void EditGroup(GroupProducts group)
 	{
@@ -289,7 +303,7 @@
 				GroupName_de = group.GroupName_de,
 				GroupName_ar = group.GroupName_ar
 			};
-		IsEditing = true;
+		IsEditingGroup = true;
 	}
 	private (bool, int) IsDeletingProcessingGroup = (false, 0);
 	private async Task DeleteGroup(int id)
@@ -316,11 +330,11 @@
 	{
 		if (action == "Add")
 		{
-			IsAdding = false;
+			IsAddingGroup = false;
 		}
 		else
 		{
-			IsEditing = false;
+			IsEditingGroup = false;
 			EditingGroupProduct = null!;
 		}
 	}

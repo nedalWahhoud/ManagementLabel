@@ -4,226 +4,233 @@
 <div class="mainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
-            @if (authContext.User.HasClaim("permission", "manageOrders") || authContext.User.HasClaim("permission", "fullAccess"))
-            { 
-                @* table *@
-                <div class="tableContiner">
-                    @* top table *@
-                    <div class="@(Isloading ? "hidden":"topTable")">
-                        <div class="dropdownDiv">
-                            <!-- Dropdown Status -->
-                            <select class="statusDropdown" @onchange="OnStatusChanged">
-                                <option value="0">Status</option>
-                                @foreach (var status in orderService.OrderStatusList)
-                                {
-                                    <option value="@status.Id">@status.Status_de</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">B-Nr.</th>
-                                <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Benutzer</th>
-                                <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Datum</th>
-                                <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">G-preis</th>
-                                <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Status</th>
-                                <th style="min-width:40px;">⋮</th>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @* Loading message *@
-                            @if (Isloading || IsOrdersLoading)
-                            {
-                                <tr>
-                                    <td colspan="12" class="loadingMessage">
-                                        Lädt...
-                                    </td>
-                                </tr>
-                            }
-                            @for (int i = 0; i < orders.Count; i++)
-                            {
-                                var order = orders[i];
-                                <tr>
-                                    <td>@order.Id</td>
-                                    <td>@(order.User?.UserName ?? "Kein Unsername")</td>
-                                    <td>@order.OrderDate.ToString("d", germanCulture)</td>
-                                    <td>@order.TotalPrice.ToString("C", germanCulture)</td>
-                                    <td>
-                                        <InputSelect Value="@order.StatusId"
-                                        ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
-                                        ValueExpression="() => order.StatusId"
-                                        class="form-select"
-                                        disabled="@order.IsUpdatingStatus">
-                                            @foreach (var status in orderService.OrderStatusList)
-                                            {
-                                                <option value="@status.Id">@status.Status_de</option>
-                                            }
-                                        </InputSelect>
-
-                                        @if (order.IsUpdatingStatus)
-                                        {
-                                            <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
-                                                <span class="visually-hidden">Laden...</span>
-                                            </div>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                ⋮
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnOrderDetails(order)">Bestelldetails</a></li>
-                                                <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">Rechnung erstellen</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="8">
-                                        <table class="table tableSm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Image</th>
-                                                    <th>Produkt</th>
-                                                    <th>Menge</th>
-                                                    <th>Einzelpreis</th>
-                                                    <th>Gesamt</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var item in order.OrderItems)
-                                                {
-                                                    <tr>
-                                                        <td>
-                                                            <img src="@productImagesService.GetProductImageUrl(item.Product?.ProductImages.FirstOrDefault(img => img.IsMain)!)" class="productImg" />
-                                                        </td>
-                                                        <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
-                                                        <td>@item.Quantity</td>
-                                                        <td>@item.UnitPrice.ToString("C", germanCulture)</td>
-                                                        <td>@((item.UnitPrice * item.Quantity).ToString("C", germanCulture))</td>
-
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                </tr>
-                            }
-                            @* No orders found *@
-                            @if (orders.Count == 0 && !Isloading && !IsOrdersLoading)
-                            {
-                                <tr>
-                                    <td colspan="12" class="loadingMessage">
-                                        Keine Bestellungen gefunden.
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                    @* Mehr laden *@
-                    @if (orders.Count > 0)
-                    {
-                        <button type="submit" class="btn btn-primary moreBtn" @onclick="() => OnMoreLoad()" disabled="@(IsOrdersLoading || AllItemsLoaded)">
-                            @if (IsOrdersLoading)
-                            {
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="ms-2">Lädt...</span>
-                            }
-                            else if (!AllItemsLoaded)
-                            {
-                                <span>Mehr laden</span>
-                            }
-                            @if (AllItemsLoaded)
-                            {
-                                <span>Alle geladen</span>
-                            }
-                        </button>
-                    }
-                    @* show Overlay *@
-                    @if (IsOverlayVisible &&  overlayItems != null)
-                    {
-                        <div class="overlay">
-                            <div class="overlayForm">
-                                <button class="btn-close" @onclick="CloseOverlay"></button>
-                                @if (string.IsNullOrEmpty(overlayItems.NoData))
-                                {
-                                    @((MarkupString)overlayItems.Title)
-
-                                    @foreach (var item in overlayItems.Items)
-                                    {
-                                        if (item.Item2 == OverlayType.AddSN)
-                                        {
-                                            var orderIdStr = item.Item1;
-                                            int orderId = int.Parse(orderIdStr);
-                                            <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(orderId)">Add Sendungsnummer</button>
-                                        }
-                                        else if (item.Item2 == OverlayType.UpdateSN)
-                                        {
-                                            var orderIdStr = item.Item1;
-                                            int orderId = int.Parse(orderIdStr);
-                                            string trackingNumber = orders.FirstOrDefault(o => o.Id == orderId)?.TrackingNumber ?? "Fehler bei Trackingnummer";
-                                            <span style="cursor:pointer;" @ondblclick=" ()=> OnAddOrUpdateTrackingNumberShowOverlay(orderId)">@trackingNumber</span>
-                                        }
-                                        else
-                                        {
-                                            @((MarkupString)item.Item1)
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    @((MarkupString)overlayItems.NoData)
-                                }
-                            </div>
-                        </div>
-                    }
-                    @* show Add Tracking Number *@
-                    @if(IsAddTrackingNumberVisible)
-                    {
-                        <div class="overlay">
-                            <div class="overlayForm">
-                                <EditForm Model="orderAddTrackingNumber" OnValidSubmit="OnAddOrUpdateTrackingNumber">
-                                    <DataAnnotationsValidator />
-                                    <div class="formGroupAdd">
-                                        <InputText class="form-control" @bind-value="orderAddTrackingNumber.TrackingNumber" placeholder="Trackingnummer" />
-                                        <ValidationMessage For="@(() => orderAddTrackingNumber.TrackingNumber)" />
-                                    </div>
-                                    <div class="d-flex flex-row gap-1">
-                                    <button type="submit" class="btn btn-primary mt-2" disabled="@IsAddTrackingNumberLoading">
-                                        @if (IsAddTrackingNumberLoading)
-                                        {
-                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                            <span class="ms-2">Ladt...</span>
-                                        }
-                                        else
-                                        {
-                                            <span>Hinzufügen</span>
-                                        }
-                                    </button>
-                                    <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">Abbrechen</button>
-                                    </div>
-                                </EditForm>
-                            </div>
-                        </div>
-                    }
-                </div>
-                @* Rechnung *@
-                @if (IsInvoiceVisible)
-                {
-                    <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnHandel="HandleInvoiceClose" />
-                }
+            @if (IsLoading)
+            {
+                <ManagementLabel.Components.Layout.Loading />
             }
             else
             {
-                <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-                    <div class="alert alert-danger text-center">
-                        Sie haben keine Berechtigung für diese Seite
+                @if (IsHasManageOrdersPermission)
+                {
+                    @* table *@
+                    <div class="tableContiner">
+                        @* top table *@
+                        <div class="topTable">
+                            <div class="dropdownDiv">
+                                <!-- Dropdown Status -->
+                                <select class="statusDropdown" @onchange="OnStatusChanged">
+                                    <option value="0">Status</option>
+                                    @foreach (var status in orderService.OrderStatusList)
+                                    {
+                                        <option value="@status.Id">@status.Status_de</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">B-Nr.</th>
+                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Benutzer</th>
+                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Datum</th>
+                                    <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">G-preis</th>
+                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Status</th>
+                                    <th style="min-width:40px;">⋮</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @* Loading message *@
+                                @if (IsOrdersLoading)
+                                {
+                                    <tr>
+                                        <td colspan="12" class="loadingMessage">
+                                            Lädt...
+                                        </td>
+                                    </tr>
+                                }
+                                @for (int i = 0; i < orders.Count; i++)
+                                {
+                                    var order = orders[i];
+                                    <tr>
+                                        <td>@order.Id</td>
+                                        <td>@(order.User?.UserName ?? "Kein Unsername")</td>
+                                        <td>@order.OrderDate.ToString("d", germanCulture)</td>
+                                        <td>@order.TotalPrice.ToString("C", germanCulture)</td>
+                                        <td>
+                                            <InputSelect Value="@order.StatusId"
+                                                         ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
+                                                         ValueExpression="() => order.StatusId"
+                                                         class="form-select"
+                                                         disabled="@order.IsUpdatingStatus">
+                                                @foreach (var status in orderService.OrderStatusList)
+                                                {
+                                                    <option value="@status.Id">@status.Status_de</option>
+                                                }
+                                            </InputSelect>
+
+                                            @if (order.IsUpdatingStatus)
+                                            {
+                                                <div class="spinner-border spinner-border-sm text-primary ms-2" role="status">
+                                                    <span class="visually-hidden">Laden...</span>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    ⋮
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnOrderDetails(order)">Bestelldetails</a></li>
+                                                    <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">Rechnung erstellen</a></li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="8">
+                                            <table class="table tableSm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Image</th>
+                                                        <th>Produkt</th>
+                                                        <th>Menge</th>
+                                                        <th>Einzelpreis</th>
+                                                        <th>Gesamt</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in order.OrderItems)
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <img src="@productImagesService.GetProductImageUrl(item.Product?.ProductImages.FirstOrDefault(img => img.IsMain)!)" class="productImg" />
+                                                            </td>
+                                                            <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
+                                                            <td>@item.Quantity</td>
+                                                            <td>@item.UnitPrice.ToString("C", germanCulture)</td>
+                                                            <td>@((item.UnitPrice * item.Quantity).ToString("C", germanCulture))</td>
+
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                }
+                                @* No orders found *@
+                                @if (orders.Count == 0 && !IsOrdersLoading)
+                                {
+                                    <tr>
+                                        <td colspan="12" class="loadingMessage">
+                                            Keine Bestellungen gefunden.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @* Mehr laden *@
+                        @if (orders.Count > 0)
+                        {
+                            <button type="submit" class="btn btn-primary moreBtn" @onclick="() => OnMoreLoad()" disabled="@(IsOrdersLoading || AllItemsLoaded)">
+                                @if (IsOrdersLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="ms-2">Lädt...</span>
+                                }
+                                else if (!AllItemsLoaded)
+                                {
+                                    <span>Mehr laden</span>
+                                }
+                                @if (AllItemsLoaded)
+                                {
+                                    <span>Alle geladen</span>
+                                }
+                            </button>
+                        }
+                        @* show Overlay *@
+                        @if (IsOverlayVisible && overlayItems != null)
+                        {
+                            <div class="overlay">
+                                <div class="overlayForm">
+                                    <button class="btn-close" @onclick="CloseOverlay"></button>
+                                    @if (string.IsNullOrEmpty(overlayItems.NoData))
+                                    {
+                                        @((MarkupString)overlayItems.Title)
+
+                                        @foreach (var item in overlayItems.Items)
+                                        {
+                                            if (item.Item2 == OverlayType.AddSN)
+                                            {
+                                                var orderIdStr = item.Item1;
+                                                int orderId = int.Parse(orderIdStr);
+                                                <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(orderId)">Add Sendungsnummer</button>
+                                            }
+                                            else if (item.Item2 == OverlayType.UpdateSN)
+                                            {
+                                                var orderIdStr = item.Item1;
+                                                int orderId = int.Parse(orderIdStr);
+                                                string trackingNumber = orders.FirstOrDefault(o => o.Id == orderId)?.TrackingNumber ?? "Fehler bei Trackingnummer";
+                                                <span style="cursor:pointer;" @ondblclick=" ()=> OnAddOrUpdateTrackingNumberShowOverlay(orderId)">@trackingNumber</span>
+                                            }
+                                            else
+                                            {
+                                                @((MarkupString)item.Item1)
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @((MarkupString)overlayItems.NoData)
+                                    }
+                                </div>
+                            </div>
+                        }
+                        @* show Add Tracking Number *@
+                        @if (IsAddTrackingNumberVisible)
+                        {
+                            <div class="overlay">
+                                <div class="overlayForm">
+                                    <EditForm Model="orderAddTrackingNumber" OnValidSubmit="OnAddOrUpdateTrackingNumber">
+                                        <DataAnnotationsValidator />
+                                        <div class="formGroupAdd">
+                                            <InputText class="form-control" @bind-value="orderAddTrackingNumber.TrackingNumber" placeholder="Trackingnummer" />
+                                            <ValidationMessage For="@(() => orderAddTrackingNumber.TrackingNumber)" />
+                                        </div>
+                                        <div class="d-flex flex-row gap-1">
+                                            <button type="submit" class="btn btn-primary mt-2" disabled="@IsAddTrackingNumberLoading">
+                                                @if (IsAddTrackingNumberLoading)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    <span class="ms-2">Ladt...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Hinzufügen</span>
+                                                }
+                                            </button>
+                                            <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">Abbrechen</button>
+                                        </div>
+                                    </EditForm>
+                                </div>
+                            </div>
+                        }
                     </div>
-                </div>
+                    @* Rechnung *@
+                    @if (IsInvoiceVisible)
+                    {
+                        <ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice" OnHandel="HandleInvoiceClose" />
+                    }
+                }
+                else
+                {
+                    <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+                        <div class="alert alert-danger text-center">
+                            Sie haben keine Berechtigung für diese Seite
+                        </div>
+                    </div>
+                }
             }
         </Authorized>
         <NotAuthorized>
@@ -233,15 +240,17 @@
 </div>
 @code {
     private System.Globalization.CultureInfo germanCulture = new System.Globalization.CultureInfo("de-DE");
-    private bool Isloading = true;
+    private bool IsLoading = false;
     private List<Order> orders = new List<Order>();
+    private bool IsHasManageOrdersPermission = false;
     protected override async Task OnInitializedAsync()
     {
+        IsLoading = true;
         var authState = await authProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var canViewCoupons = user.HasClaim("permission", "manageOrders") ||
+        IsHasManageOrdersPermission = user.HasClaim("permission", "manageOrders") ||
                                 user.HasClaim("permission", "fullAccess");
-        if (canViewCoupons)
+        if (IsHasManageOrdersPermission)
         {
             // get BankTransferDetails
             _ = invoiceService.GetBankTransferDetailsAsync();
@@ -252,7 +261,7 @@
             await OnMoreLoad();
         }
 
-        Isloading = false;
+        IsLoading = false;
     }
     // more load
     private bool AllItemsLoaded { get; set; } = false;

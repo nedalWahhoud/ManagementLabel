@@ -3,21 +3,13 @@
 <div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@{
-				var isManage = authContext.User.HasClaim("permission", "manageCustomers") || authContext.User.HasClaim("permission", "fullAccess");
-				var isDebtManage = authContext.User.HasClaim("permission", "manageDebt") || authContext.User.HasClaim("permission", "fullAccess");
-				var isEdit = authContext.User.HasClaim("permission", "editCustomers") || authContext.User.HasClaim("permission", "fullAccess");
-				var isManageCustomerOneTimePayment = authContext.User.HasClaim("permission", "manageCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
-			}
-			@if (isManage)
+			@if (IsLoading)
 			{
-				@if (IsLoading)
-				{
-					<div class="w-100 card-body text-center text-info">
-						Lädt...
-					</div>
-				}
-				else
+				<ManagementLabel.Components.Layout.Loading />
+			}
+			else
+			{
+				@if (IsHasManageCustomersPermission)
 				{
 					List<Customers> customersToDisplay = customersService.DownloadedCustomers;
 					if (FilteredCustomers != null)
@@ -28,7 +20,7 @@
 						<div class="topTable">
 							<div class="buttonsDiv">
 								@* add neu Product *@
-								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!isEdit)" title="Add neue Customer">+</button>
+								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!IsHasEditCustomersPermission)" title="Add neue Customer">+</button>
 								@* choose the Columns *@
 								<div class="h-100 d-flex">
 									<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
@@ -57,9 +49,9 @@
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
 									<option value="0">Ha-Nr</option>
 									@foreach (var customer in customersService.DownloadedCustomers
-									.Where(c => c.DistributionLineId == selectedDistributionLineId)
-									.DistinctBy(c => c.StopNumber)
-									.OrderBy(c => c.StopNumber))
+														.Where(c => c.DistributionLineId == selectedDistributionLineId)
+														.DistinctBy(c => c.StopNumber)
+														.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -77,18 +69,54 @@
 						</div>
 						<table class="table table-bordered table-hover">
 							<tr>
-								@if (ShowColumn("Id")){<th>Id</th>}
-								@if (ShowColumn("Name_de")){<th>Na-De</th>}
-								@if (ShowColumn("Name_ar")){<th>Na-Ar</th>}
-								@if (ShowColumn("Address")){<th>Anschrift</th>}
-								@if (ShowColumn("Coordinates")){<th>Koordinaten</th>}
-								@if (ShowColumn("PhoneNumber")){<th>Tel.</th>}
-								@if (ShowColumn("EMail")){<th>E-Mail</th>}
-								@if (ShowColumn("NoteDe")){<th>No-De</th>}
-								@if (ShowColumn("NoteAr")){<th>No-Ar</th>}
-								@if (ShowColumn("Direction")){<th>Richtung</th>}
-								@if (ShowColumn("StopNumber")){<th>Ha-Nr</th>}
-								@if (ShowColumn("PIN")){<th>PIN</th>}
+								@if (ShowColumn("Id"))
+								{
+									<th>Id</th>
+								}
+								@if (ShowColumn("Name_de"))
+								{
+									<th>Na-De</th>
+								}
+								@if (ShowColumn("Name_ar"))
+								{
+									<th>Na-Ar</th>
+								}
+								@if (ShowColumn("Address"))
+								{
+									<th>Anschrift</th>
+								}
+								@if (ShowColumn("Coordinates"))
+								{
+									<th>Koordinaten</th>
+								}
+								@if (ShowColumn("PhoneNumber"))
+								{
+									<th>Tel.</th>
+								}
+								@if (ShowColumn("EMail"))
+								{
+									<th>E-Mail</th>
+								}
+								@if (ShowColumn("NoteDe"))
+								{
+									<th>No-De</th>
+								}
+								@if (ShowColumn("NoteAr"))
+								{
+									<th>No-Ar</th>
+								}
+								@if (ShowColumn("Direction"))
+								{
+									<th>Richtung</th>
+								}
+								@if (ShowColumn("StopNumber"))
+								{
+									<th>Ha-Nr</th>
+								}
+								@if (ShowColumn("PIN"))
+								{
+									<th>PIN</th>
+								}
 								<th style="min-width:40px;">⋮</th>
 							</tr>
 							<tbody>
@@ -105,45 +133,75 @@
 									@foreach (var customer in customersToDisplay)
 									{
 										<tr class="@(customer.HasOneTimePaymentToday ? "table-info fw-bold" : "")">
-											@if (ShowColumn("Id")){<td>@customer.Id</td>}
-											@if (ShowColumn("Name_de")){<td>@customer.Name_de</td>}
-											@if (ShowColumn("Name_ar")){<td>@customer.Name_ar</td>}
+											@if (ShowColumn("Id"))
+											{
+												<td>@customer.Id</td>
+											}
+											@if (ShowColumn("Name_de"))
+											{
+												<td>@customer.Name_de</td>
+											}
+											@if (ShowColumn("Name_ar"))
+											{
+												<td>@customer.Name_ar</td>
+											}
 											@if (ShowColumn("Address"))
 											{
 												<td>
 													@customer.Street @customer.BuildingNumber<br />
-													@customer.PostalCode @customer.City 
+													@customer.PostalCode @customer.City
 												</td>
 											}
 											@if (ShowColumn("Coordinates"))
 											{
 												<td>
-													La: @customer.Latitude <br/>
+													La: @customer.Latitude <br />
 													Lo: @customer.Longitude
 												</td>
 											}
-											@if (ShowColumn("PhoneNumber")){<td>@customer.PhoneNumber</td>}
-											@if (ShowColumn("EMail")){<td>@customer.Email</td>}
-											@if (ShowColumn("NoteDe")){<td>@customer.Notes_de</td>}
-											@if (ShowColumn("NoteAr")){<td>@customer.Notes_ar</td>}
-											@if (ShowColumn("Direction")){<td>@(customer.DistributionLine?.LineName ?? "Null DistributionLine")</td>}
-											@if (ShowColumn("StopNumber")){<td>@customer.StopNumber</td>}
-											@if (ShowColumn("PIN")){<td>@customer.PIN</td>}
+											@if (ShowColumn("PhoneNumber"))
+											{
+												<td>@customer.PhoneNumber</td>
+											}
+											@if (ShowColumn("EMail"))
+											{
+												<td>@customer.Email</td>
+											}
+											@if (ShowColumn("NoteDe"))
+											{
+												<td>@customer.Notes_de</td>
+											}
+											@if (ShowColumn("NoteAr"))
+											{
+												<td>@customer.Notes_ar</td>
+											}
+											@if (ShowColumn("Direction"))
+											{
+												<td>@(customer.DistributionLine?.LineName ?? "Null DistributionLine")</td>
+											}
+											@if (ShowColumn("StopNumber"))
+											{
+												<td>@customer.StopNumber</td>
+											}
+											@if (ShowColumn("PIN"))
+											{
+												<td>@customer.PIN</td>
+											}
 											<td>
 												<div class="dropdown">
 													<button disabled="@thisCustomerProcess.IsProcessing" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-container="body">
 														@if (thisCustomerProcess.IsProcessing && thisCustomerProcess.CustomerId == customer.Id)
 														{
 															<span class="spinner-border spinner-border-sm"
-															role="status"
-															aria-hidden="true"></span>
+																  role="status"
+																  aria-hidden="true"></span>
 														}
 														else
 														{
 															<span>⋮</span>
 														}
 													</button>
-													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" Permissions="new (isEdit,isDebtManage,isManageCustomerOneTimePayment)" OnHandel="HandleCustomDropdown" />
+													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" Permissions="new (IsHasEditCustomersPermission,IsHasManageDebtPermission,IsHasCrateCustomerOneTimePaymentPermission)" OnHandel="HandleCustomDropdown" />
 												</div>
 											</td>
 										</tr>
@@ -165,19 +223,18 @@
 					{
 						<ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="add" OneTimePayment="newOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
 					}
+					@* map select *@
+					<ManagementLabel.Components.Layout.MapSelect />
 				}
-				@* map select *@
-				<ManagementLabel.Components.Layout.MapSelect />
-			}
-			else
-			{
-				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-					<div class="alert alert-danger text-center">
-						Sie haben keine Berechtigung für diese Seite
+				else
+				{
+					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+						<div class="alert alert-danger text-center">
+							Sie haben keine Berechtigung für diese Seite
+						</div>
 					</div>
-				</div>
+				}
 			}
-
 		</Authorized>
 		<NotAuthorized>
 			<ManagementLabel.Components.Pages.LogIn />
@@ -204,17 +261,30 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 
 	private bool IsAdding = false;
-	private bool IsLoading = true;
+	private bool IsLoading = false;
 	private int selectedDistributionLineId = 0;
 	private List<(Task<ValidationResult> task, int lineId)> customersTask = new();
-
+	private bool IsHasManageCustomersPermission = false;
+	private bool IsHasCrateCustomerOneTimePaymentPermission = false;
+	private bool IsHasEditCustomersPermission = false;
+	private bool IsHasManageDebtPermission = false;
 	protected async override Task OnInitializedAsync()
 	{
+		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
-		var canMangeCustomers = user.HasClaim("permission", "manageCustomers") ||
+		IsHasManageCustomersPermission = user.HasClaim("permission", "manageCustomers") ||
 								user.HasClaim("permission", "fullAccess");
-		if (canMangeCustomers)
+		IsHasManageDebtPermission = user.HasClaim("permission", "manageDebt") || user.HasClaim("permission", "fullAccess");
+		IsHasEditCustomersPermission = user.HasClaim("permission", "editCustomers") || user.HasClaim("permission", "fullAccess");
+		IsHasCrateCustomerOneTimePaymentPermission = user.HasClaim("permission", "manageCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
+
+		IsLoading = false;
+	}
+	protected override async Task OnParametersSetAsync()
+	{
+		IsLoading = true;
+		if (IsHasManageCustomersPermission)
 		{
 			await distributionLinesService.GetAllDistributionLinesAsync();
 
@@ -241,7 +311,6 @@
 					await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
 				}
 			}
-
 			selectedStopNumberId = await localStorage.GetItemAsync<int>("selectedStopNummerId");
 			if (selectedStopNumberId > 0)
 			{
@@ -257,7 +326,6 @@
 		}
 		IsLoading = false;
 	}
-
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
@@ -299,10 +367,10 @@
 		if (args.action == "Add" || args.action == "Edit")
 			StateHasChanged();
 
-		if (selectedDistributionLineId > 0)
+		/*if (selectedDistributionLineId > 0)
 		{
 			await AfterDistributionLineChanged();
-		}
+		}*/
 	}
 	// filter 
 	private List<Customers> FilteredCustomers = null!;

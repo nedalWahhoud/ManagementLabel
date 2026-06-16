@@ -5,368 +5,462 @@
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@{
-				hasPermission = authContext.User.HasClaim("permission", "manageProducts") ||
-				authContext.User.HasClaim("permission", "fullAccess");
-			}
-			@if (hasPermission && IsRended)
+			@if (IsLoading)
 			{
-				@* table *@
-				<div tabindex="0" id="scrollContainer" class="tableContiner">
-					<div class="topTable">
-						@* add neu Product *@
-						<button class="btn addPlusB" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)" title="Add neues Produkt">+</button>
-						@* choose the Columns *@
-						<div class="h-100 d-flex align-items-center">
-							<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
-							<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-								@foreach (var col in columnOptions)
-								{
-									<li>
-										<div class="form-check form-switch">
-											<input class="form-check-input"
-											type="checkbox"
-											id="@col.Key"
-											@bind="col.IsVisible"
-											@bind:after="OnColumnChanged" />
-											<label class="form-check-label" for="@col.Key">
-												@col.Label
-											</label>
-										</div>
-									</li>
-								}
-							</ul>
-						</div>
-						@* Rechnung *@
-						<button class="btn @(IsShowInvoice ? "btn-secondary" : "btn-success") InvoiceB" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
-							@(!IsShowInvoice ? "R" : "A")
-						</button>
-						@* filter *@
-						<div class="d-flex flex-column gap-1 ms-auto">
-							@* Lagerstand Filter  *@
-							<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage
-                            || productService.DownloadedProduct.Count == 0
-                            || categoryService.DownloadedCategories.Count == 0)">
-								<option value="0">Alle</option>
-								<option value="1">Geringer Lagerbestand</option>
-								<option value="2">Im Angebot</option>
-							</select>
-							@* category filter *@
-							<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-								<option value="0">Kategorie</option>
-								@foreach (var category in categoryService.DownloadedCategories)
-								{
-									<option value="@category.Id">@category.Name_de</option>
-								}
-							</select>
-						</div>
-					</div>
-					<table class="table text-center align-middle">
-						<thead>
-							<tr>
-								@if (ShowColumn("Index")){<th>Index</th>}
-								@if (ShowColumn("Id"))	{<th>Id</th>}
-								@if (ShowColumn("Name_de")){<th>Name de</th>}
-								@if (ShowColumn("Description_de")){<th>Beschreibung de</th>}
-								@if (ShowColumn("Name_ar")){<th>Name ar</th>}
-								@if (ShowColumn("Description_ar")){<th>Beschreibung ar</th>}
-								@if (ShowColumn("Category")){<th>Kategorie</th>}
-								@if (ShowColumn("Barcode")){<th>Barcode</th>}
-								@if (ShowColumn("Quantity")){<th>Menge</th>}
-								@if (ShowColumn("PurchasePrice")){<th>Kaufpreis</th>}
-								@if (ShowColumn("SellePrice")){<th>Verkaufspreis</th>}
-								@if (ShowColumn("MinimumStock")){<th>Mindestbestand</th>}
-								@if (ShowColumn("ExpDate")){<th>Ablaufdatum</th>}
-								@if (ShowColumn("Manufacturer")){<th>Lieferant</th>}
-								@if (ShowColumn("TaxRate")){<th>Steuersatz</th>}
-								@if (ShowColumn("Group")){<th>Gruppe</th>}
-								@if (ShowColumn("IsShippable")){<th>Versandfähig</th>}
-								@if (ShowColumn("DiscountedPrice")){<th>Im Angebot</th>}
-								@if (ShowColumn("Username")){<th>Benutzername</th>}
-								@if (ShowColumn("Img")){<th>Img</th>}
-								<th class="@(IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
-							</tr>
-						</thead>
-						<tbody>
-							@* Loading message *@
-							<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "showLoading")">
-								<td colspan="11" class="loadingTd">
-									Lädt...
-								</td>
-							</tr>
-							@* table *@
-							@{
-								var dataSource = filterP ?? productService.DownloadedProduct;
-								<Virtualize Items="dataSource" Context="product" OverscanCount="10">
-									<tr @key="product.Id"
-									@oncontextmenu:preventDefault="true"
-									@oncontextmenu="@(e => OnSelectRow(product, e))"
-									@onclick="(e) => OnSelectRow(product, e)"
-									@ondblclick="(e) => OnDoubleTap(product, e)"
-									class="@(selectedRow?.Id == product.Id ? "selected" : "")">
-										@if (ShowColumn("Index")){<td>@(dataSource.IndexOf(product) + 1)</td> }
-										@if (ShowColumn("Id")){<td>@product.Id</td>}
-										@if (ShowColumn("Name_de")){<td>@product.Name_de</td>}
-										@if (ShowColumn("Description_de")){<td>@product.Description_de</td>}
-										@if (ShowColumn("Name_ar")){<td>@product.Name_ar</td>}
-										@if (ShowColumn("Description_ar")){<td>@product.Description_ar</td>}
-										@if (ShowColumn("Category")){<td>@product.Category!.Name_de</td>}
-										@if (ShowColumn("Barcode")){<td>@product.Barcode</td>}
-										@if (ShowColumn("Quantity")){<td class="@(product.MinimumStock >= product.Quantity ? "IsMinimumStock" : "")">@product.Quantity</td>}
-										@if (ShowColumn("PurchasePrice")){<td>@product.PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
-										@if (ShowColumn("SellePrice"))
-										{<td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>}
-										@if (ShowColumn("MinimumStock"))
-										{<td>@product.MinimumStock</td>}
-										@if (ShowColumn("ExpDate"))
-										{
-											@* check exp date *@
-											var expDate = product.EXPDate;
-											string backgroundcolor = ""; // Default color
-											string color = "";
-
-											if (expDate < DateTime.Today)
-											{
-												backgroundcolor = "red"; // Abgelaufen
-												color = "white";
-											}
-											else if (expDate <= DateTime.Today.AddMonths(1))
-											{
-												backgroundcolor = "orange"; // Weniger als ein Monat übrig
-												color = "white";
-											}
-
-											<td style="background-color:@backgroundcolor!; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
-										}
-										@if (ShowColumn("Manufacturer"))
-										{
-											<td>@string.Join(", ", product.Suppliers.Select(s => s.Name))</td>
-										}
-										@if (ShowColumn("TaxRate"))
-										{
-											<td>@((product.TaxRate?.Rate.ToString("0") + "%") ?? "")</td>
-										}
-										@if (ShowColumn("Group"))
-										{
-											<td>@(product.ProductGroup?.GroupName_de ?? "")</td>
-										}
-										@if (ShowColumn("IsShippable"))
-										{
-											<td>@product.IsShippable</td>
-										}
-										@if (ShowColumn("DiscountedPrice")){<td>@(product.ProductDiscount == null ? 0 : product.ProductDiscount.DiscountedPrice)</td>}
-										@if (ShowColumn("Username"))
-										{
-											<td>@(product.User?.UserName ?? "")</td>
-										}
-										@if (ShowColumn("Img"))
-										{
-											<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
-										}
-										@* Rechnung *@
-										<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
-											<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@product.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
-										</td>
-									</tr>
-								</Virtualize>
-
-								@if (!IsLoadingMessage && dataSource.Count == 0)
-								{
-									<tr id="loadingMessage">
-										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-											<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
-										</td>
-									</tr>
-								}
-							}
-						</tbody>
-					</table>
-				</div>
-
-				@* menu context *@
-				@if (showContextMenu && selectedProduct != null)
-				{
-					<div class="contextMenu dropdown-menu-end dropdown-menu"
-					style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
-					@onclick:stopPropagation="true">
-						<ul>
-							<li @onclick="() => EditProduct(selectedProduct)">
-								<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
-							</li>
-							<li @onclick="() => DeleteProduct(selectedProduct)">
-								<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
-							</li>
-							<li @onclick="OpenScanner">
-								<a><i class="fa-solid fa-barcode"></i> Barcode eingeben</a>
-							</li>
-						</ul>
-					</div>
-				}
-				@* Add Product form *@
-				@if (IsShowAddProductForm)
-				{
-					<ManagementLabel.Components.Layout.OverlayEditForm Action="Add"  GetProducts="newProduct" user ="user" OnHandel="HandleEditProduct" />
-				}
-				else if (_editProduct != null)
-				{
-					<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" GetProducts="_editProduct" user="user" OnHandel="HandleEditProduct" />
-				}
-				@* order erstellen *@
-				@if (IsShowOrder)
-				{
-					<div class="overlay">
-						<div class="overlayAddForm">
-							@* address *@
-							<h3>Lieferadresse: </h3>
-							<EditForm Model="@newAddress">
-								<DataAnnotationsValidator />
-								<div class="form-group">
-									<label>Vorname</label>
-									<InputText class="form-control" @bind-Value="newAddress.FirstName" />
-									<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
-								</div>
-								<div class="form-group">
-									<label>Nachname</label>
-									<InputText class="form-control" @bind-Value="newAddress.LastName" />
-									<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
-								</div>
-								<div class="form-group">
-									<label>Tel.</label>
-									<InputText class="form-control" @bind-Value="newAddress.Phone" />
-									<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
-								</div>
-								<div class="form-group">
-									<label>Straße</label>
-									<InputText class="form-control" @bind-Value="newAddress.Street" />
-									<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
-								</div>
-								<div class="form-group">
-									<label>Postleitzahl</label>
-									<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
-									<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
-								</div>
-								<div class="form-group">
-									<label>Stadt</label>
-									<InputText class="form-control" @bind-Value="newAddress.City" />
-									<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
-								</div>
-								<div class="form-group">
-									<label>Land</label>
-									<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
-								</div>
-							</EditForm>
-							@* Discount Code *@
-							<div class="discountClass">
-								<label>Hast du Rabatt Code?</label>
-								<div class="input-group d-flex gap-2 mb-1">
-									<InputText class="form-control" @bind-Value="discountCode.Code" />
-									<button type="button" class="btn btn-primary" @onclick="OnCode">
-										@if (IsDiscountCodeLoading)
-										{
-											<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-										}
-										else
-										{
-											<span>Code eingeben</span>
-										}
-									</button>
-								</div>
-								@{
-									string message = null!;
-									if (discountCode.Message != null && !string.IsNullOrEmpty(discountCode.Message))
-									{
-										message = discountCode.Message;
-									}
-									else if (discountCategory.Message != null && !string.IsNullOrEmpty(discountCategory.Message))
-									{
-										message = discountCategory.Message;
-									}
-
-									double DiscountPercentageText = 0;
-									char? valueSymbol = null;
-									if (discountCode.DiscountAmount != 0)
-									{
-										DiscountPercentageText = discountCode.DiscountAmount;
-										valueSymbol = discountCode.DiscountType == DiscountType.Percentage ? '%' : '€';
-									}
-									else if (discountCategory.DiscountAmount != 0)
-									{
-										DiscountPercentageText = discountCategory.DiscountAmount;
-										valueSymbol = discountCategory.DiscountType == DiscountType.Percentage ? '%' : '€';
-									}
-									else
-									{
-										DiscountPercentageText = 0;
-									}
-
-									<label class="mt-2 text-success">Rabattprozentsatz: @DiscountPercentageText @valueSymbol</label>
-									<label class="mt-2 text-danger">@message</label>
-								}
-							</div>
-							<div class="placeOrder">
-								Artikel: @cartService.GetTotalQuantity()
-								<span>
-									@if (discountCode != null && discountCode.Id > 0)
-									{
-										var result = GetFinalPriceWithDiscount();
-										<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
-									}
-									else if (discountCategory != null && discountCategory.Id > 0 && discountCategory.CategoriesId > 0)
-									{
-										var result = GetFinalPriceWithDiscountCategory();
-										<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
-									}
-									else
-									{
-										GetFinalPrice();
-									}
-								</span>
-								@{
-									double totalPrice = 0;
-									if (order.ShippingProviders != null && order.ShippingProviderId > 0)
-									{
-										<span>Versandkosten: @order.ShippingProviders.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
-										totalPrice = order.TotalPrice + order.ShippingProviders.PublicShippingCost;
-									}
-									else
-										totalPrice = order.TotalPrice;
-								}
-								<span><strong>Gesamtpreis:</strong> @totalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
-								<span>Die Preise beinhalten MwSt.</span>
-							</div>
-							<div class="OrderClassB">
-								<button type="button" class="btn InvoiceGenerateB" @onclick="OnInvoiceGenerate">Rechnung erstellen</button>
-								<button type="button" class="btn InvoiceGeneratCancelB" @onclick="OnOrderCancel">Abbrechnen</button>
-							</div>
-						</div>
-					</div>
-				}
-				@* Rechnung *@
-				@if (IsInvoiceVisible)
-				{
-					<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice"  OnHandel="HandleInvoice" />
-				}
-				@if (ShowScanner)
-				{
-					<div class="scanner-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-						<div id="reader" style="width: 300px; background:white; border-radius:10px; overflow:hidden;"></div>
-						<button class="btn btn-danger mt-3" @onclick="CloseScanner">Abbrechen</button>
-					</div>
-				}
-			}
-			else if (!hasPermission && IsRended)
-			{
-				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-					<div class="alert alert-danger text-center">
-						Sie haben keine Berechtigung für diese Seite
-					</div>
-				</div>
+				<ManagementLabel.Components.Layout.Loading />
 			}
 			else
 			{
-				<div class="w-100 card-body text-center text-info">
-					Lädt...
-				</div>
+				@if (IsHasManageProductsPermission)
+				{
+					@* table *@
+					<div tabindex="0" id="scrollContainer" class="tableContiner">
+						<div class="topTable">
+							@* add neu Product *@
+							<button class="btn addPlusB" @onclick="ShowAddProductFormAsync" disabled="@(IsLoadingMessage)" title="Add neues Produkt">+</button>
+							@* choose the Columns *@
+							<div class="h-100 d-flex align-items-center">
+								<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+								<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+									@foreach (var col in columnOptions)
+									{
+										<li>
+											<div class="form-check form-switch">
+												<input class="form-check-input"
+												type="checkbox"
+												id="@col.Key"
+												@bind="col.IsVisible"
+												@bind:after="OnColumnChanged" />
+												<label class="form-check-label" for="@col.Key">
+													@col.Label
+												</label>
+											</div>
+										</li>
+									}
+								</ul>
+							</div>
+							@* Rechnung *@
+							<button class="btn @(IsShowInvoice ? "btn-secondary" : "btn-success") InvoiceB" @onclick="@(IsShowInvoice ? CancelOrderForm : ShowOrderForm)" disabled="@(IsLoadingMessage)">
+								@(!IsShowInvoice ? "R" : "A")
+							</button>
+							@* filter *@
+							<div class="d-flex flex-column gap-1 ms-auto">
+								@* Lagerstand Filter  *@
+								<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage
+                            || productService.DownloadedProduct.Count == 0
+                            || categoryService.DownloadedCategories.Count == 0)">
+									<option value="0">Alle</option>
+									<option value="1">Geringer Lagerbestand</option>
+									<option value="2">Im Angebot</option>
+								</select>
+								@* category filter *@
+								<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
+									<option value="0">Kategorie</option>
+									@foreach (var category in categoryService.DownloadedCategories)
+									{
+										<option value="@category.Id">@category.Name_de</option>
+									}
+								</select>
+							</div>
+						</div>
+						<table class="table text-center align-middle">
+							<thead>
+								<tr>
+									@if (ShowColumn("Index"))
+									{
+										<th>Index</th>
+									}
+									@if (ShowColumn("Id"))
+									{
+										<th>Id</th>
+									}
+									@if (ShowColumn("Name_de"))
+									{
+										<th>Name de</th>
+									}
+									@if (ShowColumn("Description_de"))
+									{
+										<th>Beschreibung de</th>
+									}
+									@if (ShowColumn("Name_ar"))
+									{
+										<th>Name ar</th>
+									}
+									@if (ShowColumn("Description_ar"))
+									{
+										<th>Beschreibung ar</th>
+									}
+									@if (ShowColumn("Category"))
+									{
+										<th>Kategorie</th>
+									}
+									@if (ShowColumn("Barcode"))
+									{
+										<th>Barcode</th>
+									}
+									@if (ShowColumn("Quantity"))
+									{
+										<th>Menge</th>
+									}
+									@if (ShowColumn("PurchasePrice"))
+									{
+										<th>Kaufpreis</th>
+									}
+									@if (ShowColumn("SellePrice"))
+									{
+										<th>Verkaufspreis</th>
+									}
+									@if (ShowColumn("MinimumStock"))
+									{
+										<th>Mindestbestand</th>
+									}
+									@if (ShowColumn("ExpDate"))
+									{
+										<th>Ablaufdatum</th>
+									}
+									@if (ShowColumn("Manufacturer"))
+									{
+										<th>Lieferant</th>
+									}
+									@if (ShowColumn("TaxRate"))
+									{
+										<th>Steuersatz</th>
+									}
+									@if (ShowColumn("Group"))
+									{
+										<th>Gruppe</th>
+									}
+									@if (ShowColumn("IsShippable"))
+									{
+										<th>Versandfähig</th>
+									}
+									@if (ShowColumn("DiscountedPrice"))
+									{
+										<th>Im Angebot</th>
+									}
+									@if (ShowColumn("Username"))
+									{
+										<th>Benutzername</th>
+									}
+									@if (ShowColumn("Img"))
+									{
+										<th>Img</th>
+									}
+									<th class="@(IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
+								</tr>
+							</thead>
+							<tbody>
+								@* Loading message *@
+								<tr id="loadingMessage" class="@(!IsLoadingMessage ? "hidden" : "showLoading")">
+									<td colspan="11" class="loadingTd">
+										Lädt...
+									</td>
+								</tr>
+								@* table *@
+								@{
+									var dataSource = filterP ?? productService.DownloadedProduct;
+									<Virtualize Items="dataSource" Context="product" OverscanCount="10">
+										<tr @key="product.Id"
+										@oncontextmenu:preventDefault="true"
+										@oncontextmenu="@(e => OnSelectRow(product, e))"
+										@onclick="(e) => OnSelectRow(product, e)"
+										@ondblclick="(e) => OnDoubleTap(product, e)"
+										class="@(selectedRow?.Id == product.Id ? "selected" : "")">
+											@if (ShowColumn("Index"))
+											{
+												<td>@(dataSource.IndexOf(product) + 1)</td>
+											}
+											@if (ShowColumn("Id"))
+											{
+												<td>@product.Id</td>
+											}
+											@if (ShowColumn("Name_de"))
+											{
+												<td>@product.Name_de</td>
+											}
+											@if (ShowColumn("Description_de"))
+											{
+												<td>@product.Description_de</td>
+											}
+											@if (ShowColumn("Name_ar"))
+											{
+												<td>@product.Name_ar</td>
+											}
+											@if (ShowColumn("Description_ar"))
+											{
+												<td>@product.Description_ar</td>
+											}
+											@if (ShowColumn("Category"))
+											{
+												<td>@product.Category!.Name_de</td>
+											}
+											@if (ShowColumn("Barcode"))
+											{
+												<td>@product.Barcode</td>
+											}
+											@if (ShowColumn("Quantity"))
+											{
+												<td class="@(product.MinimumStock >= product.Quantity ? "IsMinimumStock" : "")">@product.Quantity</td>
+											}
+											@if (ShowColumn("PurchasePrice"))
+											{
+												<td>@product.PurchasePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+											}
+											@if (ShowColumn("SellePrice"))
+											{
+												<td>@product.SalePrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</td>
+											}
+											@if (ShowColumn("MinimumStock"))
+											{
+												<td>@product.MinimumStock</td>
+											}
+											@if (ShowColumn("ExpDate"))
+											{
+												@* check exp date *@
+												var expDate = product.EXPDate;
+												string backgroundcolor = ""; // Default color
+												string color = "";
+
+												if (expDate < DateTime.Today)
+												{
+													backgroundcolor = "red"; // Abgelaufen
+													color = "white";
+												}
+												else if (expDate <= DateTime.Today.AddMonths(1))
+												{
+													backgroundcolor = "orange"; // Weniger als ein Monat übrig
+													color = "white";
+												}
+
+												<td style="background-color:@backgroundcolor!; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
+											}
+											@if (ShowColumn("Manufacturer"))
+											{
+												<td>@string.Join(", ", product.Suppliers.Select(s => s.Name))</td>
+											}
+											@if (ShowColumn("TaxRate"))
+											{
+												<td>@((product.TaxRate?.Rate.ToString("0") + "%") ?? "")</td>
+											}
+											@if (ShowColumn("Group"))
+											{
+												<td>@(product.ProductGroup?.GroupName_de ?? "")</td>
+											}
+											@if (ShowColumn("IsShippable"))
+											{
+												<td>@product.IsShippable</td>
+											}
+											@if (ShowColumn("DiscountedPrice"))
+											{
+												<td>@(product.ProductDiscount == null ? 0 : product.ProductDiscount.DiscountedPrice)</td>
+											}
+											@if (ShowColumn("Username"))
+											{
+												<td>@(product.User?.UserName ?? "")</td>
+											}
+											@if (ShowColumn("Img"))
+											{
+												<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
+											}
+											@* Rechnung *@
+											<td class="@(authContext.User.IsInRole("admin") && IsShowInvoice ? "AddDecresaseCard" : "hidden")">
+												<ManagementLabel.Components.Layout.AddDecresaseCard ProductId="@product.CartItem.ProductId" OnQuantityChanged="HandleQuantityChanged" />
+											</td>
+										</tr>
+									</Virtualize>
+
+									@if (!IsLoadingMessage && dataSource.Count == 0)
+									{
+										<tr id="loadingMessage">
+											<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+												<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
+											</td>
+										</tr>
+									}
+								}
+							</tbody>
+						</table>
+					</div>
+
+					@* menu context *@
+					@if (showContextMenu && selectedProduct != null)
+					{
+						<div class="contextMenu dropdown-menu-end dropdown-menu"
+						style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
+						@onclick:stopPropagation="true">
+							<ul>
+								<li @onclick="() => EditProduct(selectedProduct)">
+									<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+								</li>
+								<li @onclick="() => DeleteProduct(selectedProduct)">
+									<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+								</li>
+								<li @onclick="OpenScanner">
+									<a><i class="fa-solid fa-barcode"></i> Barcode eingeben</a>
+								</li>
+							</ul>
+						</div>
+					}
+					@* Add Product form *@
+					@if (IsShowAddProductForm)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditForm Action="Add" GetProducts="newProduct" user="user" OnHandel="HandleEditProduct" />
+					}
+					else if (_editProduct != null)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditForm Action="Edit" GetProducts="_editProduct" user="user" OnHandel="HandleEditProduct" />
+					}
+					@* order erstellen *@
+					@if (IsShowOrder)
+					{
+						<div class="overlay">
+							<div class="overlayAddForm">
+								@* address *@
+								<h3>Lieferadresse: </h3>
+								<EditForm Model="@newAddress">
+									<DataAnnotationsValidator />
+									<div class="form-group">
+										<label>Vorname</label>
+										<InputText class="form-control" @bind-Value="newAddress.FirstName" />
+										<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
+									</div>
+									<div class="form-group">
+										<label>Nachname</label>
+										<InputText class="form-control" @bind-Value="newAddress.LastName" />
+										<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
+									</div>
+									<div class="form-group">
+										<label>Tel.</label>
+										<InputText class="form-control" @bind-Value="newAddress.Phone" />
+										<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
+									</div>
+									<div class="form-group">
+										<label>Straße</label>
+										<InputText class="form-control" @bind-Value="newAddress.Street" />
+										<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
+									</div>
+									<div class="form-group">
+										<label>Postleitzahl</label>
+										<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
+										<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
+									</div>
+									<div class="form-group">
+										<label>Stadt</label>
+										<InputText class="form-control" @bind-Value="newAddress.City" />
+										<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
+									</div>
+									<div class="form-group">
+										<label>Land</label>
+										<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
+									</div>
+								</EditForm>
+								@* Discount Code *@
+								<div class="discountClass">
+									<label>Hast du Rabatt Code?</label>
+									<div class="input-group d-flex gap-2 mb-1">
+										<InputText class="form-control" @bind-Value="discountCode.Code" />
+										<button type="button" class="btn btn-primary" @onclick="OnCode">
+											@if (IsDiscountCodeLoading)
+											{
+												<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+											}
+											else
+											{
+												<span>Code eingeben</span>
+											}
+										</button>
+									</div>
+									@{
+										string message = null!;
+										if (discountCode.Message != null && !string.IsNullOrEmpty(discountCode.Message))
+										{
+											message = discountCode.Message;
+										}
+										else if (discountCategory.Message != null && !string.IsNullOrEmpty(discountCategory.Message))
+										{
+											message = discountCategory.Message;
+										}
+
+										double DiscountPercentageText = 0;
+										char? valueSymbol = null;
+										if (discountCode.DiscountAmount != 0)
+										{
+											DiscountPercentageText = discountCode.DiscountAmount;
+											valueSymbol = discountCode.DiscountType == DiscountType.Percentage ? '%' : '€';
+										}
+										else if (discountCategory.DiscountAmount != 0)
+										{
+											DiscountPercentageText = discountCategory.DiscountAmount;
+											valueSymbol = discountCategory.DiscountType == DiscountType.Percentage ? '%' : '€';
+										}
+										else
+										{
+											DiscountPercentageText = 0;
+										}
+
+										<label class="mt-2 text-success">Rabattprozentsatz: @DiscountPercentageText @valueSymbol</label>
+										<label class="mt-2 text-danger">@message</label>
+									}
+								</div>
+								<div class="placeOrder">
+									Artikel: @cartService.GetTotalQuantity()
+									<span>
+										@if (discountCode != null && discountCode.Id > 0)
+										{
+											var result = GetFinalPriceWithDiscount();
+											<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
+										}
+										else if (discountCategory != null && discountCategory.Id > 0 && discountCategory.CategoriesId > 0)
+										{
+											var result = GetFinalPriceWithDiscountCategory();
+											<span class="text-success">Es wird bei deinem Einkauf gespart @result.discountValue.ToString("C", new System.Globalization.CultureInfo("de-DE")) </span>
+										}
+										else
+										{
+											GetFinalPrice();
+										}
+									</span>
+									@{
+										double totalPrice = 0;
+										if (order.ShippingProviders != null && order.ShippingProviderId > 0)
+										{
+											<span>Versandkosten: @order.ShippingProviders.PublicShippingCost.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
+											totalPrice = order.TotalPrice + order.ShippingProviders.PublicShippingCost;
+										}
+										else
+											totalPrice = order.TotalPrice;
+									}
+									<span><strong>Gesamtpreis:</strong> @totalPrice.ToString("C", new System.Globalization.CultureInfo("de-DE"))</span>
+									<span>Die Preise beinhalten MwSt.</span>
+								</div>
+								<div class="OrderClassB">
+									<button type="button" class="btn InvoiceGenerateB" @onclick="OnInvoiceGenerate">Rechnung erstellen</button>
+									<button type="button" class="btn InvoiceGeneratCancelB" @onclick="OnOrderCancel">Abbrechnen</button>
+								</div>
+							</div>
+						</div>
+					}
+					@* Rechnung *@
+					@if (IsInvoiceVisible)
+					{
+						<ManagementLabel.Components.Layout.InvoiceLayout invoice="invoice" OnHandel="HandleInvoice" />
+					}
+					@if (ShowScanner)
+					{
+						<div class="scanner-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+							<div id="reader" style="width: 300px; background:white; border-radius:10px; overflow:hidden;"></div>
+							<button class="btn btn-danger mt-3" @onclick="CloseScanner">Abbrechen</button>
+						</div>
+					}
+				}
+				else if (!IsHasManageProductsPermission)
+				{
+					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+						<div class="alert alert-danger text-center">
+							Sie haben keine Berechtigung für diese Seite
+						</div>
+					</div>
+				}
 			}
 		</Authorized>
 		<NotAuthorized>
@@ -378,12 +472,12 @@
 
 	// Taks
 	Task taskCatyrories = Task.CompletedTask;
-	Task taskManufacturers = Task.CompletedTask;
+	Task taskSuppliers = Task.CompletedTask;
 	Task taskProductGroups = Task.CompletedTask;
 	Task taskTaxRates = Task.CompletedTask;
-	private bool hasPermission = false;
+	private bool IsHasManageProductsPermission = false;
 	private bool IsLoadingMessage = false;
-	private bool IsRended = false;
+	private bool IsLoading = false;
 	private Users? user;
 	private GetItems<Products> getItems = new();
 	// show Colmuns
@@ -413,34 +507,35 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	protected override async Task OnInitializedAsync()
 	{
+		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
-		var user = authState.User;
+		var user1 = authState.User;
+		IsHasManageProductsPermission = user1.HasClaim("permission", "manageProducts") || user1.HasClaim("permission", "fullAccess");
+		// get aktulle user
+		user = await authService.GetUser();
+		// get benötigte listen
+		taskSuppliers = suppliersService.GetAllSuppliers();
+		taskProductGroups = productGroupService.GetAllGroupProductsAsync();
+		taskTaxRates = productService.GetAllTaxRates();
+		taskCatyrories = categoryService.GetAllCategoriesAsync();
+		// die Spaltenoptionen aus dem Local Storage laden
+		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
+		if (saved is not null)
+			columnOptions = saved;
+		// get gespeicherte CategoryId
+		selectedCategoryId = await localStorage.GetItemAsync<int>("selectedCategoryId");
+		IsLoading = false;
+	}
 
-		if (hasPermission)
+	protected override async Task OnParametersSetAsync()
+	{
+		IsLoading = true;
+		if (IsHasManageProductsPermission)
 		{
-			if (user.Identity?.IsAuthenticated == true)
-			{
-				this.user = new();
-				var userIdStr = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value!;
-				if (int.TryParse(userIdStr, out int userIdInt))
-				{
-					this.user.Id = userIdInt;
-				}
-			}
-			//
-			taskCatyrories = categoryService.GetAllCategoriesAsync();
-
-			selectedCategoryId = await localStorage.GetItemAsync<int>("selectedCategoryId");
-
-			taskManufacturers = suppliersService.GetAllSuppliers();
-			taskProductGroups = productGroupService.GetAllGroupProductsAsync();
-			taskTaxRates = productService.GetAllTaxRates();
-
-
 			// wenn die category filter gesetzt in latzt Sitzung wurde dann filtern nach lest gespeicherte category
 			if (selectedCategoryId > 0)
 			{
-				getItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category },Includes = ProductIncludes.Category | ProductIncludes.ProductImages };
+				getItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages | ProductIncludes.Suppliers | ProductIncludes.ProductDiscount };
 				if (!taskCatyrories.IsCompleted)
 					await taskCatyrories;
 			}
@@ -451,14 +546,10 @@
 			productService.DownloadedProduct.Clear();
 			// erste Produkte laden
 			await loadInBackground();
-
-			// die Spaltenoptionen aus dem Local Storage laden
-			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
-			if (saved is not null)
-				columnOptions = saved;
 		}
-		IsRended = true;
+		IsLoading = false;
 	}
+
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
@@ -466,12 +557,15 @@
 	}
 	// OnAfterRenderAsync
 	private DotNetObjectReference<ProductsManagement>? objRef;
+
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
+			IsLoading = true;
 			// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 			objRef = DotNetObjectReference.Create(this);
+			IsLoading = false;
 		}
 		try
 		{
@@ -581,8 +675,8 @@
 		// get the categories and manufacturers and taxrates
 		if (!taskCatyrories.IsCompleted)
 			await taskCatyrories;
-		if (!taskManufacturers.IsCompleted)
-			await taskManufacturers;
+		if (!taskSuppliers.IsCompleted)
+			await taskSuppliers;
 		if (!taskProductGroups.IsCompleted)
 			await taskProductGroups;
 		if (!taskTaxRates.IsCompleted)
@@ -772,7 +866,7 @@
 		else
 		{
 			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
-			getItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages };
+			getItems = new() { Filter = new() { Id = selectedCategoryId, Type = GetItemFilterType.Category }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages | ProductIncludes.Suppliers | ProductIncludes.ProductDiscount };
 			var moreProducts = await loadInBackground();
 
 			// get the products by categoryId local, after downloading from server
@@ -794,7 +888,7 @@
 		if (selectedValuesFilter == 1)
 		{
 			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
-			getItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.LowStock }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages  };
+			getItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.LowStock }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages | ProductIncludes.Suppliers | ProductIncludes.ProductDiscount };
 			var moreProducts = await loadInBackground();
 
 			filterP = moreProducts.Items;
@@ -802,7 +896,7 @@
 		else if (selectedValuesFilter == 2)
 		{
 			// Legen Sie den Filter für die Kategorie-ID fest, um die Produkte anhand der Kategorie-ID zu erhalten.
-			getItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.OnOffer }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages };
+			getItems = new() { Filter = new() { Id = 0, Type = GetItemFilterType.OnOffer }, Includes = ProductIncludes.Category | ProductIncludes.ProductImages | ProductIncludes.Suppliers | ProductIncludes.ProductDiscount };
 			var moreProducts = await loadInBackground();
 
 			filterP = moreProducts.Items;

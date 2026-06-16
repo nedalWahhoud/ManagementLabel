@@ -50,11 +50,13 @@ namespace ManagementLabel.Components.CategoriesF
             }
             try
             {
-                var response = await _http.GetAsync($"api/Categories/getCategories");
+                GetItems<Categories> getItems = new () { IsAdmin = true};
+
+                var response = await _http.PostAsJsonAsync($"api/Categories/getCategories",getItems);
                 if (!response.IsSuccessStatusCode)
                     return [];
 
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<Categories>>();
+                getItems = await response.Content.ReadFromJsonAsync<GetItems<Categories>>() ?? new();
                 // add the categories to the local list
                 AddCategoriesToLocal(getItems?.Items ?? []);
 

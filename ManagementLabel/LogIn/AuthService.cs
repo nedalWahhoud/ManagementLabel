@@ -146,6 +146,26 @@ namespace ManagementLabel.LogIn
             }
         }
         // local
+        public async Task<Users> GetUser()
+        {
+            Users userModel = new();
+
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity != null && user.Identity.IsAuthenticated)
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier) ?? user.FindFirst("sub");
+
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int userId))
+                {
+                    userModel.Id = userId;
+                }
+                userModel.SignupProvider = user.FindFirst(c => c.Type == "SignupProvider")?.Value!;
+            }
+
+            return userModel;
+        }
         public void AddToLocal(List<Users> users)
         {
             if (users.Count > 0 && DownloadedUsers.Count == 0)

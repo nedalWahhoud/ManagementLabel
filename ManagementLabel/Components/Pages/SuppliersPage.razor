@@ -3,181 +3,190 @@
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			@if (!canManage && !IsProcessing)
+			@if (IsLoading)
 			{
-				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-					<div class="alert alert-danger text-center">
-						Sie haben keine Berechtigung für diese Seite
-					</div>
-				</div>
-				return;
+				<ManagementLabel.Components.Layout.Loading />
 			}
-			<div tabindex="0" id="scrollContainer" class="tableContiner">
-				<div class="topTable">
-					<div class="buttonsDiv">
-						@* add neu Product *@
-						<button class="btn addPlusB" @onclick="ShowAddFormAsync" disabled="@(IsProcessing)" title="Add neues Liefranten">+</button>
-						@* choose the Columns *@
-						<div class="h-100 d-flex">
-							<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
-							<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
-								@foreach (var col in columnOptions)
-								{
-									<li>
-										<div class="form-check form-switch">
-											<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
-											<label class="form-check-label" for="@col.Key">
-												@col.Label
-											</label>
-										</div>
-									</li>
-								}
-							</ul>
+			else
+			{
+				@if (isHasManageSuppliersPermission)
+				{
+					<div tabindex="0" id="scrollContainer" class="tableContiner">
+						<div class="topTable">
+							<div class="buttonsDiv">
+								@* add neu Product *@
+								<button class="btn addPlusB" @onclick="ShowAddFormAsync" disabled="@(IsProcessing)" title="Add neues Liefranten">+</button>
+								@* choose the Columns *@
+								<div class="h-100 d-flex">
+									<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
+									<ul class="dropdown-menu p-3" style="max-height:300px; overflow-y:auto; min-width: 250px;">
+										@foreach (var col in columnOptions)
+										{
+											<li>
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" id="@col.Key" @bind="col.IsVisible" @bind:after="OnColumnChanged" />
+													<label class="form-check-label" for="@col.Key">
+														@col.Label
+													</label>
+												</div>
+											</li>
+										}
+									</ul>
+								</div>
+							</div>
 						</div>
-					</div>
-				</div>
-				<table class="table table-bordered table-hover">
-					<thead>
-						<tr>
-							@if (ShowColumn("Id"))
-							{
-								<th>Id</th>
-							}
-							@if (ShowColumn("Name"))
-							{
-								<th>Name</th>
-							}
-							@if (ShowColumn("Street"))
-							{
-								<th>Straße</th>
-							}
-							@if (ShowColumn("HNumber"))
-							{
-								<th>Hausnummer</th>
-							}
-							@if (ShowColumn("PostalCode"))
-							{
-								<th>Postleitzahl</th>
-							}
-							@if (ShowColumn("City"))
-							{
-								<th>Stadt</th>
-							}
-							@if (ShowColumn("Country"))
-							{
-								<th>Land</th>
-							}
-							@if (ShowColumn("Phone"))
-							{
-								<th>Tel.</th>
-							}
-							@if (ShowColumn("Email"))
-							{
-								<th>Email</th>
-							}
-							@if (ShowColumn("Website"))
-							{
-								<th>Webseite</th>
-							}
-						</tr>
-					</thead>
-					<tbody>
-						@* Loading message *@
-						<tr id="Loading" class="@(!IsProcessing ? "hidden" : "showLoading")">
-							<td colspan="11" class="loadingTd">
-								Lädt...
-							</td>
-						</tr>
-						@* table *@
-						@{
-							var dataSource = suppliersService.DownloadedSuppliers;
-							<Virtualize Items="dataSource" Context="supplier" OverscanCount="10">
-								<tr @key="supplier.Id" @oncontextmenu:preventDefault="true"
-								@oncontextmenu="@(e => OnSelectRow(supplier, e))"
-								@onclick="(e) => OnSelectRow(supplier, e)"
-								@ondblclick="(e) => OnDoubleTap(supplier, e)"
-								class="@(selectedSupplier?.Id == supplier.Id ? "selected" : "")">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
 									@if (ShowColumn("Id"))
 									{
-										<td>@supplier.Id</td>
+										<th>Id</th>
 									}
 									@if (ShowColumn("Name"))
 									{
-										<td>@supplier.Name</td>
+										<th>Name</th>
 									}
 									@if (ShowColumn("Street"))
 									{
-										<td>@supplier.Street</td>
+										<th>Straße</th>
 									}
 									@if (ShowColumn("HNumber"))
 									{
-										<td>@supplier.HNumber</td>
+										<th>Hausnummer</th>
 									}
 									@if (ShowColumn("PostalCode"))
 									{
-										<td>@supplier.PostalCode</td>
+										<th>Postleitzahl</th>
 									}
 									@if (ShowColumn("City"))
 									{
-										<td>@supplier.City</td>
+										<th>Stadt</th>
 									}
 									@if (ShowColumn("Country"))
 									{
-										<td>@supplier.Country</td>
+										<th>Land</th>
 									}
 									@if (ShowColumn("Phone"))
 									{
-										<td>@supplier.Phone</td>
+										<th>Tel.</th>
 									}
 									@if (ShowColumn("Email"))
 									{
-										<td>@supplier.Email</td>
+										<th>Email</th>
 									}
 									@if (ShowColumn("Website"))
 									{
-										<td><a href="@supplier.Website" target="_blank">@supplier.Website</a></td>
+										<th>Webseite</th>
 									}
 								</tr>
-							</Virtualize>
-						}
-						@if (!IsProcessing && dataSource.Count == 0)
-						{
-							<tr id="loadingMessage">
-								<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-									<i class="bi bi-exclamation-circle mr-2"></i> Keine Lieferanten gefunden.
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-			@* menu context *@
-			@if (showContextMenu && selectedSupplier != null)
-			{
-				<div class="contextMenu dropdown-menu-end dropdown-menu"
-				style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
-				@onclick:stopPropagation="true">
-					<ul>
-						<li @onclick="() => PlaceOrder(selectedSupplier)">
-							<a><i class="fa-solid fa-cart-plus"></i> Bestellung aufgeben</a>
-						</li>
-						<li @onclick="() => Edit(selectedSupplier)">
-							<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
-						</li>
-						<li @onclick="() => Delete(selectedSupplier)">
-							<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
-						</li>
-					</ul>
-				</div>
-			}
+							</thead>
+							<tbody>
+								@* Loading message *@
+								<tr id="Loading" class="@(!IsProcessing ? "hidden" : "showLoading")">
+									<td colspan="11" class="loadingTd">
+										Lädt...
+									</td>
+								</tr>
+								@* table *@
+								@{
+									var dataSource = suppliersService.DownloadedSuppliers;
+									<Virtualize Items="dataSource" Context="supplier" OverscanCount="10">
+										<tr @key="supplier.Id" @oncontextmenu:preventDefault="true"
+											@oncontextmenu="@(e => OnSelectRow(supplier, e))"
+											@onclick="(e) => OnSelectRow(supplier, e)"
+											@ondblclick="(e) => OnDoubleTap(supplier, e)"
+											class="@(selectedSupplier?.Id == supplier.Id ? "selected" : "")">
+											@if (ShowColumn("Id"))
+											{
+												<td>@supplier.Id</td>
+											}
+											@if (ShowColumn("Name"))
+											{
+												<td>@supplier.Name</td>
+											}
+											@if (ShowColumn("Street"))
+											{
+												<td>@supplier.Street</td>
+											}
+											@if (ShowColumn("HNumber"))
+											{
+												<td>@supplier.HNumber</td>
+											}
+											@if (ShowColumn("PostalCode"))
+											{
+												<td>@supplier.PostalCode</td>
+											}
+											@if (ShowColumn("City"))
+											{
+												<td>@supplier.City</td>
+											}
+											@if (ShowColumn("Country"))
+											{
+												<td>@supplier.Country</td>
+											}
+											@if (ShowColumn("Phone"))
+											{
+												<td>@supplier.Phone</td>
+											}
+											@if (ShowColumn("Email"))
+											{
+												<td>@supplier.Email</td>
+											}
+											@if (ShowColumn("Website"))
+											{
+												<td><a href="@supplier.Website" target="_blank">@supplier.Website</a></td>
+											}
+										</tr>
+									</Virtualize>
+								}
+								@if (!IsProcessing && dataSource.Count == 0)
+								{
+									<tr id="loadingMessage">
+										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+											<i class="bi bi-exclamation-circle mr-2"></i> Keine Lieferanten gefunden.
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+					@* menu context *@
+					@if (showContextMenu && selectedSupplier != null)
+					{
+						<div class="contextMenu dropdown-menu-end dropdown-menu"
+							 style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
+							 @onclick:stopPropagation="true">
+							<ul>
+								<li @onclick="() => PlaceOrder(selectedSupplier)">
+									<a><i class="fa-solid fa-cart-plus"></i> Bestellung aufgeben</a>
+								</li>
+								<li @onclick="() => Edit(selectedSupplier)">
+									<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+								</li>
+								<li @onclick="() => Delete(selectedSupplier)">
+									<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+								</li>
+							</ul>
+						</div>
+					}
 
-			@if (IsAdding)
-			{
-				<ManagementLabel.Components.Layout.OverlayEditAddSupplier supplier="new Suppliers()" Action="Add" OnHandel="Handle" />
-			}
-			else if (IsEditing && EditingSupplier != null)
-			{
-				<ManagementLabel.Components.Layout.OverlayEditAddSupplier supplier="EditingSupplier" Action="Edit" OnHandel="Handle" />
+					@if (IsAdding)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditAddSupplier supplier="new Suppliers()" Action="Add" OnHandel="Handle" />
+					}
+					else if (IsEditing && EditingSupplier != null)
+					{
+						<ManagementLabel.Components.Layout.OverlayEditAddSupplier supplier="EditingSupplier" Action="Edit" OnHandel="Handle" />
+					}
+				}
+				else
+				{
+					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+						<div class="alert alert-danger text-center">
+							Sie haben keine Berechtigung für diese Seite
+						</div>
+					</div>
+				}
 			}
 		</Authorized>
 		<NotAuthorized>
@@ -206,17 +215,18 @@
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
 		await localStorage.SetItemAsync("columnOptionsSuppliers", columnOptions);
 	}
-
-	private bool IsProcessing = true;
-	private bool canManage = false;
+	private bool IsProcessing = false;
+	private bool IsLoading = false;
+	private bool isHasManageSuppliersPermission = false;
 	protected override async Task OnInitializedAsync()
 	{
+		IsLoading = true;
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
 
-		canManage = user.HasClaim("permission", "manageSuppliers") ||
+		isHasManageSuppliersPermission = user.HasClaim("permission", "manageSuppliers") ||
 								user.HasClaim("permission", "fullAccess");
-		if (canManage)
+		if (isHasManageSuppliersPermission)
 		{
 			// get Discount codes
 			await suppliersService.GetAllSuppliers();
@@ -225,10 +235,7 @@
 			if (saved is not null)
 				columnOptions = saved;
 		}
-
-		
-
-		IsProcessing = false;
+		IsLoading = false;
 	}
 	private bool IsEditing = false;
 	private bool IsAdding = false;

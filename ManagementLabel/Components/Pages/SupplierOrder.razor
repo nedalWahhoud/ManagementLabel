@@ -3,80 +3,86 @@
 <div class="p-2 min-vh-100 w-100">
 	<AuthorizeView>
 		<Authorized Context="authContext">
-			<div class="container-fluid px-2">
-				<div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-					<button class="btn btn-sm btn-outline-danger ps-3" @onclick="GoBack" title="Zurück zur Liste">
-						<i class="bi bi-arrow-return-left fs-5"></i>
-					</button>
-				</div>
-			</div>
-			@if (authContext.User.HasClaim("permission", "orderFromSupplier") ||
-																					authContext.User.HasClaim("permission", "fullAccess"))
+			@if (IsLoading)
 			{
-				<div tabindex="0" id="SOPContainer" class="tableContiner">
-					<div class="topTable">
-						<div class="buttonsDiv">
-							@* add neu Product *@
-							<button class="btn addPlusB" @onclick="PlaceOrder" title="Bestellung aufgeben"><i class="bi bi-cart-check-fill fs-5"></i></button>
-							<div class="d-flex flex-column align-items-center gap-2">
-								<span class="small fw-bold text-muted">Sprache / اللغة:</span>
-								<select class="form-select form-select-sm" style="width: auto;" @bind="selectedLanguage">
-									<option value="ar">Arabisch (العربية)</option>
-									<option value="de">Deutsch (الألمانية)</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<table class="table text-center align-middle">
-						<thead>
-							<tr>
-								<th>Index</th>
-								<th>Name de</th>
-								<th>Kaufpreis</th>
-								<th>Img</th>
-								<th>Menge</th>
-							</tr>
-						</thead>
-						<tbody>
-							@{
-								var dataSource = productService.DownloadedProduct;
-							}
-							<Virtualize Items="dataSource" Context="product" OverscanCount="10">
-								<tr @key="product.Id"
-								@onclick="() => selectedRow = product"
-								class="@(selectedRow?.Id == product.Id ? "selected" : "")
-                                           @(selectedQuantities.ContainsKey(product.Id) && selectedQuantities[product.Id] > 0 ? "has-quantity" : "")">
-									<td>@(dataSource.IndexOf(product) + 1)</td>
-									<td>@product.Name_de</td>
-									<td>@product.PurchasePrice €</td>
-									<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
-									<td>
-										<input type="number" min="0" class="form-control form-control-sm"
-										style="width: 50px; margin: auto;"
-										value="@(selectedQuantities.ContainsKey(product.Id) ? selectedQuantities[product.Id] : 0)"
-										@onchange="@(e => UpdateQuantity(product.Id,product, int.Parse(e.Value?.ToString() ?? "0")))" />
-									</td>
-								</tr>
-							</Virtualize>
-							@if (!IsLoading && dataSource.Count == 0)
-							{
-								<tr id="loadingMessage">
-									<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-										<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
-									</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
+				<ManagementLabel.Components.Layout.Loading />
 			}
 			else
 			{
-				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-					<div class="alert alert-danger text-center">
-						Sie haben keine Berechtigung für diese Seite
+				<div class="container-fluid px-2">
+					<div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+						<button class="btn btn-sm btn-outline-danger ps-3" @onclick="GoBack" title="Zurück zur Liste">
+							<i class="bi bi-arrow-return-left fs-5"></i>
+						</button>
 					</div>
 				</div>
+				@if (IsHasOrderFromSupplierPermission)
+				{
+					<div tabindex="0" id="SOPContainer" class="tableContiner">
+						<div class="topTable">
+							<div class="buttonsDiv">
+								@* add neu Product *@
+								<button class="btn addPlusB" @onclick="PlaceOrder" title="Bestellung aufgeben"><i class="bi bi-cart-check-fill fs-5"></i></button>
+								<div class="d-flex flex-column align-items-center gap-2">
+									<span class="small fw-bold text-muted">Sprache / اللغة:</span>
+									<select class="form-select form-select-sm" style="width: auto;" @bind="selectedLanguage">
+										<option value="ar">Arabisch (العربية)</option>
+										<option value="de">Deutsch (الألمانية)</option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<table class="table text-center align-middle">
+							<thead>
+								<tr>
+									<th>Index</th>
+									<th>Name de</th>
+									<th>Kaufpreis</th>
+									<th>Img</th>
+									<th>Menge</th>
+								</tr>
+							</thead>
+							<tbody>
+								@{
+									var dataSource = productService.DownloadedProduct;
+								}
+								<Virtualize Items="dataSource" Context="product" OverscanCount="10">
+									<tr @key="product.Id"
+									@onclick="() => selectedRow = product"
+									class="@(selectedRow?.Id == product.Id ? "selected" : "")
+                                           @(selectedQuantities.ContainsKey(product.Id) && selectedQuantities[product.Id] > 0 ? "has-quantity" : "")">
+										<td>@(dataSource.IndexOf(product) + 1)</td>
+										<td>@product.Name_de</td>
+										<td>@product.PurchasePrice €</td>
+										<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
+										<td>
+											<input type="number" min="0" class="form-control form-control-sm"
+											style="width: 50px; margin: auto;"
+											value="@(selectedQuantities.ContainsKey(product.Id) ? selectedQuantities[product.Id] : 0)"
+											@onchange="@(e => UpdateQuantity(product.Id,product, int.Parse(e.Value?.ToString() ?? "0")))" />
+										</td>
+									</tr>
+								</Virtualize>
+								@if (!IsLoading && dataSource.Count == 0)
+								{
+									<tr id="loadingMessage">
+										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
+											<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+				else
+				{
+					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+						<div class="alert alert-danger text-center">
+							Sie haben keine Berechtigung für diese Seite
+						</div>
+					</div>
+				}
 			}
 		</Authorized>
 		<NotAuthorized>
@@ -88,7 +94,7 @@
 	[Parameter]
 	public int SupplierId { get; set; }
 	private Suppliers supplier = new Suppliers();
-	private bool hasPermission = false;
+	private bool IsHasOrderFromSupplierPermission = false;
 	private bool IsProcessing { get; set; } = false;
 	private bool IsLoading { get; set; } = false;
 	private Products? selectedRow;
@@ -97,25 +103,30 @@
 	private GetItems<Products> getItem = new();
 	protected override async Task OnInitializedAsync()
 	{
-		IsLoading = true;
-
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user = authState.User;
-		hasPermission = user.HasClaim("permission", "orderFromSupplier") ||
+		IsHasOrderFromSupplierPermission = user.HasClaim("permission", "orderFromSupplier") ||
 				user.HasClaim("permission", "fullAccess");
-		if (!hasPermission)
-			return;
-		supplier =  suppliersService.GetSupplierByIdLocal(SupplierId) ?? await suppliersService.GetSupplierByIdAsync(SupplierId);
-		getItem = new() { Filter = new() { Id = SupplierId, Type = GetItemFilterType.Supplier }, Includes = ProductIncludes.Suppliers | ProductIncludes.ProductImages };
-		productService.DownloadedProduct.Clear();
-		// erste Produkte laden
-		await OnScrollEnd();
-
+		
+		IsLoading = false;
+	}
+	protected override async Task OnParametersSetAsync()
+	{
+		IsLoading = true;
+		if (IsHasOrderFromSupplierPermission)
+		{
+			supplier = suppliersService.GetSupplierByIdLocal(SupplierId) ?? await suppliersService.GetSupplierByIdAsync(SupplierId);
+			getItem = new() { Filter = new() { Id = SupplierId, Type = GetItemFilterType.Supplier }, Includes = ProductIncludes.Suppliers | ProductIncludes.ProductImages };
+			productService.DownloadedProduct.Clear();
+			// erste Produkte laden
+			await OnScrollEnd();
+		}
 		IsLoading = false;
 	}
 	private DotNetObjectReference<SupplierOrder>? objRef;
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
+		IsLoading = true;
 		if (firstRender)
 		{
 			// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
@@ -131,6 +142,7 @@
 		{
 			Console.WriteLine($"Error initializing scroll event: {ex.Message}");
 		}
+		IsLoading = false;
 	}
 	
 	private async Task PlaceOrder()

@@ -18,7 +18,7 @@ namespace ManagementLabel.Model
         public string BirthDate { get; set; } = DateTime.Now.ToString("yyyy.MM.dd");
         public bool IsGuest { get; set; } 
         public bool IsAktiv { get; set; }
-        public string SignUpProvider { get; set; } = string.Empty;
+        public string SignupProvider { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } 
     }
     public enum UserRole

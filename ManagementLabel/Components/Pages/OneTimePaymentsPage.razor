@@ -2,32 +2,18 @@
 <div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
-            @{
-                var isManageCustomerOneTimePayment = authContext.User.HasClaim("permission", "manageCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
-                var isViewAndMangeStatus = authContext.User.HasClaim("permission", "viewPageAndManageStatusCustomerOneTimePayment") || authContext.User.HasClaim("permission", "fullAccess");
-            }
-            @if (!isViewAndMangeStatus)
-            {
-                <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
-                    <div class="alert alert-danger text-center">
-                        Sie haben keine Berechtigung für diese Seite
-                    </div>
-                </div>
-                return;
-            }
-
             @if (IsLoading)
             {
-                <div class="w-100 card-body text-center text-info">
-                    Lädt...
-                </div>
+                <ManagementLabel.Components.Layout.Loading />
             }
             else
             {
+                @if (IsHasViewPageAndManageStatusCustomerOneTimePaymentPermoission)
+                {
                 @* menu context *@
                 @if (showContextMenu && selectedPayment != null)
                 {
-                    bool isNotOpen = selectedPayment.Status != OneTimePaymentStatus.Offen ;
+                    bool isNotOpen = selectedPayment.Status != OneTimePaymentStatus.Offen;
                     <div class="contextMenu dropdown-menu-end dropdown-menu"
                     style="position: fixed; top: @(menuY)px; left: @(menuX)px; display: block;"
                     @onclick:stopPropagation="true">
@@ -50,11 +36,11 @@
                                     Navigieren
                                 </a>
                             </li>
-                            <li class="@(!isManageCustomerOneTimePayment ? "disabled text-muted pe-none opacity-50" : "")"
+                            <li class="@(!IsHasManageCustomerOneTimePaymentPermission ? "disabled text-muted pe-none opacity-50" : "")"
                             @onclick="() => Delete(selectedPayment)">
                                 <a><i class="fa-solid fa-trash-can"></i> Löschen</a>
                             </li>
-                            <li class="@((isNotOpen || !isManageCustomerOneTimePayment) ? "disabled text-muted pe-none opacity-50" : "")"
+                            <li class="@((isNotOpen || !IsHasManageCustomerOneTimePaymentPermission) ? "disabled text-muted pe-none opacity-50" : "")"
                             @onclick="() => EditTotalAmount(selectedPayment)">
                                 <a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
                             </li>
@@ -155,7 +141,6 @@
                                                                         <tr @key="p.Id"
                                                                         @oncontextmenu:preventDefault="true"
                                                                         @oncontextmenu="@(e => OnSelectRow(p, e))"
-
                                                                         @ondblclick="(e) => OnDoubleTap(p, e)"
                                                                         class="@(selectedPayment?.Id == p.Id ? "selected" : "")">
                                                                             <td class="fw-medium">@(p.Customer?.Name_de ?? "Fehler") / @(p.Customer?.Name_ar ?? "Fehler")</td>
@@ -220,10 +205,19 @@
                 {
                     <ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="@IsOneTimePaymentProcessing.Item2" OneTimePayment="editOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
                 }
-            }
 
-            @* map select *@
-            <ManagementLabel.Components.Layout.MapSelect />
+                @* map select *@
+                <ManagementLabel.Components.Layout.MapSelect />
+                }
+                else
+                {
+                    <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
+                        <div class="alert alert-danger text-center">
+                            Sie haben keine Berechtigung für diese Seite
+                        </div>
+                    </div>
+                }
+            }
         </Authorized>
         <NotAuthorized>
             <ManagementLabel.Components.Pages.LogIn />
@@ -237,9 +231,16 @@
     private bool IsLoading = false;
     private DistributionLines SelectedLine { get; set; } = new();
     private List<(Task<ValidationResult> task,int lineId)> tasks = new();
+    private bool IsHasManageCustomerOneTimePaymentPermission = false;
+    private bool IsHasViewPageAndManageStatusCustomerOneTimePaymentPermoission = false;
     protected override async Task OnParametersSetAsync()
     {
         IsLoading = true;
+        var authState = await authProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        IsHasManageCustomerOneTimePaymentPermission = user.HasClaim("permission", "manageCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
+        IsHasViewPageAndManageStatusCustomerOneTimePaymentPermoission = user.HasClaim("permission", "viewPageAndManageStatusCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
+
         if (distributionLinesService.DownloadedDistributionLines == null || distributionLinesService.DownloadedDistributionLines.Count == 0)
             await distributionLinesService.GetAllDistributionLinesAsync();
 
