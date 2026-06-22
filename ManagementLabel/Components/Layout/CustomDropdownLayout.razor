@@ -1,41 +1,42 @@
-﻿<ul class="dropdown-menu customDropdown dropdown-menu-end">
+﻿@inject IStringLocalizer<ManagementLabel.Components.Layout.CustomDropdownLayout> L
+<ul class="dropdown-menu customDropdown dropdown-menu-end">
 	@if (!IsDebtPage)
 	{
 		<li>
 			<a class="@(Permissions.IsDebtManage  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsDebtManage ? EventCallback.Factory.Create<MouseEventArgs>(this, () => OnDebts(customer.Id))  : default!)">
 				<i class="bi bi-cash-stack me-1"></i>
-				Schulden
+				@L["Debts"]
 			</a>
 		</li>
 	}
 	<li>
 		<a class="dropdown-item" @onclick="() => OnMap(customer)">
 			<i class="bi bi-geo-alt me-1"></i>
-			Navigieren
+			@L["Navigate"]
 		</a>
 	</li>
 	<li>
 		<a class="dropdown-item" @onclick="() => OnPhone(customer?.PhoneNumber!)">
 			<i class="bi bi-telephone me-1"></i>
-			Telefonieren
+			@L["PhoneCall"]
 		</a>
 	</li>
 	<li>
 		<a class="dropdown-item" @onclick="() => OnWhatsAppMessage(customer)">
 			<i class="bi bi-chat-dots-fill me-1" style="color: #28a745;"></i>
-			WhatsApp-Nachricht
+			@L["OpenWhatsApp"]
 		</a>
 	</li>
 	<li>
 		<a class="dropdown-item" @onclick="() => viaWhatasappShare(customer)">
 			<i class="bi bi-whatsapp me-1"></i>
-			Teilen über WhatsApp
+			@L["ShareViaWhatsApp"]
 		</a>
 	</li>
 	<li>
 		<a class="@(Permissions.IsRecordOneTimePayment  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsRecordOneTimePayment ? EventCallback.Factory.Create<MouseEventArgs>(this, () => newOneTimePayment(customer))  : default!)">
 			<i class="bi bi-currency-exchange me-1"></i>
-			Einmalige Zahlung erfassen
+			@L["RecordPayment"]
 		</a>
 	</li>
 	@if (!IsDebtPage)
@@ -43,13 +44,13 @@
 		<li>
 			<a class="@(Permissions.IsEdit  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Edit(customer))  : default!)">
 				<i class="bi bi-pencil-square me-1"></i>
-				Bearbeiten
+				@L["Edit"]
 			</a>
 		</li>
 		<li>
 			<a class="@(Permissions.IsEdit  ? "dropdown-item" : "disabledItem")" @onclick="@(Permissions.IsEdit ? EventCallback.Factory.Create<MouseEventArgs>(this, () => Delete(customer))  : default!)">
 				<i class="bi bi-trash3 me-1"></i>
-				Löschen
+				@L["Delete"]
 			</a>
 		</li>
 	}
@@ -88,8 +89,10 @@
 			await JS.InvokeVoidAsync("alert", result.Message);
 		}
 	}
-	private void OnDebts(int customerId)
+	private async Task OnDebts(int customerId)
 	{
+		if (customer != null)
+			await customersService.UpdateSelectedStopNummerLocalStorage(customer.StopNumber);
 		navigationManager.NavigateTo($"/debt/{customerId}");
 	}
 	private async Task OnMap(Customers customer)

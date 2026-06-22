@@ -7,7 +7,31 @@ window.updateTopTableHeight = () => {
         document.documentElement.style.setProperty('--top-height', height + 'px');
     }
 };
+// langauge cocikes fixd
+window.blazorCulture = {
+    set: function (value) {
+        const days = 365; // 1 Jahr
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
 
+        document.cookie =
+            `.AspNetCore.Culture=c=${value}|uic=${value}; ${expires}; path=/; SameSite=Lax`;
+    }, get: function () {
+        const name = ".AspNetCore.Culture=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookies = decodedCookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let c = cookies[i].trim();
+            if (c.indexOf(name) === 0) {
+                const value = c.substring(name.length);
+                const cPart = value.split('|')[0];
+                return cPart.split('=')[1];
+            }
+        }
+        return null;
+    }
+};
 //Aktivieren Sie die Funktion beim Ändern der Größe
 window.addEventListener('resize', window.updateHeaderHeight);
 // select text in input

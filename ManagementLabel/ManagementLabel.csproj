@@ -20,4 +20,79 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Resources\Components\Layout\CustomDropdownLayout.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CustomDropdownLayout.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\CustomersPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CustomersPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\DebtPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DebtPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\NavMenu.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NavMenu.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\OneTimePaymentsPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OneTimePaymentsPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\OverlayEditAddCustomers.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OverlayEditAddCustomers.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\OverlayEditAddFormOneTimePayment.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OverlayEditAddFormOneTimePayment.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Components\Layout\CustomDropdownLayout.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CustomDropdownLayout.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\CustomersPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CustomersPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\DebtPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>DebtPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\NavMenu.ar.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\NavMenu.de.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\NavMenu.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>NavMenu.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\OneTimePaymentsPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>OneTimePaymentsPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\OverlayEditAddCustomers.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>OverlayEditAddCustomers.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\OverlayEditAddFormOneTimePayment.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>OverlayEditAddFormOneTimePayment.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

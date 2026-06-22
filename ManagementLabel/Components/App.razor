@@ -1,5 +1,8 @@
-﻿<!DOCTYPE html>
-<html lang="de">
+﻿@using System.Globalization;
+@using Microsoft.AspNetCore.Localization;
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName"
+      dir="@(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? "rtl" : "ltr")">
 
 <head>
     <meta charset="utf-8" />

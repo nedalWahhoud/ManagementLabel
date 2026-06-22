@@ -1,4 +1,19 @@
-﻿.navbar-toggler {
+﻿html[dir="rtl"] .navbar-toggler {
+    right: 1rem !important;
+    left: auto !important;
+}
+html[dir="rtl"] .nav-scrollable {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+html[dir="rtl"] .top-row {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+
+.navbar-toggler {
     appearance: none;
     cursor: pointer;
     width: 3.5rem;

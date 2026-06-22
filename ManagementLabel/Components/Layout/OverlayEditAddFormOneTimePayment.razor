@@ -1,4 +1,6 @@
-﻿<div class="overlay">
+﻿@inherits ProjectComponentBase
+@inject IStringLocalizer<ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment> L
+<div class="overlay">
 	<div class="standardOverlayForm">
 		@if (!isAddedSuccess)
 		{
@@ -13,7 +15,7 @@
 					<DataAnnotationsValidator />
 					<div class="overlayField">
 						<InputSelect class="form-control" @bind-Value="oneTimePayment.CustomerId" disabled>
-							<option value="@oneTimePayment.CustomerId">@(oneTimePayment.Customer != null ? oneTimePayment.Customer.Name_de + " / " + oneTimePayment.Customer.Name_ar : "Fehler")</option>
+							<option value="@oneTimePayment.CustomerId">@(oneTimePayment.Customer != null ? (IsArabic ? oneTimePayment.Customer.Name_ar : oneTimePayment.Customer.Name_de) : "Fehler")</option>
 						</InputSelect>
 						<ValidationMessage For="@(() => oneTimePayment.CustomerId)" />
 					</div>
@@ -33,7 +35,7 @@
 					</div>
 					<div class="overlayField">
 						<div class="input-group">
-							<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event me-1"></i> AbDa</span>
+							<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event @(IsArabic ? "ms-2" : "me-2")"></i> AbDa</span>
 							<InputDate id="PickupDate" class="form-control" @bind-Value="oneTimePayment.PickupDate" disabled="@(!(Action == "add"))" />
 						</div>
 						<ValidationMessage For="@(() => oneTimePayment.PickupDate)" />
@@ -42,7 +44,7 @@
 					{
 						<div class="overlayField">
 							<InputSelect class="form-control" @bind-Value="oneTimePayment.Status" disabled>
-								<option value="@oneTimePayment.Status">@oneTimePaymentsService.GetEnumDisplayName(oneTimePayment.Status)</option>
+								<option value="@oneTimePayment.Status">@L[oneTimePayment.Status.ToString()]</option>
 							</InputSelect>
 							<ValidationMessage For="@(() => oneTimePayment.Status)" />
 						</div>
@@ -60,7 +62,7 @@
 					}
 
 					<div class="overlayField">
-						<InputText class="form-control" @bind-Value="oneTimePayment.Notes" placeholder="Anmerkungen / ملاحطة" />
+						<InputText class="form-control" @bind-Value="oneTimePayment.Notes" placeholder="@L["Note"]" />
 						<ValidationMessage For="@(() => oneTimePayment.Notes)" />
 					</div>
 					<div class="mt-3">
@@ -73,10 +75,10 @@
 							}
 							else
 							{
-								<span>Speichern</span>
+								<span>@L["Save"]</span>
 							}
 						</button>
-						<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+						<button class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
 					</div>
 				</EditForm>
 			}
@@ -88,7 +90,7 @@
 						class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 						@bind="selectedDistributionLineId"
 						@bind:after="AfterDistributionLineChanged">
-							<option value="0" disabled selected class="text-gray-400">Linie wählen...</option>
+							<option value="0" disabled selected class="text-gray-400">@L["SelectLine"]</option>
 							@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 							{
 								<option value="@distributionLine.Id">@distributionLine.LineName</option>
@@ -96,7 +98,7 @@
 						</select>
 						@if (selectedDistributionLineId == 0)
 						{
-							<div class="text-sm text-red-500 mt-1">Bitte wählen Sie eine Linie aus.</div>
+							<div class="text-sm text-red-500 mt-1">@L["PleaseSelectLine"]</div>
 						}
 						else
 						{
@@ -111,15 +113,15 @@
 							}
 							else if (customersOfSelectedLine == null)
 							{
-								<div class="text-sm text-yellow-500 mt-1">Keine Kunden für die ausgewählte Linie gefunden.</div>
+								<div class="text-sm text-yellow-500 mt-1">@L["NoCustomersFound"]</div>
 							}
 							else 
 							{
 								<div class="searchBox">
 
 									<input type="text" 
-									class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
-									placeholder="Suchen nach Kunde... / ابحث عن زبون..."
+									class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+										   placeholder="@L["SearchCustomer"]"
 									@oninput="OnSearchCustomer" />
 
 									<ul class="searchDropdown">
@@ -128,7 +130,7 @@
 											if (customer != null)
 											{
 												<li @onclick="async () => { selectedCustomerId = customer.Id; await AfterCustomerhanged(); }" class="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded">
-													@customer.Name_de / @customer.Name_ar
+													@(IsArabic ? customer.Name_ar : @customer.Name_de)
 												</li>
 											}
 										}
@@ -138,7 +140,7 @@
 						}
 					</div>
 
-					<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+					<button class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
 				</div>
 			}
 		}
@@ -148,42 +150,42 @@
 				<div class="mb-3 text-success">
 					<i class="fa-solid fa-circle-check" style="font-size: 3rem;"></i>
 				</div>
-				<h4 class="mb-3" style="color: #2e7d32;">Erfolgreich gespeichert!</h4>
+				<h4 class="mb-3" style="color: #2e7d32;">@L["SuccessfullySaved"]</h4>
 
 				<div class="card text-start mx-auto mb-4" style="max-width: 450px; border-radius: 8px; background-color: #f8f9fa; border-left: 5px solid #2e7d32;">
 					<div class="card-body p-3">
 						<h6 class="card-title border-bottom pb-2 mb-3 text-secondary fw-bold">
-							<i class="fa-solid fa-file-invoice"></i> Details / التفاصيل
+							<i class="fa-solid fa-file-invoice"></i> @L["Details"]
 						</h6>
 
 						<div class="mb-2 d-flex justify-content-between">
-							<span class="text-muted">Kunde / الزبون:</span>
+							<span class="text-muted">@L["Customer"]:</span>
 							<span class="fw-bold">
-								@(oneTimePayment.Customer != null ? $"{oneTimePayment.Customer.Name_de} / {oneTimePayment.Customer.Name_ar}" : "---")
+								@(oneTimePayment.Customer != null ? $"{(IsArabic ? oneTimePayment.Customer.Name_ar : oneTimePayment.Customer.Name_de)}" : "---")
 							</span>
 						</div>
 
 						<div class="mb-2 d-flex justify-content-between">
-							<span class="text-muted">Linie / الخط:</span>
+							<span class="text-muted">@L["Line"]:</span>
 							<span class="fw-bold">@(oneTimePayment.DistributionLine?.LineName ?? "---")</span>
 						</div>
 
 						<div class="mb-2 d-flex justify-content-between">
-							<span class="text-muted">Gesamtbetrag / المبلغ الإجمالي:</span>
+							<span class="text-muted">@L["TotalAmount"]:</span>
 							<span class="fw-bold text-primary">@oneTimePayment.TotalAmount €</span>
 						</div>
 
 						<div class="mb-2 d-flex justify-content-between">
-							<span class="text-muted">Status / الحالة:</span>
+							<span class="text-muted">@L["Status"]:</span>
 							<span class="@oneTimePaymentsService.GetStatusClass(oneTimePayment.Status,false)" style="border: none;">
-								@oneTimePaymentsService.GetEnumDisplayName(oneTimePayment.Status)
+								@L[oneTimePayment.Status.ToString()]
 							</span>
 						</div>
 
 						@if (!string.IsNullOrEmpty(oneTimePayment.Notes))
 						{
 							<div class="mt-2 border-top pt-2">
-								<small class="text-muted d-block mb-1">Anmerkungen / ملاحظات:</small>
+								<small class="text-muted d-block mb-1">@L["Note"]:</small>
 								<div class="p-2 bg-white rounded border small text-wrap text-break">
 									@oneTimePayment.Notes
 								</div>
@@ -206,6 +208,7 @@
 </div>
 
 @code {
+
 	[Parameter]
 	public OneTimePayment oneTimePayment { get; set; } = new();
 	[Parameter]

@@ -1,5 +1,7 @@
 ﻿@page "/customers"
 @inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.CustomersPage> L
 <div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -20,7 +22,7 @@
 						<div class="topTable">
 							<div class="buttonsDiv">
 								@* add neu Product *@
-								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!IsHasEditCustomersPermission)" title="Add neue Customer">+</button>
+								<button class="btn addPlusB" @onclick="NewCustomer" disabled="@(!IsHasEditCustomersPermission)" title="@L["AddNewCustomer"]">+</button>
 								@* choose the Columns *@
 								<div class="h-100 d-flex">
 									<button class="btn columnsB dropdown-toggle" type="button" data-bs-toggle="dropdown" />
@@ -40,18 +42,18 @@
 								</div>
 							</div>
 							<div class="dropdownListsDiv">
-								<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="AfterDistributionLineChanged">
+								<select id="distributionLineSelect" class="DropdownList" @bind="selectedDistributionLineId" @bind:after="() => AfterDistributionLineChanged(false)">
 									@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 									{
 										<option value="@distributionLine.Id">@distributionLine.LineName</option>
 									}
 								</select>
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
-									<option value="0">Ha-Nr</option>
+									<option value="0">@L["StopNumber"]</option>
 									@foreach (var customer in customersService.DownloadedCustomers
-																						.Where(c => c.DistributionLineId == selectedDistributionLineId)
-																						.DistinctBy(c => c.StopNumber)
-																						.OrderBy(c => c.StopNumber))
+																																																							.Where(c => c.DistributionLineId == selectedDistributionLineId)
+																																																							.DistinctBy(c => c.StopNumber)
+																																																							.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -60,7 +62,7 @@
 							@* Suchen Input*@
 							<div class="searchDiv">
 								<div class="input-group">
-									<input id="searchCustomer" type="text" placeholder="Suche in Name de/ar" class="form-control" @oninput="OnTextChanged" @onfocus="@(e => SelectAllContent())" />
+									<input id="searchCustomer" type="text" placeholder="@L["Placeholder"]" class="form-control" @oninput="OnTextChanged" @onfocus="@(e => SelectAllContent())" />
 									<button class="btn btn-danger" type="button" @onclick="ClearSearch">
 										<i class="fas fa-times"></i>
 									</button>
@@ -71,51 +73,43 @@
 							<tr>
 								@if (ShowColumn("Id"))
 								{
-									<th>Id</th>
+									<th>@L["Id"]</th>
 								}
-								@if (ShowColumn("Name_de"))
+								@if (ShowColumn("Name"))
 								{
-									<th>Na-De</th>
-								}
-								@if (ShowColumn("Name_ar"))
-								{
-									<th>Na-Ar</th>
+									<th>@L["Name"]</th>
 								}
 								@if (ShowColumn("Address"))
 								{
-									<th>Anschrift</th>
+									<th>@L["Address"]</th>
 								}
 								@if (ShowColumn("Coordinates"))
 								{
-									<th>Koordinaten</th>
+									<th>@L["Coordinates"]</th>
 								}
 								@if (ShowColumn("PhoneNumber"))
 								{
-									<th>Tel.</th>
+									<th>@L["PhoneNumber"]</th>
 								}
 								@if (ShowColumn("EMail"))
 								{
-									<th>E-Mail</th>
+									<th>@L["Email"]</th>
 								}
-								@if (ShowColumn("NoteDe"))
+								@if (ShowColumn("Note"))
 								{
-									<th>No-De</th>
-								}
-								@if (ShowColumn("NoteAr"))
-								{
-									<th>No-Ar</th>
+									<th>@L["Note"]</th>
 								}
 								@if (ShowColumn("Direction"))
 								{
-									<th>Richtung</th>
+									<th>@L["Line"]</th>
 								}
 								@if (ShowColumn("StopNumber"))
 								{
-									<th>Ha-Nr</th>
+									<th>@L["StopNumber"]</th>
 								}
 								@if (ShowColumn("PIN"))
 								{
-									<th>PIN</th>
+									<th>@L["PIN"]</th>
 								}
 								<th style="min-width:40px;">⋮</th>
 							</tr>
@@ -124,7 +118,7 @@
 								{
 									<tr id="loadingMessage">
 										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-											<i class="bi bi-exclamation-circle mr-2"></i> Keine Customer gefunden.
+											<i class="bi bi-exclamation-circle mr-2"></i> @L["NoCustomers"]
 										</td>
 									</tr>
 								}
@@ -137,13 +131,9 @@
 											{
 												<td>@customer.Id</td>
 											}
-											@if (ShowColumn("Name_de"))
+											@if (ShowColumn("Name"))
 											{
-												<td>@customer.Name_de</td>
-											}
-											@if (ShowColumn("Name_ar"))
-											{
-												<td>@customer.Name_ar</td>
+												<td>@(IsArabic ? customer.Name_ar : customer.Name_de) </td>
 											}
 											@if (ShowColumn("Address"))
 											{
@@ -167,13 +157,9 @@
 											{
 												<td>@customer.Email</td>
 											}
-											@if (ShowColumn("NoteDe"))
+											@if (ShowColumn("Note"))
 											{
-												<td>@customer.Notes_de</td>
-											}
-											@if (ShowColumn("NoteAr"))
-											{
-												<td>@customer.Notes_ar</td>
+												<td>@(IsAdding ? customer.Notes_ar : customer.Notes_de)</td>
 											}
 											@if (ShowColumn("Direction"))
 											{
@@ -198,7 +184,7 @@
 														}
 														else
 														{
-															<span>⋮</span>
+															<span class="@(IsArabic ? "ms-2" : "me-2")">⋮</span>
 														}
 													</button>
 													<ManagementLabel.Components.Layout.CustomDropdownLayout customer="customer" FilteredCustomers="FilteredCustomers" Permissions="new (IsHasEditCustomersPermission,IsHasManageDebtPermission,IsHasCrateCustomerOneTimePaymentPermission)" OnHandel="HandleCustomDropdown" />
@@ -230,7 +216,7 @@
 				{
 					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 						<div class="alert alert-danger text-center">
-							Sie haben keine Berechtigung für diese Seite
+							@L["NoPermission"]
 						</div>
 					</div>
 				}
@@ -242,18 +228,18 @@
 	</AuthorizeView>
 </div>
 @code {
+
+
 	// Column
 	private List<ColumnOption> columnOptions = new()
 	{
 	  new("Id", "Id", false),
-	  new("Na-De", "Name_de", true),
-	  new("Na-Ar", "Name_ar", false),
+	  new("Name", "Name", true),
 	  new("Anschrift", "Address", true),
 	  new("Koordinaten", "Coordinates", false),
 	  new("Tel.", "PhoneNumber", true),
 	  new("E-Mail", "EMail", true),
-	  new("No-De", "NoteDe", true),
-	  new("No-Ar", "NoteAr", true),
+	  new("Note", "Note", true),
 	  new("Richtung", "Direction", true),
 	  new("Ha-Nr", "StopNumber", true),
 	  new("PIN", "PIN", true),
@@ -277,6 +263,25 @@
 		IsHasEditCustomersPermission = user.HasClaim("permission", "editCustomers") || user.HasClaim("permission", "fullAccess");
 		IsHasCrateCustomerOneTimePaymentPermission = user.HasClaim("permission", "manageCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
 
+		// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsCustomers");
+		if (saved is not null)
+		{
+			var currentKeys = columnOptions.Select(c => c.Key).ToList();
+			var savedKeys = saved.Select(c => c.Key).ToList();
+
+			bool isMismatch = currentKeys.Count != savedKeys.Count || currentKeys.Any(k => !savedKeys.Contains(k));
+
+			if (isMismatch)
+			{
+				await localStorage.RemoveItemAsync("columnOptionsCustomers");
+			}
+			else
+			{
+				columnOptions = saved;
+			}
+		}
+
 		// afterRender true, weil wir nutzen die funktion hier nicht
 		IsRendered.AfterRender = true;
 		IsRendered.Initialized = true;
@@ -297,7 +302,7 @@
 			selectedDistributionLineId = await localStorage.GetItemAsync<int>("selectedDistributionLineId");
 			if (selectedDistributionLineId > 0)
 			{
-				await AfterDistributionLineChanged();
+				await AfterDistributionLineChanged(true);
 			}
 			else
 			{
@@ -317,11 +322,6 @@
 
 				await AfterStopNumberChanged();
 			}
-
-			// die Spaltenoptionen aus dem Local Storage laden
-			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsCustomers");
-			if (saved is not null)
-				columnOptions = saved;
 		}
 		IsRendered.ParametersSet = true;
 	}
@@ -366,14 +366,10 @@
 		if (args.action == "Add" || args.action == "Edit")
 			StateHasChanged();
 
-		/*if (selectedDistributionLineId > 0)
-		{
-			await AfterDistributionLineChanged();
-		}*/
 	}
 	// filter 
 	private List<Customers> FilteredCustomers = null!;
-	private async Task AfterDistributionLineChanged()
+	private async Task AfterDistributionLineChanged(bool ifDefaultStNrId)
 	{
 		var task = customersTask.Where(t => t.lineId == selectedDistributionLineId).Select(t => t.task).FirstOrDefault();
 		if (task != null)
@@ -387,13 +383,17 @@
 
 		if (customersService.DownloadedCustomers.Count > 0)
 		{
-			// wenn die aktuelle ausgewählte StopNumberId nicht in der neuen gefilterten Liste vorhanden ist, dann setzen wir die StopNumberId auf 0, damit alle Kunden angezeigt werden
-			selectedStopNumberId = 0;
+			// wenn die aktuelle ausgewählte StopNumberId nicht in der neuen gefilterten Liste vorhanden ist, dann setzen wir die StopNumberId auf 0, damit alle Kunden angezeigt werden, und löschen wir auch die LocalStronge
+			if (!ifDefaultStNrId)
+			{
+				selectedStopNumberId = 0;
+				await localStorage.RemoveItemAsync("selectedStopNummerId");
+			}
 			// dann filtern
 			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.DistributionLineId == selectedDistributionLineId || selectedDistributionLineId == 0)
 			&& (c.StopNumber == selectedStopNumberId || selectedStopNumberId == 0)
 			).ToList();
-			
+
 		}
 		else
 		{
@@ -417,8 +417,8 @@
 			FilteredCustomers = null!;
 		}
 
-		// save the selected category id in local storage
-		await localStorage.SetItemAsync("selectedStopNummerId", selectedStopNumberId);
+		// Speichere die ID der ausgewählten Kategorie im Local Storage.
+		await customersService.UpdateSelectedStopNummerLocalStorage(selectedStopNumberId);
 	}
 	private async Task OnTextChanged(ChangeEventArgs e)
 	{
@@ -441,7 +441,7 @@
 		// clear searchCustomer
 		await JS.InvokeVoidAsync("eval", @"var el = document.getElementById('searchCustomer');if(el) { el.value = ''; }");
 
-		await AfterDistributionLineChanged();
+		await AfterDistributionLineChanged(true);
 		await AfterStopNumberChanged();
 	}
 	// Dropdown 
@@ -482,7 +482,7 @@
 
 		// update auch die filtered list
 		if (selectedDistributionLineId > 0)
-			await AfterDistributionLineChanged();
+			await AfterDistributionLineChanged(true);
 		if (selectedStopNumberId > 0)
 			await AfterStopNumberChanged();
 	}

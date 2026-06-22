@@ -1,10 +1,11 @@
-﻿using ManagementLabel.Model;
-
+﻿using Blazored.LocalStorage;
+using ManagementLabel.Model;
 namespace ManagementLabel.Components.CustomersF
 {
-    public class CustomersService(HttpClient http)
+    public class CustomersService(HttpClient http, ILocalStorageService localStorage)
     {
         private readonly HttpClient _http = http;
+        private readonly ILocalStorageService _localStorage = localStorage;
         public List<Customers> DownloadedCustomers{ get; private set; } = [];
         public List<CustomerDownloadProcess> DownloadProcesses { get; private set; } = [];
         public async Task<ValidationResult> GetAllCustomersByLineId(int id = 0)
@@ -162,6 +163,17 @@ namespace ManagementLabel.Components.CustomersF
             var newItems = customers.ExceptBy(DownloadedCustomers.Select(c => c.Id), c => c.Id).ToList();
 
             DownloadedCustomers.AddRange(newItems);
+        }
+        public async Task UpdateSelectedStopNummerLocalStorage(int newSelectedStopNumberId)
+        {
+            try
+            {
+                await localStorage.SetItemAsync("selectedStopNummerId", newSelectedStopNumberId);
+            }
+            catch
+            {
+
+            }
         }
         public async Task<ValidationResult> UpdateCustomerLocal(int id)
         {

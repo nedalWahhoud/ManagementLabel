@@ -21,6 +21,7 @@ using ManagementLabel.Components.DebtF;
 using ManagementLabel.Components.TransactionsCustomersF;
 using ManagementLabel.Components.SupplierF;
 using ManagementLabel.Components.OneTimePaymentsF;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
@@ -115,7 +116,19 @@ builder.Services.AddScoped<TransactionsCustomersService>();
 builder.Services.AddScoped<OneTimePaymentsService>();
 //
 builder.Services.AddBlazoredLocalStorage();
+// Sprachen
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+var supportedCultures = new[] { "de", "ar" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+localizationOptions.RequestCultureProviders.Clear();
+localizationOptions.RequestCultureProviders.Add(new CookieRequestCultureProvider());
+
 var app = builder.Build();
+
+app.UseRequestLocalization(localizationOptions);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -124,6 +137,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 //app.UseHttpsRedirection();
 

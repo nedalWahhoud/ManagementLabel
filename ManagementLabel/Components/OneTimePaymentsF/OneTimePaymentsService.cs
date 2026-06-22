@@ -282,12 +282,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 .SelectMany(group => group.Payments)
                 .FirstOrDefault(p => p.Id == id);
         }
-        public string GetEnumDisplayName(OneTimePaymentStatus status)
-        {
-            var field = status.GetType().GetField(status.ToString());
-            var attribute = (System.ComponentModel.DataAnnotations.DisplayAttribute)Attribute.GetCustomAttribute(field!, typeof(System.ComponentModel.DataAnnotations.DisplayAttribute))!;
-            return attribute?.Name ?? status.ToString();
-        }
+   
         public string GetStatusClass(OneTimePaymentStatus status,bool isDropdown, bool isBaseClass = true)
         {
             string dropdownClass = isDropdown ? "dropdown-toggle" : "";

@@ -1,10 +1,11 @@
-﻿<div class="overlay">
+﻿@inject IStringLocalizer<ManagementLabel.Components.Layout.OverlayEditAddCustomers> L
+<div class="overlay">
 	<div class="standardOverlayForm">
 		<EditForm Model="@customer" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
 			<div class="overlayField">
 				<InputSelect class="form-control" @bind-Value="customer.DistributionLineId">
-					<option value="0">Select Verteilungslinie</option>
+					<option value="0">@L["SelectLine"]</option>
 					@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
 					{
 						<option value="@distributionLine.Id">@distributionLine.LineName</option>
@@ -13,27 +14,27 @@
 				<ValidationMessage For="@(() => customer.DistributionLineId)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.Name_de" placeholder="Name de" />
+				<InputText class="form-control" @bind-Value="customer.Name_de" placeholder="@L["NameDe"]" />
 				<ValidationMessage For="@(() => customer.Name_de)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.Name_ar" placeholder="Name ar" />
+				<InputText class="form-control" @bind-Value="customer.Name_ar" placeholder="@L["NameAr"]" />
 				<ValidationMessage For="@(() => customer.Name_ar)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.Street" placeholder="Anschrift" />
+				<InputText class="form-control" @bind-Value="customer.Street" placeholder="@L["Address"]" />
 				<ValidationMessage For="@(() => customer.Street)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.BuildingNumber" placeholder="Hausnummer" />
+				<InputText class="form-control" @bind-Value="customer.BuildingNumber" placeholder="@L["HouseNumber"]" />
 				<ValidationMessage For="@(() => customer.BuildingNumber)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.PostalCode" placeholder="PLZ" />
+				<InputText class="form-control" @bind-Value="customer.PostalCode" placeholder="@L["PostalCode"]" />
 				<ValidationMessage For="@(() => customer.PostalCode)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.City" placeholder="Stadt" />
+				<InputText class="form-control" @bind-Value="customer.City" placeholder="@L["City"]" />
 				<ValidationMessage For="@(() => customer.City)" />
 			</div>
 			<div class="overlayField">
@@ -51,19 +52,19 @@
 				<ValidationMessage For="@(() => customer.Longitude)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.PhoneNumber" placeholder="Tel." />
+				<InputText class="form-control" @bind-Value="customer.PhoneNumber" placeholder="@L["Tel."]" />
 				<ValidationMessage For="@(() => customer.PhoneNumber)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.Email" placeholder="Email" />
+				<InputText class="form-control" @bind-Value="customer.Email" placeholder="@L["Email"]" />
 				<ValidationMessage For="@(() => customer.Email)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.Notes_de" placeholder="Notes de" />
+				<InputText class="form-control" @bind-Value="customer.Notes_de" placeholder="@L["NoteDe"]" />
 				<ValidationMessage For="@(() => customer.Notes_de)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="customer.Notes_ar" placeholder="Notes ar" />
+				<InputText class="form-control" @bind-Value="customer.Notes_ar" placeholder="@L["NoteAr"]" />
 				<ValidationMessage For="@(() => customer.Notes_ar)" />
 			</div>
 			<div class="overlayField">
@@ -74,14 +75,14 @@
 					<div class="form-check">
 						<InputCheckbox class="form-check-input" @bind-Value="customer.shouldStopnummerShift" id="shiftCheck" />
 						<label class="form-check-label" for="shiftCheck">
-							Sollte verschieben
+							@L["ShouldPostpone"]
 						</label>
 					</div>
 				</div>
 				<ValidationMessage For="@(() => customer.StopNumber)" />
 			</div>
 			<div class="overlayField">
-				<InputText placeholder="PIN Wird Automatisch generiert oder eingeben" maxlength="4" pattern="\d{4}" title="PIN muss genau 4 Zahlen sein" class="form-control" @bind-Value="customer.PIN" />
+				<InputText placeholder="@L["PIN"]" maxlength="4" pattern="\d{4}" title="PIN muss genau 4 Zahlen sein" class="form-control" @bind-Value="customer.PIN" />
 				<ValidationMessage For="@(() => customer.PIN)" />
 			</div>
 			<div class="mt-3">
@@ -94,10 +95,10 @@
 					}
 					else
 					{
-						<span>Speichern</span>
+						<span>@L["Save"]</span>
 					}
 				</button>
-				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+				<button class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
 			</div>
 		</EditForm>
 	</div>
