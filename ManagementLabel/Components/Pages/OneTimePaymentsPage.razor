@@ -127,6 +127,7 @@
                                                         }
                                                         else
                                                         {
+                                                            double collected = 0;
                                                             <div class="table-responsive" style="overflow: visible;">
                                                                 <table class="table table-sm table-striped table-hover align-middle m-0">
                                                                     <thead class="table-light">
@@ -141,11 +142,13 @@
                                                                     <tbody>
                                                                         @foreach (var p in SelectedDate?.Payments ?? new())
                                                                         {
+                                                                            collected += p.AmountCollected;
+
                                                                             <tr @key="p.Id"
-                                                                            @oncontextmenu:preventDefault="true"
-                                                                            @oncontextmenu="@(e => OnSelectRow(p, e))"
-                                                                            @ondblclick="(e) => OnDoubleTap(p, e)"
-                                                                            class="@(selectedPayment?.Id == p.Id ? "selected" : "")">
+                                                                                @oncontextmenu:preventDefault="true"
+                                                                                @oncontextmenu="@(e => OnSelectRow(p, e))"
+                                                                                @ondblclick="(e) => OnDoubleTap(p, e)"
+                                                                                class="@(selectedPayment?.Id == p.Id ? "selected" : "")">
                                                                                 <td class="fw-medium">@(IsArabic ? p.Customer?.Name_ar : p.Customer?.Name_de ?? "Fehler")</td>
                                                                                 <td class="text-center text-info-emphasis">
                                                                                     <span style="cursor: pointer;" title="@L["DoppelklickTitleDropdown"]">
@@ -167,39 +170,52 @@
                                                                                     {
                                                                                         <div class="dropdown">
                                                                                             <button class="@oneTimePaymentsService.GetStatusClass(p.Status,true)" type="button" id="statusDropdown-@p.Id" data-bs-toggle="dropdown"
-                                                                                            data-bs-boundary="viewport"
-                                                                                            aria-expanded="false"
-                                                                                            style="border: none;">
+                                                                                                    data-bs-boundary="viewport"
+                                                                                                    aria-expanded="false"
+                                                                                                    style="border: none;">
                                                                                                 <span class="@(IsArabic ? "ms-2" : "me-2")">@L[p.Status.ToString()]</span>
                                                                                             </button>
                                                                                             <ul class="dropdown-menu" aria-labelledby="statusDropdown-@p.Id">
                                                                                                 @foreach (OneTimePaymentStatus newStatus in Enum.GetValues(typeof(OneTimePaymentStatus)))
                                                                                                 {
-                                                                                                <li>
-                                                                                                    <button class="dropdown-item" type="button" @onclick="() => UpdateStatus(p.Id, newStatus,p)">
+                                                                                                    <li>
+                                                                                                        <button class="dropdown-item" type="button" @onclick="() => UpdateStatus(p.Id, newStatus,p)">
                                                                                                             @L[newStatus.ToString()]
-                                                                                                    </button>
-                                                                                                </li>
-                                                                                            }
-                                                                                        </ul>
-                                                                                    </div>
-                                                                                }
-                                                                            </td>
-                                                                        </tr>
-                                                                    }
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            }
+                                                                                                        </button>
+                                                                                                    </li>
+                                                                                                }
+                                                                                            </ul>
+                                                                                        </div>
+                                                                                    }
+                                                                                </td>
+                                                                            </tr>
+                                                                        }
+                                                                        @if (SelectedDate?.Payments != null && SelectedDate.Payments.Any())
+                                                                        {
+                                                                            <tr class="table-success fw-bold border-top border-dark">
+                                                                                <td>@L["AmountCollected"]</td>
+                                                                                <td></td>
+                                                                                <td class="text-center text-success">
+                                                                                    @(SelectedDate.Payments.Sum(p => p.AmountCollected).ToString("N2")) €
+                                                                                </td>
+                                                                                <td></td>
+                                                                                <td></td>
+                                                                            </tr>
+                                                                        }
+
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
                                         </div>
-                                    </div>
+                                    }
                                 }
-                            }
+                            </div>
                         </div>
                     </div>
-                </div>
 
                 if (IsOneTimePaymentProcessing.Item1)
                 {

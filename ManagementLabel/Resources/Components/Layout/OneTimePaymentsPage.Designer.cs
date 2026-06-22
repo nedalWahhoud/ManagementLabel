@@ -79,6 +79,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The total amount collected ähnelt.
+        /// </summary>
+        public static string AmountCollected {
+            get {
+                return ResourceManager.GetString("AmountCollected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Amount Received ähnelt.
         /// </summary>
         public static string AmountReceived {

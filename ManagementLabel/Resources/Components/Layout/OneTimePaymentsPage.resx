@@ -192,4 +192,7 @@
   <data name="DoppelklickTitleDropdown" xml:space="preserve">
     <value>Double-click to show the menu.</value>
   </data>
+  <data name="AmountCollected" xml:space="preserve">
+    <value>The total amount collected</value>
+  </data>
 </root>
