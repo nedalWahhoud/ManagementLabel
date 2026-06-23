@@ -168,7 +168,7 @@ namespace ManagementLabel.Components.CustomersF
         {
             try
             {
-                await localStorage.SetItemAsync("selectedStopNummerId", newSelectedStopNumberId);
+                await _localStorage.SetItemAsync("selectedStopNummerId", newSelectedStopNumberId);
             }
             catch
             {

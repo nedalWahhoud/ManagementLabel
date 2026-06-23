@@ -1,10 +1,9 @@
-﻿using ManagementLabel.Model;
-using ManagementLabel.ProductsF;
+﻿using ManagementLabel.Components.ProductsF;
+using ManagementLabel.Model;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using System.Globalization;
 using System.Net;
-using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Web;
 namespace ManagementLabel.Components.Share

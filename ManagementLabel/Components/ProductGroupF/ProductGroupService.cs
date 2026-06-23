@@ -1,6 +1,6 @@
 ﻿using ManagementLabel.Components.Pages;
 using ManagementLabel.Model;
-using ManagementLabel.ProductsF;
+using ManagementLabel.Components.ProductsF;
 using Microsoft.AspNetCore.Rewrite;
 using Org.BouncyCastle.Crypto;
 

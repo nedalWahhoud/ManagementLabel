@@ -1,6 +1,4 @@
 ﻿using ManagementLabel.Model;
-using ManagementLabel.ProductsF;
-using static System.Net.WebRequestMethods;
 
 namespace ManagementLabel.Components.CategoriesF
 {

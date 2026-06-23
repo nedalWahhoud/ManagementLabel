@@ -38,7 +38,6 @@
     </div>*@
 @code {
 
-    private bool isRended = false;
     private ErrorBoundary? errorBoundary;
     protected override void OnAfterRender(bool firstRender)
     {
@@ -49,14 +48,10 @@
                 _ = CheckAdminStatusAsync();
                 // Initialize the orderService to start count funktion of openOrders
                 orderService.InitializeAsync();
-                
-                isRended = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Fehler bei der Initialisierung von MainLyout: {ex.Message}");
-                // Optionally, you can set isRended to true to show the UI even if there's an error
-                isRended = true;
             }
 
             StateHasChanged();

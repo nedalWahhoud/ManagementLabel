@@ -2,9 +2,7 @@
 using ManagementLabel.Components.CartF;
 using ManagementLabel.Components.OrderF;
 using ManagementLabel.Components.ReceiptF;
-using ManagementLabel.LogIn;
 using ManagementLabel.Model;
-using ManagementLabel.ProductsF;
 using ManagementLabel.Components.DiscountF;
 using ManagementLabel.Components.ProductGroupF;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -22,6 +20,8 @@ using ManagementLabel.Components.TransactionsCustomersF;
 using ManagementLabel.Components.SupplierF;
 using ManagementLabel.Components.OneTimePaymentsF;
 using Microsoft.AspNetCore.Localization;
+using ManagementLabel.Components.ProductsF;
+using ManagementLabel.Components.LogIn;
 
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören

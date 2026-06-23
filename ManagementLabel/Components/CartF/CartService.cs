@@ -1,5 +1,5 @@
-﻿using ManagementLabel.Model;
-using ManagementLabel.ProductsF;
+﻿using ManagementLabel.Components.ProductsF;
+using ManagementLabel.Model;
 using Microsoft.JSInterop;
 using System.Text.Json;
 

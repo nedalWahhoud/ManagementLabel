@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http;
 
 
-namespace ManagementLabel.ProductsF
+namespace ManagementLabel.Components.ProductsF
 {
     public class ProductService(HttpClient http)
     {
@@ -22,7 +22,7 @@ namespace ManagementLabel.ProductsF
                 var products = await response.Content.ReadFromJsonAsync<List<Products>>();
                 if (products != null)
                 {
-                        // add the product to the local list
+                    // add the product to the local list
                     AddProductToLocal(products);
                     return products;
                 }
@@ -65,7 +65,7 @@ namespace ManagementLabel.ProductsF
                 return new();
             }
         }
-        
+
         public async Task<List<TaxRate>> GetAllTaxRates()
         {
             if (DownloadedTaxRates.Count > 0)
@@ -99,7 +99,7 @@ namespace ManagementLabel.ProductsF
 
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
 
-                if (result?.Result == true &&  result.NewId != null)
+                if (result?.Result == true && result.NewId != null)
                     return result;
                 else
                     return new ValidationResult { Result = false, Message = "Unbekannte Fehler." };
@@ -119,11 +119,11 @@ namespace ManagementLabel.ProductsF
                 {
                     return await response.Content.ReadFromJsonAsync<ValidationResult>() ?? new ValidationResult { Result = false, Message = "Unknown error." }; ;
                 }
-                
+
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
                 return result!;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
@@ -140,14 +140,14 @@ namespace ManagementLabel.ProductsF
 
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
 
-                if(result?.Result == true)
+                if (result?.Result == true)
                 {
                     return result;
                 }
 
                 return result ?? new ValidationResult { Result = false, Message = "Unbekannter Fehler aufgetreten." };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
@@ -172,12 +172,12 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-      
+
         public bool IsEditedProduct(Products currentProduct, Products editProduct)
         {
             if (editProduct == null || currentProduct == null)
-            { 
-                return false; 
+            {
+                return false;
             }
             else
             {
@@ -210,7 +210,7 @@ namespace ManagementLabel.ProductsF
             var currentIds = currentProduct.SelectedSupplierIds ?? [];
             var editIds = editProduct.SelectedSupplierIds ?? [];
 
-            bool isSuppliersChanged = (currentIds.Count != editIds.Count) ||
+            bool isSuppliersChanged = currentIds.Count != editIds.Count ||
                                        editIds.Except(currentIds).Any() ||
                                        currentIds.Except(editIds).Any();
             if (isSuppliersChanged)
@@ -221,7 +221,7 @@ namespace ManagementLabel.ProductsF
                 return true;
             if (currentProduct.IsShippable != editProduct.IsShippable)
                 return true;
-            if (HasDiscountChanged(currentProduct.ProductDiscount,editProduct.ProductDiscount))
+            if (HasDiscountChanged(currentProduct.ProductDiscount, editProduct.ProductDiscount))
                 return true;
             if (currentProduct.ProductImages.FirstOrDefault(i => i.IsMain)?.LastModified != editProduct.ProductImages.FirstOrDefault(i => i.IsMain)?.LastModified)
                 return true;
@@ -230,8 +230,8 @@ namespace ManagementLabel.ProductsF
         }
         private static bool HasDiscountChanged(ProductDiscounts? oldDiscount, ProductDiscounts? newDiscount)
         {
-            var effectiveOld = (oldDiscount == null || oldDiscount.DiscountedPrice <= 0) ? null : oldDiscount;
-            var effectiveNew = (newDiscount == null || newDiscount.DiscountedPrice <= 0) ? null : newDiscount;
+            var effectiveOld = oldDiscount == null || oldDiscount.DiscountedPrice <= 0 ? null : oldDiscount;
+            var effectiveNew = newDiscount == null || newDiscount.DiscountedPrice <= 0 ? null : newDiscount;
 
 
             if (effectiveOld == null && effectiveNew == null)
@@ -248,7 +248,7 @@ namespace ManagementLabel.ProductsF
         {
             if (string.IsNullOrWhiteSpace(newProduct.Name_de))
             {
-                return new ValidationResult () { NewId = null, Result = false, Message = "Die Angabe des Produktnamens ist erforderlich." };
+                return new ValidationResult() { NewId = null, Result = false, Message = "Die Angabe des Produktnamens ist erforderlich." };
             }
 
             if (string.IsNullOrWhiteSpace(newProduct.Description_de))
@@ -263,7 +263,7 @@ namespace ManagementLabel.ProductsF
             if (string.IsNullOrWhiteSpace(newProduct.Description_ar))
             {
                 return new ValidationResult() { Result = false, Message = "Die Angabe der Produktbeschreibung_ar ist erforderlich." };
-              
+
             }
 
             if (newProduct!.CategoryId <= 0)
@@ -294,19 +294,19 @@ namespace ManagementLabel.ProductsF
             {
                 return new ValidationResult() { Result = false, Message = "Ein Steuersatz ist erforderlich." };
             }
-           /* if (newProduct.EXPDate < DateTime.Now)
-            {
-                return new ValidationResult() {Result = false, Message = "Das Ablaufdatum muss größer als das aktuelle Datum sein." };
-            }*/
+            /* if (newProduct.EXPDate < DateTime.Now)
+             {
+                 return new ValidationResult() {Result = false, Message = "Das Ablaufdatum muss größer als das aktuelle Datum sein." };
+             }*/
             foreach (var item in newProduct.ProductImages)
             {
 
-                if (item.ImageBytes == null || (item.ImageBytes != null && item.ImageBytes.Length <= 0))
+                if (item.ImageBytes == null || item.ImageBytes != null && item.ImageBytes.Length <= 0)
                 {
-                    return new ValidationResult() {Result = false, Message = "Das Hauptbild ist erforderlich." };
+                    return new ValidationResult() { Result = false, Message = "Das Hauptbild ist erforderlich." };
                 }
             }
-            return new ValidationResult() {Result = true, Message =string.Empty };
+            return new ValidationResult() { Result = true, Message = string.Empty };
         }
         //
         public async Task<List<PaymentMethod>> GetPaymentMethodsAsync()
@@ -318,8 +318,8 @@ namespace ManagementLabel.ProductsF
                 {
                     return [];
                 }
-               return  await response.Content.ReadFromJsonAsync<List<PaymentMethod>>() ?? [];
-                 
+                return await response.Content.ReadFromJsonAsync<List<PaymentMethod>>() ?? [];
+
             }
             catch
             {
@@ -329,7 +329,7 @@ namespace ManagementLabel.ProductsF
         // local
         public void AddProductToLocal(List<Products> products)
         {
-            if(products.Count > 0 && DownloadedProduct.Count == 0)
+            if (products.Count > 0 && DownloadedProduct.Count == 0)
             {
                 DownloadedProduct.AddRange(products);
                 return;
@@ -365,7 +365,6 @@ namespace ManagementLabel.ProductsF
                 return null!;
             }
         }
-       
         // barcode
         public async Task<ValidationResult> UpdateBarcodeAsync(int id, string barcode)
         {

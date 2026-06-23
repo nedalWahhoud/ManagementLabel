@@ -1,5 +1,4 @@
 ﻿using ManagementLabel.Model;
-using static System.Net.WebRequestMethods;
 
 namespace ManagementLabel.Components.DebtF
 {

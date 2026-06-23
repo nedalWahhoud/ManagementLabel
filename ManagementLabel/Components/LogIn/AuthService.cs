@@ -2,7 +2,7 @@
 using ManagementLabel.Model;
 using System.Security.Claims;
 
-namespace ManagementLabel.LogIn
+namespace ManagementLabel.Components.LogIn
 {
     public class AuthService(HttpClient http, AuthenticationStateProvider authStateProvider)
     {
@@ -83,10 +83,10 @@ namespace ManagementLabel.LogIn
                 }
 
                 // get result token
-                 var result1 = await response.Content.ReadFromJsonAsync<LoginModel>();
+                var result1 = await response.Content.ReadFromJsonAsync<LoginModel>();
 
-                  if (result1 == null || string.IsNullOrEmpty(result1.Token))
-                      return new ValidationResult { Result = false, Message = "Token Error" };
+                if (result1 == null || string.IsNullOrEmpty(result1.Token))
+                    return new ValidationResult { Result = false, Message = "Token Error" };
 
                 return new ValidationResult { Result = true, Message = "erfolgreich Userdata geupdatet" };
             }
@@ -184,7 +184,7 @@ namespace ManagementLabel.LogIn
         public void AddToLocal(Users user, int index)
         {
             if (!DownloadedUsers.Any(p => p.Id == user.Id))
-            { 
+            {
                 DownloadedUsers.Insert(index, user);
             }
         }

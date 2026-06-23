@@ -51,9 +51,9 @@
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
 									<option value="0">@L["StopNumber"]</option>
 									@foreach (var customer in customersService.DownloadedCustomers
-																																																							.Where(c => c.DistributionLineId == selectedDistributionLineId)
-																																																							.DistinctBy(c => c.StopNumber)
-																																																							.OrderBy(c => c.StopNumber))
+																																.Where(c => c.DistributionLineId == selectedDistributionLineId)
+																																.DistinctBy(c => c.StopNumber)
+																																.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -62,7 +62,7 @@
 							@* Suchen Input*@
 							<div class="searchDiv">
 								<div class="input-group">
-									<input id="searchCustomer" type="text" placeholder="@L["Placeholder"]" class="form-control" @oninput="OnTextChanged" @onfocus="@(e => SelectAllContent())" />
+									<input placeholder="@L["Placeholder"]" class="form-control" type="text" @bind="SearchValue" @bind:event="oninput" @bind:after="OnSearchChanged" />
 									<button class="btn btn-danger" type="button" @onclick="ClearSearch">
 										<i class="fas fa-times"></i>
 									</button>
@@ -371,6 +371,10 @@
 	private List<Customers> FilteredCustomers = null!;
 	private async Task AfterDistributionLineChanged(bool ifDefaultStNrId)
 	{
+
+		// clear die InputSuche
+		SearchValue = string.Empty;
+
 		var task = customersTask.Where(t => t.lineId == selectedDistributionLineId).Select(t => t.task).FirstOrDefault();
 		if (task != null)
 		{
@@ -406,6 +410,9 @@
 	private int selectedStopNumberId = 0;
 	private async Task AfterStopNumberChanged()
 	{
+		// clear die InputSuche
+		SearchValue = string.Empty;
+
 		if (customersService.DownloadedCustomers.Count > 0)
 		{
 			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.StopNumber == selectedStopNumberId || selectedStopNumberId == 0)
@@ -420,26 +427,27 @@
 		// Speichere die ID der ausgewählten Kategorie im Local Storage.
 		await customersService.UpdateSelectedStopNummerLocalStorage(selectedStopNumberId);
 	}
-	private async Task OnTextChanged(ChangeEventArgs e)
+	// Suche
+	private string SearchValue { get; set; } = "";
+	private async Task OnSearchChanged()
 	{
-		string searchText = e.Value?.ToString()?.Trim() ?? string.Empty;
-		if ((customersService.DownloadedCustomers.Count == 0 || string.IsNullOrEmpty(searchText)))
+		if ((customersService.DownloadedCustomers.Count == 0 || string.IsNullOrEmpty(SearchValue)))
 		{
 			await ClearSearch();
+			return;
 		}
 		FilteredCustomers = customersService.DownloadedCustomers
 			.Where(p =>
-				string.IsNullOrWhiteSpace(searchText) ||
-				(!string.IsNullOrEmpty(p.Name_de) && p.Name_de.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
-				(!string.IsNullOrEmpty(p.Name_ar) && p.Name_ar.Contains(searchText, StringComparison.OrdinalIgnoreCase)))
+				string.IsNullOrWhiteSpace(SearchValue) ||
+				(!string.IsNullOrEmpty(p.Name_de) && p.Name_de.Contains(SearchValue, StringComparison.OrdinalIgnoreCase)) ||
+				(!string.IsNullOrEmpty(p.Name_ar) && p.Name_ar.Contains(SearchValue, StringComparison.OrdinalIgnoreCase)))
 			.Where(p => selectedDistributionLineId == 0 || p.DistributionLineId == selectedDistributionLineId)
 		.ToList();
 	}
-
 	private async Task ClearSearch()
 	{
 		// clear searchCustomer
-		await JS.InvokeVoidAsync("eval", @"var el = document.getElementById('searchCustomer');if(el) { el.value = ''; }");
+		SearchValue = string.Empty;
 
 		await AfterDistributionLineChanged(true);
 		await AfterStopNumberChanged();
@@ -500,20 +508,6 @@
 		{
 			this.IsOneTimePaymentProcessing = false;
 			this.newOneTimePayment = null!;
-		}
-	}
-	// select all kontekt
-	private async Task SelectAllContent()
-	{
-		try
-		{
-			// um sicherzustellen, dass der Browser den Fokussierungsprozess abgeschlossen hat
-			await Task.Delay(10);
-			await JS.InvokeVoidAsync("eval", "document.querySelector('.form-control:focus').select()");
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
 		}
 	}
 }
