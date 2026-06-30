@@ -1,8 +1,4 @@
 ﻿using ManagementLabel.Model;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Net.Http;
-
-
 namespace ManagementLabel.Components.ProductsF
 {
     public class ProductService(HttpClient http)

@@ -11,6 +11,7 @@ using ManagementLabel.Components.InvoiceF;
 using ManagementLabel.Components.AddressesF;
 using Blazored.LocalStorage;
 using Microsoft.Extensions.Options;
+using ManagementLabel.Components.LocalStorageF;
 using ManagementLabel.Components.ImagesF;
 using ManagementLabel.Components.DistributionLinesF;
 using ManagementLabel.Components.CustomersF;
@@ -114,6 +115,8 @@ builder.Services.AddScoped<WhatsAppService>();
 builder.Services.AddScoped<TransactionsCustomersService>();
 //  oneTimepayment Service 
 builder.Services.AddScoped<OneTimePaymentsService>();
+//  oneTimepayment Service 
+builder.Services.AddScoped<LocalStorageService>();
 //
 builder.Services.AddBlazoredLocalStorage();
 // Sprachen

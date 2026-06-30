@@ -1,5 +1,6 @@
 ﻿@page "/distributionlines"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.DistributionLinesPage> L
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -14,7 +15,7 @@
 					<div class="tableContiner">
 						<div class="topTable">
 							<div class="buttonsDiv">
-								<button class="btn addPlusB" @onclick="NewDistributionLine" title="Add neue Vertriebslinie">+</button>
+								<button class="btn addPlusB" @onclick="NewDistributionLine" title="@L["Addline"]">+</button>
 							</div>
 						</div>
 						@if (distributionLinesService.DownloadedDistributionLines == null || !distributionLinesService.DownloadedDistributionLines.Any())
@@ -22,7 +23,7 @@
 							<div class="d-flex justify-content-center align-items-center"
 								 style="min-height: 60vh;">
 								<p class="text-muted fs-5">
-									Keine Verteilungslinien gefunden.
+									@L["NoDistribution"]
 								</p>
 							</div>
 						}
@@ -30,9 +31,9 @@
 						{
 							<table class="table table-bordered table-hover">
 								<tr>
-									<th>Id</th>
-									<th>Name Line</th>
-									<th>Beschreibung</th>
+									<th>@L["Id"]</th>
+									<th>@L["NameLine"]</th>
+									<th>@L["Description"]</th>
 								</tr>
 								<tbody>
 									@foreach (var distributionLine in distributionLinesService.DownloadedDistributionLines)
@@ -50,7 +51,7 @@
 											<td>
 												<button class="btn btn-sm btn-warning me-1"
 														@onclick="() => EditDistributionLine(distributionLine)" disabled="@IsDeletingProcessing.Item1">
-													Bearbeiten
+													@L["Edit"]
 												</button>
 												<button class="btn btn-sm btn-danger"
 														@onclick="() => DeleteDistributionLine(distributionLine)" disabled="@IsDeletingProcessing.Item1">
@@ -62,7 +63,7 @@
 													}
 													else
 													{
-														<span>Löschen</span>
+														<span>@L["Delete"]</span>
 													}
 												</button>
 											</td>
@@ -74,7 +75,7 @@
 											 style="position: fixed; top:@(menuYpx); left:@(menuXpx);"
 											 @onclick:stopPropagation="true">
 											<ul>
-												<li @onclick="() => viaWhatasappShre(selectedDistributionLine)"><i class="bi bi-whatsapp me-1"></i> Teilen über WhatsApp</li>
+												<li @onclick="() => viaWhatasappShre(selectedDistributionLine)"><i class="bi bi-whatsapp me-1"></i> @L["ShareWhatsApp"]</li>
 											</ul>
 										</div>
 									}
@@ -95,7 +96,7 @@
 				{
 					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 						<div class="alert alert-danger text-center">
-							Sie haben keine Berechtigung für diese Seite
+							@L["NoPermission"]
 						</div>
 					</div>
 				}

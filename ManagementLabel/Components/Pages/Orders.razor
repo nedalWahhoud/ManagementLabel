@@ -1,7 +1,7 @@
 ﻿@page "/order"
-@inherits ProjectComponentBase
 @using ManagementLabel.Model
-
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.Orders> L
 <div class="mainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
@@ -20,10 +20,10 @@
                             <div class="dropdownDiv">
                                 <!-- Dropdown Status -->
                                 <select class="statusDropdown" @onchange="OnStatusChanged">
-                                    <option value="0">Status</option>
+                                    <option value="0">@L["Status"]</option>
                                     @foreach (var status in orderService.OrderStatusList)
                                     {
-                                        <option value="@status.Id">@status.Status_de</option>
+                                        <option value="@status.Id">@(IsArabic ? status.Status_ar : status.Status_de)</option>
                                     }
                                 </select>
                             </div>
@@ -31,11 +31,11 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">B-Nr.</th>
-                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Benutzer</th>
-                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Datum</th>
-                                    <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">G-preis</th>
-                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">Status</th>
+                                    <th style="min-width:70px; max-width: 70px; word-break: break-word; white-space: normal;">@L["OrderNumber"]</th>
+                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">@L["User"]</th>
+                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">@L["Date"]</th>
+                                    <th style="min-width:100px; max-width: 50px; word-break: break-word; white-space: normal;">@L["TotalPrice"]</th>
+                                    <th style="min-width:50px; max-width: 50px; word-break: break-word; white-space: normal;">@L["Status"]</th>
                                     <th style="min-width:40px;">⋮</th>
 
                                 </tr>
@@ -56,8 +56,8 @@
                                     <tr>
                                         <td>@order.Id</td>
                                         <td>@(order.User?.UserName ?? "Kein Unsername")</td>
-                                        <td>@order.OrderDate.ToString("d", germanCulture)</td>
-                                        <td>@order.TotalPrice.ToString("C", germanCulture)</td>
+                                        <td>@order.OrderDate.ToString("d", GermanCulture)</td>
+                                        <td>@order.TotalPrice.ToString("C", GermanCulture)</td>
                                         <td>
                                             <InputSelect Value="@order.StatusId"
                                                          ValueChanged="@((int val) => OnStatusChangedItem(order, val.ToString()))"
@@ -66,7 +66,7 @@
                                                          disabled="@order.IsUpdatingStatus">
                                                 @foreach (var status in orderService.OrderStatusList)
                                                 {
-                                                    <option value="@status.Id">@status.Status_de</option>
+                                                    <option value="@status.Id">@(IsArabic ? status.Status_ar : status.Status_de)</option>
                                                 }
                                             </InputSelect>
 
@@ -83,8 +83,8 @@
                                                     ⋮
                                                 </button>
                                                 <ul class="dropdown-menu">
-                                                    <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnOrderDetails(order)">Bestelldetails</a></li>
-                                                    <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">Rechnung erstellen</a></li>
+                                                    <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnOrderDetails(order)">@L["OrderDetails"]</a></li>
+                                                    <li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnInvoice(order)">@L["CreateInvoice"]</a></li>
                                                 </ul>
                                             </div>
                                         </td>
@@ -94,11 +94,11 @@
                                             <table class="table tableSm">
                                                 <thead>
                                                     <tr>
-                                                        <th>Image</th>
-                                                        <th>Produkt</th>
-                                                        <th>Menge</th>
-                                                        <th>Einzelpreis</th>
-                                                        <th>Gesamt</th>
+                                                        <th>@L["Img"]</th>
+                                                        <th>@L["Product"]</th>
+                                                        <th>@L["Quantity"]</th>
+                                                        <th>@L["UnitPrice"]</th>
+                                                        <th>@L["TotalPrice"]</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -108,10 +108,10 @@
                                                             <td>
                                                                 <img src="@productImagesService.GetProductImageUrl(item.Product?.ProductImages.FirstOrDefault(img => img.IsMain)!)" class="productImg" />
                                                             </td>
-                                                            <td>@(item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
+                                                            <td>@(IsArabic ? item.Product?.Name_ar : item.Product?.Name_de ?? "Fehler bei Product name_de")</td>
                                                             <td>@item.Quantity</td>
-                                                            <td>@item.UnitPrice.ToString("C", germanCulture)</td>
-                                                            <td>@((item.UnitPrice * item.Quantity).ToString("C", germanCulture))</td>
+                                                            <td>@item.UnitPrice.ToString("C", GermanCulture)</td>
+                                                            <td>@((item.UnitPrice * item.Quantity).ToString("C", GermanCulture))</td>
 
                                                         </tr>
                                                     }
@@ -125,7 +125,7 @@
                                 {
                                     <tr>
                                         <td colspan="12" class="loadingMessage">
-                                            Keine Bestellungen gefunden.
+                                            @L["NoOrdersFound."]
                                         </td>
                                     </tr>
                                 }
@@ -142,11 +142,11 @@
                                 }
                                 else if (!AllItemsLoaded)
                                 {
-                                    <span>Mehr laden</span>
+                                    <span>@L["MoreLoad"]</span>
                                 }
                                 @if (AllItemsLoaded)
                                 {
-                                    <span>Alle geladen</span>
+                                    <span>@L["AllLoaded"]</span>
                                 }
                             </button>
                         }
@@ -166,7 +166,7 @@
                                             {
                                                 var orderIdStr = item.Item1;
                                                 int orderId = int.Parse(orderIdStr);
-                                                <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(orderId)">Add Sendungsnummer</button>
+                                                <button class="btn btn-success" @onclick=" () => OnAddOrUpdateTrackingNumberShowOverlay(orderId)">@L["AddTrackingNr"]</button>
                                             }
                                             else if (item.Item2 == OverlayType.UpdateSN)
                                             {
@@ -208,10 +208,10 @@
                                                 }
                                                 else
                                                 {
-                                                    <span>Hinzufügen</span>
+                                                    <span>@L["Add"]</span>
                                                 }
                                             </button>
-                                            <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">Abbrechen</button>
+                                            <button type="button" class="btn btn-secondary mt-2" @onclick="OnAddTrackingNumberClose">@L["Cancel"]</button>
                                         </div>
                                     </EditForm>
                                 </div>
@@ -228,7 +228,7 @@
                 {
                     <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
                         <div class="alert alert-danger text-center">
-                            Sie haben keine Berechtigung für diese Seite
+                            @L["NoPermission"]
                         </div>
                     </div>
                 }
@@ -240,7 +240,6 @@
     </AuthorizeView>
 </div>
 @code {
-    private System.Globalization.CultureInfo germanCulture = new System.Globalization.CultureInfo("de-DE");
     private List<Order> orders = new List<Order>();
     private bool IsHasManageOrdersPermission = false;
     protected override async Task OnInitializedAsync()
@@ -370,36 +369,36 @@
 			{
 				Items = new List<(string,OverlayType)>()
 			};
-        overlayItems.Title = "<h1>Bestelldetails</h1>";
-        overlayItems.Items.Add(($"<p>Bestellnummer: {order.Id}</p>",OverlayType.None));
+        overlayItems.Title = $"<h1>{L["OrderDetails"]}</h1>";
+        overlayItems.Items.Add(($"<p>{L["OrderNumber"]}: {order.Id}</p>", OverlayType.None));
         // user
         if (order.User != null)
         {
-            overlayItems.Items.Add(($"<h3>Benutzer</h3>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>Id-Nummer: {order.User.Id.ToString() ?? "null"}</p>",OverlayType.None));
-            overlayItems.Items.Add(($"<p>Name: {order.User.UserName ?? "null"}</p>",OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["User"]}</h3>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["UserId"]}: {order.User.Id.ToString() ?? "null"}</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["Name"]}: {order.User.UserName ?? "null"}</p>", OverlayType.None));
             if (!string.IsNullOrEmpty(order.User.Email))
-                overlayItems.Items.Add(($"<p>E-mail: {order.User?.Email ?? "null"}</p>",OverlayType.None));
+                overlayItems.Items.Add(($"<p>{L["Email"]}: {order.User?.Email ?? "null"}</p>", OverlayType.None));
         }
         // payment method
         if (order.PaymentMethod != null)
         {
-            overlayItems.Items.Add(($"<h3>Zahlungsart</h3>",OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["PaymentMethod"]}</h3>", OverlayType.None));
             overlayItems.Items.Add(($"<p>{order.PaymentMethod.Description_de}</p>",OverlayType.None));
         }
         // address
         if (order.Address != null)
         {
-            overlayItems.Items.Add(($"<h3>Address</h3>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>Vor-Nachname: {order.Address.FirstName} {order.Address.LastName}</p>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>Straße: {order.Address.Street}</p>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>PLZ: {order.Address.ZipCode} {order.Address.City}-{order.Address.Country}</p>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>Telefonnummer:{order.Address.Phone}</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["Address"]}</h3>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["FirstName"] + "/" + L["LastName"]}: {order.Address.FirstName} {order.Address.LastName}</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["Street"]}: {order.Address.Street}</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["PostalCode"]}: {order.Address.ZipCode} {order.Address.City}-{order.Address.Country}</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["PhoneNumber"]}:{order.Address.Phone}</p>", OverlayType.None));
         }
         // shipping
         if (order.ShippingProviders != null)
         {
-            overlayItems.Items.Add(($"<h3>Versandart</h3>", OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["ShippingMethod"]}</h3>", OverlayType.None));
             overlayItems.Items.Add(($"<p>{order.ShippingProviders.Name_de}</p>", OverlayType.None));
             @if (order.PaymentMethod?.Id == 5 && order.ShippingProviders != null && string.IsNullOrEmpty(order.TrackingNumber))
             {
@@ -411,39 +410,39 @@
             }
             else
             {
-                overlayItems.Items.Add(("<p>Nicht Möglich</p>", OverlayType.None));
+                overlayItems.Items.Add(($"<p>{L["NotPossible"]}</p>", OverlayType.None));
             }
 
             if (order.ShippingProviders != null && order.ShippingProviders.PublicShippingCost > 0)
             {
-                overlayItems.Items.Add(($"<p>Öffentliche Versandkosten: {order.ShippingProviders.PublicShippingCost.ToString("C", germanCulture)}</p>", OverlayType.None));
+                overlayItems.Items.Add(($"<p>{L["PublicShippingCosts"]}: {order.ShippingProviders.PublicShippingCost.ToString("C", GermanCulture)}</p>", OverlayType.None));
             }
         }
 
         // Discount 
         @if (order.DiscountCode != null)
         {
-            overlayItems.Items.Add(($"<h3>Rabatt Code</h3>", OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["DiscountCode"]}</h3>", OverlayType.None));
             var discountDetails = invoiceService.GetDetailsDiscountCode(order);
             var symbol = order.DiscountCode.DiscountType == DiscountType.Percentage ? "%" : "€";
-            overlayItems.Items.Add(($"<p>Code: {discountDetails.Code} </p>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>Rabattwert: {discountDetails.DiscountPercentage}{symbol} ({discountDetails.DiscountValue.ToString("C", germanCulture)})</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["Code"]}: {discountDetails.Code} </p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["DiscountValue"]}: {discountDetails.DiscountPercentage}{symbol} ({discountDetails.DiscountValue.ToString("C", GermanCulture)})</p>", OverlayType.None));
         }
         else if (order.DiscountCategory != null)
         {
-            overlayItems.Items.Add(($"<h3>Rabatt CategoryCode</h3>", OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["RabattCategoryCode"]}</h3>", OverlayType.None));
             var discountDetails = invoiceService.GetDetailsDiscountCategory(order);
             var symbol = order.DiscountCategory.DiscountType == DiscountType.Percentage ? "%" : "€";
-            overlayItems.Items.Add(($"<p>Code: {discountDetails.Code} </p>", OverlayType.None));
-			overlayItems.Items.Add(($"<p>Kategory: {discountDetails.categoryName} </p>", OverlayType.None));
-            overlayItems.Items.Add(($"<p>Rabattwert: {discountDetails.DiscountPercentage}{symbol} ({discountDetails.DiscountValue.ToString("C", germanCulture)})</p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["Code"]}: {discountDetails.Code} </p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["Category"]}: {discountDetails.categoryName} </p>", OverlayType.None));
+            overlayItems.Items.Add(($"<p>{L["DiscountValue"]}: {discountDetails.DiscountPercentage}{symbol} ({discountDetails.DiscountValue.ToString("C", GermanCulture)})</p>", OverlayType.None));
         }
       
 
         // notes
         if(!string.IsNullOrEmpty(order.Notes))
         {
-            overlayItems.Items.Add(($"<h3>Notiz</h3>", OverlayType.None));
+            overlayItems.Items.Add(($"<h3>{L["Note"]}</h3>", OverlayType.None));
             overlayItems.Items.Add(($"<p>{order.Notes}</p>", OverlayType.None));
         }
 
@@ -456,7 +455,7 @@
     }
     private string GetFullAddress(Address address)
     {
-        if (address == null) return "Keine Adresse";
+        if (address == null) return $"{L["NoAddress"]}";
         return $"{address.FirstName} {address.LastName}, {address.Street}, {address.ZipCode} {address.City}, {address.Country}, 📞 {address.Phone}";
     }
     // search 

@@ -1,41 +1,46 @@
-﻿<div class="overlay">
+﻿@inject IStringLocalizer<ManagementLabel.Components.Layout.SuppliersPage> L
+<div class="overlay">
 	<div class="standardOverlayForm" @onclick:stopPropagation="true">
 		<EditForm Model="@supplier" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
 			<div class="overlayField">
-				<InputText id="supplierName" class="form-control" @bind-Value="supplier.Name" placeholder="Name" />
+				<InputText id="supplierName" class="form-control" @bind-Value="supplier.Name" placeholder="Name de" />
 				<ValidationMessage For="@(() => supplier.Name)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.Street" placeholder="Straße" />
+				<InputText id="supplierName" class="form-control" @bind-Value="supplier.Name_Ar" placeholder="Name ar" />
+				<ValidationMessage For="@(() => supplier.Name_Ar)" />
+			</div>
+			<div class="overlayField">
+				<InputText class="form-control" @bind-Value="supplier.Street" placeholder="@L["Street"]" />
 				<ValidationMessage For="@(() => supplier.Street)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.HNumber" placeholder="Hausnummer" />
+				<InputText class="form-control" @bind-Value="supplier.HNumber" placeholder="@L["HouseNumber"]" />
 				<ValidationMessage For="@(() => supplier.HNumber)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.PostalCode" placeholder="PLZ" />
+				<InputText class="form-control" @bind-Value="supplier.PostalCode" placeholder="@L["PostalCode"]" />
 				<ValidationMessage For="@(() => supplier.PostalCode)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.City" placeholder="Stadt" />
+				<InputText class="form-control" @bind-Value="supplier.City" placeholder="@L["City"]" />
 				<ValidationMessage For="@(() => supplier.City)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.Country" placeholder="Land" />
+				<InputText class="form-control" @bind-Value="supplier.Country" placeholder="@L["Country"]" />
 				<ValidationMessage For="@(() => supplier.Country)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.Phone" placeholder="Tel." />
+				<InputText class="form-control" @bind-Value="supplier.Phone" placeholder="@L["Tel."]" />
 				<ValidationMessage For="@(() => supplier.Phone)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.Email" placeholder="E-Mail" />
+				<InputText class="form-control" @bind-Value="supplier.Email" placeholder="@L["EMail"]" />
 				<ValidationMessage For="@(() => supplier.Email)" />
 			</div>
 			<div class="overlayField">
-				<InputText class="form-control" @bind-Value="supplier.Website" placeholder="Webseite" />
+				<InputText class="form-control" @bind-Value="supplier.Website" placeholder="@L["Website"]" />
 				<ValidationMessage For="@(() => supplier.Website)" />
 			</div>
 			<div class="mt-3">
@@ -46,10 +51,10 @@
 					}
 					else
 					{
-						<span>Speichern</span>
+						<span>@L["Save"]</span>
 					}
 				</button>
-				<button type="button" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+				<button type="button" class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
 			</div>
 		</EditForm>
 	</div>

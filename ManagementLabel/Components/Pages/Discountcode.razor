@@ -1,5 +1,6 @@
 ﻿@page "/discountcode"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.Discountcode> L
 <div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
@@ -45,13 +46,13 @@
                             <table class="table text-center align-middle">
                                 <thead>
                                     <tr>
-                                        <th>Code</th>
-                                        <th>Rabatt</th>
-                                        <th>Nutz.</th>
-                                        <th>St-Datum</th>
-                                        <th>En-Datum</th>
-                                        <th>DiTy</th>
-                                        <th>Status</th>
+                                        <th>@L["Code"]</th>
+                                        <th>@L["Discount"]</th>
+                                        <th>@L["Use"]</th>
+                                        <th>@L["StartDate"]</th>
+                                        <th>@L["EndDate"]</th>
+                                        <th>@L["DiscountType"]</th>
+                                        <th>@L["Status"]</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -86,14 +87,14 @@
                             <table class="table text-center align-middle">
                                 <thead>
                                     <tr>
-                                        <th>Kategore</th>
-                                        <th>Code</th>
-                                        <th>Rabatt</th>
-                                        <th>Nutz.</th>
-                                        <th>St-Da</th>
-                                        <th>En-Da</th>
-                                        <th>DiTy</th>
-                                        <th>Status</th>
+                                        <th>@L["Category"]</th>
+                                        <th>@L["Code"]</th>
+                                        <th>@L["Discount"]</th>
+                                        <th>@L["Use"]</th>
+                                        <th>@L["StartDate"]</th>
+                                        <th>@L["EndDate"]</th>
+                                        <th>@L["DiscountType"]</th>
+                                        <th>@L["Status"]</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -132,10 +133,10 @@
                         @onclick:stopPropagation="true">
                             <ul>
                                 <li @onclick="() => Edit(selectedRowDiscountCodes!,selectedRowDiscountCategory!)">
-                                    <a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+                                    <a><i class="fa-solid fa-pen-to-square"></i> @L["Edit"]</a>
                                 </li>
                                 <li @onclick="() => Delete(selectedRowDiscountCodes!,selectedRowDiscountCategory!)">
-                                    <a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+                                    <a><i class="fa-solid fa-trash-can"></i> @L["Delete"]</a>
                                 </li>
                             </ul>
                         </div>
@@ -157,7 +158,7 @@
                 {
                     <div style="display:flex; justify-content:center; align-items:center; height:80vh;">
                         <div class="alert alert-danger text-center">
-                            Sie haben keine Berechtigung für diese Seite
+                            @L["NoPermission"]
                         </div>
                     </div>
                 }
@@ -191,22 +192,24 @@
             // get Discount Categorys
             await discountService.GetAllDiscountCategory();
         }
-
-        // die Spaltenoptionen aus dem Local Storage laden
-        var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsDiscount");
-        if (saved is not null)
-            columnOptions = saved;
-
-        // afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
-        IsRendered.AfterRender = IsRendered.ParametersSet = true;
+        // ParameterSet true, weil wir nutzen die funktionen hier nicht
+        IsRendered.ParametersSet = true;
         IsRendered.Initialized = true;
     }
     private async Task OnColumnChanged()
     {
         // Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-        await localStorage.SetItemAsync("columnOptionsDiscount", columnOptions);
+        await localStorageService.Set("columnOptionsDiscount", columnOptions);
     }
-
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+            columnOptions = await localStorageService.SyncColumnOptionsAsync("columnOptionsDiscount", columnOptions, c => c.Key);
+            IsRendered.AfterRender = true;
+        }
+    }
     private (bool ifdicountCode, bool ifAdd)? showDiscountFormAction;
     private void OpenAddForm(bool ifDiscountCode,bool ifAdd)
     {

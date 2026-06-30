@@ -1,9 +1,4 @@
-﻿using ManagementLabel.Components.Pages;
-using ManagementLabel.Model;
-using ManagementLabel.Components.ProductsF;
-using Microsoft.AspNetCore.Rewrite;
-using Org.BouncyCastle.Crypto;
-
+﻿using ManagementLabel.Model;
 namespace ManagementLabel.Components.ProductGroupF
 {
     public class ProductGroupService(HttpClient http)

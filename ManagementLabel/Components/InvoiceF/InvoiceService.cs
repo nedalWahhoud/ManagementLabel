@@ -3,10 +3,6 @@ using iTextSharp.text.pdf;
 using ManagementLabel.Components.OrderF;
 using ManagementLabel.Model;
 using Microsoft.Extensions.Options;
-using System.Diagnostics.Metrics;
-using System.Text.RegularExpressions;
-using static iTextSharp.text.pdf.AcroFields;
-
 
 namespace ManagementLabel.Components.InvoiceF
 {

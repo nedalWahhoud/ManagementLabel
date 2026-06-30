@@ -39,6 +39,20 @@
         border: none;
         font-size: 14px;
     }
+
+.DebtAndPaymentColor {
+    background: linear-gradient(180deg, #cff4fc 40%, #f8d7da 60%) ;
+    position: relative;
+}
+
+    .DebtAndPaymentColor td {
+        background: transparent ;
+        color: #212529 ;
+        vertical-align: middle;
+        border-top: none ;
+        border-bottom: none ;
+    }
+
 @media screen and (max-width: 767px) {
     .searchDiv input[type="text"].form-control {
         font-size: 16px;

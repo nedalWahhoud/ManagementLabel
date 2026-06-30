@@ -1,8 +1,8 @@
 ﻿@page "/"
 @rendermode InteractiveAuto
 @implements IDisposable
-@inherits ProjectComponentBase 
-
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.ProductsManagement> L
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -48,18 +48,18 @@
 							<div class="d-flex flex-column gap-1 ms-auto">
 								@* Lagerstand Filter  *@
 								<select id="stockFilter" class="filterDropdownList" @bind="selectedValuesFilter" @bind:after="OnFilterChanged" disabled="@(IsLoadingMessage
-                            || productService.DownloadedProduct.Count == 0
-                            || categoryService.DownloadedCategories.Count == 0)">
-									<option value="0">Alle</option>
-									<option value="1">Geringer Lagerbestand</option>
-									<option value="2">Im Angebot</option>
+                                        || productService.DownloadedProduct.Count == 0
+                                        || categoryService.DownloadedCategories.Count == 0)">
+									<option value="0">@L["All"]</option>
+									<option value="1">@L["LowStock"]</option>
+									<option value="2">@L["OnSale"]</option>
 								</select>
 								@* category filter *@
 								<select class="filterDropdownList" @bind="selectedCategoryId" @bind:after="OnCategoryChanged" @onfocus="OnCategoryOpened" disabled="@(IsLoadingMessage || productService.DownloadedProduct.Count == 0)">
-									<option value="0">Kategorie</option>
+									<option value="0">@L["Category"]</option>
 									@foreach (var category in categoryService.DownloadedCategories)
 									{
-										<option value="@category.Id">@category.Name_de</option>
+										<option value="@category.Id">@(IsArabic ? category.Name_ar : category.Name_de)</option>
 									}
 								</select>
 							</div>
@@ -69,83 +69,75 @@
 								<tr>
 									@if (ShowColumn("Index"))
 									{
-										<th>Index</th>
+										<th>@L["Index"]</th>
 									}
 									@if (ShowColumn("Id"))
 									{
-										<th>Id</th>
+										<th>@L["Id"]</th>
 									}
-									@if (ShowColumn("Name_de"))
+									@if (ShowColumn("Name"))
 									{
-										<th>Name de</th>
+										<th>@L["Name"]</th>
 									}
-									@if (ShowColumn("Description_de"))
+									@if (ShowColumn("Description"))
 									{
-										<th>Beschreibung de</th>
-									}
-									@if (ShowColumn("Name_ar"))
-									{
-										<th>Name ar</th>
-									}
-									@if (ShowColumn("Description_ar"))
-									{
-										<th>Beschreibung ar</th>
+										<th>@L["Description"]</th>
 									}
 									@if (ShowColumn("Category"))
 									{
-										<th>Kategorie</th>
+										<th>@L["Category"]</th>
 									}
 									@if (ShowColumn("Barcode"))
 									{
-										<th>Barcode</th>
+										<th>@L["Barcode"]</th>
 									}
 									@if (ShowColumn("Quantity"))
 									{
-										<th>Menge</th>
+										<th>@L["Quantity"]</th>
 									}
 									@if (ShowColumn("PurchasePrice"))
 									{
-										<th>Kaufpreis</th>
+										<th>@L["PurchasePrice"]</th>
 									}
 									@if (ShowColumn("SellePrice"))
 									{
-										<th>Verkaufspreis</th>
+										<th>@L["SellingPrice"]</th>
 									}
 									@if (ShowColumn("MinimumStock"))
 									{
-										<th>Mindestbestand</th>
+										<th>@L["MinimumStock"]</th>
 									}
 									@if (ShowColumn("ExpDate"))
 									{
-										<th>Ablaufdatum</th>
+										<th>@L["ExpDate"]</th>
 									}
-									@if (ShowColumn("Manufacturer"))
+									@if (ShowColumn("Supplier"))
 									{
-										<th>Lieferant</th>
+										<th>@L["Supplier"]</th>
 									}
 									@if (ShowColumn("TaxRate"))
 									{
-										<th>Steuersatz</th>
+										<th>@L["TaxRate"]</th>
 									}
 									@if (ShowColumn("Group"))
 									{
-										<th>Gruppe</th>
+										<th>@L["Group"]</th>
 									}
 									@if (ShowColumn("IsShippable"))
 									{
-										<th>Versandfähig</th>
+										<th>@L["IsShippable"]</th>
 									}
 									@if (ShowColumn("DiscountedPrice"))
 									{
-										<th>Im Angebot</th>
+										<th>@L["OnSale"]</th>
 									}
 									@if (ShowColumn("Username"))
 									{
-										<th>Benutzername</th>
+										<th>@L["UserName"]</th>
 									}
 									@if (ShowColumn("Img"))
 									{
-										<th>Img</th>
+										<th>@L["Img"]</th>
 									}
 									<th class="@(IsShowInvoice ? "" : "hidden" )"><button class="btn InvoiceGeB" @onclick="OnOrderGenerate">Order erstellen</button></th>
 								</tr>
@@ -175,21 +167,13 @@
 											{
 												<td>@product.Id</td>
 											}
-											@if (ShowColumn("Name_de"))
+											@if (ShowColumn("Name"))
 											{
-												<td>@product.Name_de</td>
+												<td>@(IsArabic ? product.Name_ar : product.Name_de)</td>
 											}
-											@if (ShowColumn("Description_de"))
+											@if (ShowColumn("Description"))
 											{
-												<td>@product.Description_de</td>
-											}
-											@if (ShowColumn("Name_ar"))
-											{
-												<td>@product.Name_ar</td>
-											}
-											@if (ShowColumn("Description_ar"))
-											{
-												<td>@product.Description_ar</td>
+												<td>@(IsArabic ? product.Description_ar : product.Description_de)</td>
 											}
 											@if (ShowColumn("Category"))
 											{
@@ -235,7 +219,7 @@
 
 												<td style="background-color:@backgroundcolor!; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
 											}
-											@if (ShowColumn("Manufacturer"))
+											@if (ShowColumn("Supplier"))
 											{
 												<td>@string.Join(", ", product.Suppliers.Select(s => s.Name))</td>
 											}
@@ -274,7 +258,7 @@
 									{
 										<tr id="loadingMessage">
 											<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-												<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
+												<i class="bi bi-exclamation-circle mr-2"></i> @L["NoFound"]
 											</td>
 										</tr>
 									}
@@ -291,13 +275,13 @@
 						@onclick:stopPropagation="true">
 							<ul>
 								<li @onclick="() => EditProduct(selectedProduct)">
-									<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+									<a><i class="fa-solid fa-pen-to-square"></i> @L["Edit"]</a>
 								</li>
 								<li @onclick="() => DeleteProduct(selectedProduct)">
-									<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+									<a><i class="fa-solid fa-trash-can"></i> @L["Delete"]</a>
 								</li>
 								<li @onclick="OpenScanner">
-									<a><i class="fa-solid fa-barcode"></i> Barcode eingeben</a>
+									<a><i class="fa-solid fa-barcode"></i>@L["EnterBarcode"]</a>
 								</li>
 							</ul>
 						</div>
@@ -317,41 +301,41 @@
 						<div class="overlay">
 							<div class="overlayAddForm">
 								@* address *@
-								<h3>Lieferadresse: </h3>
+								<h3>@L["DeliveryAddress"]: </h3>
 								<EditForm Model="@newAddress">
 									<DataAnnotationsValidator />
 									<div class="form-group">
-										<label>Vorname</label>
+										<label>@L["FirstName"]</label>
 										<InputText class="form-control" @bind-Value="newAddress.FirstName" />
 										<ValidationMessage style="color:red;" For="@(() => newAddress.FirstName)" />
 									</div>
 									<div class="form-group">
-										<label>Nachname</label>
+										<label>@L["LastName"]</label>
 										<InputText class="form-control" @bind-Value="newAddress.LastName" />
 										<ValidationMessage style="color:red;" For="@(() => newAddress.LastName)" />
 									</div>
 									<div class="form-group">
-										<label>Tel.</label>
+										<label>@L["Tel."]</label>
 										<InputText class="form-control" @bind-Value="newAddress.Phone" />
 										<ValidationMessage style="color:red;" For="@(() => newAddress.Phone)" />
 									</div>
 									<div class="form-group">
-										<label>Straße</label>
+										<label>@L["Street"]</label>
 										<InputText class="form-control" @bind-Value="newAddress.Street" />
 										<ValidationMessage style="color:red;" For="@(() => newAddress.Street)" />
 									</div>
 									<div class="form-group">
-										<label>Postleitzahl</label>
+										<label>@L["PostalCode"]</label>
 										<InputText class="form-control" @bind-Value="newAddress.ZipCode" />
 										<ValidationMessage style="color:red;" For="@(() => newAddress.ZipCode)" />
 									</div>
 									<div class="form-group">
-										<label>Stadt</label>
+										<label>@L["City"]</label>
 										<InputText class="form-control" @bind-Value="newAddress.City" />
 										<ValidationMessage style="color:red;" For="@(() => newAddress.City)" />
 									</div>
 									<div class="form-group">
-										<label>Land</label>
+										<label>@L["Country"]</label>
 										<InputText class="form-control" @bind-Value="newAddress.Country" readonly />
 									</div>
 								</EditForm>
@@ -450,7 +434,7 @@
 					{
 						<div class="scanner-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;">
 							<div id="reader" style="width: 300px; background:white; border-radius:10px; overflow:hidden;"></div>
-							<button class="btn btn-danger mt-3" @onclick="CloseScanner">Abbrechen</button>
+							<button class="btn btn-danger mt-3" @onclick="CloseScanner">@L["Cancel"]</button>
 						</div>
 					}
 				}
@@ -458,7 +442,7 @@
 				{
 					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 						<div class="alert alert-danger text-center">
-							Sie haben keine Berechtigung für diese Seite
+							@L["NoPermission"]
 						</div>
 					</div>
 				}
@@ -485,10 +469,8 @@
     {
 	  new("Index", "Index", false),
 	  new("Id", "Id", false),
-	  new("Name de", "Name_de", true),
-	  new("Beschreibung de", "Description_de", true),
-	  new("Name ar", "Name_ar", false),
-	  new("Beschreibung ar", "Description_ar", false),
+	  new("Name", "Name", true),
+	  new("Beschreibung", "Description", true),
 	  new("Kategorie", "Category", true),
 	  new("Barcode", "Barcode", false),
 	  new("Menge", "Quantity", true),
@@ -496,7 +478,7 @@
 	  new("Verkaufspreis", "SellePrice", true),
 	  new("Mindestbestand", "MinimumStock", true),
 	  new("Ablaufdatum", "ExpDate", true),
-	  new("Hersteller", "Manufacturer", true),
+	  new("Hersteller", "Supplier", true),
 	  new("Steuersatz", "TaxRate", false),
 	  new("Gruppe", "Group", false),
 	  new("Versandfähig", "IsShippable", false),
@@ -518,12 +500,9 @@
 		taskProductGroups = productGroupService.GetAllGroupProductsAsync();
 		taskTaxRates = productService.GetAllTaxRates();
 		taskCatyrories = categoryService.GetAllCategoriesAsync();
-		// die Spaltenoptionen aus dem Local Storage laden
-		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptions");
-		if (saved is not null)
-			columnOptions = saved;
+
 		// get gespeicherte CategoryId
-		selectedCategoryId = await localStorage.GetItemAsync<int>("selectedCategoryId");
+		selectedCategoryId = await localStorageService.Get<int>("selectedCategoryId");
 
 		IsRendered.Initialized = true;
 	}
@@ -553,7 +532,7 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await localStorage.SetItemAsync("columnOptions", columnOptions);
+		await localStorageService.Set("columnOptions", columnOptions);
 	}
 	// OnAfterRenderAsync
 	private DotNetObjectReference<ProductsManagement>? objRef;
@@ -564,6 +543,9 @@
 		{
 			// Das Donnet-Objekt für die Verwendung in JavaScript abrufen
 			objRef = DotNetObjectReference.Create(this);
+			// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+			columnOptions = await localStorageService.SyncColumnOptionsAsync("columnOptions", columnOptions, c => c.Key);
+
 			IsRendered.AfterRender = true;
 		}
 		try
@@ -873,7 +855,7 @@
 		}
 
 		// save the selected category id in local storage
-		await localStorage.SetItemAsync("selectedCategoryId", selectedCategoryId);
+		await localStorageService.Set("selectedCategoryId", selectedCategoryId);
 		StateHasChanged();
 	}
 	// filter nach Lagerbestand

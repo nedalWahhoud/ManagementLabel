@@ -28,6 +28,7 @@
 @using ManagementLabel.Components.DebtF
 @using ManagementLabel.Components.TransactionsCustomersF
 @using ManagementLabel.Components.OneTimePaymentsF
+@using ManagementLabel.Components.LocalStorageF
 @using ManagementLabel.Components.Share
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
@@ -58,3 +59,5 @@
 @inject DebtService debtService
 @inject TransactionsCustomersService transactionsCustomersService
 @inject OneTimePaymentsService oneTimePaymentsService
+@inject LocalStorageService localStorageService
+@inherits ProjectComponentBase

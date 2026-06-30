@@ -1,5 +1,6 @@
 ﻿@page "/supplierorder/{SupplierId:int}"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.SuppliersPage> L
 @implements IDisposable
 <div class="mainDiv">
 	<AuthorizeView>
@@ -10,20 +11,17 @@
 			}
 			else
 			{
-				<div class="container-fluid px-2">
-					<div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-						<button class="btn btn-sm btn-outline-danger ps-3" @onclick="GoBack" title="Zurück zur Liste">
-							<i class="bi bi-arrow-return-left fs-5"></i>
-						</button>
-					</div>
-				</div>
 				@if (IsHasOrderFromSupplierPermission)
 				{
 					<div tabindex="0" id="SOPContainer" class="tableContiner">
 						<div class="topTable">
+							<button class="btn btn-sm btn-outline-danger ps-3" @onclick="GoBack" title="Zurück zur Liste">
+								<i class="bi @(IsArabic ? "bi-arrow-return-right" : "bi-arrow-return-left") fs-5"></i>
+							</button>
 							<div class="buttonsDiv">
 								@* add neu Product *@
 								<button class="btn addPlusB" @onclick="PlaceOrder" title="Bestellung aufgeben"><i class="bi bi-cart-check-fill fs-5"></i></button>
+								<button class="btn addPlusB" @onclick="ClearCart" title="Einkaufswagen reinigen"><i class="bi bi-trash3-fill fs-5"></i></button>
 								<div class="d-flex flex-column align-items-center gap-2">
 									<span class="small fw-bold text-muted">Sprache / اللغة:</span>
 									<select class="form-select form-select-sm" style="width: auto;" @bind="selectedLanguage">
@@ -36,11 +34,11 @@
 						<table class="table text-center align-middle">
 							<thead>
 								<tr>
-									<th>Index</th>
-									<th>Name de</th>
-									<th>Kaufpreis</th>
-									<th>Img</th>
-									<th>Menge</th>
+									<th>@L["Index"]</th>
+									<th>@L["Name"]</th>
+									<th>@L["PurchasePrice"]</th>
+									<th>@L["Img"]</th>
+									<th>@L["Quantity"]</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -53,7 +51,7 @@
 									class="@(selectedRow?.Id == product.Id ? "selected" : "")
                                            @(selectedQuantities.ContainsKey(product.Id) && selectedQuantities[product.Id] > 0 ? "has-quantity" : "")">
 										<td>@(dataSource.IndexOf(product) + 1)</td>
-										<td>@product.Name_de</td>
+										<td>@(IsArabic ? product.Name_ar : product.Name_de)</td>
 										<td>@product.PurchasePrice €</td>
 										<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
 										<td>
@@ -68,7 +66,7 @@
 								{
 									<tr id="loadingMessage">
 										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-											<i class="bi bi-exclamation-circle mr-2"></i> Keine Produkte gefunden.
+											<i class="bi bi-exclamation-circle mr-2"></i> @L["NoProducts"]
 										</td>
 									</tr>
 								}
@@ -80,7 +78,7 @@
 				{
 					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 						<div class="alert alert-danger text-center">
-							Sie haben keine Berechtigung für diese Seite
+							@L["NoPermission"]
 						</div>
 					</div>
 				}
@@ -119,6 +117,19 @@
 			productService.DownloadedProduct.Clear();
 			// erste Produkte laden
 			await OnScrollEnd();
+			// get gespeicherte Mengen
+			try
+			{
+				var savedQuantities = await localStorage.GetItemAsync<Dictionary<int, int>>($"draftOrder_{SupplierId}");
+				if (savedQuantities != null)
+				{
+					selectedQuantities = savedQuantities;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error loading draft from Blazored LocalStorage: {ex.Message}");
+			}
 		}
 
 		IsRendered.ParametersSet = true;
@@ -143,7 +154,7 @@
 			Console.WriteLine($"Error initializing scroll event: {ex.Message}");
 		}
 	}
-	
+
 	private async Task PlaceOrder()
 	{
 		if (selectedQuantities.Count == 0)
@@ -156,6 +167,8 @@
 		if (result.Result)
 		{
 			selectedQuantities.Clear();
+
+			await localStorage.RemoveItemAsync($"draftOrder_{SupplierId}");
 		}
 		else
 		{
@@ -179,16 +192,41 @@
 
 		IsProcessing = false;
 	}
-	private void UpdateQuantity(int productId,Products product, int quantity)
+	private async Task UpdateQuantity(int productId, Products product, int quantity)
 	{
-		if (quantity > 0)
+		try
 		{
-			selectedQuantities[productId] = quantity;
+			if (quantity > 0)
+			{
+				selectedQuantities[productId] = quantity;
+
+				await localStorage.SetItemAsync($"draftOrder_{SupplierId}", selectedQuantities);
+			}
+			else
+			{
+				selectedQuantities.Remove(productId);
+
+				// Wenn der Warenkorb nach der Bearbeitung vollständig leer ist, löschen wir den Schlüssel aus dem Cache.
+				await localStorage.RemoveItemAsync($"draftOrder_{SupplierId}");
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			selectedQuantities.Remove(productId);
+			Console.WriteLine($"Error during auto-save to LocalStorage: {ex.Message}");
 		}
+	}
+	private async Task ClearCart()
+	{
+		selectedQuantities.Clear();
+		try
+		{
+			await localStorage.RemoveItemAsync($"draftOrder_{SupplierId}");
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error clearing Blazored LocalStorage: {ex.Message}");
+		}
+		await InvokeAsync(StateHasChanged);
 	}
 
 	private void GoBack()

@@ -1,4 +1,5 @@
-﻿<div class="overlay">
+﻿@inject IStringLocalizer<ManagementLabel.Components.Layout.PGruppeCatPage> L
+<div class="overlay">
 	<div class="standardOverlayForm">
 		<EditForm Model="@category" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
@@ -13,12 +14,12 @@
 				<ValidationMessage For="@(() => category.Name_ar)" />
 			</div>
 			<div class="overlayField">
-				<label>Ab 18 Jahren</label>
+				<label>@L["18+"]</label>
 		    	<InputCheckbox @bind-Value="category.Requires18Plus" />
 				<ValidationMessage For="@(() => category.Requires18Plus)" />
 			</div>
 			<div class="overlayField">
-				<label>Is Aktiv</label>
+				<label>@L["IsActive"]</label>
 				<InputCheckbox @bind-Value="category.IsAktiv" />
 				<ValidationMessage For="@(() => category.IsAktiv)" />
 			</div>
@@ -32,10 +33,10 @@
 					}
 					else
 					{
-						<span>Speichern</span>
+						<span>@L["Save"]</span>
 					}
 				</button>
-				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+				<button class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
 			</div>
 		</EditForm>
 	</div>

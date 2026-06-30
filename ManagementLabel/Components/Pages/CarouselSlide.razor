@@ -1,5 +1,6 @@
 ﻿@page "/carousel"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.CarouselSlide> L
 <AuthorizeView>
 	<Authorized Context="authContext">
 		@if (!IsRendered.Initialized || !IsRendered.ParametersSet || !IsRendered.AfterRender)
@@ -13,7 +14,7 @@
 				<div class="tableContiner">
 					<div class="topTable">
 						<div class="buttonsDiv">
-							<button class="btn addPlusB" @onclick="NewCarouselImage" title="Add neues Karussellbild">+</button>
+							<button class="btn addPlusB" @onclick="NewCarouselImage" title="@L["AddNew"]">+</button>
 						</div>
 					</div>
 					@if (carouselImageService.DownloadedCarouselImage == null || carouselImageService.DownloadedCarouselImage.Count == 0)
@@ -21,7 +22,7 @@
 						<div class="d-flex justify-content-center align-items-center"
 							 style="min-height: 60vh;">
 							<p class="text-muted fs-5">
-								Keine Carousel Images gefunden.
+								@L["NoFound"]
 							</p>
 						</div>
 					}
@@ -39,13 +40,13 @@
 
 										<div class="card-body d-flex flex-column">
 											<h5 class="card-title">ID: @carouselImage.Id</h5>
-											<p class="card-text mb-1"><strong>Start:</strong> @carouselImage.StartDate.ToShortDateString()</p>
-											<p class="card-text mb-1"><strong>End:</strong> @carouselImage.EndDate.ToShortDateString()</p>
-											<p class="card-text mb-2"><strong>Order:</strong> @carouselImage.DisplayOrder</p>
+											<p class="card-text mb-1"><strong>@L["Start"]:</strong> @carouselImage.StartDate.ToShortDateString()</p>
+											<p class="card-text mb-1"><strong>@L["End"]:</strong> @carouselImage.EndDate.ToShortDateString()</p>
+											<p class="card-text mb-2"><strong>@L["Order"]:</strong> @carouselImage.DisplayOrder</p>
 
 											<div class="mt-auto d-flex justify-content-between">
 												<button class="btn btn-sm btn-warning" @onclick="() => EditCarouselImage(carouselImage)" disabled="@IsProcessing.Item1">
-													<i class="bi bi-pencil"></i> Bearbeiten
+													<i class="bi bi-pencil"></i> @L["Edit"]
 												</button>
 												<button class="btn btn-sm btn-danger" @onclick="() => DeleteCarouselImage(carouselImage.Id)" disabled="@IsProcessing.Item1">
 													@if (IsProcessing.Item1 && IsProcessing.Item2 == carouselImage.Id)
@@ -56,7 +57,7 @@
 													}
 													else
 													{
-														<span><i class="bi bi-trash"></i> Löschen</span>
+														<span><i class="bi bi-trash"></i> @L["Delete"]</span>
 													}
 												</button>
 											</div>
@@ -80,7 +81,7 @@
 			{
 				<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 					<div class="alert alert-danger text-center">
-						Sie haben keine Berechtigung für diese Seite
+						@L["NoPermission"]
 					</div>
 				</div>
 			}

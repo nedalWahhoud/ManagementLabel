@@ -1,5 +1,6 @@
 ﻿@page "/suppliers"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.SuppliersPage> L
 <div class="mainDiv" @onclick="OnMainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -40,53 +41,47 @@
 								<tr>
 									@if (ShowColumn("Id"))
 									{
-										<th>Id</th>
+										<th>@L["Id"]</th>
 									}
 									@if (ShowColumn("Name"))
 									{
-										<th>Name</th>
+										<th>@L["Name"]</th>
 									}
 									@if (ShowColumn("Street"))
 									{
-										<th>Straße</th>
+										<th>@L["Street"]</th>
 									}
 									@if (ShowColumn("HNumber"))
 									{
-										<th>Hausnummer</th>
+										<th>@L["HouseNumber"]</th>
 									}
 									@if (ShowColumn("PostalCode"))
 									{
-										<th>Postleitzahl</th>
+										<th>@L["PostalCode"]</th>
 									}
 									@if (ShowColumn("City"))
 									{
-										<th>Stadt</th>
+										<th>@L["City"]</th>
 									}
 									@if (ShowColumn("Country"))
 									{
-										<th>Land</th>
+										<th>@L["Country"]</th>
 									}
 									@if (ShowColumn("Phone"))
 									{
-										<th>Tel.</th>
+										<th>@L["Tel."]</th>
 									}
 									@if (ShowColumn("Email"))
 									{
-										<th>Email</th>
+										<th>@L["EMail"]</th>
 									}
 									@if (ShowColumn("Website"))
 									{
-										<th>Webseite</th>
+										<th>@L["Website"]</th>
 									}
 								</tr>
 							</thead>
 							<tbody>
-								@* Loading message *@
-								<tr id="Loading" class="@(!IsProcessing ? "hidden" : "showLoading")">
-									<td colspan="11" class="loadingTd">
-										Lädt...
-									</td>
-								</tr>
 								@* table *@
 								@{
 									var dataSource = suppliersService.DownloadedSuppliers;
@@ -102,7 +97,7 @@
 											}
 											@if (ShowColumn("Name"))
 											{
-												<td>@supplier.Name</td>
+												<td>@(IsArabic ? supplier.Name_Ar : supplier.Name)</td>
 											}
 											@if (ShowColumn("Street"))
 											{
@@ -143,7 +138,7 @@
 								{
 									<tr id="loadingMessage">
 										<td colspan="13" class="text-center py-4 alert-warning font-weight-bold" style="color: #007bff;">
-											<i class="bi bi-exclamation-circle mr-2"></i> Keine Lieferanten gefunden.
+											<i class="bi bi-exclamation-circle mr-2"></i> @L["NoSuppliers"]
 										</td>
 									</tr>
 								}
@@ -158,13 +153,13 @@
 							 @onclick:stopPropagation="true">
 							<ul>
 								<li @onclick="() => PlaceOrder(selectedSupplier)">
-									<a><i class="fa-solid fa-cart-plus"></i> Bestellung aufgeben</a>
+									<a><i class="fa-solid fa-cart-plus"></i> @L["PlaceOrder"]</a>
 								</li>
 								<li @onclick="() => Edit(selectedSupplier)">
-									<a><i class="fa-solid fa-pen-to-square"></i> Bearbeiten</a>
+									<a><i class="fa-solid fa-pen-to-square"></i> @L["Edit"]</a>
 								</li>
 								<li @onclick="() => Delete(selectedSupplier)">
-									<a><i class="fa-solid fa-trash-can"></i> Löschen</a>
+									<a><i class="fa-solid fa-trash-can"></i> @L["Delete"]</a>
 								</li>
 							</ul>
 						</div>
@@ -183,7 +178,7 @@
 				{
 					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 						<div class="alert alert-danger text-center">
-							Sie haben keine Berechtigung für diese Seite
+							@L["NoPermission"]
 						</div>
 					</div>
 				}
@@ -213,7 +208,7 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await localStorage.SetItemAsync("columnOptionsSuppliers", columnOptions);
+		await localStorageService.Set("columnOptionsSuppliers", columnOptions);
 	}
 	private bool IsProcessing = false;
 	private bool isHasManageSuppliersPermission = false;
@@ -228,15 +223,21 @@
 		{
 			// get Discount codes
 			await suppliersService.GetAllSuppliers();
-			// die Spaltenoptionen aus dem Local Storage laden
-			var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsSuppliers");
-			if (saved is not null)
-				columnOptions = saved;
 		}
 
 		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
-		IsRendered.AfterRender = IsRendered.ParametersSet = true;
+		IsRendered.ParametersSet = true;
 		IsRendered.Initialized = true;
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+			columnOptions = await localStorageService.SyncColumnOptionsAsync("columnOptionsSuppliers", columnOptions, c => c.Key);
+			IsRendered.AfterRender = true;
+			StateHasChanged();
+		}
 	}
 	private bool IsEditing = false;
 	private bool IsAdding = false;

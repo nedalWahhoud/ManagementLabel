@@ -1,5 +1,6 @@
 ﻿@page "/pGroupCat"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.PGruppeCatPage> L
 <div class="mainDiv">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -43,19 +44,17 @@
 							</div>
 							<table class="table table-bordered table-hover">
 								<tr>
-									<th>Id</th>
-									<th>Name de</th>
-									<th>Name ar</th>
-									<th>Ab 18 Jahren</th>
-									<th>Ist Aktiv</th>
+									<th>@L["Id"]</th>
+									<th>@L["Name"]</th>
+									<th>@L["18+"]</th>
+									<th>@L["IsActive"]</th>
 								</tr>
 								<tbody>
 									@foreach (var category in categoryService.DownloadedCategories)
 									{
 										<tr>
 											<td>@category.Id</td>
-											<td>@category.Name_de</td>
-											<td>@category.Name_ar</td>
+											<td>@(IsArabic ? category.Name_ar : category.Name_de)</td>
 											<td><div style="pointer-events: none; opacity: 1;"><InputCheckbox @bind-Value="category.Requires18Plus" /></div></td>
 											<td>
 												<div style="pointer-events: none; opacity: 1;">
@@ -65,7 +64,7 @@
 											<td>
 												<button class="btn btn-sm btn-warning me-1"
 												@onclick="() => EditGroup(category)" disabled="@IsDeletingProcessing.Item1">
-													Bearbeiten
+													@L["Edit"]
 												</button>
 												<button class="btn btn-sm btn-danger"
 												@onclick="() => DeleteCategory(category.Id)" disabled="@IsDeletingProcessing.Item1">
@@ -77,7 +76,7 @@
 													}
 													else
 													{
-														<span>Löschen</span>
+														<span>@L["Delete"]</span>
 													}
 												</button>
 											</td>
@@ -115,17 +114,15 @@
 							</div>
 							<table class="table table-bordered table-hover">
 								<tr>
-									<th>Id</th>
-									<th>Name de</th>
-									<th>Name ar</th>
+									<th>@L["Id"]</th>
+									<th>@L["Name"]</th>
 								</tr>
 								<tbody>
 									@foreach (var group in productGroupService.DownloadedproductGroups)
 									{
 										<tr>
 											<td>@group.Id</td>
-											<td>@group.GroupName_de</td>
-											<td>@group.GroupName_ar</td>
+											<td>@(IsArabic ? group.GroupName_ar : group.GroupName_de)</td>
 											<td>
 												<button class="btn btn-sm btn-warning me-1"
 												@onclick="() => EditGroup(group)" disabled="@IsDeletingProcessingGroup.Item1">
@@ -141,7 +138,7 @@
 													}
 													else
 													{
-														<span>Löschen</span>
+														<span>@L["Delete"]</span>
 													}
 												</button>
 											</td>
@@ -154,7 +151,7 @@
 						{
 							<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 								<div class="alert alert-danger text-center">
-									Sie haben keine Berechtigung für diese Seite
+									@L["NoPermission"]
 								</div>
 							</div>
 						}
@@ -199,8 +196,7 @@
 		IsHasMangeProduct_groups = user.HasClaim("permission", "manageProduct_groups") ||
 								user.HasClaim("permission", "fullAccess");
 
-		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
-		IsRendered.AfterRender = true;
+
 		IsRendered.Initialized = true;
 	}
 	protected override async Task OnParametersSetAsync()
@@ -218,11 +214,6 @@
 			TasksArray[1] = productGroupService.GetAllGroupProductsAsync();
 		}
 
-		// get saved table options
-		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("tableOptionsPGroupCat.");
-		if (saved is not null)
-			tableOptions = saved;
-
 		// wemm doe categories saved angezeigt muss, dann muss die abholung sofort erledigen
 		if(tableOptions[0].IsVisible)
 		{
@@ -234,6 +225,16 @@
 		}
 
 		IsRendered.ParametersSet = true;
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+			tableOptions = await localStorageService.SyncColumnOptionsAsync("tableOptionsPGroupCat", tableOptions, c => c.Key);
+			IsRendered.AfterRender = true;
+			StateHasChanged();
+		}
 	}
 	// table options
 	private async Task OnTableChanged(ColumnOption col)
@@ -247,7 +248,7 @@
 			await TasksArray[1];
 		}
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await localStorage.SetItemAsync("tableOptionsPGroupCat.", tableOptions);
+		await localStorageService.Set("tableOptionsPGroupCat", tableOptions);
 	}
 
 	// Katagorie

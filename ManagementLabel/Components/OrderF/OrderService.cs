@@ -1,5 +1,4 @@
-﻿using ManagementLabel.Components.Pages;
-using ManagementLabel.Model;
+﻿using ManagementLabel.Model;
 
 namespace ManagementLabel.Components.OrderF
 {

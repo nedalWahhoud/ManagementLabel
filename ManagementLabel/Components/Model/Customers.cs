@@ -35,6 +35,7 @@ namespace ManagementLabel.Model
         [RegularExpression(@"^\d{4}$", ErrorMessage = "PIN muss nur aus 4 Zahlen bestehen.")]
         public string? PIN { get; set; }
         public bool HasOneTimePaymentToday { get; set; } = false;
+        public bool HasDebt {  get; set; } = false;
         // 🔗 FK
         [Range(1, int.MaxValue, ErrorMessage = "DistributionLineId muss angegeben werden.")]
         public int DistributionLineId { get; set; }

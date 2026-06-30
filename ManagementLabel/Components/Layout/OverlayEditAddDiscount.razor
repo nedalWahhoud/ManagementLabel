@@ -1,4 +1,5 @@
 ﻿@* Rabattcode *@
+@inject IStringLocalizer<ManagementLabel.Components.Layout.Discountcode> L
 @if (action.ifdicountCode)
 {
     <div class="overlay">
@@ -7,7 +8,7 @@
                 <DataAnnotationsValidator />
                 <div class="mb-3">
                     <div class="input-group">
-                        <InputText class="form-control" @bind-Value="discountCode.Code" placeholder="Code" />
+                        <InputText class="form-control" @bind-Value="discountCode.Code" placeholder="@L["Code"]" />
                         <button class="btn btn-outline-primary" type="button" @onclick="() => OnGenerate(true)">
                             <i class="fas fa-random"></i>
                         </button>
@@ -16,50 +17,52 @@
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">R </span>
+                        <span class="input-group-text">@(discountCode.DiscountType == DiscountType.FixedAmount ? L["Amount"] : L["Percent"])</span>
                         <InputNumber class="form-control" @bind-Value="discountCode.DiscountAmount" @onfocus="@(e => SelectAllContent())" />
                     </div>
                     <ValidationMessage For="@(() => discountCode.DiscountAmount)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">Typ</span>
+                        <span class="input-group-text">@L["Type"]</span>
                         <InputSelect @bind-Value="discountCode.DiscountType" class="form-select">
-                            <option value="@DiscountType.Percentage">Prozent (%)</option>
-                            <option value="@DiscountType.FixedAmount">Betrag (€)</option>
+                            <option value="@DiscountType.Percentage">@L["Percent"] (%)</option>
+                            <option value="@DiscountType.FixedAmount">@L["Amount"] (€)</option>
                         </InputSelect>
                     </div>
                     <ValidationMessage For="@(() => discountCode.DiscountType)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">NuLi</span>
+                        <span class="input-group-text">@L["UsageLimit"]</span>
                         <InputNumber class="form-control" @bind-Value="discountCode.UsageLimit" @onfocus="@(e => SelectAllContent())" />
                     </div>
                     <ValidationMessage For="@(() => discountCode.UsageLimit)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">StDa</span>
+                        <span class="input-group-text">@L["StartDate"]</span>
                         <InputDate class="form-control" @bind-Value="discountCode.StartDate" />
                     </div>
                     <ValidationMessage For="@(() => discountCode.StartDate)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">EnDa</span>
+                        <span class="input-group-text">@L["EndDate"]</span>
                         <InputDate class="form-control" @bind-Value="discountCode.EndDate" />
                     </div>
                     <ValidationMessage For="@(() => discountCode.EndDate)" />
                 </div>
                 <div class="mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text">Ist aktiv</span>
-                        <InputCheckbox class="form-check-input ms-4" @bind-Value="discountCode.IsActive" />
+                    <div class="d-flex align-items-center">
+                        <span class="input-group-text @(IsArabic ? "ms-4" : "me-4")">@L["IsActive"]</span>
+                        <InputCheckbox class="form-check-input" @bind-Value="discountCode.IsActive" />
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Speichern</button>
-                <button type="button" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+                <div class="d-flex flex-column gap-1">
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel">@L["Cacenl"]</button>
+                </div>
             </EditForm>
         </div>
     </div>
@@ -73,7 +76,7 @@
                 <DataAnnotationsValidator />
                 <div class="mb-3">
                     <div class="input-group">
-                        <InputText class="form-control" @bind-Value="discountCategory.Code" placeholder="Code" />
+                        <InputText class="form-control" @bind-Value="discountCategory.Code" placeholder="@L["Code"]" />
                         <button class="btn btn-outline-primary" type="button" @onclick="() => OnGenerate(false)">
                             <i class="fas fa-random"></i>
                         </button>
@@ -82,7 +85,7 @@
                 </div>
                 <div class="mb-3">
                     <InputSelect class="form-control" @bind-Value="discountCategory.CategoriesId">
-                        <option value="0">Kategorie auswählen</option>
+                        <option value="0">@L["SelectCategory"]</option>
                         @foreach (var category in categories ?? new List<Categories>())
                         {
                             <option value="@category.Id">@category.Name_de</option>
@@ -92,24 +95,24 @@
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">R </span>
+                        <span class="input-group-text">@(discountCategory.DiscountType == DiscountType.FixedAmount ? L["Amount"] : L["Percent"])</span>
                         <InputNumber class="form-control" @bind-Value="discountCategory.DiscountAmount" @onfocus="@(e => SelectAllContent())" />
                     </div>
                     <ValidationMessage For="@(() => discountCategory.DiscountAmount)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">Typ</span>
+                        <span class="input-group-text">@L["Type"]</span>
                         <InputSelect @bind-Value="discountCategory.DiscountType" class="form-select">
-                            <option value="@DiscountType.Percentage">Prozent (%)</option>
-                            <option value="@DiscountType.FixedAmount">Betrag (€)</option>
+                            <option value="@DiscountType.Percentage">@L["Percent"] (%)</option>
+                            <option value="@DiscountType.FixedAmount">@L["Amount"] (€)</option>
                         </InputSelect>
                     </div>
                     <ValidationMessage For="@(() => discountCategory.DiscountType)" />
                 </div>
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">NuLi</span>
+                        <span class="input-group-text">@L["UsageLimit"]</span>
                         <InputNumber class="form-control" @bind-Value="discountCategory.UsageLimit" @onfocus="@(e => SelectAllContent())" />
                     </div>
                     <ValidationMessage For="@(() => discountCategory.UsageLimit)" />
@@ -117,7 +120,7 @@
 
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">StDa</span>
+                        <span class="input-group-text">@L["StartDate"]</span>
                         <InputDate class="form-control" @bind-Value="discountCategory.StartDate" />
                     </div>
                     <ValidationMessage For="@(() => discountCategory.StartDate)" />
@@ -125,20 +128,22 @@
 
                 <div class="mb-3">
                     <div class="input-group">
-                        <span class="input-group-text">EnDa</span>
+                        <span class="input-group-text">@L["EndDate"]</span>
                         <InputDate class="form-control" @bind-Value="discountCategory.EndDate" />
                     </div>
                     <ValidationMessage For="@(() => discountCategory.EndDate)" />
                 </div>
 
                 <div class="mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text">Ist aktiv</span>
-                        <InputCheckbox class="form-check-input ms-4" @bind-Value="discountCategory.IsActive" />
+                    <div class="d-flex align-items-center">
+                        <span class="input-group-text @(IsArabic ? "ms-4" : "me-4")">@L["IsActive"]</span>
+                        <InputCheckbox class="form-check-input" @bind-Value="discountCategory.IsActive" />
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Speichern</button>
-                <button type="submit" class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+                <div class="d-flex flex-column gap-1">
+                    <button type="submit" class="btn btn-primary">@L["Save"]</button>
+                    <button type="submit" class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
+                </div>
             </EditForm>
         </div>
     </div>

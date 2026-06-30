@@ -1,4 +1,5 @@
-﻿<div class="overlay">
+﻿@inject IStringLocalizer<ManagementLabel.Components.Layout.PGruppeCatPage> L
+<div class="overlay">
 	<div class="standardOverlayForm" @onclick:stopPropagation="true">
 		<EditForm Model="@groupProduct" OnValidSubmit="SaveGroup">
 			<DataAnnotationsValidator />
@@ -22,10 +23,10 @@
 					}
 					else
 					{
-						<span>Speichern</span>
+						<span>@L["Save"]</span>
 					}
 				</button>
-				<button class="btn btn-secondary" @onclick="Cancel">Abbrechen</button>
+				<button class="btn btn-secondary" @onclick="Cancel">@L["Cancel"]</button>
 			</div>
 		</EditForm>
 	</div>

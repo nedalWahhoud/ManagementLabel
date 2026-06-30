@@ -21,6 +21,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Resources\Components\Layout\CarouselSlide.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CarouselSlide.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Components\Layout\CustomDropdownLayout.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -36,6 +41,16 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DebtPage.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Components\Layout\Discountcode.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Discountcode.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\DistributionLinesPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DistributionLinesPage.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Components\Layout\NavMenu.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -45,6 +60,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>OneTimePaymentsPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\Orders.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Orders.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Components\Layout\OverlayEditAddCustomers.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -56,9 +76,33 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>OverlayEditAddFormOneTimePayment.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Components\Layout\PGruppeCatPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PGruppeCatPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\ProductsManagement.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProductsManagement.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\SuppliersPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SuppliersPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Components\Layout\UsersPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UsersPage.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources\Components\Layout\CarouselSlide.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CarouselSlide.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Components\Layout\CustomDropdownLayout.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>CustomDropdownLayout.Designer.cs</LastGenOutput>
@@ -70,6 +114,14 @@
     <EmbeddedResource Update="Resources\Components\Layout\DebtPage.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DebtPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\Discountcode.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Discountcode.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\DistributionLinesPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>DistributionLinesPage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Components\Layout\NavMenu.ar.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
@@ -85,6 +137,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>OneTimePaymentsPage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\Orders.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Orders.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Components\Layout\OverlayEditAddCustomers.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>OverlayEditAddCustomers.Designer.cs</LastGenOutput>
@@ -92,6 +148,22 @@
     <EmbeddedResource Update="Resources\Components\Layout\OverlayEditAddFormOneTimePayment.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>OverlayEditAddFormOneTimePayment.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\PGruppeCatPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PGruppeCatPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\ProductsManagement.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ProductsManagement.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\SuppliersPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SuppliersPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\UsersPage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>UsersPage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

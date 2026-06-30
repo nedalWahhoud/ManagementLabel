@@ -92,7 +92,7 @@
 	private async Task OnDebts(int customerId)
 	{
 		if (customer != null)
-			await customersService.UpdateSelectedStopNummerLocalStorage(customer.StopNumber);
+			await localStorageService.Set("selectedStopNummerId", customer.StopNumber);
 		navigationManager.NavigateTo($"/debt/{customerId}");
 	}
 	private async Task OnMap(Customers customer)

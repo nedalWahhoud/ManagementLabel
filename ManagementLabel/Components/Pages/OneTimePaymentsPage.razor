@@ -1,7 +1,6 @@
 ﻿@page "/oneTimePayments"
 @namespace ManagementLabel.Components.Layout
 @inject IStringLocalizer<ManagementLabel.Components.Layout.OneTimePaymentsPage> L
-@inherits ProjectComponentBase
 <div class="mainDiv" @onclick="OnMainDiv">
     <AuthorizeView>
         <Authorized Context="authContext">
@@ -272,6 +271,7 @@
         IsRendered.AfterRender = IsRendered.ParametersSet = true;
         IsRendered.Initialized = true;
     }
+
     private bool IsLoadingDates = false;
     private async Task ToggleLine(DistributionLines distributionLine)
     {

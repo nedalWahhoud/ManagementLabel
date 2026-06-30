@@ -1,5 +1,6 @@
 ﻿@page "/users"
-@inherits ProjectComponentBase
+@namespace ManagementLabel.Components.Layout
+@inject IStringLocalizer<ManagementLabel.Components.Layout.UsersPage> L
 <div class="mainDiv" @onclick="OnMain">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -36,39 +37,39 @@
 								<tr>
 									@if (ShowColumn("Id"))
 									{
-										<th>ID</th>
+										<th>@L["Id"]</th>
 									}
 									@if (ShowColumn("User"))
 									{
-										<th>User</th>
+										<th>@L["User"]</th>
 									}
 									@if (ShowColumn("EMail"))
 									{
-										<th>E-Mail</th>
+										<th>@L["E-Mail"]</th>
 									}
 									@if (ShowColumn("Role"))
 									{
-										<th>Rolle</th>
+										<th>@L["Role"]</th>
 									}
 									@if (ShowColumn("BirthDate"))
 									{
-										<th>Geburtsdatum</th>
+										<th>@L["BirthDate"]</th>
 									}
 									@if (ShowColumn("IsGuest"))
 									{
-										<th>IsGuest</th>
+										<th>@L["IsGuest"]</th>
 									}
 									@if (ShowColumn("IsAktiv"))
 									{
-										<th>IsAktiv</th>
+										<th>@L["IsActive"]</th>
 									}
 									@if (ShowColumn("SignupProvider"))
 									{
-										<th>sigupprovieder</th>
+										<th>@L["Sigupprovieder"]</th>
 									}
 									@if (ShowColumn("Created"))
 									{
-										<th>Erstellt</th>
+										<th>@L["Created"]</th>
 									}
 								</tr>
 							</thead>
@@ -159,11 +160,11 @@
 							}
 							else if (authService.GetItemsUsers.AllItemsLoaded)
 							{
-								<span>Alle geladen</span>
+								<span>@L["AllLoaded"]</span>
 							}
 							else
 							{
-								<span>Mehr Laden</span>
+								<span>@L["LoadMore"]</span>
 							}
 						</button>
 					</div>
@@ -172,7 +173,7 @@
 				{
 					<div style="display:flex; justify-content:center; align-items:center; height:80vh;">
 						<div class="alert alert-danger text-center">
-							Sie haben keine Berechtigung für diese Seite
+							@L["NoPermission"]
 						</div>
 					</div>
 				}
@@ -212,14 +213,18 @@
 			authService.GetItemsUsers = new GetItems<Users> { CurrentPage = 1, PageSize = 10 };
 		}
 		
-		// die Spaltenoptionen aus dem Local Storage laden
-		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsUser");
-		if (saved is not null)
-			columnOptions = saved;
-
 		// afterRender und ParameterSet true, weil wir nutzen die funktionen hier nicht
 		IsRendered.AfterRender = IsRendered.ParametersSet = true;
 		IsRendered.Initialized = true;
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+			columnOptions = await localStorageService.SyncColumnOptionsAsync("columnOptionsUser", columnOptions, c => c.Key);
+			IsRendered.AfterRender = true;
+		}
 	}
 
 	private (bool, int) IsProcessing = (false, 0);
@@ -235,7 +240,8 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await localStorage.SetItemAsync("columnOptionsUser", columnOptions);
+		await localStorageService.Set("columnOptionsUser", columnOptions);
+
 	}
 
 	// edit user

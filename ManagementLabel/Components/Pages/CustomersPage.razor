@@ -1,5 +1,4 @@
 ﻿@page "/customers"
-@inherits ProjectComponentBase
 @namespace ManagementLabel.Components.Layout
 @inject IStringLocalizer<ManagementLabel.Components.Layout.CustomersPage> L
 <div class="mainDiv">
@@ -51,9 +50,9 @@
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
 									<option value="0">@L["StopNumber"]</option>
 									@foreach (var customer in customersService.DownloadedCustomers
-																																.Where(c => c.DistributionLineId == selectedDistributionLineId)
-																																.DistinctBy(c => c.StopNumber)
-																																.OrderBy(c => c.StopNumber))
+																.Where(c => c.DistributionLineId == selectedDistributionLineId)
+																.DistinctBy(c => c.StopNumber)
+																.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -126,7 +125,7 @@
 								{
 									@foreach (var customer in customersToDisplay)
 									{
-										<tr class="@(customer.HasOneTimePaymentToday ? "table-info fw-bold" : "")">
+										<tr class="@customersService.GetRowClass(customer)">
 											@if (ShowColumn("Id"))
 											{
 												<td>@customer.Id</td>
@@ -228,8 +227,6 @@
 	</AuthorizeView>
 </div>
 @code {
-
-
 	// Column
 	private List<ColumnOption> columnOptions = new()
 	{
@@ -237,12 +234,12 @@
 	  new("Name", "Name", true),
 	  new("Anschrift", "Address", true),
 	  new("Koordinaten", "Coordinates", false),
-	  new("Tel.", "PhoneNumber", true),
-	  new("E-Mail", "EMail", true),
+	  new("Tel.", "PhoneNumber", false),
+	  new("E-Mail", "EMail", false),
 	  new("Note", "Note", true),
-	  new("Richtung", "Direction", true),
+	  new("Richtung", "Direction", false),
 	  new("Ha-Nr", "StopNumber", true),
-	  new("PIN", "PIN", true),
+	  new("PIN", "PIN", false),
 	};
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 
@@ -263,27 +260,6 @@
 		IsHasEditCustomersPermission = user.HasClaim("permission", "editCustomers") || user.HasClaim("permission", "fullAccess");
 		IsHasCrateCustomerOneTimePaymentPermission = user.HasClaim("permission", "manageCustomerOneTimePayment") || user.HasClaim("permission", "fullAccess");
 
-		// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
-		var saved = await localStorage.GetItemAsync<List<ColumnOption>>("columnOptionsCustomers");
-		if (saved is not null)
-		{
-			var currentKeys = columnOptions.Select(c => c.Key).ToList();
-			var savedKeys = saved.Select(c => c.Key).ToList();
-
-			bool isMismatch = currentKeys.Count != savedKeys.Count || currentKeys.Any(k => !savedKeys.Contains(k));
-
-			if (isMismatch)
-			{
-				await localStorage.RemoveItemAsync("columnOptionsCustomers");
-			}
-			else
-			{
-				columnOptions = saved;
-			}
-		}
-
-		// afterRender true, weil wir nutzen die funktion hier nicht
-		IsRendered.AfterRender = true;
 		IsRendered.Initialized = true;
 	}
 	protected override async Task OnParametersSetAsync()
@@ -299,7 +275,7 @@
 				customersTask.Add((task, line.Id));
 			}
 			// load the selected distributionLine id from local storage
-			selectedDistributionLineId = await localStorage.GetItemAsync<int>("selectedDistributionLineId");
+			selectedDistributionLineId = await localStorageService.Get<int>("selectedDistributionLineId");
 			if (selectedDistributionLineId > 0)
 			{
 				await AfterDistributionLineChanged(true);
@@ -315,7 +291,7 @@
 					await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
 				}
 			}
-			selectedStopNumberId = await localStorage.GetItemAsync<int>("selectedStopNummerId");
+			selectedStopNumberId = await localStorageService.Get<int>("selectedStopNummerId");
 			if (selectedStopNumberId > 0)
 			{
 				await customersTask.Where(t => t.lineId == selectedDistributionLineId).Select(t => t.task).FirstOrDefault()!;
@@ -328,7 +304,16 @@
 	private async Task OnColumnChanged()
 	{
 		// Immer wenn sich eine Checkbox ändert, speichern wir die Liste.
-		await localStorage.SetItemAsync("columnOptionsCustomers", columnOptions);
+		await localStorageService.Set("columnOptionsCustomers", columnOptions);
+	}
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// wenn die key in ColmunOptions geändert wurde dann remove was in Storage gespeichert
+			columnOptions = await localStorageService.SyncColumnOptionsAsync("columnOptionsCustomers", columnOptions, c => c.Key);
+			IsRendered.AfterRender = true;
+		}
 	}
 	// add
 	private void NewCustomer()
@@ -391,7 +376,7 @@
 			if (!ifDefaultStNrId)
 			{
 				selectedStopNumberId = 0;
-				await localStorage.RemoveItemAsync("selectedStopNummerId");
+				await localStorageService.Remove("selectedStopNummerId");
 			}
 			// dann filtern
 			FilteredCustomers = customersService.DownloadedCustomers.Where(c => (c.DistributionLineId == selectedDistributionLineId || selectedDistributionLineId == 0)
@@ -405,7 +390,7 @@
 		}
 
 		// save the selected category id in local storage
-		await localStorage.SetItemAsync("selectedDistributionLineId", selectedDistributionLineId);
+		await localStorageService.Set("selectedDistributionLineId", selectedDistributionLineId);
 	}
 	private int selectedStopNumberId = 0;
 	private async Task AfterStopNumberChanged()
@@ -425,7 +410,7 @@
 		}
 
 		// Speichere die ID der ausgewählten Kategorie im Local Storage.
-		await customersService.UpdateSelectedStopNummerLocalStorage(selectedStopNumberId);
+		await localStorageService.Set("selectedStopNummerId", selectedStopNumberId);
 	}
 	// Suche
 	private string SearchValue { get; set; } = "";

@@ -2,10 +2,9 @@
 using ManagementLabel.Model;
 namespace ManagementLabel.Components.CustomersF
 {
-    public class CustomersService(HttpClient http, ILocalStorageService localStorage)
+    public class CustomersService(HttpClient http)
     {
         private readonly HttpClient _http = http;
-        private readonly ILocalStorageService _localStorage = localStorage;
         public List<Customers> DownloadedCustomers{ get; private set; } = [];
         public List<CustomerDownloadProcess> DownloadProcesses { get; private set; } = [];
         public async Task<ValidationResult> GetAllCustomersByLineId(int id = 0)
@@ -148,6 +147,27 @@ namespace ManagementLabel.Components.CustomersF
                 return null!;
             }
         }
+
+        public string GetRowClass(Customers customer)
+        {
+            if (customer.HasOneTimePaymentToday && customer.HasDebt)
+            {
+                return "DebtAndPaymentColor";
+            }
+
+            if (customer.HasDebt)
+            {
+                return "table-danger"; 
+            }
+
+            if (customer.HasOneTimePaymentToday)
+            {
+                return "table-info"; 
+            }
+
+            return ""; 
+        }
+
         // local
         private void AddToLocal(Customers customer)
         {
@@ -164,17 +184,7 @@ namespace ManagementLabel.Components.CustomersF
 
             DownloadedCustomers.AddRange(newItems);
         }
-        public async Task UpdateSelectedStopNummerLocalStorage(int newSelectedStopNumberId)
-        {
-            try
-            {
-                await _localStorage.SetItemAsync("selectedStopNummerId", newSelectedStopNumberId);
-            }
-            catch
-            {
-
-            }
-        }
+      
         public async Task<ValidationResult> UpdateCustomerLocal(int id)
         {
             var index = DownloadedCustomers.FindIndex(p => p.Id == id);

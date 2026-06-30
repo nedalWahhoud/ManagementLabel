@@ -1,7 +1,6 @@
 ﻿@page "/debt/{customerId:int}"
 @namespace ManagementLabel.Components.Layout
 @inject IStringLocalizer<ManagementLabel.Components.Layout.DebtPage> L
-@inherits ProjectComponentBase
 <div class="p-2 min-vh-100 w-100">
 	<AuthorizeView>
 		<Authorized Context="authContext">
@@ -16,8 +15,8 @@
 					<div class="container-fluid px-2">
 						<div class="d-flex align-items-center justify-content-between gap-2 mb-3">
 							<button class="btn btn-sm btn-outline-danger ps-3"
-									@onclick="GoBack"
-									title="Zurück zur Liste">
+							@onclick="GoBack"
+							title="Zurück zur Liste">
 								<i class="bi @(IsArabic ? "bi-arrow-return-right" : "bi-arrow-return-left") fs-5"></i>
 							</button>
 							<div class="d-flex align-items-center flex-grow-1 justify-content-center gap-3">
@@ -340,6 +339,14 @@
 			debtCustomers = await debtService.GetDebtCustomerByIdAsync(customerId);
 			debtCustomers ??= new DebtCustomers { CustomerId = customerId, Balance = 0 };
 
+			// hasDebt ändern wenn den Betrag auf 0 gesetzt
+			if (customer != null)
+			{
+				if (debtCustomers.Balance == 0)
+					customer.HasDebt = false;
+				else
+					customer.HasDebt = true;
+			}
 			await ResetToDefault();
 
 		}
@@ -408,7 +415,7 @@
 			var nextCustomer = sortedCustomers[currentIndex + 1];
 
 			// Speichere die ID der ausgewählten Kategorie im Local Storage.
-			await customersService.UpdateSelectedStopNummerLocalStorage(nextCustomer.StopNumber);
+			await localStorageService.Set("selectedStopNummerId", nextCustomer.StopNumber);
 
 			navigationManager.NavigateTo($"/debt/{nextCustomer.Id}");
 		}
@@ -433,7 +440,8 @@
 			var previousCustomer = sortedCustomers[currentIndex - 1];
 
 			// Speichere die ID der ausgewählten Kategorie im Local Storage.
-			await customersService.UpdateSelectedStopNummerLocalStorage(previousCustomer.StopNumber);
+			await localStorageService.Set("selectedStopNummerId", previousCustomer.StopNumber);
+
 
 			navigationManager.NavigateTo($"/debt/{previousCustomer.Id}");
 
