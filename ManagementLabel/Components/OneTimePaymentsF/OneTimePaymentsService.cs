@@ -115,7 +115,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 {
                     return result ?? new ValidationResult { Result = false, Message = "Fehler beim Aktualisieren des Zahlungsstatus." };
                 }
-                // update  in locally list
+                // update in locally list
                 List<OneTimePaymentsGroupDto> targetLineList = null!;
                 OneTimePaymentsGroupDto targetGroup = null!;
                 OneTimePayment oldPayment = null!;
@@ -256,11 +256,22 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                     }
                     else
                     {
-                        existingLine.Group.Add(new OneTimePaymentsGroupDto
+                        var newGroup = new OneTimePaymentsGroupDto
                         {
-                            GroupPickupDate = payment.PickupDate.Date,
+                            GroupPickupDate = payment.PickupDate,
                             Payments = [payment]
-                        });
+                        };
+
+                        int index = existingLine.Group.FindIndex(g => g.GroupPickupDate > newGroup.GroupPickupDate);
+
+                        if (index == -1)
+                        {
+                            existingLine.Group.Add(newGroup);
+                        }
+                        else
+                        {
+                            existingLine.Group.Insert(index, newGroup);
+                        }
                     }
                 }
                 else
@@ -282,7 +293,20 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 .SelectMany(group => group.Payments)
                 .FirstOrDefault(p => p.Id == id);
         }
-   
+        public ValidationResult ValidateAmountConsistencyAsync(OneTimePayment oneTimePayment)
+        {
+            if (oneTimePayment.Status == OneTimePaymentStatus.TeilweiseInkassiert && (oneTimePayment.AmountCollected == 0 || oneTimePayment.AmountCollected >= oneTimePayment.TotalAmount))
+            {
+                return new ValidationResult { Result = false, Message = "Der gesammelte Betrag darf nicht höher, gleich oder 0 sein als der Gesamtbetrag, um den Status auf 'Teilweise Inkassiert' zu setzen." };
+            }
+            else if (oneTimePayment.Status == OneTimePaymentStatus.Ueberzahlt && oneTimePayment.AmountCollected <= oneTimePayment.TotalAmount)
+            {
+
+                return new ValidationResult { Result = false, Message = "Der gesammelte Betrag muss höher sein als der Gesamtbetrag, um den Status auf 'Überzahlt' zu setzen." };
+            }
+
+            return new ValidationResult { Result = true };
+        }
         public string GetStatusClass(OneTimePaymentStatus status,bool isDropdown, bool isBaseClass = true)
         {
             string dropdownClass = isDropdown ? "dropdown-toggle" : "";

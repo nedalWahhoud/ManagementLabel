@@ -144,10 +144,10 @@
                                                                             collected += p.AmountCollected;
 
                                                                             <tr @key="p.Id"
-                                                                                @oncontextmenu:preventDefault="true"
-                                                                                @oncontextmenu="@(e => OnSelectRow(p, e))"
-                                                                                @ondblclick="(e) => OnDoubleTap(p, e)"
-                                                                                class="@(selectedPayment?.Id == p.Id ? "selected" : "")">
+                                                                            @oncontextmenu:preventDefault="true"
+                                                                            @oncontextmenu="@(e => OnSelectRow(p, e))"
+                                                                            @ondblclick="(e) => OnDoubleTap(p, e)"
+                                                                            class="@(selectedPayment?.Id == p.Id ? "selected" : "")">
                                                                                 <td class="fw-medium">@(IsArabic ? p.Customer?.Name_ar : p.Customer?.Name_de ?? "Fehler")</td>
                                                                                 <td class="text-center text-info-emphasis">
                                                                                     <span style="cursor: pointer;" title="@L["DoppelklickTitleDropdown"]">
@@ -169,16 +169,16 @@
                                                                                     {
                                                                                         <div class="dropdown">
                                                                                             <button class="@oneTimePaymentsService.GetStatusClass(p.Status,true)" type="button" id="statusDropdown-@p.Id" data-bs-toggle="dropdown"
-                                                                                                    data-bs-boundary="viewport"
-                                                                                                    aria-expanded="false"
-                                                                                                    style="border: none;">
+                                                                                            data-bs-boundary="viewport"
+                                                                                            aria-expanded="false"
+                                                                                            style="border: none;">
                                                                                                 <span class="@(IsArabic ? "ms-2" : "me-2")">@L[p.Status.ToString()]</span>
                                                                                             </button>
                                                                                             <ul class="dropdown-menu" aria-labelledby="statusDropdown-@p.Id">
                                                                                                 @foreach (OneTimePaymentStatus newStatus in Enum.GetValues(typeof(OneTimePaymentStatus)))
                                                                                                 {
                                                                                                     <li>
-                                                                                                        <button class="dropdown-item" type="button" @onclick="() => UpdateStatus(p.Id, newStatus,p)">
+                                                                                                        <button class="dropdown-item" type="button" @onclick="() => UpdateStatus(newStatus,p)">
                                                                                                             @L[newStatus.ToString()]
                                                                                                         </button>
                                                                                                     </li>
@@ -216,13 +216,13 @@
                         </div>
                     </div>
 
-                if (IsOneTimePaymentProcessing.Item1)
-                {
-                    <ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="@IsOneTimePaymentProcessing.Item2" OneTimePayment="editOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
-                }
+                    if (IsOneTimePaymentProcessing.Item1)
+                    {
+                        <ManagementLabel.Components.Layout.OverlayEditAddFormOneTimePayment Action="@IsOneTimePaymentProcessing.Item2" OneTimePayment="editOneTimePayment ?? new()" OnHandel="HandleOneTimePayment" />
+                    }
 
-                @* map select *@
-                <ManagementLabel.Components.Layout.MapSelect />
+                    @* map select *@
+                    <ManagementLabel.Components.Layout.MapSelect />
                 }
                 else
                 {
@@ -324,7 +324,7 @@
         SelectedDate = group;
     }
 
-    private async Task UpdateStatus(int paymentId, OneTimePaymentStatus newStatus, OneTimePayment currentPayment)
+    private async Task UpdateStatus(OneTimePaymentStatus newStatus, OneTimePayment currentPayment)
     {
         if (currentPayment.Status == newStatus && (newStatus != OneTimePaymentStatus.TeilweiseInkassiert && newStatus != OneTimePaymentStatus.Ueberzahlt
         && newStatus != OneTimePaymentStatus.Verschoben))
@@ -399,17 +399,23 @@
         else if (args.action == "UnexpectedPayment")
         {
             // wir klappen alle line und date zu, um der Benutzer nochmal auf eine Date zu klicken, und die data von server aktualisieren, damit die neue unerwartete Zahlung angezeigt wird, und die Daten immer aktuell sind
-            SelectedLine = null!;
-            SelectedDate = null!;
-            selectedPayment = null!;
-            oneTimePaymentsGroup.Clear();
+            /* SelectedLine = null!;
+             SelectedDate = null!;
+             selectedPayment = null!;
+             oneTimePaymentsGroup.Clear();*/
 
             // die task für die line von die neue unerwartete Zahlung löschen, damit wenn der Benutzer auf die line klickt, wird die data von server aktualisiert, und die neue unerwartete Zahlung angezeigt wird
             int lineId = args.oneTimePayment?.DistributionLineId ?? 0;
             tasks.RemoveAll(t => t.lineId == lineId);
             // starten eine taks um die data von server zu holen
             tasks.Add((oneTimePaymentsService.GetGroupedPaymentsByLineId(lineId), lineId));
+            // 
+            SelectedLine = args.oneTimePayment?.DistributionLine ?? null!;
 
+            var cachedData = oneTimePaymentsService.DownloadedGroups.FirstOrDefault(lineList => lineList.Group.Any(group => group.Payments.Any(p => p.DistributionLineId == lineId))).Group ?? new();
+            oneTimePaymentsGroup = cachedData.ToList();
+            SelectedDate = cachedData.Find(g => g.GroupPickupDate.Date == args.oneTimePayment?.PickupDate.Date) ?? null!;
+			selectedPayment = args.oneTimePayment;
         }
         this.IsOneTimePaymentProcessing = (false, null!);
         this.editOneTimePayment = null!;

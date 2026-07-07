@@ -125,14 +125,14 @@ namespace ManagementLabel.Components.CategoriesF
             try
             {
                 var response = await _http.DeleteAsync($"api/Categories/deleteCategory/{id}");
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht gelöscht werden." };
-                }
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if (!response.IsSuccessStatusCode)
+                    return result ?? new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht gelöscht werden." };
+
                 if (result == null || !result.Result)
                 {
-                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Kategorie konnte nicht gelöscht werden." };
+                    return result ?? new ValidationResult { Result = false, Message = "Die Kategorie konnte nicht gelöscht werden." };
                 }
                 // remove from local list
                 var localCategory = DownloadedCategories.FirstOrDefault(c => c.Id == id);

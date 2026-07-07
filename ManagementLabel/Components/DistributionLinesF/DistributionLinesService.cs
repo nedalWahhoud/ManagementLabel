@@ -108,12 +108,15 @@ namespace ManagementLabel.Components.DistributionLinesF
             try
             {
                 var response = await _http.DeleteAsync($"api/DistributionLines/deleteDistributionLine/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Fehler beim Löschen der Verteilerzeile." };
+
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if (!response.IsSuccessStatusCode)
+                    return result ?? new ValidationResult { Result = false, Message = "Fehler beim Löschen der Verteilerzeile." };
+               
                 if (result == null || !result.Result)
                 {
-                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Verteilerzeile konnte nicht gelöscht werden." };
+                    return result ?? new ValidationResult { Result = false, Message = result?.Message ?? "Die Verteilerzeile konnte nicht gelöscht werden." };
                 }
                 // Remove from local list
                 var index = DownloadedDistributionLines.FindIndex(gp => gp.Id == id);
@@ -121,7 +124,7 @@ namespace ManagementLabel.Components.DistributionLinesF
                 {
                     DownloadedDistributionLines.RemoveAt(index);
                 }
-                return new ValidationResult { Result = true, Message = "Verteilerzeile erfolgreich gelöscht." };
+                return result;
             }
             catch (Exception ex)
             {

@@ -61,6 +61,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Amount ähnelt.
+        /// </summary>
+        public static string Amount {
+            get {
+                return ResourceManager.GetString("Amount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Cancel ähnelt.
         /// </summary>
         public static string Cancel {
@@ -75,6 +84,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         public static string Customer {
             get {
                 return ResourceManager.GetString("Customer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Date ähnelt.
+        /// </summary>
+        public static string Date {
+            get {
+                return ResourceManager.GetString("Date", resourceCulture);
             }
         }
         
@@ -120,6 +138,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         public static string Offen {
             get {
                 return ResourceManager.GetString("Offen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Okay ähnelt.
+        /// </summary>
+        public static string Ok {
+            get {
+                return ResourceManager.GetString("Ok", resourceCulture);
             }
         }
         
@@ -183,6 +210,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         public static string TeilweiseInkassiert {
             get {
                 return ResourceManager.GetString("TeilweiseInkassiert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Go OnePayPayment Page ähnelt.
+        /// </summary>
+        public static string ToPaymentPage {
+            get {
+                return ResourceManager.GetString("ToPaymentPage", resourceCulture);
             }
         }
         

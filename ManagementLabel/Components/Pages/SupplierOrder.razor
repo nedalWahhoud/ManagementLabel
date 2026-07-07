@@ -38,6 +38,8 @@
 									<th>@L["Name"]</th>
 									<th>@L["PurchasePrice"]</th>
 									<th>@L["Img"]</th>
+									<th>@L["PackagingUnit"]</th>
+									<th>@L["ItemsPerPackage"]</th>
 									<th>@L["Quantity"]</th>
 								</tr>
 							</thead>
@@ -54,11 +56,14 @@
 										<td>@(IsArabic ? product.Name_ar : product.Name_de)</td>
 										<td>@product.PurchasePrice €</td>
 										<td><img src="@productImagesService.GetProductImageUrl(product.ProductImages?.FirstOrDefault(img => img.IsMain)!)" class="productImg" /></td>
+										<td>@L[product.PackagingUnit.ToString()]</td>
+										<td>@product.ItemsPerPackage</td>
 										<td>
 											<input type="number" min="0" class="form-control form-control-sm"
+											step="@product.ItemsPerPackage"
 											style="width: 50px; margin: auto;"
 											value="@(selectedQuantities.ContainsKey(product.Id) ? selectedQuantities[product.Id] : 0)"
-											@onchange="@(e => UpdateQuantity(product.Id,product, int.Parse(e.Value?.ToString() ?? "0")))" />
+											@onchange="@(e => UpdateQuantity(product, int.Parse(e.Value?.ToString() ?? "0")))" />
 										</td>
 									</tr>
 								</Virtualize>
@@ -192,19 +197,22 @@
 
 		IsProcessing = false;
 	}
-	private async Task UpdateQuantity(int productId, Products product, int quantity)
+	private async Task UpdateQuantity(Products product, int newQuantity)
 	{
+		if (product == null)
+			return;
+
 		try
 		{
-			if (quantity > 0)
+			if (newQuantity > 0)
 			{
-				selectedQuantities[productId] = quantity;
+				selectedQuantities[product.Id] = newQuantity;
 
 				await localStorage.SetItemAsync($"draftOrder_{SupplierId}", selectedQuantities);
 			}
 			else
 			{
-				selectedQuantities.Remove(productId);
+				selectedQuantities.Remove(product.Id);
 
 				// Wenn der Warenkorb nach der Bearbeitung vollständig leer ist, löschen wir den Schlüssel aus dem Cache.
 				await localStorage.RemoveItemAsync($"draftOrder_{SupplierId}");

@@ -107,9 +107,10 @@ namespace ManagementLabel.Components.SupplierF
             try
             {
                 var response = await _http.DeleteAsync($"api/Suppliers/deleteSupplier/{id}");
-                if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Lieferanten konnten nicht gelöscht werden." };
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if (!response.IsSuccessStatusCode)
+                    return result ?? new ValidationResult { Result = false, Message = "Lieferanten konnten nicht gelöscht werden." };
                 if (result != null && result.Result)
                 {
                     // Lieferanten aus der lokalen Liste entfernen

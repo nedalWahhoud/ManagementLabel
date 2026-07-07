@@ -171,6 +171,9 @@
   <data name="IsShippable" xml:space="preserve">
     <value>Is Shippable</value>
   </data>
+  <data name="ItemsPerPackage" xml:space="preserve">
+    <value>Items Per Package</value>
+  </data>
   <data name="LastName" xml:space="preserve">
     <value>Last Name</value>
   </data>
@@ -230,5 +233,23 @@
   </data>
   <data name="UserName" xml:space="preserve">
     <value>User Name</value>
+  </data>
+  <data name="Piece" xml:space="preserve">
+    <value>Piece</value>
+  </data>
+  <data name="Kilogram" xml:space="preserve">
+    <value>Kilogram</value>
+  </data>
+  <data name="Box" xml:space="preserve">
+    <value>Box</value>
+  </data>
+  <data name="Sack" xml:space="preserve">
+    <value>Sack</value>
+  </data>
+  <data name="Crate" xml:space="preserve">
+    <value>Crate</value>
+  </data>
+  <data name="PackagingUnit" xml:space="preserve">
+    <value>PackagingUnit</value>
   </data>
 </root>

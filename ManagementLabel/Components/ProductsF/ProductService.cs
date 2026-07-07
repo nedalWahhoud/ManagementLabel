@@ -203,6 +203,10 @@ namespace ManagementLabel.Components.ProductsF
                 return true;
             if (currentProduct.EXPDate != editProduct.EXPDate)
                 return true;
+            if(currentProduct.PackagingUnit != editProduct.PackagingUnit)
+                return true;
+            if(currentProduct.ItemsPerPackage != editProduct.ItemsPerPackage)
+                return true;
             var currentIds = currentProduct.SelectedSupplierIds ?? [];
             var editIds = editProduct.SelectedSupplierIds ?? [];
 

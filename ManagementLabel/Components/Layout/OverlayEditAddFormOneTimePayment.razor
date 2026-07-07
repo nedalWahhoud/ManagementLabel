@@ -27,7 +27,7 @@
 					</div>
 					<div class="overlayField">
 						<div class="input-group">
-							<span class="input-group-text customLatIcon">G-Betrag</span>
+							<span class="input-group-text customLatIcon">@L["Amount"]</span>
 							<InputNumber TValue="double" class="form-control" @bind-Value="oneTimePayment.TotalAmount" @onfocus="@(e => SelectAllContent())" disabled="@(!(Action == "editTotalAmount" || Action == "add"))" />
 							<span class="input-group-text customLatIcon">€</span>
 						</div>
@@ -35,12 +35,12 @@
 					</div>
 					<div class="overlayField">
 						<div class="input-group">
-							<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event @(IsArabic ? "ms-2" : "me-2")"></i> AbDa</span>
+							<span class="input-group-text customLatIcon"><i class="bi bi-calendar-event @(IsArabic ? "ms-2" : "me-2")"></i> @L["Date"]</span>
 							<InputDate id="PickupDate" class="form-control" @bind-Value="oneTimePayment.PickupDate" disabled="@(!(Action == "add"))" />
 						</div>
 						<ValidationMessage For="@(() => oneTimePayment.PickupDate)" />
 					</div>
-					@if (Action == "updateStatus")
+					@if (Action == "updateStatus" || (Action == "add" && (oneTimePayment.Status == OneTimePaymentStatus.TeilweiseInkassiert || oneTimePayment.Status == OneTimePaymentStatus.Ueberzahlt)))
 					{
 						<div class="overlayField">
 							<InputSelect class="form-control" @bind-Value="oneTimePayment.Status" disabled>
@@ -59,6 +59,33 @@
 								<ValidationMessage For="@(() => oneTimePayment.AmountCollected)" />
 							</div>
 						}
+					}
+
+					@if (Action == "add")
+					{
+						<div class="overlayField  w-100">
+							<div class="dropdown  w-100">
+								<button class="@oneTimePaymentsService.GetStatusClass(oneTimePayment.Status,true) w-100 py-2"
+								type="button" 
+								id="statusDropdown-@oneTimePayment.Id" 
+								data-bs-toggle="dropdown"
+								data-bs-boundary="viewport"
+								aria-expanded="false"
+								style="border: none;">
+									<span class="@(IsArabic ? "ms-2" : "me-2")">@L[oneTimePayment.Status.ToString()]</span>
+								</button>
+								<ul class="dropdown-menu" aria-labelledby="statusDropdown-@oneTimePayment.Id">
+									@foreach (OneTimePaymentStatus newStatus in Enum.GetValues(typeof(OneTimePaymentStatus)))
+									{
+										<li>
+											<button class="dropdown-item" type="button" @onclick="() => UpdateStatus(oneTimePayment, newStatus)">
+												@L[newStatus.ToString()]
+											</button>
+										</li>
+									}
+								</ul>
+							</div>
+						</div>
 					}
 
 					<div class="overlayField">
@@ -121,7 +148,7 @@
 
 									<input type="text" 
 									class="w-full border border-gray-300 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-										   placeholder="@L["SearchCustomer"]"
+									placeholder="@L["SearchCustomer"]"
 									@oninput="OnSearchCustomer" />
 
 									<ul class="searchDropdown">
@@ -195,10 +222,10 @@
 				</div>
 
 				<div class="mt-4 d-flex flex-column gap-2">
-					<button class="btn btn-success px-5" @onclick="CloseOverlayAfterSuccess">OK</button>
+					<button class="btn btn-success px-5" @onclick="CloseOverlayAfterSuccess">@L["Ok"]</button>
 					@if (!UnexpectedPaymentToAdd)
 					{
-						<NavLink class="btn btn-secondary px-5" href="/oneTimePayments">Zu Einmalzahlung Seite</NavLink>
+						<NavLink class="btn btn-secondary px-5" href="/oneTimePayments">@L["ToPaymentPage"]</NavLink>
 					}
 				</div>
 
@@ -206,7 +233,6 @@
 		}
 	</div>
 </div>
-
 @code {
 
 	[Parameter]
@@ -234,6 +260,15 @@
 		IsProcessing = true;
 		if (Action == "add")
 		{
+			// Validierung der Konsistenz des Betrags vor dem Hinzufügen
+			ValidationResult result1 = oneTimePaymentsService.ValidateAmountConsistencyAsync(oneTimePayment);
+			if(!result1.Result)
+			{
+				await JS.InvokeVoidAsync("alert", result1.Message);
+				IsProcessing = false;
+				return;
+			}
+
 			var result = await oneTimePaymentsService.Add(oneTimePayment);
 			if (result != null && result.Result)
 			{
@@ -255,16 +290,11 @@
 				IsProcessing = false;
 				return;
 			}
-
-			if (oneTimePayment.Status == OneTimePaymentStatus.TeilweiseInkassiert && (oneTimePayment.AmountCollected == 0 || oneTimePayment.AmountCollected >= oneTimePayment.TotalAmount))
+			// Validierung der Konsistenz des Betrags vor dem Hinzufügen
+			ValidationResult result1 = oneTimePaymentsService.ValidateAmountConsistencyAsync(oneTimePayment);
+			if (!result1.Result)
 			{
-				await JS.InvokeVoidAsync("alert", "Der gesammelte Betrag darf nicht höher, gleich oder 0 sein als der Gesamtbetrag, um den Status auf 'Teilweise Inkassiert' zu setzen.");
-				IsProcessing = false;
-				return;
-			}
-			else if (oneTimePayment.Status == OneTimePaymentStatus.Ueberzahlt && oneTimePayment.AmountCollected <= oneTimePayment.TotalAmount)
-			{
-				await JS.InvokeVoidAsync("alert", "Der gesammelte Betrag muss höher sein als der Gesamtbetrag, um den Status auf 'Überzahlt' zu setzen.");
+				await JS.InvokeVoidAsync("alert", result1.Message);
 				IsProcessing = false;
 				return;
 			}
@@ -309,7 +339,14 @@
 			Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
 		}
 	}
+	private void UpdateStatus(OneTimePayment payment, OneTimePaymentStatus newStatus)
+	{
+		if (payment == null) return;
 
+		payment.Status = newStatus;
+		if (newStatus != OneTimePaymentStatus.Verschoben && newStatus != OneTimePaymentStatus.Offen)
+			payment.AmountCollected = payment.TotalAmount;
+	}
 	// UnexpectedPayment
 	private int selectedDistributionLineId = 0;
 	private List<Customers>? customersOfSelectedLine;

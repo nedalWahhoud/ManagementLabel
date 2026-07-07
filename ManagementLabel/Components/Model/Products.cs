@@ -49,6 +49,9 @@ namespace ManagementLabel.Model
         public GroupProducts? ProductGroup { get; set; }
         public bool IsShippable { get; set; } = true;
         public ProductDiscounts? ProductDiscount { get; set; } = new();
+        public PackagingUnits PackagingUnit { get; set; } = PackagingUnits.Piece;
+        public int ItemsPerPackage { get; set; } = 1;
+
         //
         public CartItem CartItem { get; set; } = null!;
         public void InitializeCartItem(int quantity)
@@ -73,5 +76,18 @@ namespace ManagementLabel.Model
                 return false;
             }
         }
+    }
+    public enum PackagingUnits
+    {
+        [Display(Name = "Piece")]
+        Piece = 1,
+        [Display(Name = "Kilogram")]
+        Kilogram = 2,
+        [Display(Name = "Box")]
+        Box = 3,
+        [Display(Name = "Sack")]
+        Sack = 4,
+        [Display(Name = "Crate")]
+        Crate = 5
     }
 }

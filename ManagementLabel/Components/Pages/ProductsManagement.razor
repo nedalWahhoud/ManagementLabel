@@ -111,6 +111,14 @@
 									{
 										<th>@L["ExpDate"]</th>
 									}
+									@if (ShowColumn("PackagingUnit"))
+									{
+										<th>@L["PackagingUnit"]</th>
+									}
+									@if (ShowColumn("ItemsPerPackage"))
+									{
+										<th>@L["ItemsPerPackage"]</th>
+									}
 									@if (ShowColumn("Supplier"))
 									{
 										<th>@L["Supplier"]</th>
@@ -218,6 +226,14 @@
 												}
 
 												<td style="background-color:@backgroundcolor!; color:@color;">@(expDate!.ToString("dd.MM.yyyy")!)</td>
+											}
+											@if (ShowColumn("PackagingUnit"))
+											{
+												<td>@L[product.PackagingUnit.ToString()]</td>
+											}
+											@if (ShowColumn("ItemsPerPackage"))
+											{
+												<td>@product.ItemsPerPackage</td>
 											}
 											@if (ShowColumn("Supplier"))
 											{
@@ -476,9 +492,11 @@
 	  new("Menge", "Quantity", true),
 	  new("Kaufpreis", "PurchasePrice", true),
 	  new("Verkaufspreis", "SellePrice", true),
-	  new("Mindestbestand", "MinimumStock", true),
-	  new("Ablaufdatum", "ExpDate", true),
-	  new("Hersteller", "Supplier", true),
+	  new("Mindestbestand", "MinimumStock", false),
+	  new("Ablaufdatum", "ExpDate", false),
+	  new("Verpackungseinheit","PackagingUnit",false),
+	  new("Artikels pro Verpackung","ItemsPerPackage",false),
+	  new("Lieferant", "Supplier", true),
 	  new("Steuersatz", "TaxRate", false),
 	  new("Gruppe", "Group", false),
 	  new("Versandfähig", "IsShippable", false),
@@ -745,6 +763,8 @@
 					SalePrice = SelectedProduct.SalePrice,
 					MinimumStock = SelectedProduct.MinimumStock,
 					EXPDate = SelectedProduct.EXPDate,
+					PackagingUnit = SelectedProduct.PackagingUnit,
+					ItemsPerPackage = SelectedProduct.ItemsPerPackage,
 					SelectedSupplierIds = SelectedProduct.SelectedSupplierIds ?? new(),
 					Suppliers = SelectedProduct.Suppliers,
 					//Manufacturer = doubleSelectProduct.Manufacturer,

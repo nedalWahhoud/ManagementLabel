@@ -171,6 +171,9 @@
   <data name="IsShippable" xml:space="preserve">
     <value>قابل لارسال</value>
   </data>
+  <data name="ItemsPerPackage" xml:space="preserve">
+    <value>عدد القطع في العبوة</value>
+  </data>
   <data name="LastName" xml:space="preserve">
     <value>اسم العائلة</value>
   </data>
@@ -230,5 +233,23 @@
   </data>
   <data name="UserName" xml:space="preserve">
     <value>اسم المستخدم</value>
+  </data>
+  <data name="Piece" xml:space="preserve">
+    <value>قطعة</value>
+  </data>
+  <data name="Kilogram" xml:space="preserve">
+    <value>كيلو غرام</value>
+  </data>
+  <data name="Box" xml:space="preserve">
+    <value>كرتونة</value>
+  </data>
+  <data name="Sack" xml:space="preserve">
+    <value>شوال</value>
+  </data>
+  <data name="Crate" xml:space="preserve">
+    <value>صندوق</value>
+  </data>
+  <data name="PackagingUnit" xml:space="preserve">
+    <value>وحدة التعبئة</value>
   </data>
 </root>

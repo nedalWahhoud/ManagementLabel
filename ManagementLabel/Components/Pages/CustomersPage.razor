@@ -50,9 +50,9 @@
 								<select id="stopNumberSelect" class="DropdownList" @bind="selectedStopNumberId" @bind:after="AfterStopNumberChanged">
 									<option value="0">@L["StopNumber"]</option>
 									@foreach (var customer in customersService.DownloadedCustomers
-																.Where(c => c.DistributionLineId == selectedDistributionLineId)
-																.DistinctBy(c => c.StopNumber)
-																.OrderBy(c => c.StopNumber))
+																								.Where(c => c.DistributionLineId == selectedDistributionLineId)
+																								.DistinctBy(c => c.StopNumber)
+																								.OrderBy(c => c.StopNumber))
 									{
 										<option value="@customer.StopNumber">@customer.StopNumber</option>
 									}
@@ -264,6 +264,11 @@
 	}
 	protected override async Task OnParametersSetAsync()
 	{
+
+		await localStorageService.Remove("selectedDistributionLineId");
+
+		await localStorageService.Remove("selectedStopNummerId");
+
 		if (IsHasManageCustomersPermission)
 		{
 			await distributionLinesService.GetAllDistributionLinesAsync();
@@ -289,6 +294,8 @@
 
 					// wenn keine line gefunden wurde, dann holen wir erste kunden
 					await customersService.GetAllCustomersByLineId(selectedDistributionLineId);
+
+					await AfterDistributionLineChanged(true);
 				}
 			}
 			selectedStopNumberId = await localStorageService.Get<int>("selectedStopNummerId");

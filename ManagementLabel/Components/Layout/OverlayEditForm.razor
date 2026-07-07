@@ -86,6 +86,27 @@
 				<ValidationMessage For="@(() => GetProducts.EXPDate)" />
 			</div>
 			<div class="overlayField">
+				<label for="UnitType">@L["PackagingUnit"]</label>
+				<div class="row">
+				<div class="col-md-6">
+						<select @bind="GetProducts.PackagingUnit" class="form-select">
+							@foreach (PackagingUnits unit in Enum.GetValues(typeof(PackagingUnits)))
+						{
+							<option value="@unit">@L[unit.ToString()]</option>
+						}
+					</select>
+						<ValidationMessage For="@(() => GetProducts.PackagingUnit)" />
+				</div>
+				<div class="col-md-6">
+					<div class="input-group">
+						<span class="input-group-text customLatIcon">Items</span>
+						<InputNumber id="itemsPerPackage" min="0" class="form-control" @bind-Value="GetProducts.ItemsPerPackage" @onfocus="@(e => SelectAllContent("itemsPerPackage"))" />
+					</div>
+					<ValidationMessage For="@(() => GetProducts.ItemsPerPackage)" />
+				</div>
+				</div>
+			</div>
+			<div class="overlayField">
 				<label>@L["Supplier"]:</label>
 				<div class="supplier-list-container" style="border: 1px solid #cccccc; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;">
 					@foreach (var Supplier in suppliersService.DownloadedSuppliers!)

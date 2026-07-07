@@ -109,9 +109,10 @@ namespace ManagementLabel.Components.CustomersF
             try
             {
                 var response = await _http.DeleteAsync($"api/Customers/deleteCustomer/{customerId}");
-                if (!response.IsSuccessStatusCode)
-                    return new ValidationResult { Result = false, Message = "Fehler beim Löschen des Kunden." };
                 var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
+                if (!response.IsSuccessStatusCode)
+                    return result ?? new ValidationResult { Result = false, Message = "Fehler beim Löschen des Kunden." };
                 if (result?.Result == true)
                 {
                     var customerToRemove = DownloadedCustomers.FirstOrDefault(p => p.Id == customerId);

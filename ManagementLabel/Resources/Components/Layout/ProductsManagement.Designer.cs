@@ -79,6 +79,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Box ähnelt.
+        /// </summary>
+        public static string Box {
+            get {
+                return ResourceManager.GetString("Box", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Cancel ähnelt.
         /// </summary>
         public static string Cancel {
@@ -111,6 +120,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         public static string Country {
             get {
                 return ResourceManager.GetString("Country", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Crate ähnelt.
+        /// </summary>
+        public static string Crate {
+            get {
+                return ResourceManager.GetString("Crate", resourceCulture);
             }
         }
         
@@ -223,6 +241,24 @@ namespace ManagementLabel.Resources.Components.Layout {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Items Per Package ähnelt.
+        /// </summary>
+        public static string ItemsPerPackage {
+            get {
+                return ResourceManager.GetString("ItemsPerPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Kilogram ähnelt.
+        /// </summary>
+        public static string Kilogram {
+            get {
+                return ResourceManager.GetString("Kilogram", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Last Name ähnelt.
         /// </summary>
         public static string LastName {
@@ -286,6 +322,24 @@ namespace ManagementLabel.Resources.Components.Layout {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die PackagingUnit ähnelt.
+        /// </summary>
+        public static string PackagingUnit {
+            get {
+                return ResourceManager.GetString("PackagingUnit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Piece ähnelt.
+        /// </summary>
+        public static string Piece {
+            get {
+                return ResourceManager.GetString("Piece", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Postal code ähnelt.
         /// </summary>
         public static string PostalCode {
@@ -309,6 +363,15 @@ namespace ManagementLabel.Resources.Components.Layout {
         public static string Quantity {
             get {
                 return ResourceManager.GetString("Quantity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Sack ähnelt.
+        /// </summary>
+        public static string Sack {
+            get {
+                return ResourceManager.GetString("Sack", resourceCulture);
             }
         }
         

@@ -98,16 +98,17 @@ namespace ManagementLabel.Components.ProductGroupF
             try
             {
                 var response = await _http.DeleteAsync($"api/GroupProducts/deleteGroupProducts/{id}");
+                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    return new ValidationResult { Result = false,Message = "Die Produktgruppe konnte nicht gelöscht werden.." };
+                    return result ?? new ValidationResult { Result = false,Message = "Die Produktgruppe konnte nicht gelöscht werden.." };
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ValidationResult>();
 
                 if (result == null || !result.Result)
                 {
-                    return new ValidationResult { Result = false, Message = result?.Message ?? "Die Produktgruppe konnte nicht gelöscht werden.." };
+                    return result ?? new ValidationResult { Result = false, Message = "Die Produktgruppe konnte nicht gelöscht werden.." };
                 }
 
                 // Remove from local list
