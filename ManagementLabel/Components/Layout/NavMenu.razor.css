@@ -11,7 +11,23 @@ html[dir="rtl"] .top-row {
     direction: ltr !important;
     text-align: left !important;
 }
-
+.container-fluid {
+    display: flex;
+    flex-direction: row;
+    align-items:center;
+    justify-content:center;
+}
+.logoImg {
+    width: 70px;
+    height: auto;
+    cursor:pointer;
+    margin:0;
+    padding:0;
+}
+    .logoImg:hover {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
 
 .navbar-toggler {
     appearance: none;
@@ -31,7 +47,7 @@ html[dir="rtl"] .top-row {
 }
 
 .top-row {
-    height: 3.5rem;
+    padding: 0;
     background-color: rgba(0,0,0,0.4);
 }
 

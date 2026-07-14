@@ -7,9 +7,9 @@
 @inherits ProjectComponentBase
  <AuthorizeView>
     <Authorized Context="authContext">
-        <div class="top-row ps-3 navbar navbar-dark">
+        <div class="top-row navbar navbar-dark">
            <div class="container-fluid">
-                <a class="navbar-brand" href="#">@authContext.User.Identity!.Name</a>
+                <NavLink href="/" class="logo-link"> <img src="/Images/logo/LogoMitText.png" alt="logo" class="logoImg" /></NavLink>
             </div>
         </div>
     </Authorized>

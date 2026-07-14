@@ -23,6 +23,7 @@ using ManagementLabel.Components.OneTimePaymentsF;
 using Microsoft.AspNetCore.Localization;
 using ManagementLabel.Components.ProductsF;
 using ManagementLabel.Components.LogIn;
+using Microsoft.AspNetCore.Components.Server;
 
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
@@ -42,21 +43,24 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-builder.Services.AddServerSideBlazor()
-    .AddHubOptions(options =>
-    {
-        options.ClientTimeoutInterval = TimeSpan.FromMinutes(10); // Wartet 10 Minuten, bevor die Verbindung getrennt wird
-        options.KeepAliveInterval = TimeSpan.FromSeconds(15);    // Alle 15 Sekunden ein Ping durchführen, um die Verbindung aufrechtzuerhalten
-        options.HandshakeTimeout = TimeSpan.FromSeconds(30);
-    })
-    .AddCircuitOptions(options =>
+    .AddInteractiveServerComponents(options =>
     {
         options.DetailedErrors = true;
-        // Speichert den Benutzerstatus für 10 Minuten nach Verbindungsverlust
-        options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
-        options.JSInteropDefaultCallTimeout = TimeSpan.FromSeconds(30);
     });
+
+builder.Services.AddSignalR(options =>
+{
+    options.ClientTimeoutInterval = TimeSpan.FromMinutes(10);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.Configure<CircuitOptions>(options =>
+{
+    options.DetailedErrors = true;
+    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
+    options.JSInteropDefaultCallTimeout = TimeSpan.FromSeconds(30);
+});
+
 // ProjectInfo 
 builder.Services.Configure<ProjectInfo>(builder.Configuration.GetSection("ProjectInfo"));
 var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
