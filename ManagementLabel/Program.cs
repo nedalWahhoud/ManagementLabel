@@ -24,6 +24,9 @@ using Microsoft.AspNetCore.Localization;
 using ManagementLabel.Components.ProductsF;
 using ManagementLabel.Components.LogIn;
 using Microsoft.AspNetCore.Components.Server;
+using ManagementLabel.Components.TaxRatesF;
+using ManagementLabel.Components.CircuitF;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 var builder = WebApplication.CreateBuilder(args);
 // Netzwerk anhören
@@ -41,24 +44,21 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(5105);
 });
 
-// Add services to the container.
+//
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents(options =>
-    {
-        options.DetailedErrors = true;
-    });
+    .AddInteractiveServerComponents();
 
 builder.Services.AddSignalR(options =>
 {
-    options.ClientTimeoutInterval = TimeSpan.FromMinutes(10);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.HandshakeTimeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.Configure<CircuitOptions>(options =>
 {
-    options.DetailedErrors = true;
-    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(10);
-    options.JSInteropDefaultCallTimeout = TimeSpan.FromSeconds(30);
+    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(30);
+    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(2);
+    options.DisconnectedCircuitMaxRetained = 100;
 });
 
 // ProjectInfo 
@@ -119,8 +119,12 @@ builder.Services.AddScoped<WhatsAppService>();
 builder.Services.AddScoped<TransactionsCustomersService>();
 //  oneTimepayment Service 
 builder.Services.AddScoped<OneTimePaymentsService>();
-//  oneTimepayment Service 
+// LocalStorageService
 builder.Services.AddScoped<LocalStorageService>();
+// TaxRatesService
+builder.Services.AddScoped<TaxRatesService>();
+// Circuit
+builder.Services.AddScoped<CircuitHandler, MyCircuitHandler>();
 //
 builder.Services.AddBlazoredLocalStorage();
 // Sprachen

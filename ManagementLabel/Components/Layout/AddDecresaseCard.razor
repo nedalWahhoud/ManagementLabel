@@ -11,7 +11,7 @@
            disabled />
     <button class="btn @(cartService.IsProductAdded(ProductId)  ? "btnProductAdded" : "btnProduct")"
             @onclick="() => CartChangedAdd(ProductId)">
-        @(cartService.IsProductAdded(ProductId) ? $"➕{cartService.GetQuantityOfProduct(ProductId)}" : "🛒")
+        @(cartService.IsProductAdded(ProductId) ? $"➕" : "🛒")
     </button>
 </div>
 <label class="form-label" style="color:red;">@textMessage</label>

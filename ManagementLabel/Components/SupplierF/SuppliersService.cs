@@ -150,9 +150,7 @@ namespace ManagementLabel.Components.SupplierF
         {
             return DownloadedSuppliers.FirstOrDefault(s => s.Id == id) ?? null!;
         }
-        private bool IsEdited(Suppliers currentSupplier, Suppliers editSupplier)
-        {
-            return currentSupplier.Name != editSupplier.Name ||
+        private bool IsEdited(Suppliers currentSupplier, Suppliers editSupplier) => currentSupplier.Name != editSupplier.Name ||
                    currentSupplier.Street != editSupplier.Street ||
                    currentSupplier.HNumber != editSupplier.HNumber ||
                    currentSupplier.PostalCode != editSupplier.PostalCode ||
@@ -161,7 +159,6 @@ namespace ManagementLabel.Components.SupplierF
                    currentSupplier.Phone != editSupplier.Phone ||
                    currentSupplier.Email != editSupplier.Email ||
                    currentSupplier.Website != editSupplier.Website;
-        }
 
     }
 }

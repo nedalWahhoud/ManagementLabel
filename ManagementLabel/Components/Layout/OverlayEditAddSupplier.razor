@@ -79,6 +79,7 @@
 	private async void Save()
 	{
 		IsProcessing = true;
+		TrimItems();
 		if (action == "Add")
 		{
 			var result = await suppliersService.AddSupplier(supplier);
@@ -109,5 +110,21 @@
 	{
 		supplier = new ();
 		OnHandel.InvokeAsync("Cancel");
+	}
+	private void TrimItems()
+	{
+		if (supplier != null)
+		{
+			supplier.Name = supplier.Name?.Trim()!;
+			supplier.Name_Ar = supplier.Name_Ar?.Trim()!;
+			supplier.Street = supplier.Street?.Trim()!;
+			supplier.HNumber = supplier.HNumber?.Trim()!;
+			supplier.PostalCode = supplier.PostalCode?.Trim()!;
+			supplier.City = supplier.City?.Trim()!;
+			supplier.Country = supplier.Country?.Trim()!;
+			supplier.Phone = supplier.Phone?.Trim()!;
+			supplier.Email = supplier.Email?.Trim()!;
+			supplier.Website = supplier.Website?.Trim()!;
+		}
 	}
 }

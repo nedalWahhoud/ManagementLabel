@@ -122,11 +122,11 @@
 	}
 	private async void Save()
 	{
-		 customerProcess = new CustomerProcess
+		customerProcess = new CustomerProcess
 			{
 				IsProcessing = true
 			};
-
+		TrimItems();
 		if (action == "Add")
 		{
 			var result = await customersService.AddCustomer(customer);
@@ -136,7 +136,7 @@
 				// Verteilungslinie zuweisen
 				customer.DistributionLine = distributionLinesService.DownloadedDistributionLines
 					.Find(dl => dl.Id == customer.DistributionLineId)
-					?? await distributionLinesService.GetDistributionLineById(customer.DistributionLineId);
+					?? await distributionLinesService.GetDistributionLineByIdAsync(customer.DistributionLineId);
 
 				customer = null!;
 			}
@@ -194,6 +194,24 @@
 		catch(Exception ex)
 		{
 			Console.WriteLine($"Fehler beim Auswählen des Inhalts: {ex.Message}");
+		}
+	}
+
+	private void TrimItems()
+	{
+		if (customer != null)
+		{
+			customer.Name_de = customer.Name_de?.Trim()!;
+			customer.Name_ar = customer.Name_ar?.Trim()!;
+			customer.Street = customer.Street?.Trim()!;
+			customer.BuildingNumber = customer.BuildingNumber?.Trim()!;
+			customer.PostalCode = customer.PostalCode?.Trim()!;
+			customer.City = customer.City?.Trim()!;
+			customer.PhoneNumber = customer.PhoneNumber?.Trim()!;
+			customer.Email = customer.Email?.Trim();
+			customer.Notes_de = customer.Notes_de?.Trim();
+			customer.Notes_ar = customer.Notes_ar?.Trim();
+			customer.PIN = customer.PIN?.Trim();
 		}
 	}
 }

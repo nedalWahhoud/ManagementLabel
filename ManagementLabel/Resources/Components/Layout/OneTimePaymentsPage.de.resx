@@ -189,10 +189,4 @@
   <data name="Offen" xml:space="preserve">
     <value>Offen</value>
   </data>
-  <data name="DoppelklickTitleDropdown" xml:space="preserve">
-    <value>Doppeltippen, um das Menü anzuzeigen</value>
-  </data>
-  <data name="AmountCollected" xml:space="preserve">
-    <value>Der gesamte gesammelte Betrag</value>
-  </data>
 </root>

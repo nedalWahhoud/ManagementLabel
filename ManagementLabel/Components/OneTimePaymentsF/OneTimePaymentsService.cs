@@ -94,7 +94,7 @@ namespace ManagementLabel.Components.OneTimePaymentsF
                 }
 
                 // add to Local
-                    AddOneTimePaymentToLocal(lineId, groupedPayment);
+                AddOneTimePaymentToLocal(lineId, groupedPayment);
 
                 return new ValidationResult { Result = true, Message = "Einmalzahlungen erfolgreich abgerufen." };
             }

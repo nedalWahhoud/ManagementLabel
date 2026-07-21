@@ -52,6 +52,7 @@
 	private async void SaveGroup()
 	{
 		IsProcessing = true;
+		TrimItems();
 		if (action == "Add")
 		{
 			var result = await productGroupService.CreateGroupProduct(groupProduct);
@@ -95,5 +96,13 @@
 	{
 		groupProduct = new();
 		OnHandel.InvokeAsync(action);
+	}
+	private void TrimItems()
+	{
+		if(groupProduct != null)
+		{
+			groupProduct.GroupName_de = groupProduct.GroupName_de?.Trim()!;
+			groupProduct.GroupName_ar = groupProduct.GroupName_ar?.Trim()!;
+		}
 	}
 }

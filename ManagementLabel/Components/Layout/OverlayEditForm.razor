@@ -2,7 +2,7 @@
 @inherits ProjectComponentBase
 <div class="overlay">
 	<div class="standardOverlayForm" @onclick:stopPropagation="true">
-		<EditForm Model="@GetProducts" OnValidSubmit="HandleSubmit">
+		<EditForm Model="@GetProducts" OnValidSubmit="Save">
 			<DataAnnotationsValidator />
 			<div class="overlayField">
 				<div class="input-group">
@@ -88,22 +88,22 @@
 			<div class="overlayField">
 				<label for="UnitType">@L["PackagingUnit"]</label>
 				<div class="row">
-				<div class="col-md-6">
+					<div class="col-md-6">
 						<select @bind="GetProducts.PackagingUnit" class="form-select">
 							@foreach (PackagingUnits unit in Enum.GetValues(typeof(PackagingUnits)))
-						{
-							<option value="@unit">@L[unit.ToString()]</option>
-						}
-					</select>
+							{
+								<option value="@unit">@L[unit.ToString()]</option>
+							}
+						</select>
 						<ValidationMessage For="@(() => GetProducts.PackagingUnit)" />
-				</div>
-				<div class="col-md-6">
-					<div class="input-group">
-						<span class="input-group-text customLatIcon">Items</span>
-						<InputNumber id="itemsPerPackage" min="0" class="form-control" @bind-Value="GetProducts.ItemsPerPackage" @onfocus="@(e => SelectAllContent("itemsPerPackage"))" />
 					</div>
-					<ValidationMessage For="@(() => GetProducts.ItemsPerPackage)" />
-				</div>
+					<div class="col-md-6">
+						<div class="input-group">
+							<span class="input-group-text customLatIcon">Items</span>
+							<InputNumber id="itemsPerPackage" min="0" class="form-control" @bind-Value="GetProducts.ItemsPerPackage" @onfocus="@(e => SelectAllContent("itemsPerPackage"))" />
+						</div>
+						<ValidationMessage For="@(() => GetProducts.ItemsPerPackage)" />
+					</div>
 				</div>
 			</div>
 			<div class="overlayField">
@@ -126,7 +126,7 @@
 			<div class="overlayField">
 				<InputSelect class="form-control" @bind-Value="GetProducts.TaxRateId">
 					<option value="0">@L["SelectTaxRate"]</option>
-					@foreach (var rate in productService.DownloadedTaxRates)
+					@foreach (var rate in taxRateService.DownloadedTaxRates)
 					{
 						<option value="@rate.Id">@rate.Rate</option>
 					}
@@ -236,6 +236,7 @@
 	private bool IsProcessing = false;
 	protected override void OnInitialized()
 	{
+
 		// get default image for add action, and Initialize die ProductDiscount
 		if (Action == "Add")
 		{
@@ -274,9 +275,12 @@
 		}
 	}
 
-	private async Task HandleSubmit()
+	private async Task Save()
 	{
 		IsProcessing = true;
+
+		TrimItems();
+
 		if (Action == "Edit")
 		{
 			// wenn  nicht edited
@@ -444,5 +448,18 @@
 		setter(string.Empty);
 		// nutzen die selectTextById funktion um den Focus an input zu setzen, da die normale focus funktion nicht funktioniert nach dem löschen
 		await SelectAllContent(elementId);
+	}
+
+
+	private void TrimItems()
+	{
+		if (GetProducts != null)
+		{
+			GetProducts.Name_de = GetProducts.Name_de?.Trim();
+			GetProducts.Name_ar = GetProducts.Name_ar?.Trim();
+			GetProducts.Description_de = GetProducts.Description_de?.Trim();
+			GetProducts.Description_ar = GetProducts.Description_ar?.Trim();
+			GetProducts.Barcode = GetProducts.Barcode?.Trim();
+		}
 	}
 }

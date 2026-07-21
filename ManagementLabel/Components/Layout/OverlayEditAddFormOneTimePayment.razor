@@ -258,6 +258,7 @@
 	private async Task Save()
 	{
 		IsProcessing = true;
+		TrimItems();
 		if (Action == "add")
 		{
 			// Validierung der Konsistenz des Betrags vor dem Hinzufügen
@@ -378,7 +379,7 @@
 					?? await customersService.GetCustomerByIdAsync(selectedCustomerId),
 				DistributionLineId = selectedDistributionLineId,
 				DistributionLine = distributionLinesService.DownloadedDistributionLines.FirstOrDefault(dl => dl.Id == selectedDistributionLineId)
-					?? await distributionLinesService.GetDistributionLineById(selectedDistributionLineId),
+						?? await distributionLinesService.GetDistributionLineByIdAsync(selectedDistributionLineId),
 					PickupDate = DateTime.Now
 			};
 		UnexpectedPaymentToAdd = true;
@@ -402,6 +403,13 @@
 					.ToList();
 			}
 			StateHasChanged();
+		}
+	}
+	private void TrimItems()
+	{
+		if (oneTimePayment != null)
+		{
+			oneTimePayment.Notes = oneTimePayment.Notes?.Trim()!;
 		}
 	}
 }

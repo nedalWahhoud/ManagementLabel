@@ -6,7 +6,6 @@ namespace ManagementLabel.Components.ProductsF
         private readonly HttpClient _http = http;
         public List<Products> DownloadedProduct { get; set; } = [];
 
-        public List<TaxRate> DownloadedTaxRates { get; set; } = [];
         public async Task<List<Products>> GetProductByIdsAsync(List<int> productIds)
         {
             try
@@ -62,27 +61,6 @@ namespace ManagementLabel.Components.ProductsF
             }
         }
 
-        public async Task<List<TaxRate>> GetAllTaxRates()
-        {
-            if (DownloadedTaxRates.Count > 0)
-                return DownloadedTaxRates;
-            try
-            {
-                var response = await _http.GetAsync($"api/Products/getTaxRates");
-                if (!response.IsSuccessStatusCode)
-                    return [];
-
-                var getItems = await response.Content.ReadFromJsonAsync<GetItems<TaxRate>>();
-                // add the tax rates to the local list
-                DownloadedTaxRates.AddRange(getItems?.Items ?? []);
-
-                return DownloadedTaxRates;
-            }
-            catch
-            {
-                return [];
-            }
-        }
         public async Task<ValidationResult> AddProductAsync(Products newProduct)
         {
             try
@@ -365,6 +343,7 @@ namespace ManagementLabel.Components.ProductsF
                 return null!;
             }
         }
+       
         // barcode
         public async Task<ValidationResult> UpdateBarcodeAsync(int id, string barcode)
         {

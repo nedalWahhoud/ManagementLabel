@@ -43,7 +43,7 @@ namespace ManagementLabel.Model
         [StringLength(255)]
         public string? Description_ar { get; set; }
         [Required(ErrorMessage = "Bitte geben Sie die Steuersatz ein")]
-        public int? TaxRateId { get; set; }
+        public int TaxRateId { get; set; }
         public TaxRate? TaxRate { get; set; }
         public int? ProductGroupID { get; set; }
         public GroupProducts? ProductGroup { get; set; }

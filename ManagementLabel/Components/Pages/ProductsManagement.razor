@@ -315,7 +315,7 @@
 					@if (IsShowOrder)
 					{
 						<div class="overlay">
-							<div class="overlayAddForm">
+							<div class="standardOverlayForm">
 								@* address *@
 								<h3>@L["DeliveryAddress"]: </h3>
 								<EditForm Model="@newAddress">
@@ -507,7 +507,6 @@
 	private bool ShowColumn(string key) => columnOptions.FirstOrDefault(c => c.Key == key)?.IsVisible == true;
 	protected override async Task OnInitializedAsync()
 	{
-
 		var authState = await authProvider.GetAuthenticationStateAsync();
 		var user1 = authState.User;
 		IsHasManageProductsPermission = user1.HasClaim("permission", "manageProducts") || user1.HasClaim("permission", "fullAccess");
@@ -516,7 +515,7 @@
 		// get benötigte listen
 		taskSuppliers = suppliersService.GetAllSuppliers();
 		taskProductGroups = productGroupService.GetAllGroupProductsAsync();
-		taskTaxRates = productService.GetAllTaxRates();
+		taskTaxRates = taxRateService.GetAllTaxRates();
 		taskCatyrories = categoryService.GetAllCategoriesAsync();
 
 		// get gespeicherte CategoryId
@@ -570,7 +569,7 @@
 		{
 			await JS.InvokeVoidAsync("checkScrollEnd", objRef, "scrollContainer");
 			// aktivieren die Funktion, die die Höhe von topTable zu aktualisieren, damit die thead th immer sichtbar bleibt bei Scroll
-			await JS.InvokeVoidAsync("updateTopTableHeight");
+			await JS.InvokeVoidAsync("getHeightFromCss");
 		}
 		catch (Exception ex)
 		{
@@ -863,6 +862,8 @@
 			filterP = null!;
 			// reset die Getitem 
 			getItems = new();
+
+			await loadInBackground();
 		}
 		else
 		{
@@ -1092,6 +1093,8 @@
 		foreach (var item in createOrder.OrderItems)
 		{
 			item.Product = productService.GetProductByIdLocal(item.ProductId) ?? await productService.GetProductByIdAsync(item.ProductId);
+			if (item.Product != null && item.Product.TaxRate == null)
+				item.Product.TaxRate = taxRateService.GetTasRateLocal(item.Product.TaxRateId) ?? await taxRateService.GetTaxRateByIdAsync(item.Product.TaxRateId);
 		}
 
 		// add the discount code to the order

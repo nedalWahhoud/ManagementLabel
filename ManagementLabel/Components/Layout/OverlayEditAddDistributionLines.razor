@@ -49,6 +49,9 @@
 	private async Task Save()
 	{
 		IsProcessing = true;
+
+		TrimItems();
+
 		if (action == "Add")
 		{
 			var result = await distributionLinesService.AddDistributionLineAsync(DistributionLine);
@@ -89,5 +92,14 @@
 	{
 		DistributionLine = new DistributionLines();
 		await OnHandel.InvokeAsync(action);
+	}
+
+	private void TrimItems()
+	{
+		if(DistributionLine != null)
+		{
+			DistributionLine.LineName = DistributionLine.LineName?.Trim()!;
+			DistributionLine.Description = DistributionLine.Description?.Trim()!;
+		}
 	}
 }

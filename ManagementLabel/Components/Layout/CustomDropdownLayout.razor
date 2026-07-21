@@ -91,17 +91,23 @@
 	}
 	private async Task OnDebts(int customerId)
 	{
-		/*if (customer != null)
-			await localStorageService.Set("selectedStopNummerId", customer.StopNumber);*/
+		if (customer != null)
+			await localStorageService.Set("selectedStopNummerId", customer.StopNumber);
 		navigationManager.NavigateTo($"/debt/{customerId}");
 	}
 	private async Task OnMap(Customers customer)
 	{
 		try
 		{
-			var address = customersService.AddressInitialisierenMap(customer);
 
-			await JS.InvokeVoidAsync("mapRedirect.openMap", customer.Latitude, customer.Longitude, address.hasAddress ? address.fullAddress : "");
+			var (isValidCoordinates, hasAddress, fullAddress) = customersService.ValidateAndBuildMapAddress(customer);
+			if (!isValidCoordinates && !hasAddress)
+			{
+				await JS.InvokeVoidAsync("alert", "Keine gültigen Koordinaten oder Adresse für diesen Kunden vorhanden.");
+				return;
+			}
+
+			await JS.InvokeVoidAsync("mapRedirect.openMap", customer.Latitude, customer.Longitude, fullAddress);
 		}
 		catch (Exception ex)
 		{
@@ -141,7 +147,7 @@
 				Customer = customer,
 				DistributionLineId = customer.DistributionLineId,
 				DistributionLine = customer?.DistributionLine ??
-					(distributionLinesService.DownloadedDistributionLines.FirstOrDefault(dl => dl.Id == customer?.DistributionLineId) ?? await distributionLinesService.GetDistributionLineById(customer?.DistributionLineId ?? 0))
+						(distributionLinesService.DownloadedDistributionLines.FirstOrDefault(dl => dl.Id == customer?.DistributionLineId) ?? await distributionLinesService.GetDistributionLineByIdAsync(customer?.DistributionLineId ?? 0))
 			};
 		await OnHandel.InvokeAsync(("oneTimePayment", new(), false, oneTimePayment, true));
 	}

@@ -1,4 +1,5 @@
-﻿@if (invoice != null)
+﻿@inject IStringLocalizer<ManagementLabel.Components.Layout.InvoiceLayout> L
+@if (invoice != null)
 {
 	<div class="overlay">
 		<div class="overlayFormInvoice">
@@ -9,7 +10,7 @@
 						⋮
 					</button>
 					<ul class="dropdown-menu">
-						<li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnSaveInvoice(invoice)">Speichern</a></li>
+						<li style="cursor:pointer"><a class="dropdown-item" @onclick="() => OnSaveInvoice(invoice)">@L["Save"]</a></li>
 					</ul>
 				</div>
 			</div>
@@ -52,7 +53,6 @@
 								</tr>
 							</thead>
 							<tbody>
-
 								@{
 									var culture = new System.Globalization.CultureInfo("de-DE");
 									for (int i = 0; i < invoice.order.OrderItems.Count; i++)
@@ -168,7 +168,7 @@
 	private TaxDetail Tax7 { get; set; } = new();
 	private PriceSummary priceSummary { get; set; } = new();
 	private DiscountDetails discountDetails { get; set; } = new();
-	protected override void OnInitialized()
+	protected override void OnParametersSet()
 	{
 		if (invoice != null)
 		{
@@ -221,17 +221,17 @@
 	private async Task CloseInvoice()
 	{
 		invoice = null!;
-		
+
 		await OnHandel.InvokeAsync("close");
 	}
 	private async Task OnSaveInvoice(Invoice invoice)
 	{
 		try
 		{
-			var bytes = await invoiceService.InvoicePdfGeneration(invoice, priceSummary, Tax7, Tax19, discountDetails);
+			byte[] bytes = await invoiceService.InvoicePdfGeneration(invoice, priceSummary, Tax7, Tax19, discountDetails);
 
-			var base64 = Convert.ToBase64String(bytes);
-			var url = $"data:application/pdf;base64,{base64}";
+			String base64 = Convert.ToBase64String(bytes);
+			//var url = $"data:application/pdf;base64,{base64}";
 
 			await JS.InvokeVoidAsync("eval", $@"
                  const byteCharacters = atob('{base64}');

@@ -30,6 +30,7 @@
 @using ManagementLabel.Components.OneTimePaymentsF
 @using ManagementLabel.Components.LocalStorageF
 @using ManagementLabel.Components.Share
+@using ManagementLabel.Components.TaxRatesF
 @using Microsoft.Extensions.Options
 @using Microsoft.Extensions.Localization
 
@@ -60,4 +61,5 @@
 @inject TransactionsCustomersService transactionsCustomersService
 @inject OneTimePaymentsService oneTimePaymentsService
 @inject LocalStorageService localStorageService
+@inject TaxRatesService taxRateService
 @inherits ProjectComponentBase

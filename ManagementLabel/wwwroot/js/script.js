@@ -7,6 +7,7 @@ window.updateTopTableHeight = () => {
         document.documentElement.style.setProperty('--top-height', height + 'px');
     }
 };
+
 // langauge cocikes fixd
 window.blazorCulture = {
     set: function (value) {
@@ -95,18 +96,6 @@ window.addEventListener('focus', async () => {
         console.log("Reconnection attempt failed, but Blazor will keep trying...");
     }
 });
-// Wenn der Benutzer zur Seite zurückkehrt und der Verbindungsstatus „getrennt“ lautet
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-        // Prüfen, ob die Standard-Fehlermeldung von Blazor auf dem Bildschirm erscheint (was bedeutet, dass die Verbindung unterbrochen ist)
-        const blazorDisconnectUi = document.getElementById("components-reconnect-modal");
-
-        if (blazorDisconnectUi && (blazorDisconnectUi.classList.contains("components-reconnect-show") || blazorDisconnectUi.classList.contains("components-reconnect-failed"))) {
-            console.log("Die Seite wurde aufgrund einer Verbindungsunterbrechung weitergeleitet. Die Seite wird neu geladen…");
-            window.location.reload();
-        }
-    }
-});
 // OnMap
 window.mapRedirect = {
     openMap: function(latitude, longitude, address = '') {
@@ -121,7 +110,6 @@ window.mapRedirect = {
         const appleUrl = `https://maps.apple.com/?q=${query}&ll=${latitude},${longitude}`;
         const googleUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
         const webUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
-        const androidUrl = `geo:${latitude},${longitude}?q=${query}`;
 
         const ua = navigator.userAgent || window.opera;
         const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;

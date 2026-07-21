@@ -264,11 +264,6 @@
 	}
 	protected override async Task OnParametersSetAsync()
 	{
-
-		await localStorageService.Remove("selectedDistributionLineId");
-
-		await localStorageService.Remove("selectedStopNummerId");
-
 		if (IsHasManageCustomersPermission)
 		{
 			await distributionLinesService.GetAllDistributionLinesAsync();

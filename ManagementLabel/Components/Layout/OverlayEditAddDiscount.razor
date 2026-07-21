@@ -180,6 +180,8 @@
     }
     private async Task OnSave()
     {
+        TrimItems();
+
         if (action.ifdicountCode)
         {
             if (action.ifAdd)
@@ -194,7 +196,7 @@
             }
             else
             {
-                 DiscountCodes currentProduct = discountService.DownloadedDiscountCodes.Find(p => p.Id == discountCode.Id) ?? new();
+                DiscountCodes currentProduct = discountService.DownloadedDiscountCodes.Find(p => p.Id == discountCode.Id) ?? new();
                 bool isEdited = discountService.IsEditedDiscountCode(currentProduct, discountCode);
                 if (!isEdited)
                 {
@@ -238,14 +240,14 @@
                 }
 
                 var result = await discountService.UpdateDiscountCategory(discountCategory);
-				if (result.Result)
-				{
-					// Code aktualisiert, keine weiteren Aktionen erforderlich
-				}
-				else
-				{
-					await JS.InvokeVoidAsync("window.alert", result.Message!);
-				}
+                if (result.Result)
+                {
+                    // Code aktualisiert, keine weiteren Aktionen erforderlich
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("window.alert", result.Message!);
+                }
 
             }
         }
@@ -259,19 +261,19 @@
     {
         var randomCode = Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 
-		if (ifDiscountCode)
-		{
-			discountCode.Code = randomCode;
-		}
-		else
-		{
-			discountCategory.Code = randomCode;
-		}
+        if (ifDiscountCode)
+        {
+            discountCode.Code = randomCode;
+        }
+        else
+        {
+            discountCategory.Code = randomCode;
+        }
     }
-   
+
     private void Cancel()
     {
-		OnHandel.InvokeAsync("Cancel");
+        OnHandel.InvokeAsync("Cancel");
     }
     // Den gesamten Inhalt im Eingabefeld auswählen, wenn der Fokus
     private async Task SelectAllContent()
@@ -286,5 +288,13 @@
         {
             Console.WriteLine($"Error selecting input text: {ex.Message}");
         }
+    }
+
+    private void TrimItems()
+    {
+        if (action.ifdicountCode)
+            discountCode.Code = discountCode.Code?.Trim()!;
+        else
+            discountCategory.Code = discountCategory.Code?.Trim()!;
     }
 }

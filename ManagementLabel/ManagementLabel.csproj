@@ -51,6 +51,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DistributionLinesPage.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Components\Layout\InvoiceLayout.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InvoiceLayout.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Components\Layout\NavMenu.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -122,6 +127,10 @@
     <EmbeddedResource Update="Resources\Components\Layout\DistributionLinesPage.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DistributionLinesPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Components\Layout\InvoiceLayout.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>InvoiceLayout.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Components\Layout\NavMenu.ar.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

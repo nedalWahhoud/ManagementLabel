@@ -79,15 +79,6 @@ namespace ManagementLabel.Resources.Components.Layout {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The total amount collected ähnelt.
-        /// </summary>
-        public static string AmountCollected {
-            get {
-                return ResourceManager.GetString("AmountCollected", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Amount Received ähnelt.
         /// </summary>
         public static string AmountReceived {
@@ -111,15 +102,6 @@ namespace ManagementLabel.Resources.Components.Layout {
         public static string Delete {
             get {
                 return ResourceManager.GetString("Delete", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Double-click to show the menu. ähnelt.
-        /// </summary>
-        public static string DoppelklickTitleDropdown {
-            get {
-                return ResourceManager.GetString("DoppelklickTitleDropdown", resourceCulture);
             }
         }
         

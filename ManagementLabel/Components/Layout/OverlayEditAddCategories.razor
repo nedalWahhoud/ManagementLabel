@@ -62,6 +62,9 @@
 	private async void Save()
 	{
 		IsProcessing = true;
+
+		TrimItems();
+
 		if (action == "Add")
 		{
 			var result = await categoryService.CreateCategory(category);
@@ -106,5 +109,14 @@
 		category = new Categories();
 		OnHandel.InvokeAsync(action);
 
+	}
+
+	private void TrimItems()
+	{
+		if(category != null)
+		{
+			category.Name_de = category.Name_de?.Trim()!;
+			category.Name_ar = category.Name_ar?.Trim()!;
+		}
 	}
 }

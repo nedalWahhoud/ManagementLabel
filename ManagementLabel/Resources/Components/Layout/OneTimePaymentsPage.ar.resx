@@ -189,10 +189,4 @@
   <data name="Offen" xml:space="preserve">
     <value>مفتوح</value>
   </data>
-  <data name="DoppelklickTitleDropdown" xml:space="preserve">
-    <value>انقر مرتين لاظهار القائمة</value>
-  </data>
-  <data name="AmountCollected" xml:space="preserve">
-    <value>إجمالي المبلغ المحصل</value>
-  </data>
 </root>

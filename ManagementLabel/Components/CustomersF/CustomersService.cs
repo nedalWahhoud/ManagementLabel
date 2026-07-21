@@ -225,10 +225,15 @@ namespace ManagementLabel.Components.CustomersF
                    currentCustomer.StopNumber != editCustomer.StopNumber ||
                    currentCustomer.PIN != editCustomer.PIN;
         }
-        public (bool hasAddress, string fullAddress) AddressInitialisierenMap(Customers customer)
+        public (bool isValidCoordinates, bool hasAddress, string fullAddress) ValidateAndBuildMapAddress(Customers customer)
         {
             if (customer == null)
                 return new();
+
+            bool isValidCoordinates = customer.Latitude >= -90 && customer.Latitude <= 90
+                          && customer.Longitude >= -180 && customer.Longitude <= 180
+                          && (customer.Latitude != 0 || customer.Longitude != 0);
+
 
             // Address aufbauen
             var addressParts = new List<string>();
@@ -246,19 +251,16 @@ namespace ManagementLabel.Components.CustomersF
             var fullAddress = string.Join(" ", addressParts).Trim();
 
             bool hasAddress = !string.IsNullOrWhiteSpace(fullAddress);
-            bool hasCoordinates = customer.Latitude != 0 && customer.Longitude != 0;
 
-            if (!hasAddress && !hasCoordinates)
-            {
-                Console.WriteLine("Keine Adresse oder Koordinaten vorhanden.");
-                return new();
-            }
-
-            return (hasAddress, fullAddress);
+            return (isValidCoordinates, hasAddress, fullAddress);
         }
+
+    
+
         public class CustomerDownloadProcess
         {
            public int Id { get; set; }
         }
+
     }
 }

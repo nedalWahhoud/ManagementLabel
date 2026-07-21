@@ -29,7 +29,7 @@ namespace ManagementLabel.Components.DistributionLinesF
                 return new ValidationResult { Result = false, Message = ex.Message };
             }
         }
-        public async Task<DistributionLines> GetDistributionLineById(int id)
+        public async Task<DistributionLines> GetDistributionLineByIdAsync(int id)
         {
             try
             {
