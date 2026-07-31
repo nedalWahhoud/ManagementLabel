@@ -6,11 +6,13 @@
 @using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
+
+
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security.Claims
 @using ManagementLabel
 @using ManagementLabel.Components
 @using ManagementLabel.Components.LogIn
-@using Microsoft.AspNetCore.Components.Authorization;
-@using System.Security.Claims
 @using ManagementLabel.Components.ProductsF;
 @using ManagementLabel.Components.OrderF
 @using ManagementLabel.Model
@@ -63,3 +65,5 @@
 @inject LocalStorageService localStorageService
 @inject TaxRatesService taxRateService
 @inherits ProjectComponentBase
+
+
